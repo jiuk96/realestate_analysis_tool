@@ -14,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.preprocessor import run as preprocess, compute_penalties
 from src.analyzer import build_monthly_median, run as analyze
+from src.scorer import compute_composite_score
 
 app = Flask(__name__)
 log = logging.getLogger(__name__)
@@ -58,12 +59,14 @@ def _load_data():
 
     monthly = build_monthly_median(clean_df)
     mdd_df, top_df, traits = analyze(clean_df)
+    composite_df = compute_composite_score(mdd_df, monthly)
 
-    _cache["monthly"]  = monthly
-    _cache["mdd_df"]   = mdd_df
-    _cache["top_df"]   = top_df
-    _cache["traits"]   = traits
-    _cache["clean_df"] = clean_df
+    _cache["monthly"]       = monthly
+    _cache["mdd_df"]        = mdd_df
+    _cache["top_df"]        = top_df
+    _cache["traits"]        = traits
+    _cache["clean_df"]      = clean_df
+    _cache["composite_df"]  = composite_df
 
 
 @app.before_request
@@ -170,6 +173,37 @@ def api_traits():
 
     safe = {k: {sub: _to_native(val) for sub, val in v.items()} for k, v in traits.items()}
     return jsonify(safe)
+
+
+@app.route("/api/composite_score")
+def api_composite_score():
+    """종합 입지 점수 랭킹"""
+    df = _cache["composite_df"]
+    result = []
+    for _, row in df.iterrows():
+        result.append({
+            "rank":               int(row["rank"]),
+            "apt_name":           str(row["apt_name"]),
+            "district":           str(row["district_name"]),
+            "composite_score":    round(float(row["composite_score"]), 1),
+            "consistency_score":  round(float(row["consistency_score"]) * 10, 1),
+            "resilience_score":   round(float(row["resilience_score"]) * 10, 1),
+            "upside_score":       round(float(row["upside_score"]) * 10, 1),
+            "subway_score":       round(float(row["subway_score"]) * 10, 1),
+            "infra_score":        round(float(row["infra_score"]) * 10, 1),
+            "school_score":       round(float(row["school_score"]) * 10, 1),
+            "mdd_pct":            round(float(row["mdd_pct"]), 2),
+            "upside_pct":         round(float(row["upside_pct"]), 1),
+            "subway_min":         int(row["subway_min"]),
+            "active_months":      int(row["active_months"]),
+        })
+    return jsonify({
+        "ranking": result,
+        "weights": {
+            "거래지속성": 30, "가격방어력": 25, "상승참여도": 20,
+            "교통": 12, "인프라": 8, "학군": 5,
+        }
+    })
 
 
 @app.route("/api/quality")

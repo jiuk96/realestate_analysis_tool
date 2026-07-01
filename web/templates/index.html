@@ -139,10 +139,38 @@
   </div>
 </section>
 
-<!-- ── ⑥ 공통 특성 ──────────────────────────────────────── -->
-<section class="section section-alt" id="secTraits">
+<!-- ── ⑥ 종합 입지 점수 ─────────────────────────────────── -->
+<section class="section section-alt" id="secComposite">
   <div class="section-inner">
-    <h2 class="section-title">⑥ 방어력 상위 단지의 공통점</h2>
+    <h2 class="section-title">⑥ 종합 입지 점수 랭킹</h2>
+    <p class="section-desc">
+      가격 방어력만이 아닌 <strong>거래 지속성 · 상승 참여도 · 교통 · 인프라 · 학군</strong>을
+      종합해 점수화했습니다. 시장 상황과 무관하게 꾸준히 거래되고 잘 오르는 단지를 찾습니다.
+    </p>
+    <div class="weight-badges" id="weightBadges"></div>
+    <div id="chartComposite" class="chart-container" style="height:420px"></div>
+    <div class="ranking-table-wrap" style="margin-top:2rem">
+      <table class="ranking-table" id="compositeTable">
+        <thead>
+          <tr>
+            <th>순위</th><th>단지명</th><th>구</th>
+            <th>종합점수</th>
+            <th>거래지속성</th><th>가격방어력</th><th>상승참여도</th>
+            <th>교통</th><th>인프라</th><th>학군</th>
+            <th>MDD</th><th>상승률</th><th>지하철(분)</th><th>거래월수</th>
+          </tr>
+        </thead>
+        <tbody id="compositeBody"></tbody>
+      </table>
+    </div>
+    <div id="chartRadar" class="chart-container" style="height:500px;margin-top:2rem"></div>
+  </div>
+</section>
+
+<!-- ── ⑦ 공통 특성 ──────────────────────────────────────── -->
+<section class="section" id="secTraits">
+  <div class="section-inner">
+    <h2 class="section-title">⑦ 방어력 상위 단지의 공통점</h2>
     <p class="section-desc">
       하락장을 잘 버텐 상위 10% 단지와 전체 단지를 비교했습니다.
     </p>

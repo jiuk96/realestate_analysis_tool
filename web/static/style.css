@@ -117,3 +117,11 @@ body { background: var(--bg); color: var(--text); font-family: 'Pretendard', 'No
 
 /* ── 푸터 ────────────────────────────────────────────── */
 .footer { background: var(--bg2); border-top: 1px solid var(--bg3); text-align: center; padding: 2rem 1.5rem; color: var(--text2); font-size: .82rem; }
+
+/* ── 종합 점수 섹션 ──────────────────────────────────── */
+.weight-badges { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: 1.5rem; }
+.weight-badge {
+  background: var(--bg3); border-radius: 99px;
+  padding: .35rem .9rem; font-size: .8rem; color: var(--text2);
+}
+.weight-badge strong { color: var(--accent); margin-left: .25rem; }

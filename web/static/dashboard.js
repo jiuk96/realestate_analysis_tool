@@ -214,7 +214,95 @@ async function renderRanking() {
   `).join('');
 }
 
-/* ── ⑥ 공통 특성 ─────────────────────────────────────── */
+/* ── ⑥ 종합 입지 점수 ────────────────────────────────── */
+async function renderComposite() {
+  const d = await fetchJSON('/api/composite_score');
+  const items = d.ranking;
+  const weights = d.weights;
+
+  // 비중 배지
+  document.getElementById('weightBadges').innerHTML = Object.entries(weights).map(([k, v]) =>
+    `<span class="weight-badge">${k} <strong>${v}%</strong></span>`
+  ).join('');
+
+  // 수평 막대 차트 (종합 점수)
+  const sorted = [...items].sort((a, b) => b.composite_score - a.composite_score);
+  const colors = sorted.map(r => {
+    if (r.composite_score >= 65) return '#34d399';
+    if (r.composite_score >= 55) return '#38bdf8';
+    return '#94a3b8';
+  });
+
+  Plotly.newPlot('chartComposite', [{
+    type: 'bar',
+    orientation: 'h',
+    y: sorted.map(r => r.apt_name),
+    x: sorted.map(r => r.composite_score),
+    marker: { color: colors },
+    text: sorted.map(r => r.composite_score.toFixed(1) + '점'),
+    textposition: 'outside',
+    hovertemplate: '<b>%{y}</b><br>종합: %{x:.1f}점<extra></extra>',
+  }], {
+    paper_bgcolor: '#1e293b', plot_bgcolor: '#1e293b',
+    font: { color: '#e2e8f0', size: 12 },
+    xaxis: { range: [0, 100], gridcolor: '#334155', title: '종합 입지 점수 (0~100)' },
+    yaxis: { autorange: 'reversed', tickfont: { size: 11 } },
+    margin: { l: 160, r: 80, t: 20, b: 50 },
+    height: 420,
+  }, { responsive: true });
+
+  // 테이블
+  const scoreClass = v => v >= 65 ? 'good' : v >= 55 ? 'mid' : 'bad';
+  document.getElementById('compositeBody').innerHTML = items.map(r => `
+    <tr>
+      <td>${r.rank}</td>
+      <td><strong>${r.apt_name}</strong></td>
+      <td>${r.district}</td>
+      <td class="mdd-cell ${scoreClass(r.composite_score)}"><strong>${r.composite_score.toFixed(1)}</strong></td>
+      <td>${r.consistency_score.toFixed(1)}</td>
+      <td>${r.resilience_score.toFixed(1)}</td>
+      <td>${r.upside_score.toFixed(1)}</td>
+      <td>${r.subway_score.toFixed(1)}</td>
+      <td>${r.infra_score.toFixed(1)}</td>
+      <td>${r.school_score.toFixed(1)}</td>
+      <td class="${r.mdd_pct >= -10 ? 'good' : r.mdd_pct >= -20 ? 'mid' : 'bad'}">${r.mdd_pct.toFixed(1)}%</td>
+      <td>+${r.upside_pct.toFixed(0)}%</td>
+      <td>${r.subway_min}분</td>
+      <td>${r.active_months}개월</td>
+    </tr>
+  `).join('');
+
+  // 레이더 차트 (상위 5개 단지)
+  const top5 = items.slice(0, 5);
+  const axes = ['거래지속성','가격방어력','상승참여도','교통','인프라','학군'];
+  const scoreKeys = ['consistency_score','resilience_score','upside_score','subway_score','infra_score','school_score'];
+
+  const radarTraces = top5.map((r, i) => ({
+    type: 'scatterpolar',
+    name: r.apt_name,
+    r: [...scoreKeys.map(k => r[k]), r[scoreKeys[0]]],
+    theta: [...axes, axes[0]],
+    fill: 'toself',
+    fillcolor: COLORS[i % COLORS.length] + '33',
+    line: { color: COLORS[i % COLORS.length], width: 2 },
+  }));
+
+  Plotly.newPlot('chartRadar', radarTraces, {
+    paper_bgcolor: '#1e293b', plot_bgcolor: '#1e293b',
+    font: { color: '#e2e8f0' },
+    polar: {
+      bgcolor: '#1e293b',
+      radialaxis: { range: [0, 100], gridcolor: '#334155', tickfont: { color: '#94a3b8' } },
+      angularaxis: { gridcolor: '#334155', tickfont: { size: 13 } },
+    },
+    legend: { orientation: 'h', y: -0.15, font: { size: 11 } },
+    title: { text: '상위 5개 단지 레이더 차트', font: { color: '#e2e8f0', size: 14 }, y: 0.97 },
+    margin: { t: 60, b: 80 },
+    height: 500,
+  }, { responsive: true });
+}
+
+/* ── ⑦ 공통 특성 ─────────────────────────────────────── */
 async function renderTraits() {
   const d = await fetchJSON('/api/traits');
 
@@ -260,6 +348,7 @@ async function renderTraits() {
     renderPipeline(),
     renderTimeseries(),
     renderRanking(),
+    renderComposite(),
     renderTraits(),
   ]);
 })();
