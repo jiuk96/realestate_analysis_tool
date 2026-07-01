@@ -9,9 +9,14 @@
 ⑤ 입지 프리미엄      15%  - m²당 고점가 percentile (시장가에 내재된 입지가치)
 ⑥ 규모·연식         10%  - 거래규모(대단지 프리미엄) + 준공연도
 
+data/static/apt_locations.json (geocode_apts.py로 생성) 캐시가 있으면
+⑦ 교통 접근성 10%가 활성화되고 비중이 재배분됨:
+   방어 25 / 유동성 20 / 상승 15 / 모멘텀 12 / 프리미엄 10 / 규모 8 / 교통 10
+
 정규화: percentile-rank (이상치에 견고). 각 축 0~100.
 """
 
+import json
 import logging
 import numpy as np
 import pandas as pd
@@ -31,6 +36,20 @@ WEIGHTS = {
     "premium":   0.15,   # 입지 프리미엄
     "scale":     0.10,   # 규모·연식
 }
+
+# 실측 교통 데이터(geocode_apts.py 캐시)가 있을 때의 7축 가중치
+WEIGHTS_TRANSIT = {
+    "defense":   0.25,
+    "liquidity": 0.20,
+    "upside":    0.15,
+    "momentum":  0.12,
+    "premium":   0.10,
+    "scale":     0.08,
+    "transit":   0.10,   # 교통 접근성 (최근접역 도보거리 + 역세권 밀도)
+}
+
+TRANSIT_CACHE = Path(__file__).parent.parent / "data" / "static" / "apt_locations.json"
+WALK_M_PER_MIN = 67   # 성인 평균 보속 약 4km/h
 
 
 def _pct_rank(s: pd.Series, low_is_good: bool = False) -> pd.Series:
@@ -226,6 +245,51 @@ def _scale_age(mdd_df: pd.DataFrame, monthly: pd.DataFrame) -> pd.DataFrame:
     return df[["apt_name", "scale_score", "total_trades"]]
 
 
+# ── ⑦ 교통 접근성 (실측, 캐시 있을 때만) ─────────────────────
+
+def _transit_access(mdd_df: pd.DataFrame) -> pd.DataFrame | None:
+    """
+    geocode_apts.py가 만든 캐시에서 최근접역 거리 → 교통 점수.
+    도보 분(80%) + 역세권 밀도(1km 내 역 수, 20%).
+    캐시가 없거나 매칭되는 단지가 없으면 None (교통 축 비활성).
+    """
+    if not TRANSIT_CACHE.exists():
+        return None
+    cache = json.loads(TRANSIT_CACHE.read_text(encoding="utf-8"))
+
+    rows = []
+    for _, r in mdd_df.iterrows():
+        e = cache.get(f"{r['district_name']}|{r['apt_name']}")
+        if e and e.get("nearest_station_m") is not None:
+            rows.append({
+                "apt_name": r["apt_name"],
+                "walk_min": round(e["nearest_station_m"] / WALK_M_PER_MIN, 1),
+                "nearest_station": e.get("nearest_station"),
+                "nearest_station_m": e["nearest_station_m"],
+                "stations_within_1km": e.get("stations_within_1km", 0),
+            })
+        elif e and e.get("lat"):
+            # 좌표는 있으나 반경 1.5km 내 역 없음 → 최저권 취급 (도보 25분)
+            rows.append({
+                "apt_name": r["apt_name"],
+                "walk_min": 25.0,
+                "nearest_station": None,
+                "nearest_station_m": None,
+                "stations_within_1km": 0,
+            })
+
+    if not rows:
+        return None
+
+    tr = pd.DataFrame(rows)
+    tr["transit_score"] = (
+        _pct_rank(tr["walk_min"], low_is_good=True)   * 0.80 +
+        _pct_rank(tr["stations_within_1km"].astype(float)) * 0.20
+    )
+    log.info(f"교통 축 활성: {len(tr)}/{len(mdd_df)}개 단지 실측 반영")
+    return tr[["apt_name", "transit_score", "walk_min", "nearest_station", "nearest_station_m", "stations_within_1km"]]
+
+
 # ── 종합 점수 합산 ────────────────────────────────────────────
 
 def compute_composite_score(
@@ -248,19 +312,25 @@ def compute_composite_score(
     mo  = _recovery_momentum(monthly)
     pr  = _location_premium(mdd_df)
     sc  = _scale_age(mdd_df, monthly)
+    tr  = _transit_access(mdd_df)
 
     df = mdd_df[["apt_name", "district_name", "build_year", "area_exclusive"]].copy()
-    for part in (dfn, lq, ups, mo, pr, sc):
+    parts = [dfn, lq, ups, mo, pr, sc] + ([tr] if tr is not None else [])
+    for part in parts:
         df = df.merge(part, on="apt_name", how="left")
 
+    weights = WEIGHTS_TRANSIT if tr is not None else WEIGHTS
     df["composite_score"] = (
-        df["defense_score"].fillna(50)   * WEIGHTS["defense"]   +
-        df["liquidity_score"].fillna(50) * WEIGHTS["liquidity"] +
-        df["upside_score"].fillna(50)    * WEIGHTS["upside"]    +
-        df["momentum_score"].fillna(50)  * WEIGHTS["momentum"]  +
-        df["premium_score"].fillna(50)   * WEIGHTS["premium"]   +
-        df["scale_score"].fillna(50)     * WEIGHTS["scale"]
+        df["defense_score"].fillna(50)   * weights["defense"]   +
+        df["liquidity_score"].fillna(50) * weights["liquidity"] +
+        df["upside_score"].fillna(50)    * weights["upside"]    +
+        df["momentum_score"].fillna(50)  * weights["momentum"]  +
+        df["premium_score"].fillna(50)   * weights["premium"]   +
+        df["scale_score"].fillna(50)     * weights["scale"]
     )
+    if tr is not None:
+        df["composite_score"] += df["transit_score"].fillna(50) * weights["transit"]
+    df.attrs["weights_used"] = weights
 
     df = df.sort_values("composite_score", ascending=False).reset_index(drop=True)
     df["rank"] = df.index + 1

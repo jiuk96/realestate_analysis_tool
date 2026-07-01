@@ -10,7 +10,7 @@ from pathlib import Path
 
 from src.preprocessor import run as preprocess_run
 from src.analyzer import run as analyzer_run, build_monthly_median
-from src.scorer import compute_composite_score
+from src.scorer import compute_composite_score, WEIGHTS, WEIGHTS_TRANSIT
 
 DISTRICTS = {
     '마포구': '11440', '용산구': '11170', '성동구': '11200',
@@ -115,7 +115,10 @@ mdd_out['total_trades'] = mdd_out['apt_name'].map(df.groupby('apt_name').size())
 save('mdd_ranking.json', {'ranking': mdd_out.sort_values('mdd', ascending=False).to_dict('records')})
 
 # composite_score.json
-weights = {'가격방어력': 0.25, '거래유동성': 0.20, '상승참여도': 0.15, '회복모멘텀': 0.15, '입지프리미엄': 0.15, '규모·연식': 0.10}
+_KR = {'defense': '가격방어력', 'liquidity': '거래유동성', 'upside': '상승참여도',
+       'momentum': '회복모멘텀', 'premium': '입지프리미엄', 'scale': '규모·연식', 'transit': '교통'}
+_w = WEIGHTS_TRANSIT if 'transit_score' in score_df.columns else WEIGHTS
+weights = {_KR[k]: v for k, v in _w.items()}
 save('composite_score.json', {'ranking': score_df.to_dict('records'), 'weights': weights})
 
 # timeseries.json
