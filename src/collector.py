@@ -60,6 +60,9 @@ def _fetch_one_page(api_key: str, district_code: str, ym: str, page: int) -> dic
     for attempt in range(config.API_RETRY_COUNT):
         try:
             resp = requests.get(url, timeout=30)
+            # 진단용: 첫 시도에서 raw 응답 로깅
+            if attempt == 0:
+                log.info(f"[진단] HTTP {resp.status_code} | Content-Type: {resp.headers.get('Content-Type','?')} | 응답 길이: {len(resp.content)}bytes | 앞 200자: {resp.text[:200]!r}")
             resp.raise_for_status()
             return resp.json()
         except Exception as e:
