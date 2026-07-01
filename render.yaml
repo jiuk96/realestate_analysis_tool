@@ -3,7 +3,7 @@ services:
     name: realestate-analysis
     runtime: python
     buildCommand: pip install -r requirements.txt
-    startCommand: python web/app.py
+    startCommand: gunicorn web.app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
