@@ -12,7 +12,6 @@ from flask import Flask, jsonify, render_template
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from tests.fixtures import make_sample_df
 from src.preprocessor import run as preprocess, compute_penalties
 from src.analyzer import build_monthly_median, run as analyze
 
@@ -22,10 +21,30 @@ log = logging.getLogger(__name__)
 # ── 데이터 캐시 (앱 시작 시 1회 계산) ────────────────────────
 _cache: dict = {}
 
+def _load_real_data() -> "pd.DataFrame":
+    import pandas as pd
+    raw_dir = Path(__file__).parent.parent / "data" / "raw"
+    district_map = {"11440": "마포구", "11170": "용산구", "11200": "성동구"}
+    frames = []
+    for f in sorted(raw_dir.glob("*.parquet")):
+        try:
+            df = pd.read_parquet(f)
+            if df.empty:
+                continue
+            code = f.stem.split("_")[0]
+            df["district_name"] = district_map.get(code, code)
+            frames.append(df)
+        except Exception:
+            pass
+    if not frames:
+        raise RuntimeError("data/raw/ 에 parquet 파일이 없습니다.")
+    return pd.concat(frames, ignore_index=True)
+
+
 def _load_data():
     if _cache:
         return
-    raw_df = make_sample_df()
+    raw_df = _load_real_data()
 
     # 벌점 계산 전 원본 건수 기록
     penalized = compute_penalties(raw_df.copy())
