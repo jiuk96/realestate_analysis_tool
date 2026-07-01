@@ -1,0 +1,53 @@
+name: 실거래가 데이터 수집
+
+on:
+  workflow_dispatch:        # 수동 실행 (버튼 클릭)
+  schedule:
+    - cron: '0 1 1 * *'    # 매월 1일 오전 10시 (KST) 자동 실행
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GIT_TOKEN }}
+
+      - name: Python 설정
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 패키지 설치
+        run: pip install -r requirements.txt
+
+      - name: 데이터 수집
+        env:
+          MOLIT_API_KEY: ${{ secrets.MOLIT_API_KEY }}
+        run: |
+          python src/collector.py
+          echo "수집 완료"
+
+      - name: 수집 결과 확인
+        run: |
+          echo "=== 수집된 파일 목록 ==="
+          ls data/raw/*.parquet 2>/dev/null | wc -l
+          echo "개 파일 수집됨"
+          du -sh data/raw/ 2>/dev/null || echo "데이터 없음"
+
+      - name: GitHub에 데이터 커밋·푸시
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/
+          if git diff --staged --quiet; then
+            echo "변경된 데이터 없음 — 스킵"
+          else
+            git commit -m "data: 실거래가 수집 $(date +'%Y-%m-%d %H:%M') KST"
+            git push
+            echo "✅ 푸시 완료"
+          fi
