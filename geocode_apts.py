@@ -1,17 +1,18 @@
 """
-아파트 좌표 + 최근접 지하철역 수집 (Kakao Local API)
+아파트 좌표 + 최근접 지하철역 수집
 ─────────────────────────────────────────────────────
-분석 대상 단지(composite_score.json)의 지번 주소를 지오코딩하고,
-반경 내 지하철역(SW8)을 조회해 data/static/apt_locations.json 캐시로 저장.
+분석 대상 단지(composite_score.json)의 좌표를 구하고 최근접 지하철역을
+계산해 data/static/apt_locations.json 캐시로 저장.
 
 실행: python geocode_apts.py
-  - .env에 KAKAO_REST_KEY 필요 (https://developers.kakao.com REST API 키)
-  - API는 이 스크립트에서만 호출. 이후 파이프라인(build_data.py)은
-    캐시 파일만 읽으므로 오프라인 동작.
+  - 기본: OpenStreetMap (Nominatim + Overpass) — API 키 불필요, 무료
+  - .env에 KAKAO_REST_KEY가 있으면 Kakao Local API 사용 (더 정확)
+  - API는 이 스크립트에서만 호출. 이후 build_data.py는 캐시만 읽음.
   - 재실행 시 이미 수집된 단지는 건너뜀 (증분 수집).
 """
 
 import json
+import math
 import time
 import sys
 from pathlib import Path
@@ -21,8 +22,9 @@ import requests
 
 ROOT = Path(__file__).parent
 CACHE = ROOT / "data" / "static" / "apt_locations.json"
-RADIUS_M = 1500          # 역 탐색 반경
+STATIONS = ROOT / "data" / "static" / "subway_stations.json"
 NEAR_M = 1000            # "역세권" 집계 반경
+MAX_M = 1500             # 이 거리 밖이면 역 없음 취급
 
 DISTRICTS = {
     '11440': '마포구', '11170': '용산구', '11200': '성동구',
@@ -32,56 +34,149 @@ DISTRICTS = {
     '11740': '강동구', '11110': '종로구',
 }
 
+UA = {"User-Agent": "seoul-apt-analysis/1.0 (personal research)"}
 
-def load_key() -> str:
+
+def haversine_m(lat1, lng1, lat2, lng2) -> float:
+    R = 6371000
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dp = math.radians(lat2 - lat1)
+    dl = math.radians(lng2 - lng1)
+    a = math.sin(dp/2)**2 + math.cos(p1)*math.cos(p2)*math.sin(dl/2)**2
+    return R * 2 * math.asin(math.sqrt(a))
+
+
+def load_kakao_key() -> str | None:
     env = ROOT / ".env"
     if env.exists():
         for line in env.read_text().splitlines():
-            if line.startswith("KAKAO_REST_KEY="):
+            if line.startswith("KAKAO_REST_KEY=") and line.split("=", 1)[1].strip():
                 return line.split("=", 1)[1].strip()
-    print("ERROR: .env에 KAKAO_REST_KEY가 없습니다.")
-    sys.exit(1)
+    return None
 
 
-def kakao_get(session: requests.Session, url: str, params: dict) -> dict:
-    for attempt in range(3):
-        r = session.get(url, params=params, timeout=10)
-        if r.status_code == 200:
-            return r.json()
-        if r.status_code == 429:          # rate limit
-            time.sleep(1 + attempt)
+# ── 지하철역 좌표 확보 (Overpass, 1회) ────────────────────────
+
+def fetch_stations() -> list[dict]:
+    """서울 지하철/전철역 좌표를 Overpass API에서 1회 수집 → 캐시"""
+    if STATIONS.exists():
+        return json.loads(STATIONS.read_text(encoding="utf-8"))
+
+    print("지하철역 좌표 수집 중 (Overpass API)...")
+    query = """
+    [out:json][timeout:60];
+    (
+      node["railway"="station"]["station"="subway"](37.42,126.75,37.72,127.20);
+      node["railway"="station"]["subway"="yes"](37.42,126.75,37.72,127.20);
+    );
+    out body;
+    """
+    r = requests.post("https://overpass-api.de/api/interpreter",
+                      data={"data": query}, headers=UA, timeout=90)
+    r.raise_for_status()
+    elements = r.json().get("elements", [])
+
+    seen = {}
+    for e in elements:
+        name = e.get("tags", {}).get("name", "")
+        if not name:
             continue
-        r.raise_for_status()
-    raise RuntimeError(f"Kakao API 반복 실패: {url}")
+        key = (name, round(e["lat"], 3), round(e["lon"], 3))
+        seen[key] = {"name": name, "lat": e["lat"], "lng": e["lon"]}
+    stations = list(seen.values())
+
+    if len(stations) < 100:
+        print(f"경고: 역이 {len(stations)}개만 수집됨 — Overpass 응답 확인 필요")
+    STATIONS.parent.mkdir(parents=True, exist_ok=True)
+    STATIONS.write_text(json.dumps(stations, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"  역 {len(stations)}개 저장 → {STATIONS}")
+    return stations
 
 
-def representative_address(raw: pd.DataFrame, apt_name: str, district: str) -> str | None:
-    """단지의 최빈 (법정동, 지번) → 지번 주소 문자열"""
+def nearest_station(lat: float, lng: float, stations: list[dict]) -> tuple[str | None, int | None, int]:
+    """최근접역 (이름, 거리m), 1km 내 역 수"""
+    best_name, best_d = None, float("inf")
+    within = 0
+    for s in stations:
+        d = haversine_m(lat, lng, s["lat"], s["lng"])
+        if d < best_d:
+            best_name, best_d = s["name"], d
+        if d <= NEAR_M:
+            within += 1
+    if best_d > MAX_M:
+        return None, None, within
+    return best_name, int(best_d), within
+
+
+# ── 지오코딩 ─────────────────────────────────────────────────
+
+def geocode_osm(session: requests.Session, queries: list[str]) -> tuple[float, float] | None:
+    """Nominatim: 여러 쿼리를 순서대로 시도 (1 req/s 준수)"""
+    for q in queries:
+        try:
+            r = session.get("https://nominatim.openstreetmap.org/search",
+                            params={"q": q, "format": "json", "limit": 1,
+                                    "countrycodes": "kr"},
+                            headers=UA, timeout=15)
+            time.sleep(1.1)   # Nominatim 정책: 1 req/s
+            if r.status_code != 200:
+                continue
+            docs = r.json()
+            if docs:
+                return float(docs[0]["lat"]), float(docs[0]["lon"])
+        except Exception:
+            continue
+    return None
+
+
+def geocode_kakao(session: requests.Session, key: str, addr: str | None,
+                  district: str, apt_name: str) -> tuple[float, float] | None:
+    h = {"Authorization": f"KakaoAK {key}"}
+    try:
+        if addr:
+            r = session.get("https://dapi.kakao.com/v2/local/search/address.json",
+                            params={"query": addr}, headers=h, timeout=10)
+            docs = r.json().get("documents", []) if r.status_code == 200 else []
+            if docs:
+                return float(docs[0]["y"]), float(docs[0]["x"])
+        r = session.get("https://dapi.kakao.com/v2/local/search/keyword.json",
+                        params={"query": f"서울 {district} {apt_name}", "size": 3},
+                        headers=h, timeout=10)
+        docs = r.json().get("documents", []) if r.status_code == 200 else []
+        if docs:
+            return float(docs[0]["y"]), float(docs[0]["x"])
+    except Exception:
+        pass
+    return None
+
+
+def representative_address(raw: pd.DataFrame, apt_name: str, district: str):
+    """단지의 최빈 (법정동, 지번) → (지번주소, 법정동)"""
     sub = raw[(raw["apt_name"] == apt_name) & (raw["district_name"] == district)]
     if sub.empty:
-        return None
-    top = sub.groupby(["umd_name", "jibun"]).size().idxmax()
-    umd, jibun = top
+        return None, None
+    umd, jibun = sub.groupby(["umd_name", "jibun"]).size().idxmax()
     jibun = str(jibun).strip()
-    return f"서울 {district} {umd} {jibun}".strip()
+    return f"서울 {district} {umd} {jibun}".strip(), umd
 
 
 def main():
-    key = load_key()
-    session = requests.Session()
-    session.headers["Authorization"] = f"KakaoAK {key}"
+    kakao_key = load_kakao_key()
+    provider = "kakao" if kakao_key else "osm"
+    print(f"지오코딩 제공자: {provider.upper()}"
+          + ("" if kakao_key else " (API 키 불필요 — Nominatim은 초당 1건 제한이라 약 3~5분 소요)"))
 
-    # 분석 대상 단지 목록
+    stations = fetch_stations()
+    session = requests.Session()
+
     comp = json.loads((ROOT / "data/processed/composite_score.json").read_text(encoding="utf-8"))
     targets = [(r["apt_name"], r["district"]) for r in comp["ranking"]]
 
-    # 원본에서 주소 추출용 로드
     print("원본 데이터 로드 중...")
     dfs = [pd.read_parquet(f) for f in sorted((ROOT / "data/raw").glob("*.parquet"))]
     raw = pd.concat(dfs, ignore_index=True)
     raw["district_name"] = raw["district_code"].astype(str).map(DISTRICTS)
 
-    # 기존 캐시 로드 (증분)
     cache: dict = {}
     if CACHE.exists():
         cache = json.loads(CACHE.read_text(encoding="utf-8"))
@@ -93,61 +188,40 @@ def main():
             skip += 1
             continue
 
-        addr = representative_address(raw, apt_name, district)
+        addr, umd = representative_address(raw, apt_name, district)
         entry = {"apt_name": apt_name, "district": district, "address": addr,
                  "lat": None, "lng": None,
                  "nearest_station": None, "nearest_station_m": None,
                  "stations_within_1km": 0}
 
-        # 1차: 지번 주소 검색
-        lat = lng = None
-        if addr:
-            try:
-                res = kakao_get(session, "https://dapi.kakao.com/v2/local/search/address.json",
-                                {"query": addr})
-                docs = res.get("documents", [])
-                if docs:
-                    lat, lng = float(docs[0]["y"]), float(docs[0]["x"])
-            except Exception as e:
-                print(f"  주소검색 오류 [{addr}]: {e}")
+        if provider == "kakao":
+            coords = geocode_kakao(session, kakao_key, addr, district, apt_name)
+        else:
+            # OSM: 단지명 → 지번주소 → 법정동 순으로 시도
+            queries = [f"{apt_name}, {district}, 서울"]
+            if addr:
+                queries.append(addr)
+            if umd:
+                queries.append(f"{umd}, {district}, 서울")   # 최후: 동 중심 (오차 큼)
+            coords = geocode_osm(session, queries)
 
-        # 2차 폴백: 키워드 검색 (단지명)
-        if lat is None:
-            try:
-                res = kakao_get(session, "https://dapi.kakao.com/v2/local/search/keyword.json",
-                                {"query": f"서울 {district} {apt_name}", "size": 3})
-                docs = res.get("documents", [])
-                if docs:
-                    lat, lng = float(docs[0]["y"]), float(docs[0]["x"])
-            except Exception as e:
-                print(f"  키워드검색 오류 [{apt_name}]: {e}")
-
-        if lat is None:
+        if coords is None:
             print(f"  ✗ 좌표 실패: {district} {apt_name} ({addr})")
             cache[cache_key] = entry
             fail += 1
             continue
 
+        lat, lng = coords
         entry["lat"], entry["lng"] = lat, lng
+        name, dist_m, within = nearest_station(lat, lng, stations)
+        entry["nearest_station"] = name
+        entry["nearest_station_m"] = dist_m
+        entry["stations_within_1km"] = within
 
-        # 지하철역 검색 (거리순)
-        try:
-            res = kakao_get(session, "https://dapi.kakao.com/v2/local/search/category.json",
-                            {"category_group_code": "SW8", "x": lng, "y": lat,
-                             "radius": RADIUS_M, "sort": "distance", "size": 15})
-            docs = res.get("documents", [])
-            if docs:
-                entry["nearest_station"] = docs[0]["place_name"]
-                entry["nearest_station_m"] = int(docs[0]["distance"])
-                entry["stations_within_1km"] = sum(1 for d in docs if int(d["distance"]) <= NEAR_M)
-        except Exception as e:
-            print(f"  역검색 오류 [{apt_name}]: {e}")
-
-        st = entry["nearest_station"] or "역 없음(1.5km)"
-        print(f"  ✓ {district} {apt_name}: {st} {entry['nearest_station_m'] or '-'}m")
+        st = f"{name} {dist_m}m" if name else "역 없음(1.5km)"
+        print(f"  ✓ {district} {apt_name}: {st}")
         cache[cache_key] = entry
         ok += 1
-        time.sleep(0.15)      # rate limit 여유
 
     CACHE.parent.mkdir(parents=True, exist_ok=True)
     CACHE.write_text(json.dumps(cache, ensure_ascii=False, indent=2), encoding="utf-8")
