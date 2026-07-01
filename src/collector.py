@@ -6,8 +6,10 @@
 """
 
 import os
+import subprocess
 import time
 import logging
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
@@ -198,9 +200,69 @@ def collect_all(districts: Optional[dict] = None) -> pd.DataFrame:
     return combined
 
 
+def git_push_data(message: str = "") -> bool:
+    """
+    수집된 data/ 디렉터리를 GitHub에 자동 커밋·푸시.
+    GIT_TOKEN 환경변수가 있으면 remote URL에 토큰을 포함해 인증.
+    """
+    repo_root = Path(__file__).parent.parent
+    token     = os.getenv("GIT_TOKEN", "")
+
+    try:
+        # 현재 remote URL 백업
+        orig_url = subprocess.check_output(
+            ["git", "remote", "get-url", "origin"], cwd=repo_root, text=True
+        ).strip()
+
+        # 토큰이 있으면 URL에 포함
+        if token and "github.com" in orig_url:
+            auth_url = orig_url.replace("https://", f"https://{token}@")
+            subprocess.run(["git", "remote", "set-url", "origin", auth_url],
+                           cwd=repo_root, check=True)
+
+        # 스테이징 → 커밋 → 푸시
+        subprocess.run(["git", "add", "data/"], cwd=repo_root, check=True)
+
+        status = subprocess.check_output(
+            ["git", "status", "--porcelain", "data/"], cwd=repo_root, text=True
+        ).strip()
+
+        if not status:
+            log.info("변경된 데이터 없음 — 푸시 스킵")
+            return True
+
+        commit_msg = message or f"data: 실거래가 수집 업데이트 {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        subprocess.run(["git", "commit", "-m", commit_msg], cwd=repo_root, check=True)
+
+        # 현재 브랜치명 감지
+        branch = subprocess.check_output(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=repo_root, text=True
+        ).strip()
+        subprocess.run(["git", "push", "-u", "origin", branch], cwd=repo_root, check=True)
+
+        log.info("GitHub 푸시 완료")
+        return True
+
+    except subprocess.CalledProcessError as e:
+        log.error(f"Git 푸시 실패: {e}")
+        return False
+    finally:
+        # 토큰을 URL에서 즉시 제거
+        if token:
+            subprocess.run(["git", "remote", "set-url", "origin", orig_url],
+                           cwd=repo_root, check=True)
+
+
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--push", action="store_true", help="수집 완료 후 GitHub에 자동 푸시")
+    args = parser.parse_args()
+
     df = collect_all()
     if not df.empty:
-        print(df.dtypes)
-        print(df.head())
-        print(f"\n메모리 사용량: {df.memory_usage(deep=True).sum() / 1024**2:.1f} MB")
+        print(f"\n수집 완료: {len(df):,}건, {df['apt_name'].nunique()}개 단지")
+        print(f"메모리 사용량: {df.memory_usage(deep=True).sum() / 1024**2:.1f} MB")
+
+    if args.push:
+        git_push_data()
