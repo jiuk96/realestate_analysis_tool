@@ -8,6 +8,15 @@ import logging
 from pathlib import Path
 from flask import Flask, jsonify, render_template
 
+# 분석 대상 구 코드 (데이터 재생성 시 참조용)
+DISTRICT_MAP = {
+    "11110": "종로구", "11170": "용산구", "11200": "성동구",
+    "11215": "광진구", "11230": "동대문구", "11380": "은평구",
+    "11410": "서대문구", "11440": "마포구", "11470": "양천구",
+    "11500": "강서구", "11560": "영등포구", "11590": "동작구",
+    "11620": "관악구", "11740": "강동구",
+}
+
 app = Flask(__name__)
 log = logging.getLogger(__name__)
 
