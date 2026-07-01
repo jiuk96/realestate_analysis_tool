@@ -1,341 +1,268 @@
 /* ── 유틸 ──────────────────────────────────────────────── */
-const fmt만  = v => (v / 10000).toFixed(1) + '억';
-const fmt억  = v => v.toFixed(2) + '억';
-const fmtPct = v => (v >= 0 ? '+' : '') + v.toFixed(1) + '%';
-
-const COLORS = ['#38bdf8','#818cf8','#34d399','#fb923c','#f472b6','#a78bfa'];
-const GOLD   = '#fbbf24';
-const RED    = '#f87171';
-const GREEN  = '#34d399';
+const COLORS = ['#38bdf8','#34d399','#818cf8','#fb923c','#f472b6','#a78bfa'];
+const GOLD = '#fbbf24', GREEN = '#34d399', RED = '#f87171';
 
 async function fetchJSON(url) {
   const r = await fetch(url);
   return r.json();
 }
 
-/* ── ① 신뢰도 배지 ────────────────────────────────────── */
-async function renderQuality() {
-  const d = await fetchJSON('/api/quality');
-  document.getElementById('heroMeta').innerHTML = `
-    <span>${d.collection_period}</span>
-    <span>대상: ${d.target_districts.join(' · ')}</span>
-    <span>최소 세대수: ${d.min_households}세대 이상</span>
-  `;
+const scoreClass = v => v >= 65 ? 'good' : v >= 50 ? 'mid' : 'bad';
+const mddClass   = v => v >= -10 ? 'good' : v >= -20 ? 'mid' : 'bad';
 
-  const cards = [
-    { icon: '🏛️', label: '데이터 출처',     value: '국토교통부',           sub: '실거래가 공개시스템 (공공데이터포털)' },
-    { icon: '📦', label: '원본 거래 건수',   value: `${d.total_raw.toLocaleString()}건`,  sub: `${d.collection_period}` },
-    { icon: '🧹', label: '정제 후 거래 건수',value: `${d.total_clean.toLocaleString()}건`, sub: `벌점 제거 후 사용 데이터` },
-    { icon: '📊', label: '데이터 유효율',    value: `${(100 - d.filter_rate_pct).toFixed(1)}%`, sub: `(필터 제거율 ${d.filter_rate_pct}%)` },
-    { icon: '🔍', label: '이상치 탐지',      value: 'z-score > 3.0',       sub: '단지×면적 그룹 내 표준화' },
-    { icon: '📈', label: '스무딩 방식',      value: '3개월 이동 중앙값',    sub: '단기 스파이크 완화' },
-    { icon: '🏠', label: '최소 세대수 기준', value: `${d.min_households}세대 이상`, sub: '소규모 단지 분석 제외' },
-    { icon: '✅', label: '직거래 필터',      value: '중앙값 60% 이하 제외', sub: '증여·특수관계 거래 제거' },
-  ];
+/* ── ① STEP 1: 데이터 필터링 ───────────────────────────── */
+async function renderFilter() {
+  const [q, p] = await Promise.all([fetchJSON('/api/quality'), fetchJSON('/api/pipeline')]);
 
-  document.getElementById('qualityBadges').innerHTML = cards.map(c => `
-    <div class="badge-card">
-      <div class="badge-icon">${c.icon}</div>
-      <div class="badge-label">${c.label}</div>
-      <div class="badge-value">${c.value}</div>
-      <div class="badge-sub">${c.sub}</div>
-    </div>
-  `).join('');
-}
+  // 히어로 통계
+  document.getElementById('statRaw').textContent    = q.total_raw.toLocaleString() + '건';
+  document.getElementById('statClean').textContent  = q.total_clean.toLocaleString() + '건';
+  document.getElementById('statApts').textContent   = '16개';
+  document.getElementById('statPeriod').textContent = '2020~2025';
 
-/* ── ② 파이프라인 플로우 ──────────────────────────────── */
-async function renderPipeline() {
-  const d = await fetchJSON('/api/pipeline');
-
-  document.getElementById('pipelineFlow').innerHTML = d.stages.map((s, i) => `
-    ${i > 0 ? '<div class="pipe-arrow">→</div>' : ''}
+  // 파이프라인 플로우
+  document.getElementById('pipelineRow').innerHTML = p.stages.map((s, i) => `
+    ${i > 0 ? '<div class="pipe-arrow">▶</div>' : ''}
     <div class="pipe-stage">
-      <div class="pipe-count">${s.count.toLocaleString()}</div>
+      <div class="pipe-count">${s.count.toLocaleString()}<span class="pipe-unit">건</span></div>
       <div class="pipe-label">${s.label}</div>
       <div class="pipe-desc">${s.desc}</div>
     </div>
   `).join('');
 
-  document.getElementById('penaltyGrid').innerHTML = d.penalty_rules.map(r => `
+  // 벌점 규칙
+  const icons = ['🏢','🤝','📊','❓'];
+  document.getElementById('penaltyGrid').innerHTML = p.penalty_rules.map((r, i) => `
     <div class="penalty-card">
-      <span class="penalty-score">+${r.score}점</span>
-      <div class="penalty-rule">${r.rule}</div>
+      <div class="penalty-header">
+        <span class="penalty-icon">${icons[i]}</span>
+        <span class="penalty-rule">${r.rule}</span>
+        <span class="penalty-score">+${r.score}점</span>
+      </div>
       <div class="penalty-why">${r.reason}</div>
     </div>
   `).join('');
 }
 
-/* ── ④ 가격 시계열 차트 ───────────────────────────────── */
-async function renderTimeseries() {
-  const d = await fetchJSON('/api/timeseries');
+/* ── ② STEP 2: 점수 산출 방식 ──────────────────────────── */
+function renderScoring() {
+  const axes = [
+    { key: '거래지속성', weight: 30, color: '#38bdf8',
+      desc: '분석 기간 동안 꾸준히 거래된 단지를 높게 평가. 실수요가 받치는 단지는 하락장에도 버팁니다.' },
+    { key: '가격방어력', weight: 25, color: '#34d399',
+      desc: '2022~2023년 하락장의 MDD(최대낙폭)를 반영. 덜 빠진 단지가 높은 점수를 받습니다.' },
+    { key: '상승참여도', weight: 20, color: '#818cf8',
+      desc: '2021년 상승장 대비 얼마나 올랐는지. 방어도 하고 상승도 하는 단지가 진짜 우량 단지입니다.' },
+    { key: '교통',      weight: 12, color: '#fb923c',
+      desc: '지하철역까지 도보 소요 시간. 가까울수록 수요가 안정적으로 유지됩니다.' },
+    { key: '인프라',    weight:  8, color: '#f472b6',
+      desc: '백화점·대형마트·공원·병원 등 생활 인프라 밀도. 편의성이 높을수록 가격 하방이 견고합니다.' },
+    { key: '학군',      weight:  5, color: '#a78bfa',
+      desc: '주요 초·중·고 학군 수준. 학령기 실수요를 유인하는 장기 가격 지지 요인입니다.' },
+  ];
 
-  const traces = [];
-  const annotations = [];
-
-  d.series.forEach((s, i) => {
-    const color = COLORS[i % COLORS.length];
-
-    // 스무딩 라인
-    traces.push({
-      x: s.dates, y: s.prices,
-      name: s.apt_name,
-      type: 'scatter', mode: 'lines',
-      line: { color, width: 2.5 },
-      hovertemplate: `%{x}<br>${s.apt_name}: %{y:.2f}억<extra></extra>`,
-    });
-
-    // 최고점 마커
-    if (s.peak_date) {
-      const pi = s.dates.indexOf(s.peak_date);
-      if (pi >= 0) {
-        traces.push({
-          x: [s.peak_date], y: [s.prices[pi]],
-          name: `${s.apt_name} 최고점`,
-          showlegend: false,
-          type: 'scatter', mode: 'markers',
-          marker: { color: GOLD, size: 12, symbol: 'triangle-up' },
-          hovertemplate: `최고점 ${s.peak_date}<br>${s.prices[pi].toFixed(2)}억<extra></extra>`,
-        });
-        annotations.push({
-          x: s.peak_date, y: s.prices[pi],
-          text: `▲고점<br>${s.prices[pi].toFixed(1)}억`,
-          showarrow: true, arrowhead: 0, arrowcolor: GOLD,
-          font: { size: 10, color: GOLD }, ax: 0, ay: -36,
-          bgcolor: 'rgba(15,23,42,.8)', bordercolor: GOLD, borderwidth: 1,
-        });
-      }
-    }
-
-    // 최저점 마커
-    if (s.trough_date) {
-      const ti = s.dates.indexOf(s.trough_date);
-      if (ti >= 0) {
-        traces.push({
-          x: [s.trough_date], y: [s.prices[ti]],
-          name: `${s.apt_name} 최저점`,
-          showlegend: false,
-          type: 'scatter', mode: 'markers',
-          marker: { color: RED, size: 12, symbol: 'triangle-down' },
-          hovertemplate: `최저점 ${s.trough_date}<br>${s.prices[ti].toFixed(2)}억 (MDD ${s.mdd_pct?.toFixed(1)}%)<extra></extra>`,
-        });
-        annotations.push({
-          x: s.trough_date, y: s.prices[ti],
-          text: `▼저점<br>${s.prices[ti].toFixed(1)}억<br>${s.mdd_pct?.toFixed(1)}%`,
-          showarrow: true, arrowhead: 0, arrowcolor: RED,
-          font: { size: 10, color: RED }, ax: 0, ay: 44,
-          bgcolor: 'rgba(15,23,42,.8)', bordercolor: RED, borderwidth: 1,
-        });
-      }
-    }
-  });
-
-  // 하락장 구간 음영
-  const shapes = [{
-    type: 'rect',
-    x0: '2022-07', x1: '2023-06',
-    y0: 0, y1: 1, yref: 'paper',
-    fillcolor: 'rgba(248,113,113,.08)',
-    line: { width: 0 },
-  }, {
-    type: 'rect',
-    x0: '2021-01', x1: '2021-12',
-    y0: 0, y1: 1, yref: 'paper',
-    fillcolor: 'rgba(251,191,36,.06)',
-    line: { width: 0 },
-  }];
-
-  const layout = {
-    paper_bgcolor: 'transparent', plot_bgcolor: 'rgba(30,41,59,.5)',
-    font: { color: '#94a3b8', size: 12 },
-    xaxis: { gridcolor: '#334155', tickfont: { size: 11 } },
-    yaxis: { gridcolor: '#334155', ticksuffix: '억', tickfont: { size: 11 } },
-    legend: { bgcolor: 'rgba(15,23,42,.7)', bordercolor: '#334155', borderwidth: 1 },
-    margin: { t: 30, b: 50, l: 60, r: 20 },
-    hovermode: 'x unified',
-    annotations: [
-      ...annotations,
-      { x: '2021-06', y: 1.04, xref: 'x', yref: 'paper',
-        text: '🔶 고점 구간', showarrow: false, font: { size: 10, color: GOLD } },
-      { x: '2022-12', y: 1.04, xref: 'x', yref: 'paper',
-        text: '🔴 하락장 구간', showarrow: false, font: { size: 10, color: RED } },
-    ],
-    shapes,
-  };
-
-  Plotly.newPlot('chartTimeseries', traces, layout, { responsive: true, displayModeBar: false });
-}
-
-/* ── ⑤ MDD 랭킹 차트 + 테이블 ────────────────────────── */
-async function renderRanking() {
-  const d = await fetchJSON('/api/mdd_ranking');
-  const items = d.ranking;
-
-  const colors = items.map(r => r.is_top ? GOLD : '#475569');
-  const labels = items.map(r => r.apt_name + (r.is_top ? ' ★' : ''));
-
-  const trace = {
-    type: 'bar', orientation: 'h',
-    x: items.map(r => r.mdd_pct),
-    y: labels,
-    marker: { color: colors },
-    text: items.map(r => `${r.mdd_pct.toFixed(1)}%`),
-    textposition: 'outside',
-    textfont: { color: '#e2e8f0', size: 12 },
-    hovertemplate: '%{y}<br>MDD: %{x:.1f}%<extra></extra>',
-  };
-
-  const layout = {
-    paper_bgcolor: 'transparent', plot_bgcolor: 'rgba(30,41,59,.5)',
-    font: { color: '#94a3b8', size: 12 },
-    xaxis: { gridcolor: '#334155', ticksuffix: '%', zeroline: true, zerolinecolor: '#475569', range: [Math.min(...items.map(r=>r.mdd_pct)) - 5, 5] },
-    yaxis: { gridcolor: '#334155', automargin: true },
-    margin: { t: 20, b: 50, l: 10, r: 80 },
-    height: Math.max(300, items.length * 52),
-    shapes: [{ type: 'line', x0: 0, x1: 0, y0: -0.5, y1: items.length - 0.5,
-      line: { color: '#94a3b8', width: 1, dash: 'dot' } }],
-  };
-
-  Plotly.newPlot('chartRanking', [trace], layout, { responsive: true, displayModeBar: false });
-
-  // 테이블
-  const mddClass = v => v >= -10 ? 'good' : v >= -20 ? 'mid' : 'bad';
-  document.getElementById('rankingBody').innerHTML = items.map(r => `
-    <tr class="${r.is_top ? 'is-top' : ''}">
-      <td>${r.rank}</td>
-      <td>${r.apt_name}${r.is_top ? '<span class="star-badge">★</span>' : ''}</td>
-      <td>${r.district}</td>
-      <td class="mdd-cell ${mddClass(r.mdd_pct)}">${r.mdd_pct.toFixed(1)}%</td>
-      <td>${r.peak_date}</td>
-      <td>${(r.peak_price / 10000).toFixed(1)}억</td>
-      <td>${r.trough_date}</td>
-      <td>${(r.trough_price / 10000).toFixed(1)}억</td>
-      <td>${r.build_year}년</td>
-    </tr>
+  document.getElementById('scoreAxes').innerHTML = axes.map(a => `
+    <div class="axis-card">
+      <div class="axis-top">
+        <span class="axis-key" style="color:${a.color}">${a.key}</span>
+        <div class="axis-bar-wrap">
+          <div class="axis-bar" style="width:${a.weight * 3}%;background:${a.color}"></div>
+        </div>
+        <span class="axis-weight" style="color:${a.color}">${a.weight}%</span>
+      </div>
+      <div class="axis-desc">${a.desc}</div>
+    </div>
   `).join('');
 }
 
-/* ── ⑥ 종합 입지 점수 ────────────────────────────────── */
-async function renderComposite() {
+/* ── ③ STEP 3: 종합 랭킹 ───────────────────────────────── */
+async function renderRanking() {
   const d = await fetchJSON('/api/composite_score');
   const items = d.ranking;
-  const weights = d.weights;
 
-  // 비중 배지
-  document.getElementById('weightBadges').innerHTML = Object.entries(weights).map(([k, v]) =>
-    `<span class="weight-badge">${k} <strong>${v}%</strong></span>`
-  ).join('');
-
-  // 수평 막대 차트 (종합 점수)
+  // 수평 바 차트
   const sorted = [...items].sort((a, b) => b.composite_score - a.composite_score);
-  const colors = sorted.map(r => {
-    if (r.composite_score >= 65) return '#34d399';
-    if (r.composite_score >= 55) return '#38bdf8';
-    return '#94a3b8';
-  });
+  const colors = sorted.map(r =>
+    r.composite_score >= 65 ? GREEN : r.composite_score >= 50 ? '#38bdf8' : '#475569'
+  );
 
-  Plotly.newPlot('chartComposite', [{
-    type: 'bar',
-    orientation: 'h',
+  Plotly.newPlot('chartRanking', [{
+    type: 'bar', orientation: 'h',
     y: sorted.map(r => r.apt_name),
     x: sorted.map(r => r.composite_score),
     marker: { color: colors },
     text: sorted.map(r => r.composite_score.toFixed(1) + '점'),
     textposition: 'outside',
-    hovertemplate: '<b>%{y}</b><br>종합: %{x:.1f}점<extra></extra>',
+    textfont: { color: '#e2e8f0', size: 12 },
+    hovertemplate: '<b>%{y}</b><br>종합 점수: %{x:.1f}점<extra></extra>',
   }], {
-    paper_bgcolor: '#1e293b', plot_bgcolor: '#1e293b',
-    font: { color: '#e2e8f0', size: 12 },
-    xaxis: { range: [0, 100], gridcolor: '#334155', title: '종합 입지 점수 (0~100)' },
-    yaxis: { autorange: 'reversed', tickfont: { size: 11 } },
-    margin: { l: 160, r: 80, t: 20, b: 50 },
-    height: 420,
-  }, { responsive: true });
+    paper_bgcolor: 'transparent', plot_bgcolor: 'rgba(30,41,59,.5)',
+    font: { color: '#94a3b8', size: 12 },
+    xaxis: { range: [0, 105], gridcolor: '#334155', ticksuffix: '점', title: '종합 입지 점수 (0~100)' },
+    yaxis: { autorange: 'reversed', automargin: true, tickfont: { size: 12 } },
+    margin: { l: 160, r: 80, t: 10, b: 50 },
+    height: Math.max(320, sorted.length * 42),
+  }, { responsive: true, displayModeBar: false });
 
   // 테이블
-  const scoreClass = v => v >= 65 ? 'good' : v >= 55 ? 'mid' : 'bad';
-  document.getElementById('compositeBody').innerHTML = items.map(r => `
+  document.getElementById('rankingBody').innerHTML = items.map(r => `
     <tr>
-      <td>${r.rank}</td>
+      <td><strong>${r.rank}</strong></td>
       <td><strong>${r.apt_name}</strong></td>
-      <td>${r.district}</td>
-      <td class="mdd-cell ${scoreClass(r.composite_score)}"><strong>${r.composite_score.toFixed(1)}</strong></td>
+      <td><span class="district-tag district-${r.district}">${r.district}</span></td>
+      <td class="score-cell ${scoreClass(r.composite_score)}">${r.composite_score.toFixed(1)}</td>
+      <td class="${mddClass(r.mdd_pct)}">${r.mdd_pct.toFixed(1)}%</td>
       <td>${r.consistency_score.toFixed(1)}</td>
       <td>${r.resilience_score.toFixed(1)}</td>
       <td>${r.upside_score.toFixed(1)}</td>
       <td>${r.subway_score.toFixed(1)}</td>
       <td>${r.infra_score.toFixed(1)}</td>
       <td>${r.school_score.toFixed(1)}</td>
-      <td class="${r.mdd_pct >= -10 ? 'good' : r.mdd_pct >= -20 ? 'mid' : 'bad'}">${r.mdd_pct.toFixed(1)}%</td>
-      <td>+${r.upside_pct.toFixed(0)}%</td>
-      <td>${r.subway_min}분</td>
-      <td>${r.active_months}개월</td>
     </tr>
   `).join('');
-
-  // 레이더 차트 (상위 5개 단지)
-  const top5 = items.slice(0, 5);
-  const axes = ['거래지속성','가격방어력','상승참여도','교통','인프라','학군'];
-  const scoreKeys = ['consistency_score','resilience_score','upside_score','subway_score','infra_score','school_score'];
-
-  const radarTraces = top5.map((r, i) => ({
-    type: 'scatterpolar',
-    name: r.apt_name,
-    r: [...scoreKeys.map(k => r[k]), r[scoreKeys[0]]],
-    theta: [...axes, axes[0]],
-    fill: 'toself',
-    fillcolor: COLORS[i % COLORS.length] + '33',
-    line: { color: COLORS[i % COLORS.length], width: 2 },
-  }));
-
-  Plotly.newPlot('chartRadar', radarTraces, {
-    paper_bgcolor: '#1e293b', plot_bgcolor: '#1e293b',
-    font: { color: '#e2e8f0' },
-    polar: {
-      bgcolor: '#1e293b',
-      radialaxis: { range: [0, 100], gridcolor: '#334155', tickfont: { color: '#94a3b8' } },
-      angularaxis: { gridcolor: '#334155', tickfont: { size: 13 } },
-    },
-    legend: { orientation: 'h', y: -0.15, font: { size: 11 } },
-    title: { text: '상위 5개 단지 레이더 차트', font: { color: '#e2e8f0', size: 14 }, y: 0.97 },
-    margin: { t: 60, b: 80 },
-    height: 500,
-  }, { responsive: true });
 }
 
-/* ── ⑦ 공통 특성 ─────────────────────────────────────── */
-async function renderTraits() {
-  const d = await fetchJSON('/api/traits');
+/* ── ④ STEP 4: 구별 TOP 단지 ───────────────────────────── */
+async function renderDistrict() {
+  const d = await fetchJSON('/api/composite_score');
+  const items = d.ranking;
 
-  const cards = [];
+  const districts = ['마포구', '용산구', '성동구'];
+  const districtColors = { '마포구': '#38bdf8', '용산구': '#34d399', '성동구': '#818cf8' };
+  const districtEmoji  = { '마포구': '🏙️', '용산구': '🌿', '성동구': '🌊' };
 
-  if (d['평균_준공연도']) {
-    const { top, all } = d['평균_준공연도'];
-    const pct = Math.min(100, ((top - 1990) / (2025 - 1990)) * 100);
-    cards.push({ label: '📅 평균 준공연도', top: `${top}년`, all: `${all}년`, pct });
-  }
-  if (d['평균_MDD']) {
-    const { top, all } = d['평균_MDD'];
-    const pct = Math.min(100, Math.abs(top) / Math.abs(all) * 100);
-    cards.push({ label: '📉 평균 MDD', top: `${top}%`, all: `${all}%`, pct: 100 - pct, note: '낮을수록 방어력 ↑' });
-  }
-  if (d['주력_면적']) {
-    const { top, all } = d['주력_면적'];
-    cards.push({ label: '📐 대표 전용면적', top: `${top}㎡`, all: `${all}㎡`, pct: 70 });
-  }
-  if (d['구별_분포']) {
-    const { top } = d['구별_분포'];
-    const topStr = Object.entries(top).map(([k,v]) => `${k} ${v}개`).join(', ');
-    cards.push({ label: '🗺️ 주력 지역 (상위)', top: topStr, all: '─', pct: 80 });
-  }
+  const html = districts.map(dist => {
+    const group = items
+      .filter(r => r.district === dist)
+      .sort((a, b) => b.composite_score - a.composite_score);
 
-  document.getElementById('traitsGrid').innerHTML = cards.map(c => `
-    <div class="trait-card">
-      <div class="trait-label">${c.label}</div>
-      <div class="trait-compare">
-        <div class="trait-row"><span class="who">방어 상위 10%</span><span class="val-top">${c.top}</span></div>
-        <div class="trait-row"><span class="who">전체 평균</span><span class="val-all">${c.all}</span></div>
-        ${c.note ? `<div style="font-size:.72rem;color:#94a3b8">${c.note}</div>` : ''}
-        <div class="trait-bar-wrap"><div class="trait-bar" style="width:${c.pct}%"></div></div>
+    if (!group.length) return '';
+    const top = group[0];
+    const rest = group.slice(1, 4);
+    const color = districtColors[dist];
+
+    const bars = [
+      { label: '거래지속성', val: top.consistency_score },
+      { label: '가격방어력', val: top.resilience_score },
+      { label: '상승참여도', val: top.upside_score },
+      { label: '교통',       val: top.subway_score },
+    ];
+
+    return `
+      <div class="district-card" style="--dc:${color}">
+        <div class="dc-header">
+          <span class="dc-emoji">${districtEmoji[dist]}</span>
+          <span class="dc-name">${dist}</span>
+        </div>
+        <div class="dc-top">
+          <div class="dc-rank">1위</div>
+          <div class="dc-apt">${top.apt_name}</div>
+          <div class="dc-score">${top.composite_score.toFixed(1)}<span>점</span></div>
+        </div>
+        <div class="dc-bars">
+          ${bars.map(b => `
+            <div class="dc-bar-row">
+              <span class="dc-bar-label">${b.label}</span>
+              <div class="dc-bar-wrap"><div class="dc-bar-fill" style="width:${b.val}%;background:${color}"></div></div>
+              <span class="dc-bar-val">${b.val.toFixed(0)}</span>
+            </div>
+          `).join('')}
+        </div>
+        ${rest.length ? `
+          <div class="dc-rest">
+            ${rest.map((r, i) => `
+              <div class="dc-rest-row">
+                <span class="dc-rest-rank">${i + 2}위</span>
+                <span class="dc-rest-name">${r.apt_name}</span>
+                <span class="dc-rest-score">${r.composite_score.toFixed(1)}점</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('districtGrid').innerHTML = html;
+}
+
+/* ── ⑤ STEP 5: 공통점 분석 ─────────────────────────────── */
+async function renderInsight() {
+  const [comp, traits] = await Promise.all([
+    fetchJSON('/api/composite_score'),
+    fetchJSON('/api/traits'),
+  ]);
+
+  const items = comp.ranking;
+  const top3  = items.slice(0, 3);
+  const all   = items;
+
+  // 공통점 도출
+  const avgSubwayTop = top3.reduce((s, r) => s + r.subway_min, 0) / top3.length;
+  const avgSubwayAll = all.reduce((s, r) => s + r.subway_min, 0) / all.length;
+  const avgMddTop    = top3.reduce((s, r) => s + r.mdd_pct, 0) / top3.length;
+  const avgMddAll    = all.reduce((s, r) => s + r.mdd_pct, 0) / all.length;
+  const avgMonthsTop = top3.reduce((s, r) => s + r.active_months, 0) / top3.length;
+  const avgMonthsAll = all.reduce((s, r) => s + r.active_months, 0) / all.length;
+  const avgUpsideTop = top3.reduce((s, r) => s + r.upside_pct, 0) / top3.length;
+  const avgUpsideAll = all.reduce((s, r) => s + r.upside_pct, 0) / all.length;
+
+  const topYears = traits['평균_준공연도'] ? traits['평균_준공연도']['top'] : null;
+  const allYears = traits['평균_준공연도'] ? traits['평균_준공연도']['all'] : null;
+
+  const insights = [
+    {
+      icon: '🚇',
+      title: '역세권 집중',
+      highlight: `평균 ${avgSubwayTop.toFixed(0)}분`,
+      sub: `전체 평균 ${avgSubwayAll.toFixed(0)}분 대비`,
+      desc: `상위 3개 단지 모두 지하철역 도보 ${avgSubwayTop.toFixed(0)}분 이내에 위치합니다. 교통 접근성이 실수요의 핵심 지지선 역할을 합니다.`,
+      good: avgSubwayTop < avgSubwayAll,
+    },
+    {
+      icon: '🛡️',
+      title: '하락폭이 작다',
+      highlight: `MDD ${avgMddTop.toFixed(1)}%`,
+      sub: `전체 평균 ${avgMddAll.toFixed(1)}%`,
+      desc: `상위 단지의 평균 최대낙폭은 ${avgMddTop.toFixed(1)}%로, 전체 평균(${avgMddAll.toFixed(1)}%)보다 하락폭이 ${(avgMddAll - avgMddTop).toFixed(1)}%p 낮습니다.`,
+      good: avgMddTop > avgMddAll,
+    },
+    {
+      icon: '🔄',
+      title: '꾸준한 거래량',
+      highlight: `${avgMonthsTop.toFixed(0)}개월`,
+      sub: `전체 평균 ${avgMonthsAll.toFixed(0)}개월`,
+      desc: `분석 기간(약 60개월) 중 상위 단지는 평균 ${avgMonthsTop.toFixed(0)}개월 동안 거래가 있었습니다. 거래가 끊기지 않는 단지는 가격 왜곡이 적습니다.`,
+      good: avgMonthsTop > avgMonthsAll,
+    },
+    {
+      icon: '📈',
+      title: '상승장에도 참여',
+      highlight: `+${avgUpsideTop.toFixed(0)}%`,
+      sub: `전체 평균 +${avgUpsideAll.toFixed(0)}%`,
+      desc: `상위 단지의 2021년 상승률은 평균 +${avgUpsideTop.toFixed(0)}%로, 하락도 덜 하고 상승도 충분히 참여한 우량 단지입니다.`,
+      good: avgUpsideTop >= avgUpsideAll,
+    },
+    ...(topYears && allYears ? [{
+      icon: '🏗️',
+      title: '신축 선호',
+      highlight: `평균 ${Math.round(topYears)}년식`,
+      sub: `전체 평균 ${Math.round(allYears)}년식`,
+      desc: `상위 단지의 평균 준공연도는 ${Math.round(topYears)}년으로, 전체 평균(${Math.round(allYears)}년)보다 최신입니다. 신축일수록 커뮤니티·품질 프리미엄이 붙어 하방이 견고합니다.`,
+      good: topYears > allYears,
+    }] : []),
+  ];
+
+  document.getElementById('insightGrid').innerHTML = insights.map(ins => `
+    <div class="insight-card">
+      <div class="insight-icon">${ins.icon}</div>
+      <div class="insight-body">
+        <div class="insight-title">${ins.title}</div>
+        <div class="insight-numbers">
+          <span class="insight-highlight ${ins.good ? 'good' : 'bad'}">${ins.highlight}</span>
+          <span class="insight-sub">${ins.sub}</span>
+        </div>
+        <div class="insight-desc">${ins.desc}</div>
       </div>
     </div>
   `).join('');
@@ -343,12 +270,11 @@ async function renderTraits() {
 
 /* ── 진입점 ──────────────────────────────────────────── */
 (async () => {
+  renderScoring();
   await Promise.all([
-    renderQuality(),
-    renderPipeline(),
-    renderTimeseries(),
+    renderFilter(),
     renderRanking(),
-    renderComposite(),
-    renderTraits(),
+    renderDistrict(),
+    renderInsight(),
   ]);
 })();

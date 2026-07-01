@@ -9,50 +9,41 @@
 </head>
 <body>
 
-<!-- ── 헤더 ────────────────────────────────────────────── -->
+<!-- ── 헤더 ──────────────────────────────────────────── -->
 <header class="hero">
   <div class="hero-inner">
-    <div class="hero-badge">부동산 퀀트 분석</div>
+    <div class="hero-badge">부동산 퀀트 분석 · 마포 / 용산 / 성동</div>
     <h1>서울 아파트<br><span class="accent">하락장 방어력</span> 분석</h1>
     <p class="hero-sub">
       2022~2023년 폭락장에서도 가격을 지킨 아파트는 어디일까?<br>
-      국토교통부 실거래가 데이터 기반 · 마포 / 용산 / 성동구
+      국토교통부 실거래가 데이터 기반으로 객관적으로 분석합니다.
     </p>
-    <div class="hero-meta" id="heroMeta">데이터 로딩 중…</div>
+    <div class="hero-stats">
+      <div class="hero-stat"><span class="hero-stat-val" id="statRaw">—</span><span class="hero-stat-label">원본 거래</span></div>
+      <div class="hero-stat-div"></div>
+      <div class="hero-stat"><span class="hero-stat-val" id="statClean">—</span><span class="hero-stat-label">정제 거래</span></div>
+      <div class="hero-stat-div"></div>
+      <div class="hero-stat"><span class="hero-stat-val" id="statApts">—</span><span class="hero-stat-label">분석 단지</span></div>
+      <div class="hero-stat-div"></div>
+      <div class="hero-stat"><span class="hero-stat-val" id="statPeriod">—</span><span class="hero-stat-label">수집 기간</span></div>
+    </div>
   </div>
 </header>
 
-<!-- ── ① 신뢰도 배지 ────────────────────────────────────── -->
-<section class="section" id="secQuality">
+<!-- ── ① 데이터 소팅 방법 ──────────────────────────── -->
+<section class="section" id="secFilter">
   <div class="section-inner">
-    <h2 class="section-title">① 이 분석, 믿을 수 있나요?</h2>
+    <div class="section-label">STEP 1</div>
+    <h2 class="section-title">데이터를 어떻게 걸렀나요?</h2>
     <p class="section-desc">
-      분석에 사용된 데이터 출처와 품질 관리 방법을 투명하게 공개합니다.
+      국토교통부 실거래가 원본에서 <strong>신뢰할 수 없는 거래를 제거</strong>한 뒤 분석에 사용했습니다.
+      아래 벌점 규칙에서 합계 5점 이상이면 해당 거래는 제외됩니다.
     </p>
-    <div class="badge-grid" id="qualityBadges">
-      <div class="skeleton"></div><div class="skeleton"></div>
-      <div class="skeleton"></div><div class="skeleton"></div>
+    <div class="pipeline-row" id="pipelineRow">
+      <div class="skeleton" style="height:90px;flex:1"></div>
+      <div class="skeleton" style="height:90px;flex:1"></div>
+      <div class="skeleton" style="height:90px;flex:1"></div>
     </div>
-  </div>
-</section>
-
-<!-- ── ② 데이터 파이프라인 ──────────────────────────────── -->
-<section class="section section-alt" id="secPipeline">
-  <div class="section-inner">
-    <h2 class="section-title">② 데이터는 어떻게 처리됐나요?</h2>
-    <p class="section-desc">
-      원본 데이터에서 분석 가능한 신뢰 데이터까지, 단계별 필터링 과정입니다.
-    </p>
-
-    <div class="pipeline-flow" id="pipelineFlow">
-      <div class="skeleton" style="height:120px"></div>
-    </div>
-
-    <h3 class="sub-title" style="margin-top:2.5rem">벌점 시스템 규칙</h3>
-    <p class="section-desc">
-      아래 4가지 규칙으로 <strong>의심 거래에 벌점</strong>을 부여합니다.
-      합계 <strong>5점 이상</strong>이면 해당 거래를 분석에서 제외합니다.
-    </p>
     <div class="penalty-grid" id="penaltyGrid">
       <div class="skeleton"></div><div class="skeleton"></div>
       <div class="skeleton"></div><div class="skeleton"></div>
@@ -60,77 +51,48 @@
   </div>
 </section>
 
-<!-- ── ③ MDD란 무엇인가 ──────────────────────────────────── -->
-<section class="section" id="secMddExplain">
+<!-- ── ② 점수 산출 방식 ──────────────────────────────── -->
+<section class="section section-alt" id="secScoring">
   <div class="section-inner">
-    <h2 class="section-title">③ MDD(최대낙폭)란 무엇인가요?</h2>
+    <div class="section-label">STEP 2</div>
+    <h2 class="section-title">점수를 어떻게 계산했나요?</h2>
     <p class="section-desc">
-      MDD(Maximum DrawDown)는 <strong>최고점 대비 최저점의 하락폭</strong>입니다.
-      예를 들어 10억이던 아파트가 7억까지 떨어졌다면 MDD = <strong>–30%</strong>입니다.
-      MDD가 <span class="tag-good">0%에 가까울수록</span> 하락장에서 가격을 잘 지킨 단지입니다.
+      단순히 가격 하락폭(MDD)만 보지 않고 <strong>6가지 축</strong>을 종합해 점수를 산출했습니다.
+      꾸준히 거래되고, 하락장을 버티며, 상승장에도 참여하는 단지가 높은 점수를 받습니다.
     </p>
-
-    <div class="mdd-explainer">
-      <div class="mdd-formula">
-        <div class="formula-box">
-          <span class="formula-label">MDD 공식</span>
-          <div class="formula-body">
-            MDD (%) = <span class="fraction"><span class="num">최저점 가격 − 최고점 가격</span><span class="den">최고점 가격</span></span> × 100
-          </div>
+    <div class="score-axes" id="scoreAxes"></div>
+    <div class="mdd-box">
+      <div class="mdd-box-title">MDD(최대낙폭)란?</div>
+      <div class="mdd-box-body">
+        <div class="mdd-formula-inline">
+          MDD(%) = <span class="frac"><span class="fn">최저점 − 최고점</span><span class="fd">최고점</span></span> × 100
         </div>
-      </div>
-
-      <div class="mdd-steps">
-        <div class="step">
-          <div class="step-num">1</div>
-          <div class="step-text"><strong>최고점 탐지</strong><br>2021년 1월~12월 구간에서 단지별 월별 중앙가가 가장 높은 시점을 찾습니다.</div>
-        </div>
-        <div class="step">
-          <div class="step-num">2</div>
-          <div class="step-text"><strong>최저점 탐지</strong><br>2022년 7월~2023년 6월 구간(최고점 이후)에서 가장 낮은 시점을 찾습니다.</div>
-        </div>
-        <div class="step">
-          <div class="step-num">3</div>
-          <div class="step-text"><strong>노이즈 제거</strong><br>월별 중앙가에 3개월 이동 중앙값 스무딩을 적용해 일회성 급등락을 완화합니다.</div>
-        </div>
-        <div class="step">
-          <div class="step-num">4</div>
-          <div class="step-text"><strong>MDD 계산</strong><br>(최저가 − 최고가) ÷ 최고가 × 100. 음수가 클수록 많이 하락한 것입니다.</div>
-        </div>
+        <p>10억짜리 아파트가 7억까지 떨어지면 MDD = <strong>–30%</strong>. 0에 가까울수록 방어력이 뛰어납니다.
+        고점은 <strong>2021년</strong>, 저점은 <strong>2022~2023년</strong> 구간에서 탐지하며,
+        3개월 이동 중앙값으로 스무딩해 일회성 노이즈를 제거합니다.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── ④ 가격 시계열 ─────────────────────────────────────── -->
-<section class="section section-alt" id="secTimeseries">
-  <div class="section-inner">
-    <h2 class="section-title">④ 단지별 가격 흐름</h2>
-    <p class="section-desc">
-      월별 실거래 중앙가 추이입니다.
-      <span class="tag-peak">▲ 최고점</span>과 <span class="tag-trough">▼ 최저점</span>이 자동으로 표시됩니다.
-      범례를 클릭하면 단지를 개별 켜고 끌 수 있습니다.
-    </p>
-    <div id="chartTimeseries" class="chart-container"></div>
-  </div>
-</section>
-
-<!-- ── ⑤ MDD 랭킹 ──────────────────────────────────────── -->
+<!-- ── ③ 전체 종합 랭킹 ──────────────────────────────── -->
 <section class="section" id="secRanking">
   <div class="section-inner">
-    <h2 class="section-title">⑤ 방어력 랭킹</h2>
+    <div class="section-label">STEP 3</div>
+    <h2 class="section-title">종합 랭킹</h2>
     <p class="section-desc">
-      MDD가 <span class="tag-good">0%에 가까울수록</span> 하락장에서 잘 버텼습니다.
-      <span class="tag-star">★ 상위 10%</span> 단지는 황금색으로 강조됩니다.
+      6가지 축을 가중 합산한 <strong>종합 입지 점수</strong> 기준 순위입니다.
+      점수가 높을수록 하락장 방어력 · 거래 활성도 · 입지가 모두 우수한 단지입니다.
     </p>
-    <div id="chartRanking" class="chart-container"></div>
-    <div class="ranking-table-wrap">
+    <div id="chartRanking" class="chart-container" style="min-height:380px"></div>
+    <div class="ranking-table-wrap" style="margin-top:1.5rem">
       <table class="ranking-table" id="rankingTable">
         <thead>
           <tr>
             <th>순위</th><th>단지명</th><th>구</th>
-            <th>MDD</th><th>최고점</th><th>최고가</th>
-            <th>최저점</th><th>최저가</th><th>준공연도</th>
+            <th>종합점수</th><th>MDD</th>
+            <th>거래지속성</th><th>가격방어력</th><th>상승참여도</th>
+            <th>교통</th><th>인프라</th><th>학군</th>
           </tr>
         </thead>
         <tbody id="rankingBody"></tbody>
@@ -139,49 +101,40 @@
   </div>
 </section>
 
-<!-- ── ⑥ 종합 입지 점수 ─────────────────────────────────── -->
-<section class="section section-alt" id="secComposite">
+<!-- ── ④ 구별 TOP 단지 ────────────────────────────────── -->
+<section class="section section-alt" id="secDistrict">
   <div class="section-inner">
-    <h2 class="section-title">⑥ 종합 입지 점수 랭킹</h2>
+    <div class="section-label">STEP 4</div>
+    <h2 class="section-title">구별 추천 단지</h2>
     <p class="section-desc">
-      가격 방어력만이 아닌 <strong>거래 지속성 · 상승 참여도 · 교통 · 인프라 · 학군</strong>을
-      종합해 점수화했습니다. 시장 상황과 무관하게 꾸준히 거래되고 잘 오르는 단지를 찾습니다.
+      마포·용산·성동구 각각에서 종합 점수 기준 상위 단지를 뽑았습니다.
     </p>
-    <div class="weight-badges" id="weightBadges"></div>
-    <div id="chartComposite" class="chart-container" style="height:420px"></div>
-    <div class="ranking-table-wrap" style="margin-top:2rem">
-      <table class="ranking-table" id="compositeTable">
-        <thead>
-          <tr>
-            <th>순위</th><th>단지명</th><th>구</th>
-            <th>종합점수</th>
-            <th>거래지속성</th><th>가격방어력</th><th>상승참여도</th>
-            <th>교통</th><th>인프라</th><th>학군</th>
-            <th>MDD</th><th>상승률</th><th>지하철(분)</th><th>거래월수</th>
-          </tr>
-        </thead>
-        <tbody id="compositeBody"></tbody>
-      </table>
-    </div>
-    <div id="chartRadar" class="chart-container" style="height:500px;margin-top:2rem"></div>
-  </div>
-</section>
-
-<!-- ── ⑦ 공통 특성 ──────────────────────────────────────── -->
-<section class="section" id="secTraits">
-  <div class="section-inner">
-    <h2 class="section-title">⑦ 방어력 상위 단지의 공통점</h2>
-    <p class="section-desc">
-      하락장을 잘 버텐 상위 10% 단지와 전체 단지를 비교했습니다.
-    </p>
-    <div class="traits-grid" id="traitsGrid">
-      <div class="skeleton"></div><div class="skeleton"></div>
-      <div class="skeleton"></div><div class="skeleton"></div>
+    <div class="district-grid" id="districtGrid">
+      <div class="skeleton" style="height:320px"></div>
+      <div class="skeleton" style="height:320px"></div>
+      <div class="skeleton" style="height:320px"></div>
     </div>
   </div>
 </section>
 
-<!-- ── 푸터 ────────────────────────────────────────────── -->
+<!-- ── ⑤ 공통점 분석 ─────────────────────────────────── -->
+<section class="section" id="secInsight">
+  <div class="section-inner">
+    <div class="section-label">STEP 5</div>
+    <h2 class="section-title">상위 단지의 공통점</h2>
+    <p class="section-desc">
+      종합 점수 상위 단지들은 어떤 특성을 공유하고 있을까요?
+    </p>
+    <div class="insight-grid" id="insightGrid">
+      <div class="skeleton" style="height:120px"></div>
+      <div class="skeleton" style="height:120px"></div>
+      <div class="skeleton" style="height:120px"></div>
+      <div class="skeleton" style="height:120px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 푸터 ──────────────────────────────────────────── -->
 <footer class="footer">
   <p>데이터 출처: 국토교통부 실거래가 공개시스템 (공공데이터포털) · 분석 대상: 서울 마포·용산·성동구 500세대 이상 아파트</p>
   <p style="margin-top:.4rem;color:#6b7280;font-size:.8rem">
