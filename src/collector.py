@@ -51,17 +51,15 @@ def _checkpoint_path(district_code: str, ym: str) -> Path:
 
 def _fetch_one_page(api_key: str, district_code: str, ym: str, page: int) -> dict:
     """API 단일 페이지 호출 (재시도 포함)"""
-    params = {
-        "serviceKey": api_key,
-        "LAWD_CD":    district_code,
-        "DEAL_YMD":   ym,
-        "pageNo":     page,
-        "numOfRows":  config.MAX_PAGE_SIZE,
-        "resultType": "json",
-    }
+    # serviceKey는 URL에 직접 삽입 — requests params로 넘기면 이중 인코딩됨
+    url = (
+        f"{API_URL}?serviceKey={api_key}"
+        f"&LAWD_CD={district_code}&DEAL_YMD={ym}"
+        f"&pageNo={page}&numOfRows={config.MAX_PAGE_SIZE}&resultType=json"
+    )
     for attempt in range(config.API_RETRY_COUNT):
         try:
-            resp = requests.get(API_URL, params=params, timeout=30)
+            resp = requests.get(url, timeout=30)
             resp.raise_for_status()
             return resp.json()
         except Exception as e:
