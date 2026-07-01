@@ -1,0 +1,1 @@
+{"total_raw": 33422, "total_clean": 6686, "penalty_removed": 3, "filter_rate_pct": 80.0, "data_source": "국토교통부 실거래가 공개시스템 (공공데이터포털)", "collection_period": "2020년 1월 ~ 2025년 12월", "target_districts": ["마포구", "용산구", "성동구"], "min_households": 500, "smoothing": "3개월 이동 중앙값", "outlier_method": "z-score > 3.0 제거"}
