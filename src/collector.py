@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Optional
 
 import requests
+import xml.etree.ElementTree as ET
 import pandas as pd
 from dotenv import load_dotenv
 from tqdm import tqdm
@@ -49,22 +50,47 @@ def _checkpoint_path(district_code: str, ym: str) -> Path:
     return RAW_DIR / f"{district_code}_{ym}.parquet"
 
 
+def _xml_response_to_dict(content: bytes) -> dict:
+    """XML 응답을 _parse_items가 기대하는 dict 구조로 변환"""
+    root = ET.fromstring(content)
+    total_count = 0
+    item_list = []
+
+    body = root.find("body")
+    if body is not None:
+        tc = body.find("totalCount")
+        if tc is not None and tc.text:
+            total_count = int(tc.text)
+        items_el = body.find("items")
+        if items_el is not None:
+            for item_el in items_el.findall("item"):
+                item_dict = {child.tag: (child.text or "").strip() for child in item_el}
+                item_list.append(item_dict)
+
+    return {
+        "response": {
+            "body": {
+                "totalCount": total_count,
+                "items": {"item": item_list} if item_list else {},
+            }
+        }
+    }
+
+
 def _fetch_one_page(api_key: str, district_code: str, ym: str, page: int) -> dict:
     """API 단일 페이지 호출 (재시도 포함)"""
     # serviceKey는 URL에 직접 삽입 — requests params로 넘기면 이중 인코딩됨
+    # API가 XML로 응답하므로 resultType 파라미터 생략 후 XML 파싱
     url = (
         f"{API_URL}?serviceKey={api_key}"
         f"&LAWD_CD={district_code}&DEAL_YMD={ym}"
-        f"&pageNo={page}&numOfRows={config.MAX_PAGE_SIZE}&resultType=json"
+        f"&pageNo={page}&numOfRows={config.MAX_PAGE_SIZE}"
     )
     for attempt in range(config.API_RETRY_COUNT):
         try:
             resp = requests.get(url, timeout=30)
-            # 진단용: 첫 시도에서 raw 응답 로깅
-            if attempt == 0:
-                log.info(f"[진단] HTTP {resp.status_code} | Content-Type: {resp.headers.get('Content-Type','?')} | 응답 길이: {len(resp.content)}bytes | 앞 200자: {resp.text[:200]!r}")
             resp.raise_for_status()
-            return resp.json()
+            return _xml_response_to_dict(resp.content)
         except Exception as e:
             wait = config.API_RETRY_BACKOFF ** attempt
             log.warning(f"재시도 {attempt+1}/{config.API_RETRY_COUNT} ({wait:.0f}s 대기): {e}")
