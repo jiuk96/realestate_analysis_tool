@@ -73,14 +73,6 @@ score_df = score_df.rename(columns={'district_name': 'district'})
 # mdd 컬럼 추가 (dashboard.js에서 a.mdd 참조)
 if 'mdd_pct' in score_df.columns and 'mdd' not in score_df.columns:
     score_df['mdd'] = score_df['mdd_pct']
-# scorer 출력 컬럼 → dashboard 기대 컬럼 매핑
-col_map = {
-    'consistency_score': 'continuity_score',
-    'resilience_score': 'mdd_score',
-    'upside_score': 'recovery_score',
-    'subway_score': 'transport_score',
-}
-score_df = score_df.rename(columns=col_map)
 print(f'  상위 10:')
 print(score_df[['apt_name', 'district', 'composite_score']].head(10).to_string(index=False))
 
@@ -123,7 +115,7 @@ mdd_out['total_trades'] = mdd_out['apt_name'].map(df.groupby('apt_name').size())
 save('mdd_ranking.json', {'ranking': mdd_out.sort_values('mdd', ascending=False).to_dict('records')})
 
 # composite_score.json
-weights = {'거래지속성': 0.30, '가격방어력': 0.25, '상승참여도': 0.20, '교통': 0.12, '인프라': 0.08, '학군': 0.05}
+weights = {'가격방어력': 0.25, '거래유동성': 0.20, '상승참여도': 0.15, '회복모멘텀': 0.15, '입지프리미엄': 0.15, '규모·연식': 0.10}
 save('composite_score.json', {'ranking': score_df.to_dict('records'), 'weights': weights})
 
 # timeseries.json

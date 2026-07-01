@@ -164,24 +164,24 @@ function highlightDistrict(name) {
 /* ── ② 점수 산출 방식 ───────────────────────────────────── */
 function renderScoring() {
   const axes = [
-    { key: '거래지속성', weight: 30, color: '#38bdf8',
-      desc: '2020~2026년 전 기간에 걸쳐 꾸준히 거래가 이루어졌는지 측정합니다. 거래가 끊기지 않는 단지는 수요가 안정적이라는 신호입니다.',
-      metric: '활성 월수 / 전체 기간', example: '72개월 중 60개월 거래 → 높은 점수' },
     { key: '가격방어력', weight: 25, color: '#34d399',
-      desc: '2022~2023년 하락장에서 최고점 대비 얼마나 덜 떨어졌는지(MDD)를 측정합니다. MDD가 0에 가까울수록 우량 단지입니다.',
-      metric: 'MDD(%) = (최저-최고)/최고 × 100', example: 'MDD -15% vs -35% → 방어력 차이 큼' },
-    { key: '상승참여도', weight: 20, color: '#fbbf24',
-      desc: '2021년 상승장에서 시장 평균 대비 얼마나 많이 올랐는지를 측정합니다. 하락에 강하면서 상승에도 참여해야 진정한 우량 단지입니다.',
-      metric: '단지 상승률 / 구 평균 상승률', example: '구 평균 30% 상승 시 단지 45% → 높은 참여도' },
-    { key: '교통', weight: 12, color: '#a78bfa',
-      desc: '지하철역까지의 접근성을 기준으로 평가합니다. 역세권 단지는 수요가 안정적으로 유지됩니다.',
-      metric: '인근 지하철역 수 / 도보 거리', example: '도보 5분 이내 역세권 → 최고 점수' },
-    { key: '인프라', weight: 8, color: '#fb923c',
-      desc: '대형마트, 병원, 공원 등 생활편의시설의 밀집도를 측정합니다. 인프라가 풍부한 단지는 실거주 수요가 견고합니다.',
-      metric: '반경 1km 내 편의시설 수', example: '이마트+병원+공원 → 높은 인프라 점수' },
-    { key: '학군', weight: 5, color: '#f472b6',
-      desc: '초중고 학군 품질을 평가합니다. 학군은 실거주 가족의 핵심 수요이며 가격 하방을 지지하는 요인입니다.',
-      metric: '인근 학교 학업성취도 지수', example: '학업성취도 상위 20% 학교 인접 → 가점' },
+      desc: '2022~2023년 하락장에서 최고점 대비 얼마나 덜 떨어졌는지(MDD)와, 저점 이후 얼마나 회복했는지를 함께 봅니다. 신고가를 갱신한 단지는 가점을 받습니다.',
+      metric: 'MDD(60%) + 회복률(40%)', example: 'MDD -12% & 전고점 회복 → 최상위 방어력' },
+    { key: '거래유동성', weight: 20, color: '#38bdf8',
+      desc: '전 기간에 걸쳐 거래가 꾸준했는지, 특히 하락장에서도 거래가 유지됐는지 측정합니다. 팔고 싶을 때 팔리는 단지가 진짜 우량 단지입니다.',
+      metric: '거래 공백률 + 하락기 유지율 + 변동계수', example: '하락장에도 매달 거래 체결 → 높은 점수' },
+    { key: '상승참여도', weight: 15, color: '#fbbf24',
+      desc: '2021년 상승장에서 얼마나 올랐는지를 측정합니다. 하락에 강하면서 상승에도 참여해야 진정한 우량 단지입니다.',
+      metric: '(고점가 − 2020년 기저가) / 기저가', example: '기저 대비 +50% 상승 → 높은 참여도' },
+    { key: '회복모멘텀', weight: 15, color: '#a78bfa',
+      desc: '최근 12개월 가격 추세를 측정합니다. 하락 후 다시 오르는 단지와 바닥에 머무는 단지를 구분하는 핵심 지표입니다.',
+      metric: '최근 12개월 가격 추세 (연율화 %)', example: '최근 1년간 연 +8% 추세 → 강한 모멘텀' },
+    { key: '입지프리미엄', weight: 15, color: '#fb923c',
+      desc: '단위면적(m²)당 가격 수준입니다. 교통·학군·인프라 가치는 이미 시장가격에 반영되어 있어, 평단가가 가장 객관적인 입지 지표입니다.',
+      metric: 'm²당 고점 거래가 percentile', example: '평단가 상위 10% → 시장이 인정한 입지' },
+    { key: '규모·연식', weight: 10, color: '#f472b6',
+      desc: '거래 규모(대단지 프리미엄)와 준공연도를 반영합니다. 대단지는 환금성이 높고, 신축은 상품 경쟁력이 있습니다.',
+      metric: '총 거래량(70%) + 준공연도(30%)', example: '1,000+ 거래 대단지 & 2010년대 준공 → 가점' },
   ];
 
   document.getElementById('formulaAxes').innerHTML = axes.map(a => `
@@ -255,12 +255,12 @@ async function renderDistrictRankings() {
 
     const rows = apts.map((a, i) => {
       const axes = [
-        { name: '거래지속성', val: a.continuity_score, w: 30 },
-        { name: '가격방어', val: a.mdd_score, w: 25 },
-        { name: '상승참여', val: a.recovery_score, w: 20 },
-        { name: '교통', val: a.transport_score, w: 12 },
-        { name: '인프라', val: a.infra_score, w: 8 },
-        { name: '학군', val: a.school_score, w: 5 },
+        { name: '가격방어', val: a.defense_score, w: 25 },
+        { name: '거래유동성', val: a.liquidity_score, w: 20 },
+        { name: '상승참여', val: a.upside_score, w: 15 },
+        { name: '회복모멘텀', val: a.momentum_score, w: 15 },
+        { name: '입지프리미엄', val: a.premium_score, w: 15 },
+        { name: '규모·연식', val: a.scale_score, w: 10 },
       ].filter(x => x.val != null);
 
       const best = axes.reduce((a,b) => (a.val||0) > (b.val||0) ? a : b, {});
@@ -312,12 +312,12 @@ async function renderTop1() {
   const color = distInfo.color || '#38bdf8';
 
   const axes = [
-    { name: '거래지속성', val: top.continuity_score, w: 30, color: '#38bdf8' },
-    { name: '가격방어력', val: top.mdd_score, w: 25, color: '#34d399' },
-    { name: '상승참여도', val: top.recovery_score, w: 20, color: '#fbbf24' },
-    { name: '교통', val: top.transport_score, w: 12, color: '#a78bfa' },
-    { name: '인프라', val: top.infra_score, w: 8, color: '#fb923c' },
-    { name: '학군', val: top.school_score, w: 5, color: '#f472b6' },
+    { name: '가격방어력', val: top.defense_score, w: 25, color: '#34d399' },
+    { name: '거래유동성', val: top.liquidity_score, w: 20, color: '#38bdf8' },
+    { name: '상승참여도', val: top.upside_score, w: 15, color: '#fbbf24' },
+    { name: '회복모멘텀', val: top.momentum_score, w: 15, color: '#a78bfa' },
+    { name: '입지프리미엄', val: top.premium_score, w: 15, color: '#fb923c' },
+    { name: '규모·연식', val: top.scale_score, w: 10, color: '#f472b6' },
   ];
 
   // 레이더 차트 (Plotly)
@@ -358,10 +358,11 @@ async function renderTop1() {
     <div class="top1-insight">
       <div class="insight-title">왜 1위인가요?</div>
       <ul class="insight-list">
-        ${top.mdd_score >= 70 ? '<li>하락장에서 가격 방어력이 매우 뛰어납니다</li>' : ''}
-        ${top.continuity_score >= 70 ? '<li>6년간 꾸준한 거래가 이어진 수요 안정 단지입니다</li>' : ''}
-        ${top.recovery_score >= 70 ? '<li>상승장에서도 시장 평균을 웃도는 상승률을 기록했습니다</li>' : ''}
-        ${top.transport_score >= 70 ? '<li>역세권 입지로 교통 접근성이 우수합니다</li>' : ''}
+        ${top.defense_score >= 70 ? '<li>하락장에서 가격 방어력이 매우 뛰어나고 회복도 빠릅니다</li>' : ''}
+        ${top.liquidity_score >= 70 ? '<li>6년간 꾸준한 거래가 이어진 환금성 높은 단지입니다</li>' : ''}
+        ${top.upside_score >= 70 ? '<li>상승장에서도 시장 평균을 웃도는 상승률을 기록했습니다</li>' : ''}
+        ${top.momentum_score >= 70 ? '<li>최근 12개월 가격 추세가 뚜렷한 상승 흐름입니다</li>' : ''}
+        ${top.premium_score >= 70 ? '<li>단위면적당 가격 상위권 — 시장이 인정한 입지입니다</li>' : ''}
         <li>${top.district} 내 ${comp.ranking.filter(r=>r.district===top.district).length}개 단지 중 종합 1위를 차지했습니다</li>
         <li>6가지 분석 축에서 균형 잡힌 고득점을 기록했습니다</li>
       </ul>
