@@ -469,6 +469,11 @@ const getAsk = a => { const v = localStorage.getItem(askKey(a)); return v ? pars
 let explorerMap = null;
 let explorerMarkers = [];
 let explorerApts = [];
+let explorerVisible = [];
+let explorerFilter = { min: 0, max: 9999 };
+
+const shortName = n => n.length > 8 ? n.slice(0, 7) + '…' : n;
+const eokFmt = v => v == null ? '—' : (v/10000 >= 10 ? (v/10000).toFixed(1) : (v/10000).toFixed(2)).replace(/\.?0+$/,'') + '억';
 
 async function renderExplorer() {
   const data = await fetchJSON('/api/apartments');
@@ -479,7 +484,6 @@ async function renderExplorer() {
     attribution: '© OpenStreetMap contributors', maxZoom: 18
   }).addTo(explorerMap);
 
-  // 가격 칩
   document.querySelectorAll('.price-chip').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.price-chip').forEach(b => b.classList.remove('active'));
@@ -495,26 +499,42 @@ async function renderExplorer() {
     const mx = parseFloat(document.getElementById('priceMax').value) || 9999;
     applyPriceFilter(mn, mx);
   });
+  document.getElementById('explorerSort').addEventListener('change', () => {
+    applyPriceFilter(explorerFilter.min, explorerFilter.max);
+  });
 
   applyPriceFilter(0, 9999);
 }
 
+function sortApts(list) {
+  const mode = document.getElementById('explorerSort').value;
+  const s = [...list];
+  if (mode === 'priceAsc')  s.sort((a,b) => a.latest_price - b.latest_price);
+  else if (mode === 'priceDesc') s.sort((a,b) => b.latest_price - a.latest_price);
+  else if (mode === 'mdd')  s.sort((a,b) => (b.mdd ?? -99) - (a.mdd ?? -99));
+  else s.sort((a,b) => b.composite_score - a.composite_score);
+  return s;
+}
+
 function applyPriceFilter(minEok, maxEok) {
+  explorerFilter = { min: minEok, max: maxEok };
   explorerMarkers.forEach(m => explorerMap.removeLayer(m));
   explorerMarkers = [];
 
-  const visible = explorerApts.filter(a => {
+  explorerVisible = sortApts(explorerApts.filter(a => {
     const p = a.latest_price != null ? a.latest_price / 10000 : null;
     return p != null && p >= minEok && p <= maxEok;
-  });
+  }));
 
-  visible.forEach(a => {
-    const eok = a.latest_price / 10000;
+  explorerVisible.forEach(a => {
     const cls = a.composite_score >= 60 ? 'bubble-hot' : a.composite_score >= 55 ? 'bubble-mid' : 'bubble-cool';
     const icon = L.divIcon({
       className: '',
-      html: `<div class="apt-bubble ${cls}">${eok >= 10 ? eok.toFixed(0) : eok.toFixed(1)}억</div>`,
-      iconSize: [52, 26], iconAnchor: [26, 13],
+      html: `<div class="apt-bubble ${cls}">
+               <span class="apt-bubble-name">${shortName(a.apt_name)}</span>
+               <span class="apt-bubble-price">${eokFmt(a.latest_price)}</span>
+             </div>`,
+      iconSize: [72, 40], iconAnchor: [36, 40],
     });
     const m = L.marker([a.lat, a.lng], { icon });
     m.on('click', () => showAptDetail(a));
@@ -522,8 +542,37 @@ function applyPriceFilter(minEok, maxEok) {
     explorerMarkers.push(m);
   });
 
-  document.getElementById('explorerCount').textContent =
-    `${visible.length}개 단지 (최신 실거래가 기준)`;
+  document.getElementById('explorerCount').textContent = `${explorerVisible.length}개 단지`;
+  showAptList();
+}
+
+function showAptList() {
+  const rows = explorerVisible.map((a, i) => `
+    <div class="ep-list-row" data-idx="${i}">
+      <div class="ep-list-rank">${i+1}</div>
+      <div class="ep-list-main">
+        <div class="ep-list-name">${a.apt_name}</div>
+        <div class="ep-list-sub">${a.district} · ${a.build_year}년 · ${a.area_exclusive}㎡</div>
+      </div>
+      <div class="ep-list-right">
+        <div class="ep-list-price">${eokFmt(a.latest_price)}</div>
+        <div class="ep-list-score">${fmtScore(a.composite_score)}점</div>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('explorerPanel').innerHTML = `
+    <div class="ep-list-head">단지 목록 <span class="ep-list-cnt">${explorerVisible.length}</span></div>
+    <div class="ep-list">${rows || '<div class="explorer-panel-empty">조건에 맞는 단지가 없습니다</div>'}</div>
+  `;
+
+  document.querySelectorAll('.ep-list-row').forEach(el => {
+    el.addEventListener('click', () => {
+      const a = explorerVisible[+el.dataset.idx];
+      explorerMap.setView([a.lat, a.lng], 15, { animate: true });
+      showAptDetail(a);
+    });
+  });
 }
 
 function showAptDetail(a) {
@@ -540,6 +589,7 @@ function showAptDetail(a) {
   const best = [...axes].sort((x,y) => y[1]-x[1]).slice(0,2);
 
   document.getElementById('explorerPanel').innerHTML = `
+    <button class="ep-back" id="epBack">← 목록으로</button>
     <div class="ep-head">
       <div class="ep-name">${a.apt_name}</div>
       <div class="ep-loc">${a.district} · ${a.build_year}년 준공 · 전용 ${a.area_exclusive}㎡ · 종합 ${a.rank}위</div>
@@ -566,14 +616,49 @@ function showAptDetail(a) {
     <a class="ep-naver" href="${naverLandUrl(a)}" target="_blank" rel="noopener">
       네이버부동산에서 실제 매물 보기 ↗
     </a>
+    <div class="ep-trades">
+      <div class="ep-trades-head">
+        📋 실거래 내역 <span class="ep-trades-note">국토부 raw data</span>
+      </div>
+      <div id="epTradesBody" class="ep-trades-body"><div class="skeleton" style="height:80px"></div></div>
+    </div>
   `;
 
+  document.getElementById('epBack').addEventListener('click', showAptList);
   document.getElementById('epAskSave').addEventListener('click', () => {
     const v = document.getElementById('epAskInput').value;
     if (v) localStorage.setItem(askKey(a), v);
     else localStorage.removeItem(askKey(a));
     showAptDetail(a);
   });
+
+  // raw 거래내역 로드
+  fetchJSON(`/api/trades?district=${encodeURIComponent(a.district)}&apt=${encodeURIComponent(a.apt_name)}`)
+    .then(res => {
+      const trades = res.trades || [];
+      if (!trades.length) {
+        document.getElementById('epTradesBody').innerHTML = '<div class="ep-trades-empty">거래 내역이 없습니다</div>';
+        return;
+      }
+      document.getElementById('epTradesBody').innerHTML = `
+        <table class="ep-trades-table">
+          <thead><tr><th>계약일</th><th>가격</th><th>층</th><th>면적</th></tr></thead>
+          <tbody>
+            ${trades.slice(0, 30).map(t => `
+              <tr>
+                <td>${t.ym}${t.day ? '-' + String(t.day).padStart(2,'0') : ''}</td>
+                <td class="ep-tr-price">${eokFmt(t.price)}</td>
+                <td>${t.floor != null ? t.floor + '층' : '—'}</td>
+                <td>${t.area}㎡</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+        ${trades.length > 30 ? `<div class="ep-trades-more">최근 30건 표시 (전체 ${trades.length}건)</div>` : ''}
+      `;
+    })
+    .catch(() => {
+      document.getElementById('epTradesBody').innerHTML = '<div class="ep-trades-empty">로딩 실패</div>';
+    });
 }
 
 /* ── 네비게이션 활성화 ──────────────────────────────────── */

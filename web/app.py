@@ -53,6 +53,16 @@ def api_composite_score():
     return jsonify(_load("composite_score.json"))
 
 
+@app.route("/api/trades")
+def api_trades():
+    """단지별 최근 실거래 내역: /api/trades?district=성동구&apt=행당한진타운"""
+    from flask import request
+    district = request.args.get("district", "")
+    apt = request.args.get("apt", "")
+    trades = _load("trades.json")
+    return jsonify({"trades": trades.get(f"{district}|{apt}", [])})
+
+
 @app.route("/api/apartments")
 def api_apartments():
     """지도 탐색기용: 단지별 좌표 + 가격 + 점수 통합"""

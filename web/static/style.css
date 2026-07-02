@@ -588,3 +588,74 @@ body {
   .explorer-panel { max-height: none; }
   .explorer-count { margin-left: 0; width: 100%; }
 }
+
+/* ── 호갱노노 스타일 버블 & 목록 ────────────────────────── */
+.apt-bubble {
+  display: flex; flex-direction: column; align-items: center; gap: 0;
+  padding: .3rem .55rem .28rem; border-radius: 9px; position: relative;
+  min-width: 58px; line-height: 1.25;
+}
+.apt-bubble::after {
+  content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);
+  border: 6px solid transparent; border-bottom: 0;
+}
+.bubble-hot::after  { border-top-color: #f59e0b; }
+.bubble-mid::after  { border-top-color: #38bdf8; }
+.bubble-cool::after { border-top-color: #64748b; }
+.apt-bubble-name { font-size: .62rem; font-weight: 600; opacity: .85; letter-spacing: -.02em; }
+.apt-bubble-price { font-size: .82rem; font-weight: 800; }
+
+.explorer-sort {
+  background: #0f172a; color: #e2e8f0; border: 1px solid #334155;
+  border-radius: 8px; padding: .4rem .6rem; font-size: .85rem; cursor: pointer;
+}
+.ep-back {
+  background: none; border: none; color: var(--accent); font-size: .85rem;
+  cursor: pointer; padding: 0 0 .7rem; font-weight: 600;
+}
+.ep-back:hover { text-decoration: underline; }
+
+.ep-list-head {
+  font-weight: 800; color: #f1f5f9; padding-bottom: .7rem;
+  border-bottom: 1px solid #334155; margin-bottom: .3rem;
+}
+.ep-list-cnt { color: var(--accent); margin-left: .3rem; }
+.ep-list-row {
+  display: flex; align-items: center; gap: .7rem; padding: .65rem .3rem;
+  border-bottom: 1px solid #1e293b; cursor: pointer; border-radius: 8px;
+  transition: background .12s;
+}
+.ep-list-row:hover { background: rgba(56,189,248,.07); }
+.ep-list-rank { width: 1.6rem; text-align: center; color: #64748b; font-weight: 700; font-size: .85rem; }
+.ep-list-main { flex: 1; min-width: 0; }
+.ep-list-name { font-weight: 700; color: #e2e8f0; font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ep-list-sub { color: #64748b; font-size: .74rem; margin-top: .12rem; }
+.ep-list-right { text-align: right; }
+.ep-list-price { font-weight: 800; color: #f1f5f9; font-size: .92rem; font-variant-numeric: tabular-nums; }
+.ep-list-score { color: var(--accent); font-size: .74rem; font-weight: 600; }
+
+/* ── 거래내역 테이블 ────────────────────────────────────── */
+.ep-trades { margin-top: 1rem; }
+.ep-trades-head { font-weight: 700; color: #e2e8f0; font-size: .9rem; margin-bottom: .55rem; }
+.ep-trades-note { font-size: .7rem; color: #64748b; font-weight: 400; margin-left: .3rem; }
+.ep-trades-table { width: 100%; border-collapse: collapse; font-size: .8rem; font-variant-numeric: tabular-nums; }
+.ep-trades-table th {
+  text-align: left; color: #64748b; font-weight: 600; padding: .35rem .4rem;
+  border-bottom: 1px solid #334155; font-size: .72rem;
+}
+.ep-trades-table td { padding: .38rem .4rem; border-bottom: 1px solid #1e293b; color: #cbd5e1; }
+.ep-tr-price { font-weight: 700; color: #f1f5f9; }
+.ep-trades-more { color: #64748b; font-size: .72rem; padding-top: .5rem; text-align: center; }
+.ep-trades-empty { color: #64748b; font-size: .82rem; padding: .8rem 0; }
+
+/* ── 타이포그래피/숫자 가독성 ──────────────────────────── */
+body { font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', 'Noto Sans KR', sans-serif; letter-spacing: -.01em; }
+.hero-stat-val, .epv, .ep-list-price, .apt-rank-score, .top1-score-big, .fsv, .ts-val, .card-score, .top1-ax-val, .age-val, .drb-count {
+  font-variant-numeric: tabular-nums;
+}
+.hero-stat-val { font-size: 1.7rem; font-weight: 800; }
+.hero-stat-label { font-size: .78rem; letter-spacing: .02em; }
+.section-title { letter-spacing: -.03em; }
+.card-desc { line-height: 1.75; }
+.axis-desc { line-height: 1.7; }
+.section-desc { line-height: 1.8; }

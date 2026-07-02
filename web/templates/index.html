@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>서울 아파트 하락장 방어력 분석</title>
 
+  <!-- Pretendard (한글 가독성) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"/>
+
   <!-- Leaflet (지도) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -169,17 +172,19 @@
         <input type="number" id="priceMax" placeholder="최대(억)" min="0" step="0.5">
         <button id="priceApply" class="price-apply">적용</button>
       </div>
+      <select id="explorerSort" class="explorer-sort">
+        <option value="score">종합점수순</option>
+        <option value="priceAsc">가격 낮은순</option>
+        <option value="priceDesc">가격 높은순</option>
+        <option value="mdd">방어력순</option>
+      </select>
       <div class="explorer-count" id="explorerCount"></div>
     </div>
 
-    <!-- 지도 + 상세 패널 -->
+    <!-- 지도 + 목록/상세 패널 -->
     <div class="explorer-layout">
       <div id="explorerMap" class="explorer-map"></div>
-      <div id="explorerPanel" class="explorer-panel">
-        <div class="explorer-panel-empty">
-          🗺️ 지도의 가격 버블을 클릭하면<br>단지 상세 정보가 표시됩니다
-        </div>
-      </div>
+      <div id="explorerPanel" class="explorer-panel"></div>
     </div>
     <p class="explorer-note">
       ※ 가격은 최근 실거래 중앙값(3개월 스무딩) 기준. 단지 위치는 지번 기반이며 일부 오차가 있을 수 있습니다.

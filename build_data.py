@@ -133,6 +133,25 @@ save('timeseries.json', {'apartments': apt_list})
 # traits.json
 save('traits.json', traits if isinstance(traits, dict) else {})
 
+# trades.json — 단지별 최근 실거래 내역 (상세 페이지 raw data 조회용)
+analyzed = set(zip(score_df['district'], score_df['apt_name']))
+tr = df[df.apply(lambda r: (r['district_name'], r['apt_name']) in analyzed, axis=1)].copy()
+tr = tr.sort_values('deal_date', ascending=False)
+trades = {}
+for (dist, apt), grp in tr.groupby(['district_name', 'apt_name'], observed=True):
+    recent = grp.head(60)
+    trades[f'{dist}|{apt}'] = [
+        {
+            'ym': str(r['deal_date']),
+            'day': int(r['deal_day']) if str(r['deal_day']).strip().isdigit() else None,
+            'price': int(r['deal_amount']),
+            'floor': int(r['floor']) if str(r['floor']).strip().lstrip('-').isdigit() else None,
+            'area': round(float(r['area_exclusive']), 2),
+        }
+        for _, r in recent.iterrows()
+    ]
+save('trades.json', trades)
+
 # district_info.json: 가격대·has_data를 실데이터로 갱신
 info_path = OUT / 'district_info.json'
 if info_path.exists():
