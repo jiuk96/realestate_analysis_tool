@@ -123,10 +123,21 @@
     <div class="budget-grid">
       <!-- 입력 -->
       <div class="budget-card">
-        <div class="budget-card-title">1️⃣ 가용자금</div>
-        <div class="budget-field"><label>💼 내 가용자금</label><div class="bf-input"><input type="number" id="myCash" placeholder="2.0" step="0.1" min="0"><span>억</span></div></div>
-        <div class="budget-field"><label>💗 여자친구 가용자금</label><div class="bf-input"><input type="number" id="gfCash" placeholder="1.5" step="0.1" min="0"><span>억</span></div></div>
-        <div class="budget-field"><label>부부(예정) 합산 연소득</label><div class="bf-input"><input type="number" id="coupleIncome" placeholder="9000" step="500" min="0"><span>만원</span></div></div>
+        <div class="budget-card-title">1️⃣ 자금 & 소득</div>
+        <div class="budget-field-row">
+          <div class="budget-field"><label>💼 내 현금</label><div class="bf-input"><input type="number" id="myCash" value="2.0" step="0.1" min="0"><span>억</span></div></div>
+          <div class="budget-field"><label>💗 여친 현금</label><div class="bf-input"><input type="number" id="gfCash" value="1.5" step="0.1" min="0"><span>억</span></div></div>
+        </div>
+        <div class="budget-field-row">
+          <div class="budget-field"><label>💼 내 증여</label><div class="bf-input"><input type="number" id="myGift" value="1.5" step="0.5" min="0"><span>억</span></div></div>
+          <div class="budget-field"><label>💗 여친 증여</label><div class="bf-input"><input type="number" id="gfGift" value="1.5" step="0.5" min="0"><span>억</span></div></div>
+        </div>
+        <div class="budget-field"><label>부부(예정) 합산 연소득</label><div class="bf-input"><input type="number" id="coupleIncome" value="9000" step="500" min="0"><span>만원</span></div></div>
+        <div class="budget-checks">
+          <label class="bc"><input type="checkbox" id="optMarriage" checked> 혼인 증여공제 (+1억)</label>
+          <label class="bc"><input type="checkbox" id="optBirth"> 출산 공제/신생아 특례</label>
+          <label class="bc"><input type="checkbox" id="optFirstHome" checked> 생애최초 (취득세·LTV 우대)</label>
+        </div>
       </div>
 
       <!-- 대출 상품 -->
@@ -147,15 +158,24 @@
 
       <!-- 결과 -->
       <div class="budget-card budget-card-result">
-        <div class="budget-card-title">3️⃣ 결과</div>
-        <button id="budgetCalc" class="price-apply budget-calc-btn">계산하기</button>
-        <div id="budgetOutput" class="budget-output">
-          <div class="explorer-panel-empty">자금·소득·대출 상품을 입력하고<br>계산하기를 눌러주세요</div>
-        </div>
+        <div class="budget-card-title">3️⃣ 최대 매수 가능</div>
+        <div id="budgetOutput" class="budget-output"></div>
+      </div>
+    </div>
+
+    <!-- 자금 구성 차트 + 부대비용 상세 -->
+    <div class="budget-detail-grid">
+      <div class="budget-card">
+        <div class="budget-card-title">💠 자금 구성</div>
+        <div id="budgetChart" style="height:230px"></div>
+      </div>
+      <div class="budget-card">
+        <div class="budget-card-title">🧾 부대비용 & 세금 상세</div>
+        <div id="budgetBreakdown" class="budget-breakdown"></div>
       </div>
     </div>
     <p class="explorer-note">
-      ※ 대출 한도·금리는 2026년 기준 대표값이며 실제 조건은 소득·주택가·규제지역 여부에 따라 달라집니다. 반드시 은행/기금e든든에서 확인하세요.
+      ※ 대출 한도·금리·세율은 2026년 기준 대표값입니다. 실제 조건은 소득·주택가·규제지역·개별 심사에 따라 달라지므로 반드시 은행/기금e든든/세무사에서 확인하세요.
     </p>
   </div>
 </section>
@@ -263,6 +283,6 @@
   </p>
 </footer>
 
-<script src="{{ url_for('static', filename='dashboard.js') }}?v={{ asset_v }}"></script>
+<script type="module" src="{{ url_for('static', filename='dashboard.js') }}?v={{ asset_v }}"></script>
 </body>
 </html>

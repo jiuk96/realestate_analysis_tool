@@ -1,3 +1,7 @@
+import {
+  LOAN_PRODUCTS, analyzeFinance, won2eok, won2man,
+} from './financeCalculator.js';
+
 /* ── 유틸 ──────────────────────────────────────────────── */
 async function fetchJSON(url) {
   const r = await fetch(url);
@@ -544,95 +548,125 @@ function initCoupleTools() {
   Object.keys(commutePoints).forEach(drawCommuteMarker);
 }
 
-/* ── 예산 플래너 (대출 상품 연동) ──────────────────────── */
-const LOAN_PRODUCTS = [
-  { id: 'didimdol', name: '디딤돌대출 (신혼)', rate: 3.20, years: 30, maxLoan: 4.0, houseCap: 6,
-    note: '부부합산 연소득 8,500만↓ · 주택가 6억↓ · 전용 85㎡↓ · 생애최초/신혼 우대' },
-  { id: 'bogeumjari', name: '보금자리론', rate: 4.30, years: 40, maxLoan: 3.6, houseCap: 6,
-    note: '연소득 7천만↓(신혼 8,500만) · 주택가 6억↓ · 고정금리' },
-  { id: 'bank', name: '일반 주택담보대출', rate: 4.10, years: 40, maxLoan: Infinity, houseCap: Infinity,
-    note: 'LTV 70%(생애최초 80%) · 스트레스 DSR 40% 적용 · 변동/혼합금리' },
-];
-let selectedLoan = LOAN_PRODUCTS[2];
+/* ── 예산 플래너 (financeCalculator.js 유틸 기반, 반응형) ── */
+let selectedLoan = LOAN_PRODUCTS[3];   // 기본: 일반 주담대
+let lastAnalysis = null;
 
 function initBudgetPlanner() {
   const wrap = document.getElementById('loanProducts');
   wrap.innerHTML = LOAN_PRODUCTS.map(p => `
     <label class="loan-product ${p.id === selectedLoan.id ? 'active' : ''}" data-id="${p.id}">
       <div class="lp-head"><input type="radio" name="loanP" ${p.id === selectedLoan.id ? 'checked' : ''}> <b>${p.name}</b>
-        <span class="lp-rate">${p.rate.toFixed(2)}%</span></div>
+        <span class="lp-rate">${(p.rate*100).toFixed(2)}%</span></div>
       <div class="lp-note">${p.note}</div>
     </label>
   `).join('');
-  document.getElementById('loanRate').value = selectedLoan.rate;
-  document.getElementById('loanYears').value = selectedLoan.years;
+  const setRateYears = () => {
+    document.getElementById('loanRate').value = (selectedLoan.rate * 100).toFixed(2);
+    document.getElementById('loanYears').value = selectedLoan.years;
+  };
+  setRateYears();
 
   wrap.querySelectorAll('.loan-product').forEach(el => {
     el.addEventListener('click', () => {
       selectedLoan = LOAN_PRODUCTS.find(p => p.id === el.dataset.id);
       wrap.querySelectorAll('.loan-product').forEach(x => x.classList.toggle('active', x === el));
       el.querySelector('input').checked = true;
-      document.getElementById('loanRate').value = selectedLoan.rate;
-      document.getElementById('loanYears').value = selectedLoan.years;
+      setRateYears();
+      recalcBudget();
     });
   });
 
-  document.getElementById('budgetCalc').addEventListener('click', calcBudget);
+  // 모든 입력에 반응형 바인딩 (입력 즉시 재계산)
+  ['myCash','gfCash','myGift','gfGift','coupleIncome','loanRate','loanYears',
+   'repayType','optMarriage','optBirth','optFirstHome'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', recalcBudget);
+    if (el) el.addEventListener('change', recalcBudget);
+  });
+
+  recalcBudget();
 }
 
-function calcBudget() {
-  const myCash = parseFloat(document.getElementById('myCash').value) || 0;       // 억
-  const gfCash = parseFloat(document.getElementById('gfCash').value) || 0;       // 억
-  const income = parseFloat(document.getElementById('coupleIncome').value) || 0; // 만원/년
-  const rate = (parseFloat(document.getElementById('loanRate').value) || selectedLoan.rate) / 100;
-  const years = parseInt(document.getElementById('loanYears').value) || selectedLoan.years;
-  const repay = document.getElementById('repayType').value;
+function recalcBudget() {
+  const num = id => parseFloat(document.getElementById(id).value) || 0;
+  const chk = id => document.getElementById(id).checked;
+  const 억 = 1e8, 만 = 1e4;
 
-  const cash = myCash + gfCash;
-  const r = rate / 12, n = years * 12;
-  const monthlyCap = income * 10000 * 0.40 / 12;   // DSR 40%, 원
+  const input = {
+    myCash: num('myCash') * 억,
+    gfCash: num('gfCash') * 억,
+    myGift: num('myGift') * 억,
+    gfGift: num('gfGift') * 억,
+    marriage: chk('optMarriage'),
+    birth: chk('optBirth'),
+    income: num('coupleIncome') * 만,
+    product: selectedLoan,
+    rate: num('loanRate') / 100 || selectedLoan.rate,
+    years: parseInt(document.getElementById('loanYears').value) || selectedLoan.years,
+    repay: document.getElementById('repayType').value,
+    firstHome: chk('optFirstHome'),
+  };
 
-  // 상환방식별 대출한도 (월상환 상한 기준)
-  let dsrLoan;   // 억
-  if (repay === 'linear') {
-    dsrLoan = monthlyCap / (1 / n + r) / 1e8;                       // 원금균등 1회차 기준
-  } else {
-    dsrLoan = monthlyCap * (1 - Math.pow(1 + r, -n)) / r / 1e8;     // 원리금균등
-  }
-  dsrLoan = Math.min(dsrLoan, selectedLoan.maxLoan);
+  const R = analyzeFinance(input);
+  lastAnalysis = R;
 
-  // LTV 70% 캡을 고려한 최대 예산
-  let budget = cash + dsrLoan;
-  if (dsrLoan > budget * 0.7) budget = cash / 0.3;
-  const loan = Math.min(dsrLoan, budget * 0.7);
-
-  // 월 상환액
-  let monthly;   // 원
-  if (repay === 'linear') monthly = loan * 1e8 * (1 / n + r);
-  else monthly = loan * 1e8 * r / (1 - Math.pow(1 + r, -n));
-
-  const capWarn = budget > selectedLoan.houseCap
-    ? `<div class="budget-warn">⚠️ ${selectedLoan.name}은 주택가 ${selectedLoan.houseCap}억 이하만 가능합니다. 예산을 ${selectedLoan.houseCap}억으로 제한하거나 일반 주담대를 선택하세요.</div>` : '';
-  const effBudget = Math.min(budget, selectedLoan.houseCap);
+  const dsrPct = (R.dsrRatio * 100).toFixed(0);
+  const dsrColor = R.dsrRatio > 0.40 ? '#f87171' : R.dsrRatio > 0.30 ? '#fbbf24' : '#34d399';
 
   document.getElementById('budgetOutput').innerHTML = `
-    <div class="budget-big">최대 예산 <b>${budget.toFixed(1)}억</b></div>
+    <div class="budget-big">최대 매수가 <b>${won2eok(R.maxPrice)}</b></div>
     <div class="budget-rows">
-      <div class="budget-row"><span>합산 가용자금</span><b>${cash.toFixed(1)}억</b></div>
-      <div class="budget-row"><span>대출 (${selectedLoan.name})</span><b>${loan.toFixed(1)}억</b></div>
-      <div class="budget-row"><span>예상 월 상환액${repay === 'linear' ? ' (1회차)' : ''}</span><b>${Math.round(monthly / 10000).toLocaleString()}만원</b></div>
-      <div class="budget-row"><span>월 상환 / 월 소득</span><b>${income > 0 ? (monthly / (income * 10000 / 12) * 100).toFixed(0) + '%' : '—'}</b></div>
+      <div class="budget-row"><span>자기자본 (현금+세후증여)</span><b>${won2eok(R.ownEquity)}</b></div>
+      <div class="budget-row"><span>대출 (${selectedLoan.name})</span><b>${won2eok(R.loan)} <small>${R.loanBind}</small></b></div>
+      <div class="budget-row"><span>월 상환액${input.repay==='linear'?' (1회차)':''}</span><b>${won2man(R.monthlyFirst)}</b></div>
+      <div class="budget-row"><span>DSR (원리금/소득)</span><b style="color:${dsrColor}">${dsrPct}%</b></div>
     </div>
-    ${capWarn}
+    ${R.warnings.map(w => `<div class="budget-warn">⚠️ ${w}</div>`).join('')}
     <button class="price-apply budget-calc-btn" id="budgetApply">이 예산으로 지도 필터 →</button>
   `;
   document.getElementById('budgetApply').addEventListener('click', () => {
+    const eok = R.maxPrice / 억;
     document.querySelectorAll('.price-chip').forEach(b => b.classList.remove('active'));
     document.getElementById('priceMin').value = '';
-    document.getElementById('priceMax').value = effBudget.toFixed(1);
-    applyPriceFilter(0, effBudget);
+    document.getElementById('priceMax').value = eok.toFixed(1);
+    applyPriceFilter(0, eok);
     document.getElementById('secExplorer').scrollIntoView({ behavior: 'smooth' });
   });
+
+  renderBudgetBreakdown(R);
+  renderBudgetChart(R);
+}
+
+function renderBudgetBreakdown(R) {
+  document.getElementById('budgetBreakdown').innerHTML = `
+    <div class="budget-row"><span>취득세 ${(R.acqRate*100).toFixed(1)}%${R.acqDiscount>0?' (생애최초 감면)':''}</span><b>${won2man(R.acqTax)}</b></div>
+    <div class="budget-row"><span>중개보수 (상한)</span><b>${won2man(R.brokerFee)}</b></div>
+    <div class="budget-row"><span>증여세 합계</span><b>${won2man(R.giftTax)}</b></div>
+    <div class="budget-row"><span>세후 증여 실수령</span><b>${won2eok(R.netGift)}</b></div>
+    <div class="budget-row"><span>총 대출이자 (만기까지)</span><b>${won2eok(R.totalInterest)}</b></div>
+    <div class="budget-row"><span>실투입 자기자본</span><b>${won2eok(R.cashUsed)}</b></div>
+    <div class="budget-note" style="margin-top:.6rem">부대비용(취득세+중개비) 총 ${won2man(R.acqTax + R.brokerFee)}는 자기자본에서 먼저 차감됩니다.</div>
+  `;
+}
+
+function renderBudgetChart(R) {
+  const c = R.composition;
+  const div = document.getElementById('budgetChart');
+  if (!div || typeof Plotly === 'undefined') return;
+  Plotly.react(div, [{
+    type: 'pie', hole: 0.55,
+    labels: ['현금', '세후 증여', '대출'],
+    values: [c.cash, c.gift, c.loan],
+    marker: { colors: ['#38bdf8', '#34d399', '#fbbf24'] },
+    textinfo: 'label+percent', textfont: { color: '#0f172a', size: 12 },
+    hovertemplate: '%{label}: %{value:,.0f}원<extra></extra>',
+  }], {
+    paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
+    font: { color: '#e2e8f0' }, showlegend: false,
+    margin: { t: 10, b: 10, l: 10, r: 10 },
+    annotations: [{ text: `${won2eok(R.maxPrice)}`, showarrow: false, font: { size: 16, color: '#f1f5f9' } }],
+  }, { responsive: true, displayModeBar: false });
 }
 
 function drawCommuteMarker(key) {

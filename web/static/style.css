@@ -748,3 +748,11 @@ body { font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSy
 .couple-badge { background: rgba(52,211,153,.15); color: #34d399; font-size: .68rem; padding: .15rem .5rem; border-radius: 999px; margin-left: .4rem; font-weight: 600; }
 .commute-preset { color: #cbd5e1; font-size: .8rem; background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: .4rem .7rem; }
 @media (max-width: 960px) { .budget-grid { grid-template-columns: 1fr; } }
+
+/* ── 예산 플래너 확장 (증여/세금/차트) ─────────────────── */
+.budget-checks { display: flex; flex-direction: column; gap: .5rem; margin-top: .3rem; }
+.budget-checks .bc { display: flex; align-items: center; gap: .45rem; color: #cbd5e1; font-size: .82rem; cursor: pointer; }
+.budget-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+.budget-breakdown .budget-row small, .budget-rows small { color: #64748b; font-weight: 400; font-size: .72rem; }
+.budget-big small { color: #64748b; font-size: .7rem; }
+@media (max-width: 960px) { .budget-detail-grid { grid-template-columns: 1fr; } }
