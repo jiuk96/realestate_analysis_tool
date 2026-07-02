@@ -516,11 +516,13 @@ function naverMapUrl(district, aptName, dong, lat, lng) {
   return `https://map.naver.com/p/search/${encodeURIComponent(`${area} ${normalizeAptName(aptName)}`.trim())}`;
 }
 
-// 네이버 부동산(매물). 좌표가 있으면 그 위치의 매물 지도로 바로 연결,
-// 좌표가 없으면 네이버 부동산 홈으로 보낸다.
+// 네이버 부동산(매물). 동+정규화 단지명으로 검색 (대부분 매물 목록이 열림).
+// 좌표/이름이 전혀 없으면 네이버 부동산 홈으로 폴백.
 function naverLandUrl(district, aptName, dong, lat, lng) {
-  if (lat && lng) return `https://m.land.naver.com/map/${lat}:${lng}:16`;
-  return `https://m.land.naver.com/`;
+  const area = dong || district;
+  const name = normalizeAptName(aptName);
+  if (!area && !name) return `https://m.land.naver.com/`;
+  return `https://m.land.naver.com/search/result/${encodeURIComponent(`${area} ${name}`.trim())}`;
 }
 
 // 호갱노노. 좌표가 있으면 좌표 중심 지도로, 없으면 이름 검색.
