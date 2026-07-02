@@ -615,15 +615,20 @@ function recalcBudget() {
   const dsrColor = R.dsrRatio > 0.40 ? '#f87171' : R.dsrRatio > 0.30 ? '#fbbf24' : '#34d399';
 
   document.getElementById('budgetOutput').innerHTML = `
-    <div class="budget-big">최대 매수가 <b>${won2eok(R.maxPrice)}</b></div>
-    <div class="budget-rows">
-      <div class="budget-row"><span>자기자본 (현금+세후증여)</span><b>${won2eok(R.ownEquity)}</b></div>
-      <div class="budget-row"><span>대출 (${selectedLoan.name})</span><b>${won2eok(R.loan)} <small>${R.loanBind}</small></b></div>
-      <div class="budget-row"><span>월 상환액${input.repay==='linear'?' (1회차)':''}</span><b>${won2man(R.monthlyFirst)}</b></div>
-      <div class="budget-row"><span>DSR (원리금/소득)</span><b style="color:${dsrColor}">${dsrPct}%</b></div>
+    <div class="br-main">
+      <div class="br-headline">
+        <span class="br-label">최대 매수 가능 주택가</span>
+        <span class="br-price">${won2eok(R.maxPrice)}</span>
+      </div>
+      <button class="price-apply br-apply" id="budgetApply">이 예산으로 지도 필터 →</button>
     </div>
-    ${R.warnings.map(w => `<div class="budget-warn">⚠️ ${w}</div>`).join('')}
-    <button class="price-apply budget-calc-btn" id="budgetApply">이 예산으로 지도 필터 →</button>
+    <div class="br-stats">
+      <div class="br-stat"><span class="brk">자기자본</span><span class="brv">${won2eok(R.ownEquity)}</span><span class="brs">현금+세후증여</span></div>
+      <div class="br-stat"><span class="brk">대출</span><span class="brv">${won2eok(R.loan)}</span><span class="brs">${selectedLoan.name} · ${R.loanBind} 한도</span></div>
+      <div class="br-stat"><span class="brk">월 상환액${input.repay==='linear'?' (1회차)':''}</span><span class="brv">${won2man(R.monthlyFirst)}</span><span class="brs">${input.years}년 · ${(input.rate*100).toFixed(2)}%</span></div>
+      <div class="br-stat"><span class="brk">DSR</span><span class="brv" style="color:${dsrColor}">${dsrPct}%</span><span class="brs">원리금/연소득</span></div>
+    </div>
+    ${R.warnings.length ? `<div class="br-warns">${R.warnings.map(w => `<div class="budget-warn">⚠️ ${w}</div>`).join('')}</div>` : ''}
   `;
   document.getElementById('budgetApply').addEventListener('click', () => {
     const eok = R.maxPrice / 억;
@@ -653,7 +658,23 @@ function renderBudgetBreakdown(R) {
 function renderBudgetChart(R) {
   const c = R.composition;
   const div = document.getElementById('budgetChart');
-  if (!div || typeof Plotly === 'undefined') return;
+  if (!div) return;
+
+  // Plotly 미로딩 시 CSS 스택 막대로 대체
+  if (typeof Plotly === 'undefined') {
+    const total = c.cash + c.gift + c.loan || 1;
+    const seg = [
+      ['현금', c.cash, '#38bdf8'], ['세후 증여', c.gift, '#34d399'], ['대출', c.loan, '#fbbf24'],
+    ];
+    div.innerHTML = `
+      <div class="fallback-bar">
+        ${seg.map(([n,v,col]) => v > 0 ? `<div class="fb-seg" style="width:${v/total*100}%;background:${col}" title="${n}"></div>` : '').join('')}
+      </div>
+      <div class="fallback-legend">
+        ${seg.map(([n,v,col]) => `<div class="fb-leg"><span class="fb-dot" style="background:${col}"></span>${n} ${won2eok(v)} (${(v/total*100).toFixed(0)}%)</div>`).join('')}
+      </div>`;
+    return;
+  }
   Plotly.react(div, [{
     type: 'pie', hole: 0.55,
     labels: ['현금', '세후 증여', '대출'],

@@ -714,7 +714,7 @@ body { font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSy
 .drs-score { font-weight: 800; color: #94a3b8; font-variant-numeric: tabular-nums; }
 
 /* ── 예산 플래너 ───────────────────────────────────────── */
-.budget-grid { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 1rem; }
+.budget-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
 .budget-card { background: var(--bg2); border: 1px solid #334155; border-radius: 14px; padding: 1.2rem; }
 .budget-card-title { font-weight: 800; color: #f1f5f9; margin-bottom: 1rem; }
 .budget-field { margin-bottom: .85rem; }
@@ -737,13 +737,24 @@ body { font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSy
 .lp-rate { margin-left: auto; color: var(--accent); font-weight: 800; font-variant-numeric: tabular-nums; }
 .lp-note { color: #64748b; font-size: .72rem; margin-top: .3rem; line-height: 1.5; }
 .budget-calc-btn { width: 100%; padding: .6rem; font-size: .95rem; margin-bottom: .9rem; }
-.budget-output { min-height: 160px; }
-.budget-big { font-size: 1.05rem; color: #cbd5e1; margin-bottom: .8rem; }
-.budget-big b { color: #fbbf24; font-size: 1.5rem; font-variant-numeric: tabular-nums; }
-.budget-rows { display: flex; flex-direction: column; gap: .45rem; margin-bottom: .9rem; }
 .budget-row { display: flex; justify-content: space-between; color: #94a3b8; font-size: .85rem; padding: .35rem 0; border-bottom: 1px solid #1e293b; }
 .budget-row b { color: #e2e8f0; font-variant-numeric: tabular-nums; }
-.budget-warn { background: rgba(251,191,36,.1); border: 1px solid rgba(251,191,36,.3); color: #fbbf24; border-radius: 8px; padding: .55rem .7rem; font-size: .78rem; line-height: 1.55; margin-bottom: .8rem; }
+.budget-warn { background: rgba(251,191,36,.1); border: 1px solid rgba(251,191,36,.3); color: #fbbf24; border-radius: 8px; padding: .55rem .7rem; font-size: .78rem; line-height: 1.55; }
+
+/* 결과 바 (전체 폭) */
+.budget-card-result { margin-top: 1rem; }
+.br-main { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; padding-bottom: 1rem; margin-bottom: 1rem; border-bottom: 1px solid #334155; }
+.br-headline { display: flex; flex-direction: column; gap: .2rem; }
+.br-label { color: #94a3b8; font-size: .85rem; }
+.br-price { color: #fbbf24; font-size: 2.4rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
+.br-apply { padding: .7rem 1.4rem; font-size: .95rem; white-space: nowrap; }
+.br-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+.br-stat { display: flex; flex-direction: column; gap: .25rem; background: #0f172a; border-radius: 10px; padding: .8rem .9rem; }
+.brk { color: #64748b; font-size: .78rem; }
+.brv { color: #f1f5f9; font-size: 1.25rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.brs { color: #64748b; font-size: .72rem; }
+.br-warns { margin-top: 1rem; display: flex; flex-direction: column; gap: .5rem; }
+@media (max-width: 720px) { .br-stats { grid-template-columns: 1fr 1fr; } }
 .couple-box-wide { margin-bottom: 1.1rem; }
 .couple-badge { background: rgba(52,211,153,.15); color: #34d399; font-size: .68rem; padding: .15rem .5rem; border-radius: 999px; margin-left: .4rem; font-weight: 600; }
 .commute-preset { color: #cbd5e1; font-size: .8rem; background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: .4rem .7rem; }
@@ -753,6 +764,12 @@ body { font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSy
 .budget-checks { display: flex; flex-direction: column; gap: .5rem; margin-top: .3rem; }
 .budget-checks .bc { display: flex; align-items: center; gap: .45rem; color: #cbd5e1; font-size: .82rem; cursor: pointer; }
 .budget-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
-.budget-breakdown .budget-row small, .budget-rows small { color: #64748b; font-weight: 400; font-size: .72rem; }
-.budget-big small { color: #64748b; font-size: .7rem; }
+.budget-breakdown .budget-row small { color: #64748b; font-weight: 400; font-size: .72rem; }
 @media (max-width: 960px) { .budget-detail-grid { grid-template-columns: 1fr; } }
+
+/* 자금구성 차트 Plotly 미로딩 fallback */
+.fallback-bar { display: flex; height: 42px; border-radius: 8px; overflow: hidden; margin: 1rem 0; background: #0f172a; }
+.fb-seg { height: 100%; }
+.fallback-legend { display: flex; flex-direction: column; gap: .5rem; }
+.fb-leg { display: flex; align-items: center; gap: .5rem; color: #cbd5e1; font-size: .85rem; font-variant-numeric: tabular-nums; }
+.fb-dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
