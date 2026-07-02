@@ -52,28 +52,64 @@ async function renderMap() {
     }).addTo(seoulMap);
   }
 
-  // 구별 폴리곤 + 마커
+  const popupFor = d => d.has_data
+    ? `<div class="map-popup"><b>${d.name}</b><br>
+        분석 완료 ✓<br>
+        단지 수: ${d.apt_count}개<br>
+        최우수: ${d.top_apt_name || '—'}<br>
+        최고점: ${d.top_score != null ? d.top_score.toFixed(1) : '—'}점</div>`
+    : `<div class="map-popup"><b>${d.name}</b><br>데이터 수집 예정</div>`;
+
+  // 실제 구 경계 GeoJSON (jsDelivr CDN, 브라우저에서 직접 로드) — 실패 시 사각형 폴백
+  let geo = null;
+  try {
+    geo = await fetchJSON('https://cdn.jsdelivr.net/gh/southkorea/seoul-maps@master/kostat/2013/json/seoul_municipalities_geo_simple.json');
+  } catch (e) { /* 폴백 사용 */ }
+
+  if (geo && geo.features) {
+    L.geoJSON(geo, {
+      filter: f => districtData.some(d => d.name === f.properties.name),
+      style: f => {
+        const d = districtData.find(x => x.name === f.properties.name);
+        const color = d.has_data ? (d.color || '#38bdf8') : '#475569';
+        return { color, weight: 2, fillColor: color, fillOpacity: d.has_data ? 0.35 : 0.12 };
+      },
+      onEachFeature: (f, layer) => {
+        const d = districtData.find(x => x.name === f.properties.name);
+        if (!d) return;
+        layer.bindPopup(popupFor(d));
+        layer.on('click', () => scrollToDistrict(d.name));
+        layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.55 }));
+        layer.on('mouseout', () => layer.setStyle({ fillOpacity: d.has_data ? 0.35 : 0.12 }));
+        mapLayers[d.name] = mapLayers[d.name] || {};
+        mapLayers[d.name].rect = layer;
+      }
+    }).addTo(seoulMap);
+  }
+
+  // 구 라벨 마커 (+ GeoJSON 실패 시 사각형 폴리곤 폴백)
   districtData.forEach(d => {
     const poly = DISTRICT_POLYGONS[d.name];
     if (!poly) return;
     const color = d.has_data ? (d.color || '#38bdf8') : '#475569';
-    const bounds = poly.map(p => [p[0], p[1]]);
-    const rect = L.rectangle(
-      [[Math.min(...poly.map(p=>p[0])), Math.min(...poly.map(p=>p[1]))],
-       [Math.max(...poly.map(p=>p[0])), Math.max(...poly.map(p=>p[1]))]],
-      {
-        color: color,
-        weight: 2,
-        fillColor: color,
-        fillOpacity: d.has_data ? 0.35 : 0.12
-      }
-    );
+
+    if (!geo || !geo.features) {
+      const rect = L.rectangle(
+        [[Math.min(...poly.map(p=>p[0])), Math.min(...poly.map(p=>p[1]))],
+         [Math.max(...poly.map(p=>p[0])), Math.max(...poly.map(p=>p[1]))]],
+        { color, weight: 2, fillColor: color, fillOpacity: d.has_data ? 0.35 : 0.12 }
+      );
+      rect.bindPopup(popupFor(d));
+      rect.on('click', () => scrollToDistrict(d.name));
+      rect.addTo(seoulMap);
+      mapLayers[d.name] = mapLayers[d.name] || {};
+      mapLayers[d.name].rect = rect;
+    }
 
     const center = d.center || [
       (Math.min(...poly.map(p=>p[0])) + Math.max(...poly.map(p=>p[0]))) / 2,
       (Math.min(...poly.map(p=>p[1])) + Math.max(...poly.map(p=>p[1]))) / 2
     ];
-
     const icon = L.divIcon({
       className: '',
       html: `<div class="map-label ${d.has_data ? 'map-label-data' : ''}">${d.name.replace('구','')}</div>`,
@@ -81,24 +117,11 @@ async function renderMap() {
       iconAnchor: [30, 12]
     });
     const marker = L.marker(center, { icon });
-
-    const popupContent = d.has_data
-      ? `<div class="map-popup"><b>${d.name}</b><br>
-          분석 완료 ✓<br>
-          단지 수: ${d.apt_count}개<br>
-          최우수: ${d.top_apt_name || '—'}<br>
-          최고점: ${d.top_score != null ? d.top_score.toFixed(1) : '—'}점</div>`
-      : `<div class="map-popup"><b>${d.name}</b><br>데이터 수집 예정</div>`;
-
-    rect.bindPopup(popupContent);
-    marker.bindPopup(popupContent);
-
-    rect.on('click', () => scrollToDistrict(d.name));
+    marker.bindPopup(popupFor(d));
     marker.on('click', () => scrollToDistrict(d.name));
-
-    rect.addTo(seoulMap);
     marker.addTo(seoulMap);
-    mapLayers[d.name] = { rect, marker };
+    mapLayers[d.name] = mapLayers[d.name] || {};
+    mapLayers[d.name].marker = marker;
   });
 
   // 구 카드 그리드
@@ -473,6 +496,99 @@ let explorerVisible = [];
 let explorerFilter = { min: 0, max: 9999 };
 
 const shortName = n => n.length > 8 ? n.slice(0, 7) + '…' : n;
+
+function haversineKm(lat1, lng1, lat2, lng2) {
+  const R = 6371, p = Math.PI / 180;
+  const a = Math.sin((lat2-lat1)*p/2)**2 +
+            Math.cos(lat1*p) * Math.cos(lat2*p) * Math.sin((lng2-lng1)*p/2)**2;
+  return R * 2 * Math.asin(Math.sqrt(a));
+}
+
+/* ── 커플 도구: 예산 계산기 + 통근 모드 ────────────────── */
+let commutePoints = JSON.parse(localStorage.getItem('commutePoints') || '{}');
+let commuteMarkers = {};
+let placingWork = null;
+
+function commuteInfo(a) {
+  const parts = [];
+  let total = 0, n = 0;
+  for (const key of ['A', 'B']) {
+    const pt = commutePoints[key];
+    if (pt) {
+      const km = haversineKm(a.lat, a.lng, pt[0], pt[1]);
+      parts.push(`${key === 'A' ? '💼' : '💗'} ${km.toFixed(1)}km`);
+      total += km; n++;
+    }
+  }
+  return n ? { label: parts.join(' · '), total } : null;
+}
+
+function initCoupleTools() {
+  // 예산 계산기: DSR 40% · 40년 만기 · 금리 4.2% · LTV 70% 가정
+  document.getElementById('budgetCalc').addEventListener('click', () => {
+    const cash = (parseFloat(document.getElementById('cashInput').value) || 0);          // 억
+    const income = (parseFloat(document.getElementById('incomeInput').value) || 0);      // 만원/년
+    const r = 0.042 / 12, n = 480;
+    const monthlyCap = income * 10000 * 0.40 / 12;                                       // 원
+    const dsrLoan = monthlyCap * (1 - Math.pow(1 + r, -n)) / r / 1e8;                    // 억
+    let budget = cash + dsrLoan;
+    if (dsrLoan > budget * 0.7) budget = cash / 0.3;                                     // LTV 70% 캡
+    const loan = Math.min(dsrLoan, budget * 0.7);
+    document.getElementById('budgetResult').innerHTML = `
+      최대 예산 <b>약 ${budget.toFixed(1)}억</b> (자금 ${cash.toFixed(1)}억 + 대출 ${loan.toFixed(1)}억)
+      <button class="price-apply" id="budgetApply" style="margin-left:.6rem">이 예산으로 필터</button>
+      <div class="budget-note">※ DSR 40%·40년·4.2%·LTV 70% 가정 단순 추정. 실제 한도는 은행 상담 필요.</div>`;
+    document.getElementById('budgetApply').addEventListener('click', () => {
+      document.querySelectorAll('.price-chip').forEach(b => b.classList.remove('active'));
+      document.getElementById('priceMin').value = '';
+      document.getElementById('priceMax').value = budget.toFixed(1);
+      applyPriceFilter(0, budget);
+      document.getElementById('explorerMap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
+
+  // 통근 모드
+  const hint = document.getElementById('commuteHint');
+  document.getElementById('setWorkA').addEventListener('click', () => {
+    placingWork = 'A'; hint.textContent = '지도를 클릭해 직장 A 위치를 지정하세요.';
+  });
+  document.getElementById('setWorkB').addEventListener('click', () => {
+    placingWork = 'B'; hint.textContent = '지도를 클릭해 직장 B 위치를 지정하세요.';
+  });
+  document.getElementById('clearWork').addEventListener('click', () => {
+    commutePoints = {};
+    localStorage.removeItem('commutePoints');
+    Object.values(commuteMarkers).forEach(m => explorerMap.removeLayer(m));
+    commuteMarkers = {};
+    hint.textContent = '초기화됐습니다. 다시 지정하려면 버튼을 누르세요.';
+    applyPriceFilter(explorerFilter.min, explorerFilter.max);
+  });
+
+  explorerMap.on('click', e => {
+    if (!placingWork) return;
+    const key = placingWork;
+    commutePoints[key] = [e.latlng.lat, e.latlng.lng];
+    localStorage.setItem('commutePoints', JSON.stringify(commutePoints));
+    drawCommuteMarker(key);
+    placingWork = null;
+    hint.textContent = `직장 ${key} 지정 완료. 목록·상세에 직선거리가 표시됩니다.`;
+    applyPriceFilter(explorerFilter.min, explorerFilter.max);
+  });
+
+  Object.keys(commutePoints).forEach(drawCommuteMarker);
+}
+
+function drawCommuteMarker(key) {
+  const pt = commutePoints[key];
+  if (!pt) return;
+  if (commuteMarkers[key]) explorerMap.removeLayer(commuteMarkers[key]);
+  const icon = L.divIcon({
+    className: '',
+    html: `<div class="work-pin">${key === 'A' ? '💼' : '💗'} 직장${key}</div>`,
+    iconSize: [64, 26], iconAnchor: [32, 13],
+  });
+  commuteMarkers[key] = L.marker(pt, { icon }).addTo(explorerMap);
+}
 const eokFmt = v => v == null ? '—' : (v/10000 >= 10 ? (v/10000).toFixed(1) : (v/10000).toFixed(2)).replace(/\.?0+$/,'') + '억';
 
 async function renderExplorer() {
@@ -503,6 +619,7 @@ async function renderExplorer() {
     applyPriceFilter(explorerFilter.min, explorerFilter.max);
   });
 
+  initCoupleTools();
   applyPriceFilter(0, 9999);
 }
 
@@ -512,6 +629,10 @@ function sortApts(list) {
   if (mode === 'priceAsc')  s.sort((a,b) => a.latest_price - b.latest_price);
   else if (mode === 'priceDesc') s.sort((a,b) => b.latest_price - a.latest_price);
   else if (mode === 'mdd')  s.sort((a,b) => (b.mdd ?? -99) - (a.mdd ?? -99));
+  else if (mode === 'commute') s.sort((a,b) => {
+    const ca = commuteInfo(a), cb = commuteInfo(b);
+    return (ca ? ca.total : 1e9) - (cb ? cb.total : 1e9);
+  });
   else s.sort((a,b) => b.composite_score - a.composite_score);
   return s;
 }
@@ -552,7 +673,7 @@ function showAptList() {
       <div class="ep-list-rank">${i+1}</div>
       <div class="ep-list-main">
         <div class="ep-list-name">${a.apt_name}</div>
-        <div class="ep-list-sub">${a.district} · ${a.build_year}년 · ${a.area_exclusive}㎡</div>
+        <div class="ep-list-sub">${a.district} · ${a.build_year}년 · ${a.area_exclusive}㎡${(() => { const c = commuteInfo(a); return c ? ` · <span class="ep-commute">${c.label}</span>` : ''; })()}</div>
       </div>
       <div class="ep-list-right">
         <div class="ep-list-price">${eokFmt(a.latest_price)}</div>
@@ -603,6 +724,7 @@ function showAptDetail(a) {
     <div class="ep-tags">
       ${best.map(([n,v]) => `<span class="aptag aptag-good">${n} ${v.toFixed(0)}점</span>`).join('')}
       ${a.nearest_station ? `<span class="aptag">🚇 ${a.nearest_station} ${a.nearest_station_m}m</span>` : ''}
+      ${(() => { const c = commuteInfo(a); return c ? `<span class="aptag" style="color:#f472b6">${c.label} (합계 ${c.total.toFixed(1)}km)</span>` : ''; })()}
       ${a.momentum_pct != null ? `<span class="aptag">최근 1년 추세 ${a.momentum_pct > 0 ? '+' : ''}${a.momentum_pct.toFixed(1)}%/년</span>` : ''}
     </div>
     <div class="ep-ask">

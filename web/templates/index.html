@@ -157,6 +157,28 @@
       가격 버블을 클릭하면 단지 특징과 <strong>네이버부동산 링크</strong>, 직접 입력하는 <strong>호가 메모</strong>를 확인할 수 있습니다.
     </p>
 
+    <!-- 우리 커플 도구 -->
+    <div class="couple-tools">
+      <div class="couple-box">
+        <div class="couple-box-title">💰 우리 예산 계산기</div>
+        <div class="couple-budget-row">
+          <label>보유자금 <input type="number" id="cashInput" placeholder="3" step="0.5" min="0"> 억</label>
+          <label>합산 연소득 <input type="number" id="incomeInput" placeholder="9000" step="500" min="0"> 만원</label>
+          <button id="budgetCalc" class="price-apply">계산</button>
+        </div>
+        <div class="couple-budget-result" id="budgetResult"></div>
+      </div>
+      <div class="couple-box">
+        <div class="couple-box-title">🚇 커플 통근 모드</div>
+        <div class="couple-commute-row">
+          <button class="commute-btn" id="setWorkA">💼 직장 A 지정</button>
+          <button class="commute-btn" id="setWorkB">💗 직장 B 지정</button>
+          <button class="commute-btn commute-clear" id="clearWork">초기화</button>
+        </div>
+        <div class="couple-commute-hint" id="commuteHint">버튼을 누른 뒤 지도를 클릭해 두 사람의 직장 위치를 지정하세요. 단지별 직선거리 합이 표시됩니다.</div>
+      </div>
+    </div>
+
     <!-- 가격 필터 바 -->
     <div class="explorer-bar">
       <div class="price-chips" id="priceChips">
@@ -177,6 +199,7 @@
         <option value="priceAsc">가격 낮은순</option>
         <option value="priceDesc">가격 높은순</option>
         <option value="mdd">방어력순</option>
+        <option value="commute">통근 합계순</option>
       </select>
       <div class="explorer-count" id="explorerCount"></div>
     </div>
