@@ -311,7 +311,8 @@ async function renderDistrictRankings() {
         </div>
         <span class="drs-score" style="${i===0?`color:${color}`:''}">${fmtScore(a.composite_score)}</span>
         <span class="drs-links">
-          <a href="${naverLandUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener" class="drs-lk drs-lk-n" title="네이버 지도">N</a>
+          <a href="${naverMapUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener" class="drs-lk drs-lk-m" title="네이버 지도">지</a>
+          <a href="${naverLandUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener" class="drs-lk drs-lk-n" title="네이버 부동산">부</a>
           <a href="${hogangnonoUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener" class="drs-lk drs-lk-h" title="호갱노노">호</a>
         </span>
       </div>`;
@@ -367,7 +368,8 @@ async function renderTop1() {
       <div class="top1-loc">${top.district} ${distInfo.icon||''}</div>
       <div class="top1-score-big">${fmtScore(top.composite_score)}<span class="top1-score-unit">점</span></div>
       <div class="ep-links" style="justify-content:center;margin-top:.8rem">
-        <a class="ep-naver" href="${naverLandUrl(top.district, top.apt_name, top.dong, top.lat, top.lng)}" target="_blank" rel="noopener">네이버 지도/부동산 ↗</a>
+        <a class="ep-map" href="${naverMapUrl(top.district, top.apt_name, top.dong, top.lat, top.lng)}" target="_blank" rel="noopener">네이버 지도 ↗</a>
+        <a class="ep-naver" href="${naverLandUrl(top.district, top.apt_name, top.dong, top.lat, top.lng)}" target="_blank" rel="noopener">네이버 부동산 ↗</a>
         <a class="ep-hogang" href="${hogangnonoUrl(top.district, top.apt_name, top.dong, top.lat, top.lng)}" target="_blank" rel="noopener">호갱노노 ↗</a>
       </div>
     </div>
@@ -506,16 +508,22 @@ function normalizeAptName(name) {
     .trim();
 }
 
-// 네이버 지도 링크. 좌표가 있으면 좌표 중심으로 열어(이름 매칭 실패 무관)
-// 항상 정확한 위치를 보여주고, 좌표가 없을 때만 이름 검색으로 폴백한다.
-function naverLandUrl(district, aptName, dong, lat, lng) {
+// 네이버 지도(위치 확인). 좌표 중심으로 열어 항상 정확한 위치 표시.
+function naverMapUrl(district, aptName, dong, lat, lng) {
   const label = encodeURIComponent(normalizeAptName(aptName));
   if (lat && lng) return `https://map.naver.com/p?lat=${lat}&lng=${lng}&title=${label}&level=2`;
   const area = dong || district;
   return `https://map.naver.com/p/search/${encodeURIComponent(`${area} ${normalizeAptName(aptName)}`.trim())}`;
 }
 
-// 호갱노노 링크. 좌표가 있으면 좌표 중심 지도로, 없으면 이름 검색.
+// 네이버 부동산(매물). 좌표가 있으면 그 위치의 매물 지도로 바로 연결,
+// 좌표가 없으면 네이버 부동산 홈으로 보낸다.
+function naverLandUrl(district, aptName, dong, lat, lng) {
+  if (lat && lng) return `https://m.land.naver.com/map/${lat}:${lng}:16`;
+  return `https://m.land.naver.com/`;
+}
+
+// 호갱노노. 좌표가 있으면 좌표 중심 지도로, 없으면 이름 검색.
 function hogangnonoUrl(district, aptName, dong, lat, lng) {
   if (lat && lng) return `https://hogangnono.com/?zoom=16&lat=${lat}&lng=${lng}`;
   const area = dong || district;
@@ -935,7 +943,8 @@ function showAptDetail(a) {
       ${askDiff != null ? `<div class="ep-ask-diff">호가가 최신 실거래보다 <b style="color:${askDiff >= 0 ? '#fbbf24' : '#34d399'}">${askDiff >= 0 ? '+' : ''}${askDiff.toFixed(1)}%</b> ${askDiff >= 0 ? '높음' : '낮음'}</div>` : ''}
     </div>
     <div class="ep-links">
-      <a class="ep-naver" href="${naverLandUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener">네이버 지도/부동산 ↗</a>
+      <a class="ep-map" href="${naverMapUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener">네이버 지도 ↗</a>
+      <a class="ep-naver" href="${naverLandUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener">네이버 부동산 ↗</a>
       <a class="ep-hogang" href="${hogangnonoUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener">호갱노노 ↗</a>
     </div>
     <div class="ep-trades">

@@ -718,17 +718,21 @@ body { font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSy
   width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center;
   justify-content: center; font-size: .72rem; font-weight: 800; text-decoration: none;
 }
+.drs-lk-m { background: rgba(56,189,248,.15); color: #38bdf8; }
+.drs-lk-m:hover { background: #38bdf8; color: #0f172a; }
 .drs-lk-n { background: rgba(3,199,90,.15); color: #03c75a; }
 .drs-lk-n:hover { background: #03c75a; color: #fff; }
 .drs-lk-h { background: rgba(255,110,60,.15); color: #ff6e3c; }
 .drs-lk-h:hover { background: #ff6e3c; color: #fff; }
 
-/* 상세 패널 링크 (네이버 + 호갱노노) */
-.ep-links { display: flex; gap: .5rem; }
-.ep-links .ep-naver, .ep-links .ep-hogang {
-  flex: 1; display: block; text-align: center; font-weight: 700; font-size: .85rem;
-  border-radius: 10px; padding: .65rem; text-decoration: none;
+/* 상세 패널 링크 (네이버 지도 + 네이버 부동산 + 호갱노노) */
+.ep-links { display: flex; gap: .5rem; flex-wrap: wrap; }
+.ep-links a {
+  flex: 1; min-width: 92px; display: block; text-align: center; font-weight: 700;
+  font-size: .82rem; border-radius: 10px; padding: .6rem .4rem; text-decoration: none;
 }
+.ep-map { background: #38bdf8; color: #0f172a; }
+.ep-map:hover { filter: brightness(1.08); }
 .ep-hogang { background: #ff6e3c; color: #fff; }
 .ep-hogang:hover { filter: brightness(1.08); }
 
