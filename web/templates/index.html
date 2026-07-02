@@ -178,10 +178,22 @@
       </div>
     </div>
 
+    <!-- 자금 흐름 (전체 자금 → 세금·부대비용 → 자기자본/대출 → 매수가) -->
+    <div class="budget-card" style="margin-top:1rem">
+      <div class="budget-card-title">🔀 자금 흐름 한눈에 보기</div>
+      <div id="fundFlow" class="fund-flow"></div>
+    </div>
+
     <!-- 세법·규제 근거 (클릭 아코디언) -->
     <div class="legal-section">
       <div class="legal-section-title">📖 계산 근거 · 세법/규제 설명 <span class="legal-hint">항목을 눌러 펼쳐보세요</span></div>
       <div id="legalAccordion" class="legal-accordion"></div>
+    </div>
+
+    <!-- 참고문헌 · 법령 출처 -->
+    <div class="legal-section">
+      <div class="legal-section-title">📚 참고문헌 · 법령 출처</div>
+      <ul id="referenceList" class="reference-list"></ul>
     </div>
 
     <p class="explorer-note">

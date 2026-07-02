@@ -184,6 +184,13 @@ const DSR_LIMIT = 0.40;
 export const REGULATION = {
   METRO_LOAN_CAP: 6 * 억,        // 6·27 대책 수도권/규제지역 주담대 한도
   STRESS_DSR_ADDON: 0.015,       // 스트레스 DSR 가산금리 (한도 산정용)
+  // 규제지역(투기과열지구=강남·서초·송파·용산+토지거래허가구역) LTV
+  //  - 은행업감독규정상 규제지역 실수요 LTV 40%
+  //  - 생애최초는 규제지역에서도 일부 우대되나 6·27 대책으로 축소, 보수적 50%
+  LTV_REGULATED: 0.40,
+  LTV_REGULATED_FIRST: 0.50,
+  LTV_NORMAL: 0.70,              // 비규제 일반
+  LTV_NORMAL_FIRST: 0.80,        // 비규제 생애최초
 };
 
 /* ============================================================
@@ -254,11 +261,14 @@ export const LEGAL_BASIS = {
   },
   loan: {
     title: 'DSR·LTV·6·27 대책이 대출한도를 어떻게 정하나요?',
-    body: 'LTV(주택담보인정비율)는 집값 대비 빌릴 수 있는 비율로, 규제지역은 보통 40~50%, 생애최초는 80%까지 ' +
-          '허용됩니다. DSR(총부채원리금상환비율)은 연소득 대비 모든 대출의 연간 원리금이 40%를 넘지 못하게 ' +
-          '하는 규제로, 소득이 낮으면 LTV가 남아도 대출이 막힙니다. 2025년 6·27 대책으로 수도권·규제지역 ' +
-          '주택담보대출은 한도가 최대 6억원으로 제한되고, 스트레스 DSR(가산금리 약 +1.5%p)이 적용돼 실제 ' +
-          '한도는 더 보수적으로 산정됩니다. 최종 대출액은 이 세 가지(LTV·DSR·6억 캡) 중 가장 작은 값입니다.',
+    body: 'LTV(주택담보인정비율)는 집값 대비 빌릴 수 있는 비율입니다. 비규제지역은 70%(생애최초 80%)지만, ' +
+          '투기과열지구·조정대상지역(현재 강남·서초·송파·용산)과 토지거래허가구역 같은 규제지역은 ' +
+          '실수요 기준 40%(생애최초 50%)로 축소됩니다. DSR(총부채원리금상환비율)은 연소득 대비 모든 대출의 ' +
+          '연간 원리금이 40%를 넘지 못하게 하는 규제로, 소득이 낮으면 LTV가 남아도 대출이 막힙니다. ' +
+          '2025년 6·27 가계부채 관리방안으로 수도권·규제지역 주택담보대출은 한도가 최대 6억원으로 제한되고, ' +
+          '스트레스 DSR(가산금리 약 +1.5%p)이 적용돼 실제 한도는 더 보수적으로 산정됩니다. ' +
+          '최종 대출액은 이 네 가지(LTV · DSR · 6억 캡 · 상품한도) 중 가장 작은 값으로 정해집니다. ' +
+          '[근거: 은행업감독규정 별표6, 금융위원회 2025.6.27 가계부채 관리방안]',
   },
   family: {
     title: '부모 무이자 차용증은 얼마까지 가능한가요?',
@@ -333,7 +343,15 @@ export function maxLoanForProduct(product, income, price, rate, years, firstHome
   // 스트레스 DSR: 한도 산정 시 가산금리를 얹어 보수적으로 계산
   const stressRate = rate + REGULATION.STRESS_DSR_ADDON;
   const byDSR = maxLoanByDSR(income, stressRate, years);
-  const ltv = (firstHome && product.ltvFirst) ? product.ltvFirst : product.ltv;
+
+  // LTV: 일반 주담대는 규제지역 여부에 따라 40/50%로 축소, 정책상품은 자체 LTV
+  let ltv;
+  if (product.id === 'bank') {
+    if (regulated) ltv = firstHome ? REGULATION.LTV_REGULATED_FIRST : REGULATION.LTV_REGULATED;
+    else ltv = firstHome ? REGULATION.LTV_NORMAL_FIRST : REGULATION.LTV_NORMAL;
+  } else {
+    ltv = (firstHome && product.ltvFirst) ? product.ltvFirst : product.ltv;
+  }
   const byLTV = price * ltv;
   const byProduct = product.maxLoan;
   // 6·27 대책: 규제지역이면 일반 주담대 6억 한도 (정책상품은 자체 한도 우선)
@@ -341,10 +359,10 @@ export function maxLoanForProduct(product, income, price, rate, years, firstHome
 
   const loan = Math.min(byDSR, byLTV, byProduct, byRegion);
   let bind = 'DSR(스트레스)';
-  if (loan === byLTV) bind = `LTV ${(ltv * 100).toFixed(0)}%`;
+  if (loan === byLTV) bind = `LTV ${(ltv * 100).toFixed(0)}%${regulated ? '(규제지역)' : ''}`;
   else if (loan === byProduct) bind = '상품한도';
   else if (loan === byRegion) bind = '6·27 대책 6억';
-  return { loan: Math.max(0, loan), bind };
+  return { loan: Math.max(0, loan), bind, ltv };
 }
 
 /* ============================================================
@@ -409,7 +427,7 @@ export function analyzeFinance(input) {
   // 4) 최대가격 기준 상세 재계산
   const acq = calcAcquisitionTax(maxPrice, firstHome);
   const broker = calcBrokerFee(maxPrice);
-  const { loan, bind } = maxLoanForProduct(product, income, maxPrice, rate, years, firstHome, { regulated });
+  const { loan, bind, ltv: appliedLtv } = maxLoanForProduct(product, income, maxPrice, rate, years, firstHome, { regulated });
   const monthly = calcMonthlyPayment(loan, rate, years, repay);
   const cashUsed = maxPrice + acq.tax + broker - loan - familyLoan;  // 실제 투입 자기자본
   const leftover = ownEquity - cashUsed;
@@ -430,8 +448,10 @@ export function analyzeFinance(input) {
   const dsrRatio = income > 0 ? (calcMonthlyPayment(loan, rate, years, 'annuity').first * 12) / income : 0;
 
   return {
-    netGift, giftTax, giftMe, giftGf,
+    netGift, grossGift: myGift + gfGift, giftTax, giftMe, giftGf,
+    myCash, gfCash,
     ownEquity, availableFunds,
+    appliedLtv, regulated,
     maxPrice,
     acqTax: acq.tax, acqRate: acq.rate, acqDiscount: acq.discount,
     brokerFee: broker,
@@ -451,6 +471,30 @@ export function analyzeFinance(input) {
     },
   };
 }
+
+/* ============================================================
+ * 참고문헌 · 법령 출처 (UI 하단 표시용)
+ * ============================================================ */
+export const REFERENCES = [
+  { name: '지방세법 제11조 (취득세 세율)', org: '행정안전부',
+    url: 'https://www.law.go.kr/법령/지방세법' },
+  { name: '지방세특례제한법 제36조의3 (생애최초 취득세 감면)', org: '행정안전부',
+    url: 'https://www.law.go.kr/법령/지방세특례제한법' },
+  { name: '상속세 및 증여세법 제53조·제53조의2 (증여재산공제·혼인출산공제)', org: '국세청',
+    url: 'https://www.law.go.kr/법령/상속세및증여세법' },
+  { name: '상속세 및 증여세법 제41조의4 (금전 무상대출 등에 따른 이익의 증여)', org: '국세청',
+    url: 'https://www.law.go.kr/법령/상속세및증여세법' },
+  { name: '은행업감독규정 별표6 (LTV·DSR 규제비율)', org: '금융위원회·금융감독원',
+    url: 'https://www.law.go.kr/행정규칙/은행업감독규정' },
+  { name: '가계부채 관리방안 (2025.6.27, 수도권 주담대 6억 한도·스트레스 DSR)', org: '금융위원회',
+    url: 'https://www.fsc.go.kr' },
+  { name: '공인중개사법 시행규칙 제20조 (중개보수 상한요율)', org: '국토교통부',
+    url: 'https://www.law.go.kr/법령/공인중개사법시행규칙' },
+  { name: '부동산 거래신고 등에 관한 법률 (토지거래허가구역)', org: '국토교통부',
+    url: 'https://www.law.go.kr/법령/부동산거래신고등에관한법률' },
+  { name: '실거래가 공개시스템 (분석 데이터 원천)', org: '국토교통부',
+    url: 'https://rt.molit.go.kr' },
+];
 
 /* 포맷 헬퍼 (UI 공용) */
 export function won2eok(v, digits = 2) {

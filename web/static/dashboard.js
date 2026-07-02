@@ -1,6 +1,6 @@
 import {
   LOAN_PRODUCTS, analyzeFinance, won2eok, won2man,
-  LEGAL_BASIS, FAMILY_LOAN,
+  LEGAL_BASIS, FAMILY_LOAN, REFERENCES,
 } from './financeCalculator.js';
 
 /* ── 유틸 ──────────────────────────────────────────────── */
@@ -648,6 +648,7 @@ function initBudgetPlanner() {
   });
 
   renderLegalAccordion();
+  renderReferences();
   recalcBudget();
 }
 
@@ -741,6 +742,42 @@ function recalcBudget() {
 
   renderBudgetBreakdown(R);
   renderBudgetChart(R);
+  renderFundFlow(R);
+}
+
+// 자금 흐름: 전체 자금 → 세금·부대비용 차감 → 자기자본 + 부모 + 대출 = 최대 매수가
+function renderFundFlow(R) {
+  const el = document.getElementById('fundFlow');
+  if (!el) return;
+  const fees = R.acqTax + R.brokerFee + R.giftTax;
+  const step = (icon, label, val, sub, cls='') =>
+    `<div class="ff-step ${cls}"><span class="ff-ic">${icon}</span>
+       <div class="ff-body"><div class="ff-label">${label}</div>${sub?`<div class="ff-sub">${sub}</div>`:''}</div>
+       <div class="ff-val">${val}</div></div>`;
+
+  el.innerHTML = `
+    ${step('💰', '전체 동원 자금', won2eok(R.myCash + R.gfCash + R.grossGift + R.familyLoan),
+        `내 현금 ${won2eok(R.myCash)} + 여친 ${won2eok(R.gfCash)} + 증여 ${won2eok(R.grossGift)} + 부모차용 ${won2eok(R.familyLoan)}`)}
+    <div class="ff-arrow">▼ 세금·부대비용 차감</div>
+    ${step('🧾', '세금·부대비용', '− ' + won2man(fees),
+        `증여세 ${won2man(R.giftTax)} · 취득세 ${won2man(R.acqTax)} · 중개비 ${won2man(R.brokerFee)}`, 'ff-minus')}
+    <div class="ff-arrow">▼ 실제 매수에 투입</div>
+    <div class="ff-parts">
+      ${step('🙋', '순수 자기자본', won2eok(R.ownEquity - fees > 0 ? R.ownEquity - fees : 0), '현금+세후증여−부대비용')}
+      ${step('👪', '부모 무이자 차용', won2eok(R.familyLoan), `원금만 상환 ${won2man(R.familyMonthly)}/월`)}
+      ${step('🏦', '은행 대출', won2eok(R.loan), `${R.loanBind} · LTV ${(R.appliedLtv*100).toFixed(0)}%${R.regulated?' 규제지역':''}`)}
+    </div>
+    <div class="ff-arrow ff-arrow-eq">= 최대 매수 가능</div>
+    ${step('🏠', '최대 매수 가능 주택가', won2eok(R.maxPrice), R.regulated?'토지거래허가/규제지역 기준':'비규제지역 기준', 'ff-total')}
+  `;
+}
+
+function renderReferences() {
+  const el = document.getElementById('referenceList');
+  if (!el) return;
+  el.innerHTML = REFERENCES.map(r =>
+    `<li><a href="${r.url}" target="_blank" rel="noopener">${r.name}</a> <span class="ref-org">${r.org}</span></li>`
+  ).join('');
 }
 
 function renderBudgetBreakdown(R) {

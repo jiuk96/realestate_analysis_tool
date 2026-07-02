@@ -821,3 +821,32 @@ body { font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSy
 .legal-a { max-height: 0; overflow: hidden; transition: max-height .25s ease, padding .25s ease;
   color: #94a3b8; font-size: .85rem; line-height: 1.75; padding: 0 1rem; }
 .legal-item.open .legal-a { max-height: 400px; padding: 0 1rem 1rem; }
+
+/* ── 자금 흐름 ──────────────────────────────────────────── */
+.fund-flow { display: flex; flex-direction: column; gap: .4rem; }
+.ff-step {
+  display: flex; align-items: center; gap: .8rem; background: #0f172a;
+  border: 1px solid #334155; border-radius: 10px; padding: .7rem .9rem;
+}
+.ff-ic { font-size: 1.3rem; flex-shrink: 0; }
+.ff-body { flex: 1; min-width: 0; }
+.ff-label { color: #e2e8f0; font-weight: 700; font-size: .9rem; }
+.ff-sub { color: #64748b; font-size: .74rem; margin-top: .15rem; }
+.ff-val { font-weight: 800; font-size: 1.05rem; color: #f1f5f9; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.ff-minus .ff-val { color: #f87171; }
+.ff-total { background: rgba(251,191,36,.1); border-color: rgba(251,191,36,.4); }
+.ff-total .ff-val { color: #fbbf24; font-size: 1.3rem; }
+.ff-arrow { text-align: center; color: #64748b; font-size: .76rem; padding: .1rem 0; }
+.ff-arrow-eq { color: #fbbf24; font-weight: 700; }
+.ff-parts { display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem; }
+.ff-parts .ff-step { flex-direction: column; align-items: flex-start; gap: .3rem; }
+.ff-parts .ff-val { font-size: 1rem; }
+@media (max-width: 720px) { .ff-parts { grid-template-columns: 1fr; } }
+
+/* ── 참고문헌 ───────────────────────────────────────────── */
+.reference-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .55rem; }
+.reference-list li { color: #94a3b8; font-size: .82rem; line-height: 1.5; padding-left: 1rem; position: relative; }
+.reference-list li::before { content: '§'; position: absolute; left: 0; color: #38bdf8; font-weight: 700; }
+.reference-list a { color: #cbd5e1; text-decoration: none; border-bottom: 1px dotted #475569; }
+.reference-list a:hover { color: #38bdf8; border-bottom-color: #38bdf8; }
+.ref-org { color: #64748b; font-size: .72rem; margin-left: .3rem; }
