@@ -303,7 +303,7 @@ async function renderDistrictRankings() {
       const best = axes.reduce((p,c) => c[1] > p[1] ? c : p, ['', -1]);
 
       return `
-      <a class="drs-row" href="${naverLandUrl(a.district, a.apt_name)}" target="_blank" rel="noopener">
+      <a class="drs-row" href="${naverLandUrl(a.district, a.apt_name, a.dong)}" target="_blank" rel="noopener">
         <span class="drs-rank" style="${i===0?`color:${color}`:''}">${i+1}</span>
         <span class="drs-name">${a.apt_name}</span>
         <span class="drs-meta">${a.mdd != null ? 'MDD ' + a.mdd.toFixed(1) + '%' : ''} · ${best[0]} 강점</span>
@@ -360,7 +360,7 @@ async function renderTop1() {
       <h3 class="top1-name">${top.apt_name}</h3>
       <div class="top1-loc">${top.district} ${distInfo.icon||''}</div>
       <div class="top1-score-big">${fmtScore(top.composite_score)}<span class="top1-score-unit">점</span></div>
-      <a class="ep-naver" style="display:inline-block;margin-top:.8rem" href="${naverLandUrl(top.district, top.apt_name)}" target="_blank" rel="noopener">네이버부동산에서 매물 보기 ↗</a>
+      <a class="ep-naver" style="display:inline-block;margin-top:.8rem" href="${naverLandUrl(top.district, top.apt_name, top.dong)}" target="_blank" rel="noopener">네이버부동산에서 매물 보기 ↗</a>
     </div>
 
     <div class="top1-body">
@@ -471,9 +471,36 @@ function renderPriceChart(aptTs) {
 }
 
 /* ── ⑤ 지도 탐색기 ─────────────────────────────────────── */
-// 네이버부동산 단지 검색 (모바일 검색 결과 페이지 — 단지명으로 안정적으로 매칭)
-function naverLandUrl(district, aptName) {
-  const q = encodeURIComponent(`${district} ${aptName}`);
+// 국토부 실거래명 → 네이버부동산 등록명 별칭 (이름이 다른 단지)
+const NAVER_ALIAS = {
+  '관악드림(삼성)': '관악드림타운', '관악드림(동아)': '관악드림타운',
+  '옥수파크힐스101동~116동': 'e편한세상옥수파크힐스',
+  '우장산아이파크,이편한세상': '우장산아이파크이편한세상',
+  '가양2단지(성지)': '가양2단지성지', '가양6단지': '가양6단지',
+  '장안현대홈타운(336)': '장안현대홈타운',
+  '독립문극동(200-0)': '독립문극동',
+  '북한산현대힐스테이트3차아파트': '북한산현대힐스테이트3차',
+  '대림e-편한세상': '대림e편한세상',
+  '이편한세상금호파크힐스': 'e편한세상금호파크힐스',
+};
+
+// 단지명을 네이버 검색에 맞게 정규화 (괄호·동번호·시공사 병기 제거)
+function normalizeAptName(name) {
+  if (NAVER_ALIAS[name]) return NAVER_ALIAS[name];
+  return name
+    .replace(/\([^)]*\)/g, '')       // (삼성), (336), (200-0) 등 괄호 제거
+    .replace(/\d+동\s*~\s*\d+동/g, '') // 101동~116동 동범위 제거
+    .replace(/,/g, ' ')              // 쉼표 → 공백
+    .replace(/e-편한세상/gi, 'e편한세상')
+    .replace(/이편한세상/g, 'e편한세상')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// 네이버부동산 단지 검색 (모바일 검색 결과 페이지). 구보다 정확한 법정동(洞)을 우선 사용.
+function naverLandUrl(district, aptName, dong) {
+  const area = dong || district;
+  const q = encodeURIComponent(`${area} ${normalizeAptName(aptName)}`.trim());
   return `https://m.land.naver.com/search/result/${q}`;
 }
 
@@ -889,7 +916,7 @@ function showAptDetail(a) {
       </div>
       ${askDiff != null ? `<div class="ep-ask-diff">호가가 최신 실거래보다 <b style="color:${askDiff >= 0 ? '#fbbf24' : '#34d399'}">${askDiff >= 0 ? '+' : ''}${askDiff.toFixed(1)}%</b> ${askDiff >= 0 ? '높음' : '낮음'}</div>` : ''}
     </div>
-    <a class="ep-naver" href="${naverLandUrl(a.district, a.apt_name)}" target="_blank" rel="noopener">
+    <a class="ep-naver" href="${naverLandUrl(a.district, a.apt_name, a.dong)}" target="_blank" rel="noopener">
       네이버부동산에서 실제 매물 보기 ↗
     </a>
     <div class="ep-trades">

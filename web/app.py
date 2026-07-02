@@ -114,6 +114,7 @@ def api_apartments():
             "nearest_station_m": loc.get("nearest_station_m"),
             "walk_min": r.get("walk_min"),
             "coord_source": loc.get("source", "geocoded"),
+            "dong": loc.get("dong"),
         })
     return jsonify({"apartments": out})
 

@@ -119,6 +119,12 @@ _KR = {'defense': '가격방어력', 'liquidity': '거래유동성', 'upside': '
        'momentum': '회복모멘텀', 'premium': '입지프리미엄', 'scale': '규모·연식', 'transit': '교통'}
 _w = WEIGHTS_TRANSIT if 'transit_score' in score_df.columns else WEIGHTS
 weights = {_KR[k]: v for k, v in _w.items()}
+# 네이버 검색 정확도용 법정동(洞) 병합 (apt_locations 캐시가 있으면)
+_locpath = Path('data/static/apt_locations.json')
+if _locpath.exists():
+    _loc = json.loads(_locpath.read_text(encoding='utf-8'))
+    score_df['dong'] = score_df.apply(
+        lambda r: (_loc.get(f"{r['district']}|{r['apt_name']}") or {}).get('dong'), axis=1)
 save('composite_score.json', {'ranking': score_df.to_dict('records'), 'weights': weights})
 
 # timeseries.json
