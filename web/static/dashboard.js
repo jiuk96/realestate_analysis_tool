@@ -303,7 +303,7 @@ async function renderDistrictRankings() {
       const best = axes.reduce((p,c) => c[1] > p[1] ? c : p, ['', -1]);
 
       return `
-      <a class="drs-row" href="https://new.land.naver.com/search?query=${encodeURIComponent(a.district + ' ' + a.apt_name)}" target="_blank" rel="noopener">
+      <a class="drs-row" href="${naverLandUrl(a.district, a.apt_name)}" target="_blank" rel="noopener">
         <span class="drs-rank" style="${i===0?`color:${color}`:''}">${i+1}</span>
         <span class="drs-name">${a.apt_name}</span>
         <span class="drs-meta">${a.mdd != null ? 'MDD ' + a.mdd.toFixed(1) + '%' : ''} · ${best[0]} 강점</span>
@@ -360,7 +360,7 @@ async function renderTop1() {
       <h3 class="top1-name">${top.apt_name}</h3>
       <div class="top1-loc">${top.district} ${distInfo.icon||''}</div>
       <div class="top1-score-big">${fmtScore(top.composite_score)}<span class="top1-score-unit">점</span></div>
-      <a class="ep-naver" style="display:inline-block;margin-top:.8rem" href="https://new.land.naver.com/search?query=${encodeURIComponent(top.district + ' ' + top.apt_name)}" target="_blank" rel="noopener">네이버부동산에서 매물 보기 ↗</a>
+      <a class="ep-naver" style="display:inline-block;margin-top:.8rem" href="${naverLandUrl(top.district, top.apt_name)}" target="_blank" rel="noopener">네이버부동산에서 매물 보기 ↗</a>
     </div>
 
     <div class="top1-body">
@@ -471,10 +471,10 @@ function renderPriceChart(aptTs) {
 }
 
 /* ── ⑤ 지도 탐색기 ─────────────────────────────────────── */
-function naverLandUrl(a) {
-  const q = encodeURIComponent(`${a.district} ${a.apt_name}`);
-  if (a.lat && a.lng) return `https://new.land.naver.com/search?ms=${a.lat},${a.lng},16&query=${q}`;
-  return `https://new.land.naver.com/search?query=${q}`;
+// 네이버부동산 단지 검색 (모바일 검색 결과 페이지 — 단지명으로 안정적으로 매칭)
+function naverLandUrl(district, aptName) {
+  const q = encodeURIComponent(`${district} ${aptName}`);
+  return `https://m.land.naver.com/search/result/${q}`;
 }
 
 const askKey = a => `ask|${a.district}|${a.apt_name}`;
@@ -889,7 +889,7 @@ function showAptDetail(a) {
       </div>
       ${askDiff != null ? `<div class="ep-ask-diff">호가가 최신 실거래보다 <b style="color:${askDiff >= 0 ? '#fbbf24' : '#34d399'}">${askDiff >= 0 ? '+' : ''}${askDiff.toFixed(1)}%</b> ${askDiff >= 0 ? '높음' : '낮음'}</div>` : ''}
     </div>
-    <a class="ep-naver" href="${naverLandUrl(a)}" target="_blank" rel="noopener">
+    <a class="ep-naver" href="${naverLandUrl(a.district, a.apt_name)}" target="_blank" rel="noopener">
       네이버부동산에서 실제 매물 보기 ↗
     </a>
     <div class="ep-trades">
