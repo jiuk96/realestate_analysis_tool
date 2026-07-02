@@ -133,10 +133,15 @@
           <div class="budget-field"><label>💗 여친 증여</label><div class="bf-input"><input type="number" id="gfGift" value="1.5" step="0.5" min="0"><span>억</span></div></div>
         </div>
         <div class="budget-field"><label>부부(예정) 합산 연소득</label><div class="bf-input"><input type="number" id="coupleIncome" value="9000" step="500" min="0"><span>만원</span></div></div>
+        <div class="budget-field-row">
+          <div class="budget-field"><label>🏦 부모 무이자 차용 <button class="legal-link" data-legal="family">?</button></label><div class="bf-input"><input type="number" id="familyLoan" value="2.17" step="0.1" min="0"><span>억</span></div></div>
+          <div class="budget-field"><label>차용 상환기간</label><div class="bf-input"><input type="number" id="familyYears" value="10" step="1" min="1" max="30"><span>년</span></div></div>
+        </div>
         <div class="budget-checks">
           <label class="bc"><input type="checkbox" id="optMarriage" checked> 혼인 증여공제 (+1억)</label>
           <label class="bc"><input type="checkbox" id="optBirth"> 출산 공제/신생아 특례</label>
           <label class="bc"><input type="checkbox" id="optFirstHome" checked> 생애최초 (취득세·LTV 우대)</label>
+          <label class="bc"><input type="checkbox" id="optRegulated"> 토지거래허가구역/규제지역 <button class="legal-link" data-legal="toho">?</button></label>
         </div>
       </div>
 
@@ -167,12 +172,19 @@
         <div id="budgetChart" style="height:230px"></div>
       </div>
       <div class="budget-card">
-        <div class="budget-card-title">🧾 부대비용 & 세금 상세</div>
+        <div class="budget-card-title">🧾 부대비용 & 세금 상세 <button class="legal-link" data-legal="acq">?</button></div>
         <div id="budgetBreakdown" class="budget-breakdown"></div>
       </div>
     </div>
+
+    <!-- 세법·규제 근거 (클릭 아코디언) -->
+    <div class="legal-section">
+      <div class="legal-section-title">📖 계산 근거 · 세법/규제 설명 <span class="legal-hint">항목을 눌러 펼쳐보세요</span></div>
+      <div id="legalAccordion" class="legal-accordion"></div>
+    </div>
+
     <p class="explorer-note">
-      ※ 대출 한도·금리·세율은 2026년 기준 대표값입니다. 실제 조건은 소득·주택가·규제지역·개별 심사에 따라 달라지므로 반드시 은행/기금e든든/세무사에서 확인하세요.
+      ※ 대출 한도·금리·세율은 2025~2026년 기준 대표값입니다. 실제 조건은 소득·주택가·규제지역·개별 심사에 따라 달라지므로 반드시 은행/기금e든든/세무사에서 확인하세요.
     </p>
   </div>
 </section>

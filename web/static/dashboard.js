@@ -1,5 +1,6 @@
 import {
   LOAN_PRODUCTS, analyzeFinance, won2eok, won2man,
+  LEGAL_BASIS, FAMILY_LOAN,
 } from './financeCalculator.js';
 
 /* ── 유틸 ──────────────────────────────────────────────── */
@@ -579,13 +580,49 @@ function initBudgetPlanner() {
 
   // 모든 입력에 반응형 바인딩 (입력 즉시 재계산)
   ['myCash','gfCash','myGift','gfGift','coupleIncome','loanRate','loanYears',
-   'repayType','optMarriage','optBirth','optFirstHome'].forEach(id => {
+   'repayType','optMarriage','optBirth','optFirstHome','optRegulated',
+   'familyLoan','familyYears'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', recalcBudget);
     if (el) el.addEventListener('change', recalcBudget);
   });
 
+  renderLegalAccordion();
   recalcBudget();
+}
+
+/* 세법·규제 근거 아코디언 */
+function renderLegalAccordion() {
+  const wrap = document.getElementById('legalAccordion');
+  if (!wrap) return;
+  const order = ['loan', 'family', 'gift', 'acq', 'broker', 'toho'];
+  wrap.innerHTML = order.map(k => {
+    const item = LEGAL_BASIS[k];
+    return `
+      <div class="legal-item" data-key="${k}">
+        <button class="legal-q">${item.title}<span class="legal-caret">＋</span></button>
+        <div class="legal-a">${item.body}</div>
+      </div>`;
+  }).join('');
+  wrap.querySelectorAll('.legal-q').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.legal-item');
+      item.classList.toggle('open');
+    });
+  });
+
+  // '?' 버튼 → 해당 항목으로 스크롤 + 펼치기
+  document.querySelectorAll('.legal-link').forEach(b => {
+    b.addEventListener('click', (e) => {
+      e.preventDefault();
+      const key = b.dataset.legal;
+      const item = wrap.querySelector(`.legal-item[data-key="${key}"]`);
+      if (item) {
+        item.classList.add('open');
+        item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+  });
 }
 
 function recalcBudget() {
@@ -606,6 +643,9 @@ function recalcBudget() {
     years: parseInt(document.getElementById('loanYears').value) || selectedLoan.years,
     repay: document.getElementById('repayType').value,
     firstHome: chk('optFirstHome'),
+    familyLoan: num('familyLoan') * 억,
+    familyYears: parseInt(document.getElementById('familyYears').value) || 10,
+    regulated: chk('optRegulated'),
   };
 
   const R = analyzeFinance(input);
@@ -624,9 +664,9 @@ function recalcBudget() {
     </div>
     <div class="br-stats">
       <div class="br-stat"><span class="brk">자기자본</span><span class="brv">${won2eok(R.ownEquity)}</span><span class="brs">현금+세후증여</span></div>
-      <div class="br-stat"><span class="brk">대출</span><span class="brv">${won2eok(R.loan)}</span><span class="brs">${selectedLoan.name} · ${R.loanBind} 한도</span></div>
-      <div class="br-stat"><span class="brk">월 상환액${input.repay==='linear'?' (1회차)':''}</span><span class="brv">${won2man(R.monthlyFirst)}</span><span class="brs">${input.years}년 · ${(input.rate*100).toFixed(2)}%</span></div>
-      <div class="br-stat"><span class="brk">DSR</span><span class="brv" style="color:${dsrColor}">${dsrPct}%</span><span class="brs">원리금/연소득</span></div>
+      <div class="br-stat"><span class="brk">은행 대출</span><span class="brv">${won2eok(R.loan)}</span><span class="brs">${selectedLoan.name} · ${R.loanBind}</span></div>
+      <div class="br-stat"><span class="brk">부모 차용</span><span class="brv">${won2eok(R.familyLoan)}</span><span class="brs">무이자 · 원금 ${won2man(R.familyMonthly)}/월</span></div>
+      <div class="br-stat"><span class="brk">총 월 상환액</span><span class="brv">${won2man(R.totalMonthly)}</span><span class="brs">은행+부모, DSR <b style="color:${dsrColor}">${dsrPct}%</b></span></div>
     </div>
     ${R.warnings.length ? `<div class="br-warns">${R.warnings.map(w => `<div class="budget-warn">⚠️ ${w}</div>`).join('')}</div>` : ''}
   `;
@@ -649,9 +689,10 @@ function renderBudgetBreakdown(R) {
     <div class="budget-row"><span>중개보수 (상한)</span><b>${won2man(R.brokerFee)}</b></div>
     <div class="budget-row"><span>증여세 합계</span><b>${won2man(R.giftTax)}</b></div>
     <div class="budget-row"><span>세후 증여 실수령</span><b>${won2eok(R.netGift)}</b></div>
-    <div class="budget-row"><span>총 대출이자 (만기까지)</span><b>${won2eok(R.totalInterest)}</b></div>
+    <div class="budget-row"><span>부모차용 간주이자(연 4.6%)</span><b>${won2man(R.familyDeemedInterest)} ${R.familyOverLimit?'<small style="color:#f87171">한도초과</small>':'<small style="color:#34d399">비과세</small>'}</b></div>
+    <div class="budget-row"><span>은행 대출이자 (만기까지)</span><b>${won2eok(R.totalInterest)}</b></div>
     <div class="budget-row"><span>실투입 자기자본</span><b>${won2eok(R.cashUsed)}</b></div>
-    <div class="budget-note" style="margin-top:.6rem">부대비용(취득세+중개비) 총 ${won2man(R.acqTax + R.brokerFee)}는 자기자본에서 먼저 차감됩니다.</div>
+    <div class="budget-note" style="margin-top:.6rem">부모 무이자 차용은 ${won2eok(FAMILY_LOAN.MAX_NO_INTEREST)}까지 증여세 없이 원금만 갚으면 됩니다. 부대비용(취득세+중개비) ${won2man(R.acqTax + R.brokerFee)}는 자금에서 먼저 차감됩니다.</div>
   `;
 }
 
@@ -662,9 +703,10 @@ function renderBudgetChart(R) {
 
   // Plotly 미로딩 시 CSS 스택 막대로 대체
   if (typeof Plotly === 'undefined') {
-    const total = c.cash + c.gift + c.loan || 1;
+    const total = c.cash + c.gift + c.family + c.loan || 1;
     const seg = [
-      ['현금', c.cash, '#38bdf8'], ['세후 증여', c.gift, '#34d399'], ['대출', c.loan, '#fbbf24'],
+      ['현금', c.cash, '#38bdf8'], ['세후 증여', c.gift, '#34d399'],
+      ['부모 차용', c.family, '#a78bfa'], ['은행 대출', c.loan, '#fbbf24'],
     ];
     div.innerHTML = `
       <div class="fallback-bar">
@@ -677,9 +719,9 @@ function renderBudgetChart(R) {
   }
   Plotly.react(div, [{
     type: 'pie', hole: 0.55,
-    labels: ['현금', '세후 증여', '대출'],
-    values: [c.cash, c.gift, c.loan],
-    marker: { colors: ['#38bdf8', '#34d399', '#fbbf24'] },
+    labels: ['현금', '세후 증여', '부모 차용', '은행 대출'],
+    values: [c.cash, c.gift, c.family, c.loan],
+    marker: { colors: ['#38bdf8', '#34d399', '#a78bfa', '#fbbf24'] },
     textinfo: 'label+percent', textfont: { color: '#0f172a', size: 12 },
     hovertemplate: '%{label}: %{value:,.0f}원<extra></extra>',
   }], {

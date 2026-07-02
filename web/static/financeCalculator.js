@@ -166,6 +166,117 @@ export const LOAN_PRODUCTS = [
 
 const DSR_LIMIT = 0.40;
 
+/* ============================================================
+ * 4-1. 부동산 규제 (2025 6·27 대책 · 토지거래허가제)
+ * ============================================================
+ * 2025년 6월 27일 가계부채 관리방안(6·27 대책) 핵심:
+ *  - 수도권·규제지역 주택담보대출 최대 한도 6억원으로 제한
+ *    (소득·LTV로 그보다 더 나와도 6억에서 잘림)
+ *  - 생활안정자금 목적 주담대 1억원 한도
+ *  - 6개월 내 전입 의무(실거주), 규제지역 다주택 LTV 0%
+ *  - 스트레스 DSR 3단계: 가산금리(약 +1.5%p)를 얹어 한도를 보수적으로 산정
+ *
+ * 토지거래허가구역(토허제): 강남·서초·송파·용산 등.
+ *  - 실거주 목적만 매수 허가 → 전세 낀 갭투자 불가
+ *    (전세보증금으로 잔금을 치를 수 없어 자기자본+대출로만 조달해야 함)
+ *  - 2년 실거주 의무.
+ */
+export const REGULATION = {
+  METRO_LOAN_CAP: 6 * 억,        // 6·27 대책 수도권/규제지역 주담대 한도
+  STRESS_DSR_ADDON: 0.015,       // 스트레스 DSR 가산금리 (한도 산정용)
+};
+
+/* ============================================================
+ * 4-2. 부모 차용 (무이자 차용증)
+ * ============================================================
+ * 상속세 및 증여세법 §41조의4 (금전 무상대출 등에 따른 이익의 증여):
+ *  - 특수관계인(부모↔자녀)에게 무이자/저리로 돈을 빌려주면
+ *    "적정이자(연 4.6%)와 실제이자의 차액"을 증여로 봄.
+ *  - 단, 그 차액(=증여이익)이 "연 1,000만원 미만"이면 과세하지 않음.
+ *  - 따라서 무이자로 빌릴 수 있는 최대 원금:
+ *      원금 × 4.6% < 1,000만원  →  원금 < 2억 1,739만원
+ *  - 이 한도 내에서는 이자 없이 "원금만" 갚으면 되고 증여세도 없음.
+ *  - 실제로는 차용증 작성 + 정기적 원금 상환 이체 기록이 있어야 인정됨.
+ */
+export const FAMILY_LOAN = {
+  LEGAL_RATE: 0.046,             // 상증세법 적정이자율 4.6%
+  EXEMPT_INTEREST: 1000 * 만,    // 증여이익 비과세 기준 연 1,000만원
+  get MAX_NO_INTEREST() {        // 무이자 허용 최대 원금 ≈ 2.17억
+    return this.EXEMPT_INTEREST / this.LEGAL_RATE;
+  },
+};
+
+/**
+ * 부모 무이자 차용 상환 계산
+ * @param {number} principal 차용 원금 (원)
+ * @param {number} years     상환 기간 (년) — 무이자이므로 원금균등만
+ * @returns {{monthly:number, overLimit:boolean, deemedInterest:number, giftRisk:number}}
+ *   monthly=월 원금상환액, overLimit=2.17억 초과 여부,
+ *   deemedInterest=초과 시 연 간주이자, giftRisk=증여로 간주될 위험 금액
+ */
+export function calcFamilyLoan(principal, years = 10) {
+  if (!principal || principal <= 0) return { monthly: 0, overLimit: false, deemedInterest: 0, giftRisk: 0 };
+  const n = years * 12;
+  const monthly = principal / n;                 // 무이자 → 원금만 균등 분할
+  const limit = FAMILY_LOAN.MAX_NO_INTEREST;
+  const overLimit = principal > limit;
+  // 초과분에 대한 연 간주이자 (4.6%) — 1천만 넘으면 증여세 대상
+  const deemedInterest = principal * FAMILY_LOAN.LEGAL_RATE;
+  const giftRisk = overLimit ? deemedInterest - FAMILY_LOAN.EXEMPT_INTEREST : 0;
+  return { monthly, overLimit, deemedInterest, giftRisk };
+}
+
+/* ============================================================
+ * 세법·규제 근거 텍스트 (UI '근거 보기'용)
+ * ============================================================ */
+export const LEGAL_BASIS = {
+  acq: {
+    title: '취득세는 왜, 어떻게 내나요?',
+    body: '집을 사면 소유권을 취득한 대가로 지방자치단체에 내는 지방세입니다(지방세법 §11). ' +
+          '1주택 기준 세율은 매매가 6억 이하 1%, 6~9억 구간은 1→3%로 비례 증가, 9억 초과 3%이며 ' +
+          '여기에 지방교육세(취득세의 10%)가 더해져 실효세율은 각각 1.1% / 1.1~3.3% / 3.3%가 됩니다. ' +
+          '전용 85㎡ 초과 시 농어촌특별세 0.2%가 추가됩니다. 생애최초 구입은 12억 이하 주택에 한해 ' +
+          '취득세를 최대 200만원까지 감면합니다(지방세특례제한법 §36의3).',
+  },
+  broker: {
+    title: '중개보수(복비)는 어떻게 정해지나요?',
+    body: '공인중개사법 시행규칙과 각 시·도 조례로 매매가 구간별 상한요율이 정해져 있습니다. ' +
+          '서울 주택 매매 기준 2~6억 0.4%, 6~9억 0.5%, 9~12억 0.5%, 12~15억 0.6%, 15억 이상 0.7%가 ' +
+          '상한이며(요율은 협의 가능), 별도로 부가가치세가 붙습니다. 본 계산기는 보수적으로 상한요율을 적용합니다.',
+  },
+  gift: {
+    title: '증여세와 공제는 어떻게 계산되나요?',
+    body: '부모가 자녀에게 재산을 무상으로 주면 받는 사람(자녀)이 증여세를 냅니다(상증세법). ' +
+          '성년 자녀는 부모로부터 10년 합산 5,000만원까지 공제되고, 2024년 신설된 혼인·출산 증여공제로 ' +
+          '혼인신고 전후 2년 또는 출산 2년 내 증여 시 1억원을 추가 공제받습니다(혼인+출산 통합 1억 한도). ' +
+          '즉 신혼부부는 1인당 최대 1.5억까지 증여세 없이 받을 수 있습니다. 공제 초과분은 과세표준에 따라 ' +
+          '10%(1억↓)~50%(30억↑) 누진세율이 적용되며, 기한 내 자진신고 시 3% 세액공제가 있습니다.',
+  },
+  loan: {
+    title: 'DSR·LTV·6·27 대책이 대출한도를 어떻게 정하나요?',
+    body: 'LTV(주택담보인정비율)는 집값 대비 빌릴 수 있는 비율로, 규제지역은 보통 40~50%, 생애최초는 80%까지 ' +
+          '허용됩니다. DSR(총부채원리금상환비율)은 연소득 대비 모든 대출의 연간 원리금이 40%를 넘지 못하게 ' +
+          '하는 규제로, 소득이 낮으면 LTV가 남아도 대출이 막힙니다. 2025년 6·27 대책으로 수도권·규제지역 ' +
+          '주택담보대출은 한도가 최대 6억원으로 제한되고, 스트레스 DSR(가산금리 약 +1.5%p)이 적용돼 실제 ' +
+          '한도는 더 보수적으로 산정됩니다. 최종 대출액은 이 세 가지(LTV·DSR·6억 캡) 중 가장 작은 값입니다.',
+  },
+  family: {
+    title: '부모 무이자 차용증은 얼마까지 가능한가요?',
+    body: '부모에게 돈을 빌리면 원칙적으로 증여가 아니지만, 무이자로 빌리면 "적정이자(연 4.6%)만큼 이득을 ' +
+          '증여받은 것"으로 봅니다(상증세법 §41조의4). 다만 그 이자상당액이 연 1,000만원 미만이면 과세하지 ' +
+          '않습니다. 4.6% × 원금 < 1,000만원을 풀면 원금 약 2억 1,739만원까지는 무이자로 빌려도 증여세가 ' +
+          '없습니다. 대신 실제 차용으로 인정받으려면 차용증을 쓰고 원금을 정기적으로 계좌이체로 갚은 기록이 ' +
+          '있어야 합니다. 이 돈은 갚아야 할 빚이므로 자기자본과는 구분해 관리해야 합니다.',
+  },
+  toho: {
+    title: '토지거래허가구역(토허제)이면 뭐가 달라지나요?',
+    body: '강남·서초·송파·용산 등 토지거래허가구역에서는 주택을 살 때 구청의 허가가 필요하고, 실거주 목적만 ' +
+          '허가됩니다. 따라서 전세를 끼고 사는 갭투자가 불가능해 전세보증금으로 잔금을 치를 수 없고, ' +
+          '자기자본과 대출만으로 매수 자금을 마련해야 합니다. 또한 2년간 실거주 의무가 있어 매수 직후 ' +
+          '전월세를 놓을 수 없습니다.',
+  },
+};
+
 /**
  * 월 상환액 계산
  * @param {number} principal  대출원금 (원)
@@ -217,16 +328,22 @@ export function maxLoanByDSR(annualIncome, annualRate, years) {
  * @param {boolean} firstHome 생애최초
  * @returns {{loan:number, bind:string}} loan=가능액, bind=제약요인
  */
-export function maxLoanForProduct(product, income, price, rate, years, firstHome) {
-  const byDSR = maxLoanByDSR(income, rate, years);
+export function maxLoanForProduct(product, income, price, rate, years, firstHome, opt = {}) {
+  const { regulated = false } = opt;   // 규제지역/토허제 여부
+  // 스트레스 DSR: 한도 산정 시 가산금리를 얹어 보수적으로 계산
+  const stressRate = rate + REGULATION.STRESS_DSR_ADDON;
+  const byDSR = maxLoanByDSR(income, stressRate, years);
   const ltv = (firstHome && product.ltvFirst) ? product.ltvFirst : product.ltv;
   const byLTV = price * ltv;
   const byProduct = product.maxLoan;
+  // 6·27 대책: 규제지역이면 일반 주담대 6억 한도 (정책상품은 자체 한도 우선)
+  const byRegion = (regulated && product.id === 'bank') ? REGULATION.METRO_LOAN_CAP : Infinity;
 
-  const loan = Math.min(byDSR, byLTV, byProduct);
-  let bind = 'DSR';
+  const loan = Math.min(byDSR, byLTV, byProduct, byRegion);
+  let bind = 'DSR(스트레스)';
   if (loan === byLTV) bind = `LTV ${(ltv * 100).toFixed(0)}%`;
   else if (loan === byProduct) bind = '상품한도';
+  else if (loan === byRegion) bind = '6·27 대책 6억';
   return { loan: Math.max(0, loan), bind };
 }
 
@@ -256,6 +373,8 @@ export function analyzeFinance(input) {
     myCash = 0, gfCash = 0, myGift = 0, gfGift = 0,
     marriage = false, birth = false,
     income = 0, product, rate, years, repay = 'annuity', firstHome = false,
+    familyLoan = 0, familyYears = 10,   // 부모 무이자 차용
+    regulated = false,                  // 규제지역/토허제
   } = input;
 
   // 1) 세후 증여액 (본인/여자친구 각각 계산 후 합산)
@@ -264,18 +383,19 @@ export function analyzeFinance(input) {
   const netGift = giftMe.netReceived + giftGf.netReceived;
   const giftTax = giftMe.tax + giftGf.tax;
 
-  // 2) 순수 자기자본 (현금 + 세후증여)
+  // 2) 자기자본(현금+세후증여) + 부모차용(빚이지만 조달원)
   const ownEquity = myCash + gfCash + netGift;
+  const family = calcFamilyLoan(familyLoan, familyYears);
+  const availableFunds = ownEquity + familyLoan;   // 매수에 투입 가능한 총 현금성 자금
 
   // 3) 이분탐색으로 최대 주택가 찾기
-  //    조건: ownEquity - 부대비용(주택가) + 대출(주택가) >= 주택가
+  //    조건: availableFunds - 부대비용(주택가) + 은행대출(주택가) >= 주택가
   const feasible = (price) => {
     const acq = calcAcquisitionTax(price, firstHome).tax;
     const broker = calcBrokerFee(price);
-    const { loan } = maxLoanForProduct(product, income, price, rate, years, firstHome);
-    // 자기자본으로 감당해야 하는 몫 = 주택가 - 대출 + 부대비용
+    const { loan } = maxLoanForProduct(product, income, price, rate, years, firstHome, { regulated });
     const needOwn = price - loan + acq + broker;
-    return needOwn <= ownEquity;
+    return needOwn <= availableFunds;
   };
 
   let lo = 0, hi = 50 * 억;
@@ -284,39 +404,49 @@ export function analyzeFinance(input) {
     if (feasible(mid)) lo = mid; else hi = mid;
   }
   let maxPrice = lo;
-  // 정책상품 주택가 상한 적용
   if (product.houseCap && maxPrice > product.houseCap) maxPrice = product.houseCap;
 
   // 4) 최대가격 기준 상세 재계산
   const acq = calcAcquisitionTax(maxPrice, firstHome);
   const broker = calcBrokerFee(maxPrice);
-  const { loan, bind } = maxLoanForProduct(product, income, maxPrice, rate, years, firstHome);
+  const { loan, bind } = maxLoanForProduct(product, income, maxPrice, rate, years, firstHome, { regulated });
   const monthly = calcMonthlyPayment(loan, rate, years, repay);
-  const cashUsed = maxPrice + acq.tax + broker - loan;   // 실제 투입 자기자본
+  const cashUsed = maxPrice + acq.tax + broker - loan - familyLoan;  // 실제 투입 자기자본
   const leftover = ownEquity - cashUsed;
 
-  // 5) 정책상품 자격 경고
+  // 부모차용 + 은행대출 합산 월 상환액
+  const totalMonthly = monthly.first + family.monthly;
+
+  // 5) 자격/규제 경고
   const warnings = [];
   if (income > product.incomeCap) warnings.push(`${product.name}은 부부합산 소득 ${(product.incomeCap/만).toLocaleString()}만원 이하만 가능합니다.`);
   if (product.houseCap !== Infinity && lo > product.houseCap) warnings.push(`${product.name}은 주택가 ${(product.houseCap/억).toFixed(0)}억 이하만 가능해 예산이 제한되었습니다.`);
   if (product.requiresBirth && !birth) warnings.push(`${product.name}은 2년 내 출산(예정) 가구 대상입니다.`);
+  if (regulated) warnings.push(`토지거래허가구역은 실거주 목적만 매수 허가되며, 전세 낀 갭투자가 불가능합니다(2년 실거주 의무).`);
+  if (regulated && product.id === 'bank' && bind === '6·27 대책 6억') warnings.push(`6·27 대책으로 규제지역 주담대가 6억으로 제한되었습니다.`);
+  if (family.overLimit) warnings.push(`부모 차용이 무이자 한도(${won2eok(FAMILY_LOAN.MAX_NO_INTEREST)})를 초과했습니다. 초과분은 연 ${won2man(family.giftRisk)}이 증여로 간주될 수 있어 이자 지급이 필요합니다.`);
+
+  // DSR은 은행대출 원리금 기준 (부모차용은 DSR 산정 제외)
   const dsrRatio = income > 0 ? (calcMonthlyPayment(loan, rate, years, 'annuity').first * 12) / income : 0;
 
   return {
     netGift, giftTax, giftMe, giftGf,
-    ownEquity,
+    ownEquity, availableFunds,
     maxPrice,
     acqTax: acq.tax, acqRate: acq.rate, acqDiscount: acq.discount,
     brokerFee: broker,
     loan, loanBind: bind,
+    familyLoan, familyMonthly: family.monthly, familyOverLimit: family.overLimit,
+    familyDeemedInterest: family.deemedInterest,
     monthlyFirst: monthly.first, monthlyAvg: monthly.avg, totalInterest: monthly.totalInterest,
+    totalMonthly,
     cashUsed, leftover,
     dsrRatio,
     warnings,
-    // 자금 구성 (차트용)
     composition: {
       cash: myCash + gfCash,
       gift: netGift,
+      family: familyLoan,
       loan: loan,
     },
   };
