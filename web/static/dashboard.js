@@ -497,11 +497,13 @@ function normalizeAptName(name) {
     .trim();
 }
 
-// 네이버부동산 단지 검색 (모바일 검색 결과 페이지). 구보다 정확한 법정동(洞)을 우선 사용.
+// 네이버 지도 검색으로 단지를 찾음 (m.land 검색은 지역+단지 혼합 시 실패가 잦아
+// 실패 화면이 없고 아파트 단지를 안정적으로 잡는 지도 검색을 사용).
+// 지도에서 단지를 누르면 '부동산' 매물 탭으로 연결된다.
 function naverLandUrl(district, aptName, dong) {
   const area = dong || district;
   const q = encodeURIComponent(`${area} ${normalizeAptName(aptName)}`.trim());
-  return `https://m.land.naver.com/search/result/${q}`;
+  return `https://map.naver.com/p/search/${q}`;
 }
 
 const askKey = a => `ask|${a.district}|${a.apt_name}`;
