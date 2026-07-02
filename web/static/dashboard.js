@@ -285,48 +285,34 @@ async function renderDistrictRankings() {
   }
 
   container.innerHTML = districts.map(district => {
-    const apts = byDistrict[district].slice(0, 5);
+    const apts = byDistrict[district].slice(0, 3);
     const distInfo = districtData.find(d => d.name === district) || {};
     const color = distInfo.color || '#38bdf8';
 
     const rows = apts.map((a, i) => {
       const axes = [
-        { name: '가격방어', val: a.defense_score, w: 25 },
-        { name: '거래유동성', val: a.liquidity_score, w: 20 },
-        { name: '상승참여', val: a.upside_score, w: 15 },
-        { name: '회복모멘텀', val: a.momentum_score, w: 15 },
-        { name: '입지프리미엄', val: a.premium_score, w: 15 },
-        { name: '규모·연식', val: a.scale_score, w: 10 },
-        { name: '교통', val: a.transit_score, w: 10 },
-      ].filter(x => x.val != null);
-
-      const best = axes.reduce((a,b) => (a.val||0) > (b.val||0) ? a : b, {});
-      const worst = axes.reduce((a,b) => (a.val||0) < (b.val||0) ? a : b, {});
+        ['가격방어', a.defense_score], ['유동성', a.liquidity_score], ['상승참여', a.upside_score],
+        ['모멘텀', a.momentum_score], ['프리미엄', a.premium_score], ['규모·연식', a.scale_score],
+        ['교통', a.transit_score],
+      ].filter(x => x[1] != null);
+      const best = axes.reduce((p,c) => c[1] > p[1] ? c : p, ['', -1]);
 
       return `
-      <div class="apt-rank-row ${i===0?'apt-rank-top':''}">
-        <div class="apt-rank-num" style="color:${i===0?color:'#64748b'}">${i+1}</div>
-        <div class="apt-rank-info">
-          <div class="apt-rank-name">${a.apt_name}</div>
-          <div class="apt-rank-tags">
-            ${best.name ? `<span class="aptag aptag-good">강점: ${best.name}</span>` : ''}
-            ${worst.name ? `<span class="aptag aptag-bad">약점: ${worst.name}</span>` : ''}
-            ${a.mdd != null ? `<span class="aptag">MDD ${a.mdd.toFixed(1)}%</span>` : ''}
-            <a class="aptag aptag-naver" href="https://new.land.naver.com/search?query=${encodeURIComponent(a.district + ' ' + a.apt_name)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">N 매물보기 ↗</a>
-          </div>
-        </div>
-        <div class="apt-rank-score" style="color:${i===0?color:'#94a3b8'}">${fmtScore(a.composite_score)}<span class="apt-rank-unit">점</span></div>
-      </div>`;
+      <a class="drs-row" href="https://new.land.naver.com/search?query=${encodeURIComponent(a.district + ' ' + a.apt_name)}" target="_blank" rel="noopener">
+        <span class="drs-rank" style="${i===0?`color:${color}`:''}">${i+1}</span>
+        <span class="drs-name">${a.apt_name}</span>
+        <span class="drs-meta">${a.mdd != null ? 'MDD ' + a.mdd.toFixed(1) + '%' : ''} · ${best[0]} 강점</span>
+        <span class="drs-score" style="${i===0?`color:${color}`:''}">${fmtScore(a.composite_score)}</span>
+      </a>`;
     }).join('');
 
     return `
-    <div class="district-rank-block">
-      <div class="drb-header" style="border-left:4px solid ${color}">
-        <span class="drb-icon">${distInfo.icon||'🏙️'}</span>
-        <span class="drb-name">${district}</span>
-        <span class="drb-count">${byDistrict[district].length}개 단지 분석</span>
+    <div class="drs-block">
+      <div class="drs-head" style="border-left:3px solid ${color}">
+        <span>${distInfo.icon||'🏙️'} <b>${district}</b></span>
+        <span class="drs-count">${byDistrict[district].length}개 분석</span>
       </div>
-      <div class="apt-rank-list">${rows}</div>
+      ${rows}
     </div>`;
   }).join('');
 }
@@ -504,8 +490,12 @@ function haversineKm(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.asin(Math.sqrt(a));
 }
 
-/* ── 커플 도구: 예산 계산기 + 통근 모드 ────────────────── */
-let commutePoints = JSON.parse(localStorage.getItem('commutePoints') || '{}');
+/* ── 커플 도구: 통근 모드 (기본 직장 위치 고정) ─────────── */
+const DEFAULT_COMMUTE = {
+  A: [37.5771, 126.9822],   // 💼 나: 종로구 율곡로2길 25 (안국역 인근)
+  B: [37.5593, 127.0053],   // 💗 여자친구: CJ제일제당센터, 중구 동호로 330 (동대입구역 인근)
+};
+let commutePoints = { ...DEFAULT_COMMUTE, ...JSON.parse(localStorage.getItem('commutePoints') || '{}') };
 let commuteMarkers = {};
 let placingWork = null;
 
@@ -524,43 +514,18 @@ function commuteInfo(a) {
 }
 
 function initCoupleTools() {
-  // 예산 계산기: DSR 40% · 40년 만기 · 금리 4.2% · LTV 70% 가정
-  document.getElementById('budgetCalc').addEventListener('click', () => {
-    const cash = (parseFloat(document.getElementById('cashInput').value) || 0);          // 억
-    const income = (parseFloat(document.getElementById('incomeInput').value) || 0);      // 만원/년
-    const r = 0.042 / 12, n = 480;
-    const monthlyCap = income * 10000 * 0.40 / 12;                                       // 원
-    const dsrLoan = monthlyCap * (1 - Math.pow(1 + r, -n)) / r / 1e8;                    // 억
-    let budget = cash + dsrLoan;
-    if (dsrLoan > budget * 0.7) budget = cash / 0.3;                                     // LTV 70% 캡
-    const loan = Math.min(dsrLoan, budget * 0.7);
-    document.getElementById('budgetResult').innerHTML = `
-      최대 예산 <b>약 ${budget.toFixed(1)}억</b> (자금 ${cash.toFixed(1)}억 + 대출 ${loan.toFixed(1)}억)
-      <button class="price-apply" id="budgetApply" style="margin-left:.6rem">이 예산으로 필터</button>
-      <div class="budget-note">※ DSR 40%·40년·4.2%·LTV 70% 가정 단순 추정. 실제 한도는 은행 상담 필요.</div>`;
-    document.getElementById('budgetApply').addEventListener('click', () => {
-      document.querySelectorAll('.price-chip').forEach(b => b.classList.remove('active'));
-      document.getElementById('priceMin').value = '';
-      document.getElementById('priceMax').value = budget.toFixed(1);
-      applyPriceFilter(0, budget);
-      document.getElementById('explorerMap').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
-  });
-
-  // 통근 모드
   const hint = document.getElementById('commuteHint');
   document.getElementById('setWorkA').addEventListener('click', () => {
-    placingWork = 'A'; hint.textContent = '지도를 클릭해 직장 A 위치를 지정하세요.';
+    placingWork = 'A'; hint.textContent = '지도를 클릭해 내 직장 위치를 다시 지정하세요.';
   });
   document.getElementById('setWorkB').addEventListener('click', () => {
-    placingWork = 'B'; hint.textContent = '지도를 클릭해 직장 B 위치를 지정하세요.';
+    placingWork = 'B'; hint.textContent = '지도를 클릭해 여자친구 직장 위치를 다시 지정하세요.';
   });
-  document.getElementById('clearWork').addEventListener('click', () => {
-    commutePoints = {};
+  document.getElementById('resetWork').addEventListener('click', () => {
+    commutePoints = { ...DEFAULT_COMMUTE };
     localStorage.removeItem('commutePoints');
-    Object.values(commuteMarkers).forEach(m => explorerMap.removeLayer(m));
-    commuteMarkers = {};
-    hint.textContent = '초기화됐습니다. 다시 지정하려면 버튼을 누르세요.';
+    Object.keys(commutePoints).forEach(drawCommuteMarker);
+    hint.textContent = '기본값(율곡로2길 25 / CJ제일제당센터)으로 복원했습니다.';
     applyPriceFilter(explorerFilter.min, explorerFilter.max);
   });
 
@@ -571,11 +536,102 @@ function initCoupleTools() {
     localStorage.setItem('commutePoints', JSON.stringify(commutePoints));
     drawCommuteMarker(key);
     placingWork = null;
-    hint.textContent = `직장 ${key} 지정 완료. 목록·상세에 직선거리가 표시됩니다.`;
+    hint.textContent = `직장 ${key === 'A' ? '(나)' : '(여자친구)'} 위치를 변경했습니다.`;
     applyPriceFilter(explorerFilter.min, explorerFilter.max);
   });
 
   Object.keys(commutePoints).forEach(drawCommuteMarker);
+}
+
+/* ── 예산 플래너 (대출 상품 연동) ──────────────────────── */
+const LOAN_PRODUCTS = [
+  { id: 'didimdol', name: '디딤돌대출 (신혼)', rate: 3.20, years: 30, maxLoan: 4.0, houseCap: 6,
+    note: '부부합산 연소득 8,500만↓ · 주택가 6억↓ · 전용 85㎡↓ · 생애최초/신혼 우대' },
+  { id: 'bogeumjari', name: '보금자리론', rate: 4.30, years: 40, maxLoan: 3.6, houseCap: 6,
+    note: '연소득 7천만↓(신혼 8,500만) · 주택가 6억↓ · 고정금리' },
+  { id: 'bank', name: '일반 주택담보대출', rate: 4.10, years: 40, maxLoan: Infinity, houseCap: Infinity,
+    note: 'LTV 70%(생애최초 80%) · 스트레스 DSR 40% 적용 · 변동/혼합금리' },
+];
+let selectedLoan = LOAN_PRODUCTS[2];
+
+function initBudgetPlanner() {
+  const wrap = document.getElementById('loanProducts');
+  wrap.innerHTML = LOAN_PRODUCTS.map(p => `
+    <label class="loan-product ${p.id === selectedLoan.id ? 'active' : ''}" data-id="${p.id}">
+      <div class="lp-head"><input type="radio" name="loanP" ${p.id === selectedLoan.id ? 'checked' : ''}> <b>${p.name}</b>
+        <span class="lp-rate">${p.rate.toFixed(2)}%</span></div>
+      <div class="lp-note">${p.note}</div>
+    </label>
+  `).join('');
+  document.getElementById('loanRate').value = selectedLoan.rate;
+  document.getElementById('loanYears').value = selectedLoan.years;
+
+  wrap.querySelectorAll('.loan-product').forEach(el => {
+    el.addEventListener('click', () => {
+      selectedLoan = LOAN_PRODUCTS.find(p => p.id === el.dataset.id);
+      wrap.querySelectorAll('.loan-product').forEach(x => x.classList.toggle('active', x === el));
+      el.querySelector('input').checked = true;
+      document.getElementById('loanRate').value = selectedLoan.rate;
+      document.getElementById('loanYears').value = selectedLoan.years;
+    });
+  });
+
+  document.getElementById('budgetCalc').addEventListener('click', calcBudget);
+}
+
+function calcBudget() {
+  const myCash = parseFloat(document.getElementById('myCash').value) || 0;       // 억
+  const gfCash = parseFloat(document.getElementById('gfCash').value) || 0;       // 억
+  const income = parseFloat(document.getElementById('coupleIncome').value) || 0; // 만원/년
+  const rate = (parseFloat(document.getElementById('loanRate').value) || selectedLoan.rate) / 100;
+  const years = parseInt(document.getElementById('loanYears').value) || selectedLoan.years;
+  const repay = document.getElementById('repayType').value;
+
+  const cash = myCash + gfCash;
+  const r = rate / 12, n = years * 12;
+  const monthlyCap = income * 10000 * 0.40 / 12;   // DSR 40%, 원
+
+  // 상환방식별 대출한도 (월상환 상한 기준)
+  let dsrLoan;   // 억
+  if (repay === 'linear') {
+    dsrLoan = monthlyCap / (1 / n + r) / 1e8;                       // 원금균등 1회차 기준
+  } else {
+    dsrLoan = monthlyCap * (1 - Math.pow(1 + r, -n)) / r / 1e8;     // 원리금균등
+  }
+  dsrLoan = Math.min(dsrLoan, selectedLoan.maxLoan);
+
+  // LTV 70% 캡을 고려한 최대 예산
+  let budget = cash + dsrLoan;
+  if (dsrLoan > budget * 0.7) budget = cash / 0.3;
+  const loan = Math.min(dsrLoan, budget * 0.7);
+
+  // 월 상환액
+  let monthly;   // 원
+  if (repay === 'linear') monthly = loan * 1e8 * (1 / n + r);
+  else monthly = loan * 1e8 * r / (1 - Math.pow(1 + r, -n));
+
+  const capWarn = budget > selectedLoan.houseCap
+    ? `<div class="budget-warn">⚠️ ${selectedLoan.name}은 주택가 ${selectedLoan.houseCap}억 이하만 가능합니다. 예산을 ${selectedLoan.houseCap}억으로 제한하거나 일반 주담대를 선택하세요.</div>` : '';
+  const effBudget = Math.min(budget, selectedLoan.houseCap);
+
+  document.getElementById('budgetOutput').innerHTML = `
+    <div class="budget-big">최대 예산 <b>${budget.toFixed(1)}억</b></div>
+    <div class="budget-rows">
+      <div class="budget-row"><span>합산 가용자금</span><b>${cash.toFixed(1)}억</b></div>
+      <div class="budget-row"><span>대출 (${selectedLoan.name})</span><b>${loan.toFixed(1)}억</b></div>
+      <div class="budget-row"><span>예상 월 상환액${repay === 'linear' ? ' (1회차)' : ''}</span><b>${Math.round(monthly / 10000).toLocaleString()}만원</b></div>
+      <div class="budget-row"><span>월 상환 / 월 소득</span><b>${income > 0 ? (monthly / (income * 10000 / 12) * 100).toFixed(0) + '%' : '—'}</b></div>
+    </div>
+    ${capWarn}
+    <button class="price-apply budget-calc-btn" id="budgetApply">이 예산으로 지도 필터 →</button>
+  `;
+  document.getElementById('budgetApply').addEventListener('click', () => {
+    document.querySelectorAll('.price-chip').forEach(b => b.classList.remove('active'));
+    document.getElementById('priceMin').value = '';
+    document.getElementById('priceMax').value = effBudget.toFixed(1);
+    applyPriceFilter(0, effBudget);
+    document.getElementById('secExplorer').scrollIntoView({ behavior: 'smooth' });
+  });
 }
 
 function drawCommuteMarker(key) {
@@ -584,7 +640,7 @@ function drawCommuteMarker(key) {
   if (commuteMarkers[key]) explorerMap.removeLayer(commuteMarkers[key]);
   const icon = L.divIcon({
     className: '',
-    html: `<div class="work-pin">${key === 'A' ? '💼' : '💗'} 직장${key}</div>`,
+    html: `<div class="work-pin">${key === 'A' ? '💼 나' : '💗 여친'}</div>`,
     iconSize: [64, 26], iconAnchor: [32, 13],
   });
   commuteMarkers[key] = L.marker(pt, { icon }).addTo(explorerMap);
@@ -785,7 +841,7 @@ function showAptDetail(a) {
 
 /* ── 네비게이션 활성화 ──────────────────────────────────── */
 function initNav() {
-  const sections = ['secMap','secScoring','secDistrict','secTop1','secExplorer'];
+  const sections = ['secExplorer','secBudget','secMap','secScoring','secDistrict','secTop1'];
   const links = document.querySelectorAll('.nav-link');
   const observer = new IntersectionObserver(entries => {
     entries.forEach(e => {
@@ -806,8 +862,9 @@ function initNav() {
 (async function init() {
   initNav();
   renderScoring();
+  initBudgetPlanner();
+  await renderExplorer();
   await renderMap();
   await renderDistrictRankings();
   await renderTop1();
-  await renderExplorer();
 })();

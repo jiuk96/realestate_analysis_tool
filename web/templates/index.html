@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>서울 아파트 하락장 방어력 분석</title>
+  <title>서울 부동산 분석 툴</title>
 
   <!-- Pretendard (한글 가독성) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"/>
@@ -19,13 +19,12 @@
 <body>
 
 <!-- ── 헤더 ──────────────────────────────────────────── -->
-<header class="hero">
+<header class="hero hero-compact">
   <div class="hero-inner">
-    <div class="hero-badge">서울 아파트 퀀트 분석 · 2020~2026</div>
-    <h1>서울 <span class="accent">14개 구</span><br>하락장 방어력 분석</h1>
+    <div class="hero-badge">국토부 실거래가 기반 · 2020~2026</div>
+    <h1>서울 <span class="accent">부동산</span> 분석 툴</h1>
     <p class="hero-sub">
-      어느 동네가 폭락장을 버텼고, 어떤 아파트가 진짜 우량 단지일까?<br>
-      국토교통부 실거래가 데이터를 기반으로 객관적으로 분석합니다.
+      실거래 데이터로 가격·방어력·유동성을 분석하고, 지도에서 우리에게 맞는 단지를 찾아보세요.
     </p>
     <div class="hero-stats">
       <div class="hero-stat"><span class="hero-stat-val" id="statDistricts">14</span><span class="hero-stat-label">분석 대상 구</span></div>
@@ -42,18 +41,129 @@
 <!-- ── 네비게이션 ─────────────────────────────────────── -->
 <nav class="sticky-nav">
   <div class="nav-inner">
-    <a href="#secMap" class="nav-link active">① 구별 소개</a>
-    <a href="#secScoring" class="nav-link">② 점수 산출</a>
-    <a href="#secDistrict" class="nav-link">③ 동네별 TOP</a>
-    <a href="#secTop1" class="nav-link">④ 전체 1위</a>
-    <a href="#secExplorer" class="nav-link">⑤ 지도 탐색</a>
+    <a href="#secExplorer" class="nav-link active">① 지도 탐색</a>
+    <a href="#secBudget" class="nav-link">② 예산 플래너</a>
+    <a href="#secMap" class="nav-link">③ 구별 소개</a>
+    <a href="#secScoring" class="nav-link">④ 점수 산출</a>
+    <a href="#secDistrict" class="nav-link">⑤ 동네별 TOP</a>
+    <a href="#secTop1" class="nav-link">⑥ 전체 1위</a>
   </div>
 </nav>
 
-<!-- ── ① 구별 지도 & 소개 ───────────────────────────── -->
+<!-- ── ① 지도 탐색기 (메인) ──────────────────────────── -->
+<section class="section" id="secExplorer">
+  <div class="section-inner">
+    <div class="section-label">MAIN</div>
+    <h2 class="section-title">지도로 탐색하기</h2>
+    <p class="section-desc">
+      가격대를 설정하면 조건에 맞는 단지가 지도에 표시됩니다.
+      버블을 클릭하면 단지 특징, 실거래 내역, <strong>네이버부동산 링크</strong>, <strong>호가 메모</strong>를 확인할 수 있습니다.
+    </p>
+
+    <!-- 커플 통근 모드 -->
+    <div class="couple-box couple-box-wide">
+      <div class="couple-box-title">🚇 커플 통근 모드 <span class="couple-badge">기본 설정됨</span></div>
+      <div class="couple-commute-row">
+        <span class="commute-preset">💼 나 · 종로구 율곡로2길 25 (안국)</span>
+        <span class="commute-preset">💗 여자친구 · CJ제일제당센터 (동호로 330)</span>
+        <button class="commute-btn" id="setWorkA">💼 내 직장 다시 지정</button>
+        <button class="commute-btn" id="setWorkB">💗 여자친구 직장 다시 지정</button>
+        <button class="commute-btn commute-clear" id="resetWork">기본값 복원</button>
+      </div>
+      <div class="couple-commute-hint" id="commuteHint">두 직장까지의 직선거리가 단지 목록·상세에 표시됩니다. 정렬에서 '통근 합계순'을 선택해보세요.</div>
+    </div>
+
+    <!-- 가격 필터 바 -->
+    <div class="explorer-bar">
+      <div class="price-chips" id="priceChips">
+        <button class="price-chip active" data-min="0" data-max="9999">전체</button>
+        <button class="price-chip" data-min="0" data-max="8">8억 이하</button>
+        <button class="price-chip" data-min="8" data-max="12">8~12억</button>
+        <button class="price-chip" data-min="12" data-max="16">12~16억</button>
+        <button class="price-chip" data-min="16" data-max="9999">16억 이상</button>
+      </div>
+      <div class="price-custom">
+        <input type="number" id="priceMin" placeholder="최소(억)" min="0" step="0.5">
+        <span class="price-tilde">~</span>
+        <input type="number" id="priceMax" placeholder="최대(억)" min="0" step="0.5">
+        <button id="priceApply" class="price-apply">적용</button>
+      </div>
+      <select id="explorerSort" class="explorer-sort">
+        <option value="score">종합점수순</option>
+        <option value="priceAsc">가격 낮은순</option>
+        <option value="priceDesc">가격 높은순</option>
+        <option value="mdd">방어력순</option>
+        <option value="commute">통근 합계순</option>
+      </select>
+      <div class="explorer-count" id="explorerCount"></div>
+    </div>
+
+    <!-- 지도 + 목록/상세 패널 -->
+    <div class="explorer-layout">
+      <div id="explorerMap" class="explorer-map"></div>
+      <div id="explorerPanel" class="explorer-panel"></div>
+    </div>
+    <p class="explorer-note">
+      ※ 가격은 최근 실거래 중앙값(3개월 스무딩) 기준. 단지 위치는 지번 기반이며 일부 오차가 있을 수 있습니다.
+      호가 메모는 브라우저에만 저장됩니다.
+    </p>
+  </div>
+</section>
+
+<!-- ── ② 예산 플래너 ─────────────────────────────────── -->
+<section class="section section-alt" id="secBudget">
+  <div class="section-inner">
+    <div class="section-label">CHAPTER 2</div>
+    <h2 class="section-title">우리 예산 플래너</h2>
+    <p class="section-desc">
+      두 사람의 가용자금과 대출 상품을 조합해 <strong>최대 매수 예산</strong>과 <strong>월 상환액</strong>을 계산합니다.
+      계산된 예산으로 바로 지도를 필터링할 수 있습니다.
+    </p>
+
+    <div class="budget-grid">
+      <!-- 입력 -->
+      <div class="budget-card">
+        <div class="budget-card-title">1️⃣ 가용자금</div>
+        <div class="budget-field"><label>💼 내 가용자금</label><div class="bf-input"><input type="number" id="myCash" placeholder="2.0" step="0.1" min="0"><span>억</span></div></div>
+        <div class="budget-field"><label>💗 여자친구 가용자금</label><div class="bf-input"><input type="number" id="gfCash" placeholder="1.5" step="0.1" min="0"><span>억</span></div></div>
+        <div class="budget-field"><label>부부(예정) 합산 연소득</label><div class="bf-input"><input type="number" id="coupleIncome" placeholder="9000" step="500" min="0"><span>만원</span></div></div>
+      </div>
+
+      <!-- 대출 상품 -->
+      <div class="budget-card">
+        <div class="budget-card-title">2️⃣ 대출 상품</div>
+        <div id="loanProducts" class="loan-products"></div>
+        <div class="budget-field-row">
+          <div class="budget-field"><label>금리 (%)</label><div class="bf-input"><input type="number" id="loanRate" step="0.05" min="0"></div></div>
+          <div class="budget-field"><label>만기 (년)</label><div class="bf-input"><input type="number" id="loanYears" step="5" min="5" max="50"></div></div>
+        </div>
+        <div class="budget-field"><label>상환 방식</label>
+          <select id="repayType" class="explorer-sort" style="width:100%">
+            <option value="annuity">원리금균등 (매달 동일)</option>
+            <option value="linear">원금균등 (초기 부담 큼, 총이자 적음)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 결과 -->
+      <div class="budget-card budget-card-result">
+        <div class="budget-card-title">3️⃣ 결과</div>
+        <button id="budgetCalc" class="price-apply budget-calc-btn">계산하기</button>
+        <div id="budgetOutput" class="budget-output">
+          <div class="explorer-panel-empty">자금·소득·대출 상품을 입력하고<br>계산하기를 눌러주세요</div>
+        </div>
+      </div>
+    </div>
+    <p class="explorer-note">
+      ※ 대출 한도·금리는 2026년 기준 대표값이며 실제 조건은 소득·주택가·규제지역 여부에 따라 달라집니다. 반드시 은행/기금e든든에서 확인하세요.
+    </p>
+  </div>
+</section>
+
+<!-- ── ③ 구별 지도 & 소개 ───────────────────────────── -->
 <section class="section" id="secMap">
   <div class="section-inner">
-    <div class="section-label">CHAPTER 1</div>
+    <div class="section-label">CHAPTER 3</div>
     <h2 class="section-title">서울 14개 구, 어떤 동네인가요?</h2>
     <p class="section-desc">
       지도에서 구를 클릭하면 상세 정보를 확인할 수 있습니다.
@@ -73,13 +183,13 @@
   </div>
 </section>
 
-<!-- ── ② 점수 산출 방식 ──────────────────────────────── -->
+<!-- ── ④ 점수 산출 방식 ──────────────────────────────── -->
 <section class="section section-alt" id="secScoring">
   <div class="section-inner">
-    <div class="section-label">CHAPTER 2</div>
+    <div class="section-label">CHAPTER 4</div>
     <h2 class="section-title">점수를 어떻게 계산하나요?</h2>
     <p class="section-desc">
-      단순 가격 하락폭(MDD)만 보지 않고 <strong>6가지 축</strong>을 가중 합산합니다.
+      단순 가격 하락폭(MDD)만 보지 않고 <strong>여러 축</strong>을 가중 합산합니다.
       하락장을 버티고, 상승장에 참여하며, 꾸준히 거래되는 단지가 진정한 우량 단지입니다.
     </p>
 
@@ -117,102 +227,31 @@
   </div>
 </section>
 
-<!-- ── ③ 동네별 우수 아파트 ─────────────────────────── -->
+<!-- ── ⑤ 동네별 우수 아파트 ─────────────────────────── -->
 <section class="section" id="secDistrict">
   <div class="section-inner">
-    <div class="section-label">CHAPTER 3</div>
-    <h2 class="section-title">동네별 우수 아파트</h2>
+    <div class="section-label">CHAPTER 5</div>
+    <h2 class="section-title">동네별 추천 단지</h2>
     <p class="section-desc">
-      실거래 데이터가 수집된 구의 종합 점수 상위 단지입니다.
-      각 단지의 6가지 강점과 약점을 한눈에 비교할 수 있습니다.
+      구별 종합 점수 상위 3개 단지입니다. 단지명을 클릭하면 네이버부동산으로 연결됩니다.
     </p>
-    <div id="districtRankings">
-      <div class="skeleton" style="height:300px;margin-bottom:1rem"></div>
+    <div id="districtRankings" class="district-rankings-simple">
       <div class="skeleton" style="height:300px"></div>
     </div>
   </div>
 </section>
 
-<!-- ── ④ 전체 1위 단지 상세 ─────────────────────────── -->
+<!-- ── ⑥ 전체 1위 단지 상세 ─────────────────────────── -->
 <section class="section section-alt" id="secTop1">
   <div class="section-inner">
-    <div class="section-label">CHAPTER 4</div>
+    <div class="section-label">CHAPTER 6</div>
     <h2 class="section-title">전체 종합 1위 단지</h2>
     <p class="section-desc">
-      6가지 분석 축에서 가장 높은 종합 점수를 받은 단지의 상세 분석입니다.
+      전 분석 축에서 가장 높은 종합 점수를 받은 단지의 상세 분석입니다.
     </p>
     <div id="top1Detail">
       <div class="skeleton" style="height:400px"></div>
     </div>
-  </div>
-</section>
-
-<!-- ── ⑤ 지도 탐색기 (가격 필터) ─────────────────────── -->
-<section class="section" id="secExplorer">
-  <div class="section-inner">
-    <div class="section-label">CHAPTER 5</div>
-    <h2 class="section-title">지도로 탐색하기</h2>
-    <p class="section-desc">
-      원하는 가격대를 설정하면 조건에 맞는 단지가 지도에 표시됩니다.
-      가격 버블을 클릭하면 단지 특징과 <strong>네이버부동산 링크</strong>, 직접 입력하는 <strong>호가 메모</strong>를 확인할 수 있습니다.
-    </p>
-
-    <!-- 우리 커플 도구 -->
-    <div class="couple-tools">
-      <div class="couple-box">
-        <div class="couple-box-title">💰 우리 예산 계산기</div>
-        <div class="couple-budget-row">
-          <label>보유자금 <input type="number" id="cashInput" placeholder="3" step="0.5" min="0"> 억</label>
-          <label>합산 연소득 <input type="number" id="incomeInput" placeholder="9000" step="500" min="0"> 만원</label>
-          <button id="budgetCalc" class="price-apply">계산</button>
-        </div>
-        <div class="couple-budget-result" id="budgetResult"></div>
-      </div>
-      <div class="couple-box">
-        <div class="couple-box-title">🚇 커플 통근 모드</div>
-        <div class="couple-commute-row">
-          <button class="commute-btn" id="setWorkA">💼 직장 A 지정</button>
-          <button class="commute-btn" id="setWorkB">💗 직장 B 지정</button>
-          <button class="commute-btn commute-clear" id="clearWork">초기화</button>
-        </div>
-        <div class="couple-commute-hint" id="commuteHint">버튼을 누른 뒤 지도를 클릭해 두 사람의 직장 위치를 지정하세요. 단지별 직선거리 합이 표시됩니다.</div>
-      </div>
-    </div>
-
-    <!-- 가격 필터 바 -->
-    <div class="explorer-bar">
-      <div class="price-chips" id="priceChips">
-        <button class="price-chip active" data-min="0" data-max="9999">전체</button>
-        <button class="price-chip" data-min="0" data-max="8">8억 이하</button>
-        <button class="price-chip" data-min="8" data-max="12">8~12억</button>
-        <button class="price-chip" data-min="12" data-max="16">12~16억</button>
-        <button class="price-chip" data-min="16" data-max="9999">16억 이상</button>
-      </div>
-      <div class="price-custom">
-        <input type="number" id="priceMin" placeholder="최소(억)" min="0" step="0.5">
-        <span class="price-tilde">~</span>
-        <input type="number" id="priceMax" placeholder="최대(억)" min="0" step="0.5">
-        <button id="priceApply" class="price-apply">적용</button>
-      </div>
-      <select id="explorerSort" class="explorer-sort">
-        <option value="score">종합점수순</option>
-        <option value="priceAsc">가격 낮은순</option>
-        <option value="priceDesc">가격 높은순</option>
-        <option value="mdd">방어력순</option>
-        <option value="commute">통근 합계순</option>
-      </select>
-      <div class="explorer-count" id="explorerCount"></div>
-    </div>
-
-    <!-- 지도 + 목록/상세 패널 -->
-    <div class="explorer-layout">
-      <div id="explorerMap" class="explorer-map"></div>
-      <div id="explorerPanel" class="explorer-panel"></div>
-    </div>
-    <p class="explorer-note">
-      ※ 가격은 최근 실거래 중앙값(3개월 스무딩) 기준. 단지 위치는 지번 기반이며 일부 오차가 있을 수 있습니다.
-      호가 메모는 브라우저에만 저장됩니다.
-    </p>
   </div>
 </section>
 
