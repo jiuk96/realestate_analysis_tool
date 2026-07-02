@@ -14,7 +14,7 @@
   <!-- Plotly (차트) -->
   <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v={{ asset_v }}">
 </head>
 <body>
 
@@ -263,6 +263,6 @@
   </p>
 </footer>
 
-<script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+<script src="{{ url_for('static', filename='dashboard.js') }}?v={{ asset_v }}"></script>
 </body>
 </html>

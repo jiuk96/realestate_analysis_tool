@@ -18,6 +18,16 @@ def _load(name: str) -> dict:
     return json.loads((DATA_DIR / name).read_text(encoding="utf-8"))
 
 
+@app.context_processor
+def inject_asset_version():
+    """정적 파일 캐시 무효화: dashboard.js 수정 시각을 버전으로 사용"""
+    try:
+        v = int((Path(__file__).parent / "static" / "dashboard.js").stat().st_mtime)
+    except OSError:
+        v = 0
+    return {"asset_v": v}
+
+
 @app.route("/")
 def index():
     return render_template("index.html")
