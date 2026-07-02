@@ -133,6 +133,28 @@ save('timeseries.json', {'apartments': apt_list})
 # traits.json
 save('traits.json', traits if isinstance(traits, dict) else {})
 
+# district_info.json: 가격대·has_data를 실데이터로 갱신
+info_path = OUT / 'district_info.json'
+if info_path.exists():
+    info = json.loads(info_path.read_text(encoding='utf-8'))
+    latest_by_apt = {}
+    for a in apt_list:
+        if a['monthly']:
+            latest_by_apt[a['apt_name']] = a['monthly'][-1]['median']
+    by_dist = {}
+    for _, r in score_df.iterrows():
+        p = latest_by_apt.get(r['apt_name'])
+        if p:
+            by_dist.setdefault(r['district'], []).append(p / 10000)
+    for name, meta in info.items():
+        prices = by_dist.get(name)
+        meta['has_data'] = bool(prices)
+        if prices:
+            meta['price_low'] = round(min(prices))
+            meta['price_high'] = round(max(prices))
+    info_path.write_text(json.dumps(info, ensure_ascii=False, indent=2), encoding='utf-8')
+    print('  갱신: district_info.json (실거래 최신가 기반 가격대)')
+
 print()
 print('=== 완료 ===')
 print(f'분석 구: {sorted(score_df["district"].unique())}')

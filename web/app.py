@@ -53,6 +53,51 @@ def api_composite_score():
     return jsonify(_load("composite_score.json"))
 
 
+@app.route("/api/apartments")
+def api_apartments():
+    """지도 탐색기용: 단지별 좌표 + 가격 + 점수 통합"""
+    comp = _load("composite_score.json")
+    mdd  = {r["apt_name"]: r for r in _load("mdd_ranking.json")["ranking"]}
+    ts   = {a["apt_name"]: a["monthly"] for a in _load("timeseries.json")["apartments"]}
+
+    loc_path = DATA_DIR.parent / "static" / "apt_locations.json"
+    locs = json.loads(loc_path.read_text(encoding="utf-8")) if loc_path.exists() else {}
+
+    out = []
+    for r in comp["ranking"]:
+        loc = locs.get(f"{r['district']}|{r['apt_name']}", {})
+        monthly = ts.get(r["apt_name"], [])
+        latest = monthly[-1]["median"] if monthly else None
+        m = mdd.get(r["apt_name"], {})
+        out.append({
+            "apt_name": r["apt_name"],
+            "district": r["district"],
+            "rank": r.get("rank"),
+            "composite_score": r.get("composite_score"),
+            "defense_score": r.get("defense_score"),
+            "liquidity_score": r.get("liquidity_score"),
+            "upside_score": r.get("upside_score"),
+            "momentum_score": r.get("momentum_score"),
+            "premium_score": r.get("premium_score"),
+            "scale_score": r.get("scale_score"),
+            "transit_score": r.get("transit_score"),
+            "mdd": r.get("mdd"),
+            "momentum_pct": r.get("momentum_pct"),
+            "build_year": r.get("build_year"),
+            "area_exclusive": r.get("area_exclusive"),
+            "latest_price": latest,
+            "peak_price": m.get("peak_price"),
+            "trough_price": m.get("trough_price"),
+            "lat": loc.get("lat"),
+            "lng": loc.get("lng"),
+            "nearest_station": loc.get("nearest_station"),
+            "nearest_station_m": loc.get("nearest_station_m"),
+            "walk_min": r.get("walk_min"),
+            "coord_source": loc.get("source", "geocoded"),
+        })
+    return jsonify({"apartments": out})
+
+
 @app.route("/api/districts")
 def api_districts():
     """구별 정보 + 실데이터 합산"""

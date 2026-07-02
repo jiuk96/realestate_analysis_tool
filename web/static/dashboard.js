@@ -289,6 +289,7 @@ async function renderDistrictRankings() {
             ${best.name ? `<span class="aptag aptag-good">강점: ${best.name}</span>` : ''}
             ${worst.name ? `<span class="aptag aptag-bad">약점: ${worst.name}</span>` : ''}
             ${a.mdd != null ? `<span class="aptag">MDD ${a.mdd.toFixed(1)}%</span>` : ''}
+            <a class="aptag aptag-naver" href="https://new.land.naver.com/search?query=${encodeURIComponent(a.district + ' ' + a.apt_name)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">N 매물보기 ↗</a>
           </div>
         </div>
         <div class="apt-rank-score" style="color:${i===0?color:'#94a3b8'}">${fmtScore(a.composite_score)}<span class="apt-rank-unit">점</span></div>
@@ -345,6 +346,7 @@ async function renderTop1() {
       <h3 class="top1-name">${top.apt_name}</h3>
       <div class="top1-loc">${top.district} ${distInfo.icon||''}</div>
       <div class="top1-score-big">${fmtScore(top.composite_score)}<span class="top1-score-unit">점</span></div>
+      <a class="ep-naver" style="display:inline-block;margin-top:.8rem" href="https://new.land.naver.com/search?query=${encodeURIComponent(top.district + ' ' + top.apt_name)}" target="_blank" rel="noopener">네이버부동산에서 매물 보기 ↗</a>
     </div>
 
     <div class="top1-body">
@@ -454,9 +456,129 @@ function renderPriceChart(aptTs) {
   }, { responsive: true, displayModeBar: false });
 }
 
+/* ── ⑤ 지도 탐색기 ─────────────────────────────────────── */
+function naverLandUrl(a) {
+  const q = encodeURIComponent(`${a.district} ${a.apt_name}`);
+  if (a.lat && a.lng) return `https://new.land.naver.com/search?ms=${a.lat},${a.lng},16&query=${q}`;
+  return `https://new.land.naver.com/search?query=${q}`;
+}
+
+const askKey = a => `ask|${a.district}|${a.apt_name}`;
+const getAsk = a => { const v = localStorage.getItem(askKey(a)); return v ? parseFloat(v) : null; };
+
+let explorerMap = null;
+let explorerMarkers = [];
+let explorerApts = [];
+
+async function renderExplorer() {
+  const data = await fetchJSON('/api/apartments');
+  explorerApts = (data.apartments || []).filter(a => a.lat && a.lng);
+
+  explorerMap = L.map('explorerMap', { center: [37.545, 126.99], zoom: 11 });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors', maxZoom: 18
+  }).addTo(explorerMap);
+
+  // 가격 칩
+  document.querySelectorAll('.price-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.price-chip').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('priceMin').value = '';
+      document.getElementById('priceMax').value = '';
+      applyPriceFilter(+btn.dataset.min, +btn.dataset.max);
+    });
+  });
+  document.getElementById('priceApply').addEventListener('click', () => {
+    document.querySelectorAll('.price-chip').forEach(b => b.classList.remove('active'));
+    const mn = parseFloat(document.getElementById('priceMin').value) || 0;
+    const mx = parseFloat(document.getElementById('priceMax').value) || 9999;
+    applyPriceFilter(mn, mx);
+  });
+
+  applyPriceFilter(0, 9999);
+}
+
+function applyPriceFilter(minEok, maxEok) {
+  explorerMarkers.forEach(m => explorerMap.removeLayer(m));
+  explorerMarkers = [];
+
+  const visible = explorerApts.filter(a => {
+    const p = a.latest_price != null ? a.latest_price / 10000 : null;
+    return p != null && p >= minEok && p <= maxEok;
+  });
+
+  visible.forEach(a => {
+    const eok = a.latest_price / 10000;
+    const cls = a.composite_score >= 60 ? 'bubble-hot' : a.composite_score >= 55 ? 'bubble-mid' : 'bubble-cool';
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="apt-bubble ${cls}">${eok >= 10 ? eok.toFixed(0) : eok.toFixed(1)}억</div>`,
+      iconSize: [52, 26], iconAnchor: [26, 13],
+    });
+    const m = L.marker([a.lat, a.lng], { icon });
+    m.on('click', () => showAptDetail(a));
+    m.addTo(explorerMap);
+    explorerMarkers.push(m);
+  });
+
+  document.getElementById('explorerCount').textContent =
+    `${visible.length}개 단지 (최신 실거래가 기준)`;
+}
+
+function showAptDetail(a) {
+  const eok = v => v != null ? (v/10000).toFixed(1) + '억' : '—';
+  const ask = getAsk(a);
+  const latestEok = a.latest_price != null ? a.latest_price / 10000 : null;
+  const askDiff = (ask != null && latestEok) ? ((ask - latestEok) / latestEok * 100) : null;
+
+  const axes = [
+    ['가격방어', a.defense_score], ['유동성', a.liquidity_score], ['상승참여', a.upside_score],
+    ['모멘텀', a.momentum_score], ['프리미엄', a.premium_score], ['규모연식', a.scale_score],
+    ['교통', a.transit_score],
+  ].filter(x => x[1] != null);
+  const best = [...axes].sort((x,y) => y[1]-x[1]).slice(0,2);
+
+  document.getElementById('explorerPanel').innerHTML = `
+    <div class="ep-head">
+      <div class="ep-name">${a.apt_name}</div>
+      <div class="ep-loc">${a.district} · ${a.build_year}년 준공 · 전용 ${a.area_exclusive}㎡ · 종합 ${a.rank}위</div>
+    </div>
+    <div class="ep-price-grid">
+      <div class="ep-price"><span class="epv">${eok(a.latest_price)}</span><span class="epk">최신 실거래</span></div>
+      <div class="ep-price"><span class="epv">${eok(a.peak_price)}</span><span class="epk">전고점</span></div>
+      <div class="ep-price"><span class="epv" style="color:${a.mdd >= -15 ? '#34d399' : '#f87171'}">${a.mdd != null ? a.mdd.toFixed(1)+'%' : '—'}</span><span class="epk">MDD</span></div>
+      <div class="ep-price"><span class="epv">${fmtScore(a.composite_score)}점</span><span class="epk">종합점수</span></div>
+    </div>
+    <div class="ep-tags">
+      ${best.map(([n,v]) => `<span class="aptag aptag-good">${n} ${v.toFixed(0)}점</span>`).join('')}
+      ${a.nearest_station ? `<span class="aptag">🚇 ${a.nearest_station} ${a.nearest_station_m}m</span>` : ''}
+      ${a.momentum_pct != null ? `<span class="aptag">최근 1년 추세 ${a.momentum_pct > 0 ? '+' : ''}${a.momentum_pct.toFixed(1)}%/년</span>` : ''}
+    </div>
+    <div class="ep-ask">
+      <label class="ep-ask-label">💬 현재 호가/매도희망가 메모 (억)</label>
+      <div class="ep-ask-row">
+        <input type="number" id="epAskInput" step="0.1" min="0" placeholder="예: 12.5" value="${ask != null ? ask : ''}">
+        <button id="epAskSave" class="price-apply">저장</button>
+      </div>
+      ${askDiff != null ? `<div class="ep-ask-diff">호가가 최신 실거래보다 <b style="color:${askDiff >= 0 ? '#fbbf24' : '#34d399'}">${askDiff >= 0 ? '+' : ''}${askDiff.toFixed(1)}%</b> ${askDiff >= 0 ? '높음' : '낮음'}</div>` : ''}
+    </div>
+    <a class="ep-naver" href="${naverLandUrl(a)}" target="_blank" rel="noopener">
+      네이버부동산에서 실제 매물 보기 ↗
+    </a>
+  `;
+
+  document.getElementById('epAskSave').addEventListener('click', () => {
+    const v = document.getElementById('epAskInput').value;
+    if (v) localStorage.setItem(askKey(a), v);
+    else localStorage.removeItem(askKey(a));
+    showAptDetail(a);
+  });
+}
+
 /* ── 네비게이션 활성화 ──────────────────────────────────── */
 function initNav() {
-  const sections = ['secMap','secScoring','secDistrict','secTop1'];
+  const sections = ['secMap','secScoring','secDistrict','secTop1','secExplorer'];
   const links = document.querySelectorAll('.nav-link');
   const observer = new IntersectionObserver(entries => {
     entries.forEach(e => {
@@ -480,4 +602,5 @@ function initNav() {
   await renderMap();
   await renderDistrictRankings();
   await renderTop1();
+  await renderExplorer();
 })();
