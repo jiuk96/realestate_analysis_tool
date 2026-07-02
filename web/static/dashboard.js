@@ -492,10 +492,11 @@ function haversineKm(lat1, lng1, lat2, lng2) {
 
 /* ── 커플 도구: 통근 모드 (기본 직장 위치 고정) ─────────── */
 const DEFAULT_COMMUTE = {
-  A: [37.5771, 126.9822],   // 💼 나: 종로구 율곡로2길 25 (안국역 인근)
-  B: [37.5593, 127.0053],   // 💗 여자친구: CJ제일제당센터, 중구 동호로 330 (동대입구역 인근)
+  A: [37.5768, 126.9815],   // 💼 나: 종로구 율곡로2길 25 (안국역 인근)
+  B: [37.5605, 127.0040],   // 💗 여자친구: CJ제일제당센터, 중구 동호로 330 (쌍림동)
 };
-let commutePoints = { ...DEFAULT_COMMUTE, ...JSON.parse(localStorage.getItem('commutePoints') || '{}') };
+// 키 버전 v2: 구버전에서 테스트로 찍어둔 위치가 기본값을 덮어쓰던 문제 방지
+let commutePoints = { ...DEFAULT_COMMUTE, ...JSON.parse(localStorage.getItem('commutePoints_v2') || '{}') };
 let commuteMarkers = {};
 let placingWork = null;
 
@@ -523,7 +524,7 @@ function initCoupleTools() {
   });
   document.getElementById('resetWork').addEventListener('click', () => {
     commutePoints = { ...DEFAULT_COMMUTE };
-    localStorage.removeItem('commutePoints');
+    localStorage.removeItem('commutePoints_v2');
     Object.keys(commutePoints).forEach(drawCommuteMarker);
     hint.textContent = '기본값(율곡로2길 25 / CJ제일제당센터)으로 복원했습니다.';
     applyPriceFilter(explorerFilter.min, explorerFilter.max);
@@ -533,7 +534,7 @@ function initCoupleTools() {
     if (!placingWork) return;
     const key = placingWork;
     commutePoints[key] = [e.latlng.lat, e.latlng.lng];
-    localStorage.setItem('commutePoints', JSON.stringify(commutePoints));
+    localStorage.setItem('commutePoints_v2', JSON.stringify(commutePoints));
     drawCommuteMarker(key);
     placingWork = null;
     hint.textContent = `직장 ${key === 'A' ? '(나)' : '(여자친구)'} 위치를 변경했습니다.`;
