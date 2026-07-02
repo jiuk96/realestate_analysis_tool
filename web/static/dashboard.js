@@ -183,11 +183,11 @@ function renderScoring() {
       desc: '거래 규모(대단지 프리미엄)와 준공연도를 반영합니다. 대단지는 환금성이 높고, 신축은 상품 경쟁력이 있습니다.',
       metric: '총 거래량(70%) + 준공연도(30%)', example: '1,000+ 거래 대단지 & 2010년대 준공 → 가점' },
     { key: '교통', weight: 10, color: '#f87171',
-      desc: '단지 좌표에서 가장 가까운 지하철역까지의 실측 도보거리와 반경 1km 내 역 수(더블역세권)를 평가합니다.',
+      desc: '단지 좌표에서 가장 가까운 지하철역까지의 도보거리(직선거리 기반)와 반경 1km 내 역 수(더블역세권)를 평가합니다.',
       metric: '최근접역 도보 분(80%) + 1km 내 역 수(20%)', example: '도보 5분 역세권 + 더블역세권 → 최고점' },
   ];
 
-  // 실제 사용된 가중치를 API에서 받아 반영 (교통 축은 실측 데이터 있을 때만)
+  // 실제 사용된 가중치를 API에서 받아 반영 (교통 축은 좌표 데이터 있을 때만)
   fetchJSON('/api/composite_score').then(cs => {
     const w = cs.weights || {};
     const active = axes.filter(a => w[a.key] != null).map(a => ({ ...a, weight: Math.round(w[a.key] * 100) }));
@@ -378,7 +378,7 @@ async function renderTop1() {
         ${top.upside_score >= 70 ? '<li>상승장에서도 시장 평균을 웃도는 상승률을 기록했습니다</li>' : ''}
         ${top.momentum_score >= 70 ? '<li>최근 12개월 가격 추세가 뚜렷한 상승 흐름입니다</li>' : ''}
         ${top.premium_score >= 70 ? '<li>단위면적당 가격 상위권 — 시장이 인정한 입지입니다</li>' : ''}
-        ${top.transit_score >= 70 && top.nearest_station ? `<li>${top.nearest_station} 도보 ${Math.round(top.walk_min)}분 — 실측 역세권 단지입니다</li>` : ''}
+        ${top.transit_score >= 70 && top.nearest_station ? `<li>${top.nearest_station} 도보 ${Math.round(top.walk_min)}분 거리의 역세권 단지입니다</li>` : ''}
         <li>${top.district} 내 ${comp.ranking.filter(r=>r.district===top.district).length}개 단지 중 종합 1위를 차지했습니다</li>
         <li>6가지 분석 축에서 균형 잡힌 고득점을 기록했습니다</li>
       </ul>

@@ -184,7 +184,9 @@ def main():
     ok = fail = skip = 0
     for apt_name, district in targets:
         cache_key = f"{district}|{apt_name}"
-        if cache_key in cache and cache[cache_key].get("lat"):
+        # 추정 좌표(source=estimate)는 실측으로 교체, 이미 실측이면 스킵
+        if (cache_key in cache and cache[cache_key].get("lat")
+                and cache[cache_key].get("source") != "estimate"):
             skip += 1
             continue
 
