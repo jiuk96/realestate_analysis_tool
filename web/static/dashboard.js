@@ -207,12 +207,15 @@ function renderScoring() {
     { key: '입지프리미엄', weight: 15, color: '#fb923c',
       desc: '단위면적(m²)당 가격 수준입니다. 교통·학군·인프라 가치는 이미 시장가격에 반영되어 있어, 평단가가 가장 객관적인 입지 지표입니다.',
       metric: 'm²당 고점 거래가 percentile', example: '평단가 상위 10% → 시장이 인정한 입지' },
-    { key: '규모·연식', weight: 10, color: '#f472b6',
-      desc: '거래 규모(대단지 프리미엄)와 준공연도를 반영합니다. 대단지는 환금성이 높고, 신축은 상품 경쟁력이 있습니다.',
-      metric: '총 거래량(70%) + 준공연도(30%)', example: '1,000+ 거래 대단지 & 2010년대 준공 → 가점' },
+    { key: '규모', weight: 8, color: '#f472b6',
+      desc: '총 거래량으로 단지 규모(세대수)를 가늠합니다. 대단지는 매물·수요가 풍부해 환금성이 높습니다.',
+      metric: '총 거래 건수 percentile', example: '1,000+ 거래 대단지 → 높은 환금성' },
     { key: '교통', weight: 10, color: '#f87171',
       desc: '단지 좌표에서 가장 가까운 지하철역까지의 도보거리(직선거리 기반)와 반경 1km 내 역 수(더블역세권)를 평가합니다.',
       metric: '최근접역 도보 분(80%) + 1km 내 역 수(20%)', example: '도보 5분 역세권 + 더블역세권 → 최고점' },
+    { key: '재건축잠재력', weight: 8, color: '#22d3ee',
+      desc: '준공 후 경과 연수를 기준으로 재건축·리모델링 가능성을 평가합니다. 재건축 안전진단 연한(준공 30년)에 가까울수록 미래가치 상승 잠재력이 큽니다.',
+      metric: '준공연도 기준 재건축 연한(30년) 근접도', example: '준공 30년 경과 → 재건축 추진 가능 구간' },
   ];
 
   // 실제 사용된 가중치를 API에서 받아 반영 (교통 축은 좌표 데이터 있을 때만)
@@ -297,8 +300,8 @@ async function renderDistrictRankings() {
     const rows = apts.map((a, i) => {
       const axes = [
         ['가격방어', a.defense_score], ['유동성', a.liquidity_score], ['상승참여', a.upside_score],
-        ['모멘텀', a.momentum_score], ['프리미엄', a.premium_score], ['규모·연식', a.scale_score],
-        ['교통', a.transit_score],
+        ['모멘텀', a.momentum_score], ['프리미엄', a.premium_score], ['규모', a.scale_score],
+        ['교통', a.transit_score], ['재건축', a.redevelop_score],
       ].filter(x => x[1] != null);
       const best = axes.reduce((p,c) => c[1] > p[1] ? c : p, ['', -1]);
 
@@ -352,9 +355,10 @@ async function renderTop1() {
     { name: '거래유동성', val: top.liquidity_score, w: 20, color: '#38bdf8' },
     { name: '상승참여도', val: top.upside_score, w: 15, color: '#fbbf24' },
     { name: '회복모멘텀', val: top.momentum_score, w: 15, color: '#a78bfa' },
-    { name: '입지프리미엄', val: top.premium_score, w: 15, color: '#fb923c' },
-    { name: '규모·연식', val: top.scale_score, w: 10, color: '#f472b6' },
+    { name: '입지프리미엄', val: top.premium_score, w: 13, color: '#fb923c' },
+    { name: '규모', val: top.scale_score, w: 7, color: '#f472b6' },
     { name: '교통', val: top.transit_score, w: 10, color: '#f87171' },
+    { name: '재건축잠재력', val: top.redevelop_score, w: 8, color: '#22d3ee' },
   ].filter(a => a.val != null);
 
   // 레이더 차트 (Plotly)
@@ -406,6 +410,7 @@ async function renderTop1() {
         ${top.momentum_score >= 70 ? '<li>최근 12개월 가격 추세가 뚜렷한 상승 흐름입니다</li>' : ''}
         ${top.premium_score >= 70 ? '<li>단위면적당 가격 상위권 — 시장이 인정한 입지입니다</li>' : ''}
         ${top.transit_score >= 70 && top.nearest_station ? `<li>${top.nearest_station} 도보 ${Math.round(top.walk_min)}분 거리의 역세권 단지입니다</li>` : ''}
+        ${top.redevelop_score >= 70 ? `<li>준공 ${top.apt_age || ''}년차 — 재건축 연한에 근접해 미래가치 상승 잠재력이 있습니다</li>` : ''}
         <li>${top.district} 내 ${comp.ranking.filter(r=>r.district===top.district).length}개 단지 중 종합 1위를 차지했습니다</li>
         <li>6가지 분석 축에서 균형 잡힌 고득점을 기록했습니다</li>
       </ul>

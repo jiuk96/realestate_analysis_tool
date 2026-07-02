@@ -117,7 +117,8 @@ save('mdd_ranking.json', {'ranking': mdd_out.sort_values('mdd', ascending=False)
 
 # composite_score.json
 _KR = {'defense': '가격방어력', 'liquidity': '거래유동성', 'upside': '상승참여도',
-       'momentum': '회복모멘텀', 'premium': '입지프리미엄', 'scale': '규모·연식', 'transit': '교통'}
+       'momentum': '회복모멘텀', 'premium': '입지프리미엄', 'scale': '규모',
+       'transit': '교통', 'redevelop': '재건축잠재력'}
 _w = WEIGHTS_TRANSIT if 'transit_score' in score_df.columns else WEIGHTS
 weights = {_KR[k]: v for k, v in _w.items()}
 # 네이버 검색 정확도용 법정동(洞) 병합 (apt_locations 캐시가 있으면)

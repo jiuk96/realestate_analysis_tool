@@ -29,27 +29,33 @@ import config
 log = logging.getLogger(__name__)
 
 WEIGHTS = {
-    "defense":   0.25,   # 가격 방어력
-    "liquidity": 0.20,   # 거래 유동성
-    "upside":    0.15,   # 상승 참여도
-    "momentum":  0.15,   # 회복 모멘텀
-    "premium":   0.15,   # 입지 프리미엄
-    "scale":     0.10,   # 규모·연식
+    "defense":   0.24,   # 가격 방어력
+    "liquidity": 0.19,   # 거래 유동성
+    "upside":    0.14,   # 상승 참여도
+    "momentum":  0.14,   # 회복 모멘텀
+    "premium":   0.13,   # 입지 프리미엄
+    "scale":     0.08,   # 규모(거래량)
+    "redevelop": 0.08,   # 재건축 잠재력 (준공연도 기반)
 }
 
-# 실측 교통 데이터(geocode_apts.py 캐시)가 있을 때의 7축 가중치
+# 실측 교통 데이터(geocode_apts.py 캐시)가 있을 때의 8축 가중치
 WEIGHTS_TRANSIT = {
-    "defense":   0.25,
-    "liquidity": 0.20,
-    "upside":    0.15,
+    "defense":   0.22,
+    "liquidity": 0.18,
+    "upside":    0.13,
     "momentum":  0.12,
     "premium":   0.10,
-    "scale":     0.08,
+    "scale":     0.07,   # 규모(거래량)
     "transit":   0.10,   # 교통 접근성 (최근접역 도보거리 + 역세권 밀도)
+    "redevelop": 0.08,   # 재건축 잠재력 (준공연도 기반)
 }
 
 TRANSIT_CACHE = Path(__file__).parent.parent / "data" / "static" / "apt_locations.json"
 WALK_M_PER_MIN = 67   # 성인 평균 보속 약 4km/h
+
+# 재건축 판단 기준 연도 (준공 후 30년이 재건축 안전진단 연한)
+CURRENT_YEAR = 2026
+REDEV_LEGAL_AGE = 30
 
 
 def _pct_rank(s: pd.Series, low_is_good: bool = False) -> pd.Series:
@@ -222,12 +228,12 @@ def _location_premium(mdd_df: pd.DataFrame) -> pd.DataFrame:
     return df[["apt_name", "premium_score", "price_per_m2"]]
 
 
-# ── ⑥ 규모·연식 ──────────────────────────────────────────────
+# ── ⑥ 규모 (거래량) ──────────────────────────────────────────
 
-def _scale_age(mdd_df: pd.DataFrame, monthly: pd.DataFrame) -> pd.DataFrame:
+def _scale(mdd_df: pd.DataFrame, monthly: pd.DataFrame) -> pd.DataFrame:
     """
-    거래규모(70%) : 총 거래건수 percentile — 세대수(대단지 프리미엄)의 프록시
-    연식(30%)     : 준공연도 percentile — 신축일수록 상품성 우위
+    총 거래건수 percentile — 세대수(대단지 프리미엄·환금성)의 프록시.
+    연식은 별도의 재건축 잠재력 축으로 분리했다.
     """
     vol = (
         monthly.groupby("apt_name", observed=True)["trade_count"]
@@ -235,14 +241,36 @@ def _scale_age(mdd_df: pd.DataFrame, monthly: pd.DataFrame) -> pd.DataFrame:
         .reset_index()
         .rename(columns={"trade_count": "total_trades"})
     )
-    df = mdd_df[["apt_name", "build_year"]].merge(vol, on="apt_name", how="left")
+    df = mdd_df[["apt_name"]].merge(vol, on="apt_name", how="left")
     df["total_trades"] = df["total_trades"].fillna(0)
-
-    df["scale_score"] = (
-        _pct_rank(df["total_trades"]) * 0.70 +
-        _pct_rank(df["build_year"].astype(float)) * 0.30
-    )
+    df["scale_score"] = _pct_rank(df["total_trades"])
     return df[["apt_name", "scale_score", "total_trades"]]
+
+
+# ── 재건축 잠재력 (준공연도 기반) ─────────────────────────────
+
+def _redev_score_from_age(age: float) -> float:
+    """
+    준공 후 경과연수(age) → 재건축 잠재력 0~100.
+    재건축 안전진단 연한은 준공 30년. 연한에 가까울수록/넘길수록 높은 점수.
+    신축은 재건축과 무관하므로 낮음(신축 상품성은 다른 축에서 평가).
+    """
+    if age >= 35:   return 100.0   # 재건축 사업 본격 추진 가능 구간
+    if age >= 30:   return 90.0    # 안전진단 연한 도래
+    if age >= 27:   return 72.0    # 연한 임박
+    if age >= 22:   return 52.0    # 중기 (리모델링/향후 재건축)
+    if age >= 17:   return 32.0
+    if age >= 12:   return 18.0
+    return 8.0                     # 신축 — 재건축 무관
+
+
+def _redevelopment(mdd_df: pd.DataFrame) -> pd.DataFrame:
+    """준공연도 → 재건축 잠재력 점수 (절대 기준)."""
+    df = mdd_df[["apt_name", "build_year"]].copy()
+    df["apt_age"] = (CURRENT_YEAR - df["build_year"].astype(float)).clip(lower=0)
+    df["redevelop_score"] = df["apt_age"].apply(_redev_score_from_age)
+    df["apt_age"] = df["apt_age"].round().astype(int)
+    return df[["apt_name", "redevelop_score", "apt_age"]]
 
 
 # ── ⑦ 교통 접근성 (실측, 캐시 있을 때만) ─────────────────────
@@ -311,11 +339,12 @@ def compute_composite_score(
     ups = _upside_participation(mdd_df, monthly)
     mo  = _recovery_momentum(monthly)
     pr  = _location_premium(mdd_df)
-    sc  = _scale_age(mdd_df, monthly)
+    sc  = _scale(mdd_df, monthly)
+    rd  = _redevelopment(mdd_df)
     tr  = _transit_access(mdd_df)
 
     df = mdd_df[["apt_name", "district_name", "build_year", "area_exclusive"]].copy()
-    parts = [dfn, lq, ups, mo, pr, sc] + ([tr] if tr is not None else [])
+    parts = [dfn, lq, ups, mo, pr, sc, rd] + ([tr] if tr is not None else [])
     for part in parts:
         df = df.merge(part, on="apt_name", how="left")
 
@@ -326,7 +355,8 @@ def compute_composite_score(
         df["upside_score"].fillna(50)    * weights["upside"]    +
         df["momentum_score"].fillna(50)  * weights["momentum"]  +
         df["premium_score"].fillna(50)   * weights["premium"]   +
-        df["scale_score"].fillna(50)     * weights["scale"]
+        df["scale_score"].fillna(50)     * weights["scale"]     +
+        df["redevelop_score"].fillna(20) * weights["redevelop"]
     )
     if tr is not None:
         df["composite_score"] += df["transit_score"].fillna(50) * weights["transit"]
