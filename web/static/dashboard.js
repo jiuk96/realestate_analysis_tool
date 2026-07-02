@@ -311,8 +311,8 @@ async function renderDistrictRankings() {
         </div>
         <span class="drs-score" style="${i===0?`color:${color}`:''}">${fmtScore(a.composite_score)}</span>
         <span class="drs-links">
-          <a href="${naverLandUrl(a.district, a.apt_name, a.dong)}" target="_blank" rel="noopener" class="drs-lk drs-lk-n" title="네이버 지도">N</a>
-          <a href="${hogangnonoUrl(a.district, a.apt_name, a.dong)}" target="_blank" rel="noopener" class="drs-lk drs-lk-h" title="호갱노노">호</a>
+          <a href="${naverLandUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener" class="drs-lk drs-lk-n" title="네이버 지도">N</a>
+          <a href="${hogangnonoUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener" class="drs-lk drs-lk-h" title="호갱노노">호</a>
         </span>
       </div>`;
     }).join('');
@@ -367,8 +367,8 @@ async function renderTop1() {
       <div class="top1-loc">${top.district} ${distInfo.icon||''}</div>
       <div class="top1-score-big">${fmtScore(top.composite_score)}<span class="top1-score-unit">점</span></div>
       <div class="ep-links" style="justify-content:center;margin-top:.8rem">
-        <a class="ep-naver" href="${naverLandUrl(top.district, top.apt_name, top.dong)}" target="_blank" rel="noopener">네이버 지도/부동산 ↗</a>
-        <a class="ep-hogang" href="${hogangnonoUrl(top.district, top.apt_name, top.dong)}" target="_blank" rel="noopener">호갱노노 ↗</a>
+        <a class="ep-naver" href="${naverLandUrl(top.district, top.apt_name, top.dong, top.lat, top.lng)}" target="_blank" rel="noopener">네이버 지도/부동산 ↗</a>
+        <a class="ep-hogang" href="${hogangnonoUrl(top.district, top.apt_name, top.dong, top.lat, top.lng)}" target="_blank" rel="noopener">호갱노노 ↗</a>
       </div>
     </div>
 
@@ -506,20 +506,20 @@ function normalizeAptName(name) {
     .trim();
 }
 
-// 네이버 지도 검색으로 단지를 찾음 (m.land 검색은 지역+단지 혼합 시 실패가 잦아
-// 실패 화면이 없고 아파트 단지를 안정적으로 잡는 지도 검색을 사용).
-// 지도에서 단지를 누르면 '부동산' 매물 탭으로 연결된다.
-function naverLandUrl(district, aptName, dong) {
+// 네이버 지도 링크. 좌표가 있으면 좌표 중심으로 열어(이름 매칭 실패 무관)
+// 항상 정확한 위치를 보여주고, 좌표가 없을 때만 이름 검색으로 폴백한다.
+function naverLandUrl(district, aptName, dong, lat, lng) {
+  const label = encodeURIComponent(normalizeAptName(aptName));
+  if (lat && lng) return `https://map.naver.com/p?lat=${lat}&lng=${lng}&title=${label}&level=2`;
   const area = dong || district;
-  const q = encodeURIComponent(`${area} ${normalizeAptName(aptName)}`.trim());
-  return `https://map.naver.com/p/search/${q}`;
+  return `https://map.naver.com/p/search/${encodeURIComponent(`${area} ${normalizeAptName(aptName)}`.trim())}`;
 }
 
-// 호갱노노 단지 검색 (검색 결과 페이지). 동+정규화명으로 매칭.
-function hogangnonoUrl(district, aptName, dong) {
+// 호갱노노 링크. 좌표가 있으면 좌표 중심 지도로, 없으면 이름 검색.
+function hogangnonoUrl(district, aptName, dong, lat, lng) {
+  if (lat && lng) return `https://hogangnono.com/?zoom=16&lat=${lat}&lng=${lng}`;
   const area = dong || district;
-  const q = encodeURIComponent(`${area} ${normalizeAptName(aptName)}`.trim());
-  return `https://hogangnono.com/search/${q}`;
+  return `https://hogangnono.com/search/${encodeURIComponent(`${area} ${normalizeAptName(aptName)}`.trim())}`;
 }
 
 const askKey = a => `ask|${a.district}|${a.apt_name}`;
@@ -935,8 +935,8 @@ function showAptDetail(a) {
       ${askDiff != null ? `<div class="ep-ask-diff">호가가 최신 실거래보다 <b style="color:${askDiff >= 0 ? '#fbbf24' : '#34d399'}">${askDiff >= 0 ? '+' : ''}${askDiff.toFixed(1)}%</b> ${askDiff >= 0 ? '높음' : '낮음'}</div>` : ''}
     </div>
     <div class="ep-links">
-      <a class="ep-naver" href="${naverLandUrl(a.district, a.apt_name, a.dong)}" target="_blank" rel="noopener">네이버 지도/부동산 ↗</a>
-      <a class="ep-hogang" href="${hogangnonoUrl(a.district, a.apt_name, a.dong)}" target="_blank" rel="noopener">호갱노노 ↗</a>
+      <a class="ep-naver" href="${naverLandUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener">네이버 지도/부동산 ↗</a>
+      <a class="ep-hogang" href="${hogangnonoUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener">호갱노노 ↗</a>
     </div>
     <div class="ep-trades">
       <div class="ep-trades-head">

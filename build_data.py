@@ -123,8 +123,11 @@ weights = {_KR[k]: v for k, v in _w.items()}
 _locpath = Path('data/static/apt_locations.json')
 if _locpath.exists():
     _loc = json.loads(_locpath.read_text(encoding='utf-8'))
-    score_df['dong'] = score_df.apply(
-        lambda r: (_loc.get(f"{r['district']}|{r['apt_name']}") or {}).get('dong'), axis=1)
+    def _locget(r, k):
+        return (_loc.get(f"{r['district']}|{r['apt_name']}") or {}).get(k)
+    score_df['dong'] = score_df.apply(lambda r: _locget(r, 'dong'), axis=1)
+    score_df['lat'] = score_df.apply(lambda r: _locget(r, 'lat'), axis=1)
+    score_df['lng'] = score_df.apply(lambda r: _locget(r, 'lng'), axis=1)
 save('composite_score.json', {'ranking': score_df.to_dict('records'), 'weights': weights})
 
 # timeseries.json
