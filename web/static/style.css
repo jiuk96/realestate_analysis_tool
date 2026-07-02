@@ -852,7 +852,18 @@ body { font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSy
 .ref-org { color: #64748b; font-size: .72rem; margin-left: .3rem; }
 
 /* ── 2인 예산 플래너 ────────────────────────────────────── */
-.budget-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+.common-card { margin-top: 1rem; }
+.common-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 1rem 1.5rem;
+  align-items: start;
+}
+.common-checks { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem 1rem; }
+@media (max-width: 860px) {
+  .common-grid { grid-template-columns: 1fr; }
+  .common-checks { grid-template-columns: 1fr; }
+}
 .person-a { border-top: 3px solid #38bdf8; }
 .person-b { border-top: 3px solid #f472b6; }
 .person-summary { margin-top: .9rem; background: #0f172a; border-radius: 10px; padding: .7rem .8rem; }

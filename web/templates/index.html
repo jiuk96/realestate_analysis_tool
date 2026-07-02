@@ -121,7 +121,7 @@
       합산해서 <strong>어떤 가격대의 집을 볼 수 있는지</strong> 결론을 도출합니다.
     </p>
 
-    <div class="budget-grid budget-grid-3">
+    <div class="budget-grid">
       <!-- 💼 나 -->
       <div class="budget-card person-card person-a">
         <div class="budget-card-title">💼 나</div>
@@ -163,17 +163,19 @@
         </div>
         <div id="bSummary" class="person-summary"></div>
       </div>
+    </div>
 
-      <!-- ⚙️ 공통 조건 -->
-      <div class="budget-card">
-        <div class="budget-card-title">⚙️ 공통 조건</div>
-        <div class="budget-checks">
+    <!-- ⚙️ 공통 조건 (전체 폭, 가로 배치) -->
+    <div class="budget-card common-card">
+      <div class="budget-card-title">⚙️ 공통 조건</div>
+      <div class="common-grid">
+        <div class="common-checks">
           <label class="bc"><input type="checkbox" id="optMarriage" checked> 혼인 증여공제 (+1억, 각자)</label>
           <label class="bc"><input type="checkbox" id="optBirth"> 출산 공제/신생아 특례</label>
           <label class="bc"><input type="checkbox" id="optFirstHome" checked> 생애최초 (취득세 감면)</label>
           <label class="bc"><input type="checkbox" id="optRegulated"> 토지거래허가구역/규제지역 <button class="legal-link" data-legal="toho">?</button></label>
         </div>
-        <div class="budget-field" style="margin-top:.8rem"><label>상환 방식</label>
+        <div class="budget-field"><label>상환 방식</label>
           <select id="repayType" class="explorer-sort" style="width:100%">
             <option value="annuity">원리금균등 (매달 동일)</option>
             <option value="linear">원금균등 (초기 부담 큼, 총이자 적음)</option>
@@ -182,9 +184,8 @@
         <div class="budget-field"><label>부모 차용 상환기간 (공통)</label>
           <div class="bf-input"><input type="number" id="familyYears" value="10" step="1" min="1" max="30"><span>년</span></div>
         </div>
-        <p class="lp-note" style="margin-top:.6rem">대출 한도는 각자 소득의 DSR 40%(스트레스 +1.5%p)로 계산 후 합산되고,
-        주택 전체에 LTV·6억 캡이 적용됩니다.</p>
       </div>
+      <p class="lp-note" style="margin-top:.7rem">대출 한도는 각자 소득의 DSR 40%(스트레스 +1.5%p)로 계산 후 합산되고, 주택 전체에 LTV·6억 캡이 적용됩니다.</p>
     </div>
 
     <!-- 결과 (전체 폭) -->
