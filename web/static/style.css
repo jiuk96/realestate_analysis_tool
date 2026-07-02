@@ -850,3 +850,15 @@ body { font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSy
 .reference-list a { color: #cbd5e1; text-decoration: none; border-bottom: 1px dotted #475569; }
 .reference-list a:hover { color: #38bdf8; border-bottom-color: #38bdf8; }
 .ref-org { color: #64748b; font-size: .72rem; margin-left: .3rem; }
+
+/* ── 2인 예산 플래너 ────────────────────────────────────── */
+.budget-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+.person-a { border-top: 3px solid #38bdf8; }
+.person-b { border-top: 3px solid #f472b6; }
+.person-summary { margin-top: .9rem; background: #0f172a; border-radius: 10px; padding: .7rem .8rem; }
+.ps-title { color: #94a3b8; font-size: .8rem; }
+.ps-title b { color: #fbbf24; font-size: 1.05rem; margin-left: .3rem; font-variant-numeric: tabular-nums; }
+.ps-rows { display: flex; flex-wrap: wrap; gap: .3rem .8rem; margin-top: .4rem; color: #64748b; font-size: .74rem; font-variant-numeric: tabular-nums; }
+.ps-month { margin-top: .4rem; color: #cbd5e1; font-size: .78rem; font-variant-numeric: tabular-nums; }
+.ff-parts-2 { grid-template-columns: 1fr 1fr; }
+@media (max-width: 960px) { .budget-grid-3 { grid-template-columns: 1fr; } .ff-parts-2 { grid-template-columns: 1fr; } }

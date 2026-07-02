@@ -139,28 +139,29 @@ export function calcBrokerFee(price) {
  *  - LTV: 대출액 / 주택가. 생애최초 80%, 그 외 70% 가정 (비규제).
  *  - 정책대출은 각 상품별 소득·주택가·한도 요건이 있으며 부합 시 우대금리 적용.
  */
+// 2026년 기준 대표값 (기금e든든·주택도시기금 공시 기준)
 export const LOAN_PRODUCTS = [
   {
-    id: 'newborn', name: '신생아 특례대출', rate: 0.024, years: 30,
-    maxLoan: 5 * 억, houseCap: 9 * 억, incomeCap: 20000 * 만, ltv: 0.80,
-    note: '2년 내 출산 가구 · 부부합산 소득 2억↓ · 주택 9억↓ · 최대 5억',
+    id: 'newborn', name: '신생아 특례대출', rate: 0.027, years: 30,
+    maxLoan: 4 * 억, houseCap: 9 * 억, incomeCap: 20000 * 만, ltv: 0.70,
+    note: '2년 내 출산 무주택 가구 · 부부합산 2억↓ · 주택 9억↓ · 최대 4억(2026 축소) · 금리 1.6~3.3%',
     requiresBirth: true,
   },
   {
     id: 'didimdol', name: '디딤돌대출 (신혼)', rate: 0.032, years: 30,
-    maxLoan: 4 * 억, houseCap: 6 * 억, incomeCap: 8500 * 만, ltv: 0.80,
-    note: '신혼 부부합산 소득 8,500만↓ · 주택 6억↓ · 전용 85㎡↓',
+    maxLoan: 4 * 억, houseCap: 6 * 억, incomeCap: 8500 * 만, ltv: 0.70,
+    note: '신혼 부부합산 8,500만↓ · 주택 6억↓ · 전용 85㎡↓ · 금리 2.65~3.95%',
   },
   {
-    id: 'bogeumjari', name: '보금자리론', rate: 0.043, years: 40,
+    id: 'bogeumjari', name: '보금자리론', rate: 0.042, years: 40,
     maxLoan: 3.6 * 억, houseCap: 6 * 억, incomeCap: 8500 * 만, ltv: 0.70,
     note: '소득 7천만↓(신혼 8,500만) · 주택 6억↓ · 고정금리',
   },
   {
     id: 'bank', name: '일반 주택담보대출', rate: 0.041, years: 40,
     maxLoan: Infinity, houseCap: Infinity, incomeCap: Infinity,
-    ltv: 0.70, ltvFirst: 0.80,
-    note: 'LTV 70%(생애최초 80%) · 스트레스 DSR 40% · 변동/혼합',
+    ltv: 0.70,
+    note: '수도권 LTV 70% 일괄(6·27 후속) · 스트레스 DSR 40% · 규제지역 40%·6억 캡',
   },
 ];
 
@@ -186,11 +187,12 @@ export const REGULATION = {
   STRESS_DSR_ADDON: 0.015,       // 스트레스 DSR 가산금리 (한도 산정용)
   // 규제지역(투기과열지구=강남·서초·송파·용산+토지거래허가구역) LTV
   //  - 은행업감독규정상 규제지역 실수요 LTV 40%
-  //  - 생애최초는 규제지역에서도 일부 우대되나 6·27 대책으로 축소, 보수적 50%
+  //  - 6·27 대책 후속으로 수도권 생애최초 LTV 우대(80%)가 70%로 일괄 축소됨
+  //    (규제지역은 생애최초 여부와 무관하게 40% 적용, 보수 기준)
   LTV_REGULATED: 0.40,
-  LTV_REGULATED_FIRST: 0.50,
-  LTV_NORMAL: 0.70,              // 비규제 일반
-  LTV_NORMAL_FIRST: 0.80,        // 비규제 생애최초
+  LTV_REGULATED_FIRST: 0.40,
+  LTV_NORMAL: 0.70,              // 수도권 일반
+  LTV_NORMAL_FIRST: 0.70,        // 수도권 생애최초 (6·27 후속으로 80%→70%)
 };
 
 /* ============================================================
@@ -261,9 +263,10 @@ export const LEGAL_BASIS = {
   },
   loan: {
     title: 'DSR·LTV·6·27 대책이 대출한도를 어떻게 정하나요?',
-    body: 'LTV(주택담보인정비율)는 집값 대비 빌릴 수 있는 비율입니다. 비규제지역은 70%(생애최초 80%)지만, ' +
+    body: 'LTV(주택담보인정비율)는 집값 대비 빌릴 수 있는 비율입니다. 수도권은 70%가 기본이며, ' +
+          '2025년 6·27 대책 후속으로 생애최초 우대(80%)도 수도권에선 70%로 일괄 축소됐습니다. ' +
           '투기과열지구·조정대상지역(현재 강남·서초·송파·용산)과 토지거래허가구역 같은 규제지역은 ' +
-          '실수요 기준 40%(생애최초 50%)로 축소됩니다. DSR(총부채원리금상환비율)은 연소득 대비 모든 대출의 ' +
+          '실수요 기준 40%로 더 축소됩니다. DSR(총부채원리금상환비율)은 연소득 대비 모든 대출의 ' +
           '연간 원리금이 40%를 넘지 못하게 하는 규제로, 소득이 낮으면 LTV가 남아도 대출이 막힙니다. ' +
           '2025년 6·27 가계부채 관리방안으로 수도권·규제지역 주택담보대출은 한도가 최대 6억원으로 제한되고, ' +
           '스트레스 DSR(가산금리 약 +1.5%p)이 적용돼 실제 한도는 더 보수적으로 산정됩니다. ' +
@@ -469,6 +472,105 @@ export function analyzeFinance(input) {
       family: familyLoan,
       loan: loan,
     },
+  };
+}
+
+/* ============================================================
+ * 6. 커플(2인) 분석: 각자 가용자금 → 합산 최대 매수가
+ * ============================================================
+ * 각자(A/B)가 현금·부모증여·부모차용·연소득·대출상품을 따로 입력한다.
+ *  - 대출 한도(DSR)는 각자 소득 기준으로 산정 후 합산 (공동명의 가정)
+ *  - LTV·6억 캡·부대비용은 주택(공통)에 적용
+ *  - 결과에 각자 기여 가용자금과 월 상환액을 분리해 보여준다.
+ */
+function analyzePerson(p, common) {
+  const { marriage, birth } = common;
+  const gift = calcGiftTax(p.gift || 0, { marriage, birth });
+  const fam = calcFamilyLoan(p.family || 0, p.familyYears || 10);
+  const equity = (p.cash || 0) + gift.netReceived;   // 현금 + 세후증여
+  const stressRate = (p.rate || 0.041) + REGULATION.STRESS_DSR_ADDON;
+  const dsrLoan = Math.min(
+    maxLoanByDSR(p.income || 0, stressRate, p.years || 40),
+    (p.product && p.product.maxLoan) || Infinity
+  );
+  return {
+    cash: p.cash || 0, giftGross: p.gift || 0, netGift: gift.netReceived, giftTax: gift.tax,
+    family: p.family || 0, familyMonthly: fam.monthly, familyOverLimit: fam.overLimit,
+    equity, dsrLoan, income: p.income || 0, product: p.product,
+    rate: p.rate, years: p.years,
+  };
+}
+
+export function analyzeCouple(inA, inB, common) {
+  const { firstHome = false, regulated = false, repay = 'annuity' } = common;
+  const A = analyzePerson(inA, common);
+  const B = analyzePerson(inB, common);
+
+  const ownEquity = A.equity + B.equity;                 // 두 사람 자기자본(현금+세후증여)
+  const familyTotal = A.family + B.family;               // 부모 무이자 차용 합
+  const available = ownEquity + familyTotal;             // 매수 투입 가능 현금성 자금
+  const dsrTotal = A.dsrLoan + B.dsrLoan;                // 소득 기준 대출 합
+
+  // LTV (공통, 일반 주담대 기준)
+  let ltv;
+  if (regulated) ltv = firstHome ? REGULATION.LTV_REGULATED_FIRST : REGULATION.LTV_REGULATED;
+  else ltv = firstHome ? REGULATION.LTV_NORMAL_FIRST : REGULATION.LTV_NORMAL;
+
+  const loanCapAt = (price) => {
+    let loan = Math.min(dsrTotal, price * ltv);
+    if (regulated) loan = Math.min(loan, REGULATION.METRO_LOAN_CAP);
+    return loan;
+  };
+  const feasible = (price) => {
+    const acq = calcAcquisitionTax(price, firstHome).tax;
+    const broker = calcBrokerFee(price);
+    return (price - loanCapAt(price) + acq + broker) <= available;
+  };
+
+  let lo = 0, hi = 50 * 억;
+  for (let i = 0; i < 60; i++) {
+    const mid = (lo + hi) / 2;
+    if (feasible(mid)) lo = mid; else hi = mid;
+  }
+  const maxPrice = lo;
+
+  const acq = calcAcquisitionTax(maxPrice, firstHome);
+  const broker = calcBrokerFee(maxPrice);
+  const byLTV = maxPrice * ltv;
+  let loan = Math.min(dsrTotal, byLTV);
+  let bind = 'DSR 합산';
+  if (loan === byLTV) bind = `LTV ${(ltv * 100).toFixed(0)}%${regulated ? '(규제지역)' : ''}`;
+  if (regulated && loan > REGULATION.METRO_LOAN_CAP) { loan = REGULATION.METRO_LOAN_CAP; bind = '6·27 대책 6억'; }
+
+  // 대출을 각자 DSR 여력 비율로 배분
+  const loanA = dsrTotal > 0 ? loan * A.dsrLoan / dsrTotal : loan / 2;
+  const loanB = loan - loanA;
+  const monthlyA = calcMonthlyPayment(loanA, A.rate, A.years, repay).first + A.familyMonthly;
+  const monthlyB = calcMonthlyPayment(loanB, B.rate, B.years, repay).first + B.familyMonthly;
+
+  const person = (P, ln, mth) => ({
+    cash: P.cash, netGift: P.netGift, giftTax: P.giftTax, family: P.family,
+    loan: ln, monthly: mth, familyMonthly: P.familyMonthly,
+    contrib: P.equity + P.family + ln,     // 각자 총 기여 가용자금
+    dsrLoan: P.dsrLoan, familyOverLimit: P.familyOverLimit,
+  });
+
+  const warnings = [];
+  if (regulated) warnings.push('토지거래허가구역/규제지역: 실거주 목적만 허가·2년 실거주 의무, 갭투자 불가, LTV·6억 규제 적용.');
+  if (A.familyOverLimit) warnings.push(`나의 부모 차용이 무이자 한도(${won2eok(FAMILY_LOAN.MAX_NO_INTEREST)})를 초과했습니다.`);
+  if (B.familyOverLimit) warnings.push(`여자친구의 부모 차용이 무이자 한도(${won2eok(FAMILY_LOAN.MAX_NO_INTEREST)})를 초과했습니다.`);
+
+  return {
+    maxPrice, ltv, loan, loanBind: bind, warnings,
+    ownEquity, familyTotal, available,
+    acqTax: acq.tax, acqRate: acq.rate, brokerFee: broker,
+    giftTax: A.giftTax + B.giftTax, netGift: A.netGift + B.netGift,
+    grossGift: A.giftGross + B.giftGross,
+    totalMonthly: monthlyA + monthlyB,
+    regulated,
+    A: person(A, loanA, monthlyA),
+    B: person(B, loanB, monthlyB),
+    composition: { cashGift: ownEquity, family: familyTotal, loan },
   };
 }
 
