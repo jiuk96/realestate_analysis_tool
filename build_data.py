@@ -92,6 +92,7 @@ save('quality.json', {
     'min_households': 500,
     'smoothing': '3개월 이동 중앙값',
     'outlier_method': 'z-score > 3.0 제거',
+    'representative_area': '전용 59㎡ (18평)',
 })
 
 # pipeline.json

@@ -22,11 +22,19 @@ log = logging.getLogger(__name__)
 def build_monthly_median(df: pd.DataFrame) -> pd.DataFrame:
     """
     단지 × 면적 그룹별 월별 중앙 거래가 산출.
-    면적 구분 없이 단지 전체 가격을 비교하면 믹스 오류가 생기므로
-    가장 거래량이 많은 대표 면적(주력 타입)으로 집계.
+    단지마다 주력 면적이 달라 비교가 왜곡되므로, 전 단지를 동일 평형
+    (전용 59㎡ = 18평대, config.TARGET_AREA_MIN~MAX)으로 통일한다.
+    해당 평형대 거래 중 최다 면적을 각 단지의 대표 타입으로 사용하며,
+    이 평형대 거래가 없는 단지는 분석에서 제외된다.
     반환: [apt_name, deal_date, median_price, area_exclusive, district_name, build_year]
     """
-    # 단지별 주력 면적(거래 최다 면적) 선정
+    # 전용 59㎡대(18평)만 남김 — 전 단지 동일 평형 비교
+    df = df[
+        (df["area_exclusive"] >= config.TARGET_AREA_MIN) &
+        (df["area_exclusive"] <= config.TARGET_AREA_MAX)
+    ].copy()
+
+    # 59㎡대 안에서 단지별 최다 거래 면적을 대표 타입으로 선정
     dominant_area = (
         df.groupby(["apt_name", "area_exclusive"], observed=True)
         .size()
