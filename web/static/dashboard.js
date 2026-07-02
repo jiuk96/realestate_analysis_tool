@@ -303,12 +303,18 @@ async function renderDistrictRankings() {
       const best = axes.reduce((p,c) => c[1] > p[1] ? c : p, ['', -1]);
 
       return `
-      <a class="drs-row" href="${naverLandUrl(a.district, a.apt_name, a.dong)}" target="_blank" rel="noopener">
+      <div class="drs-row">
         <span class="drs-rank" style="${i===0?`color:${color}`:''}">${i+1}</span>
-        <span class="drs-name">${a.apt_name}</span>
-        <span class="drs-meta">${a.mdd != null ? 'MDD ' + a.mdd.toFixed(1) + '%' : ''} · ${best[0]} 강점</span>
+        <div class="drs-mid">
+          <div class="drs-name">${a.apt_name}</div>
+          <div class="drs-meta">${a.mdd != null ? 'MDD ' + a.mdd.toFixed(1) + '%' : ''} · ${best[0]} 강점</div>
+        </div>
         <span class="drs-score" style="${i===0?`color:${color}`:''}">${fmtScore(a.composite_score)}</span>
-      </a>`;
+        <span class="drs-links">
+          <a href="${naverLandUrl(a.district, a.apt_name, a.dong)}" target="_blank" rel="noopener" class="drs-lk drs-lk-n" title="네이버 지도">N</a>
+          <a href="${hogangnonoUrl(a.district, a.apt_name, a.dong)}" target="_blank" rel="noopener" class="drs-lk drs-lk-h" title="호갱노노">호</a>
+        </span>
+      </div>`;
     }).join('');
 
     return `
@@ -360,7 +366,10 @@ async function renderTop1() {
       <h3 class="top1-name">${top.apt_name}</h3>
       <div class="top1-loc">${top.district} ${distInfo.icon||''}</div>
       <div class="top1-score-big">${fmtScore(top.composite_score)}<span class="top1-score-unit">점</span></div>
-      <a class="ep-naver" style="display:inline-block;margin-top:.8rem" href="${naverLandUrl(top.district, top.apt_name, top.dong)}" target="_blank" rel="noopener">네이버부동산에서 매물 보기 ↗</a>
+      <div class="ep-links" style="justify-content:center;margin-top:.8rem">
+        <a class="ep-naver" href="${naverLandUrl(top.district, top.apt_name, top.dong)}" target="_blank" rel="noopener">네이버 지도/부동산 ↗</a>
+        <a class="ep-hogang" href="${hogangnonoUrl(top.district, top.apt_name, top.dong)}" target="_blank" rel="noopener">호갱노노 ↗</a>
+      </div>
     </div>
 
     <div class="top1-body">
@@ -504,6 +513,13 @@ function naverLandUrl(district, aptName, dong) {
   const area = dong || district;
   const q = encodeURIComponent(`${area} ${normalizeAptName(aptName)}`.trim());
   return `https://map.naver.com/p/search/${q}`;
+}
+
+// 호갱노노 단지 검색 (검색 결과 페이지). 동+정규화명으로 매칭.
+function hogangnonoUrl(district, aptName, dong) {
+  const area = dong || district;
+  const q = encodeURIComponent(`${area} ${normalizeAptName(aptName)}`.trim());
+  return `https://hogangnono.com/search/${q}`;
 }
 
 const askKey = a => `ask|${a.district}|${a.apt_name}`;
@@ -918,9 +934,10 @@ function showAptDetail(a) {
       </div>
       ${askDiff != null ? `<div class="ep-ask-diff">호가가 최신 실거래보다 <b style="color:${askDiff >= 0 ? '#fbbf24' : '#34d399'}">${askDiff >= 0 ? '+' : ''}${askDiff.toFixed(1)}%</b> ${askDiff >= 0 ? '높음' : '낮음'}</div>` : ''}
     </div>
-    <a class="ep-naver" href="${naverLandUrl(a.district, a.apt_name, a.dong)}" target="_blank" rel="noopener">
-      네이버부동산에서 실제 매물 보기 ↗
-    </a>
+    <div class="ep-links">
+      <a class="ep-naver" href="${naverLandUrl(a.district, a.apt_name, a.dong)}" target="_blank" rel="noopener">네이버 지도/부동산 ↗</a>
+      <a class="ep-hogang" href="${hogangnonoUrl(a.district, a.apt_name, a.dong)}" target="_blank" rel="noopener">호갱노노 ↗</a>
+    </div>
     <div class="ep-trades">
       <div class="ep-trades-head">
         📋 실거래 내역 <span class="ep-trades-note">국토부 raw data</span>
@@ -987,11 +1004,13 @@ function initNav() {
 
 /* ── 초기화 ─────────────────────────────────────────────── */
 (async function init() {
+  const safe = async (fn) => { try { await fn(); } catch (e) { console.error(fn.name, e); } };
   initNav();
-  renderScoring();
-  initBudgetPlanner();
-  await renderExplorer();
-  await renderMap();
-  await renderDistrictRankings();
-  await renderTop1();
+  await safe(renderScoring);
+  await safe(initBudgetPlanner);
+  // 각 섹션을 독립 실행 — 한 곳(예: 지도 CDN)이 실패해도 나머지는 정상 렌더
+  await safe(renderExplorer);
+  await safe(renderMap);
+  await safe(renderDistrictRankings);
+  await safe(renderTop1);
 })();

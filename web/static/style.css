@@ -705,13 +705,32 @@ body { font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSy
 .drs-count { color: #64748b; font-size: .75rem; }
 .drs-row {
   display: flex; align-items: center; gap: .6rem; padding: .5rem .4rem;
-  text-decoration: none; border-radius: 8px; transition: background .12s;
+  border-radius: 8px; transition: background .12s;
 }
 .drs-row:hover { background: rgba(56,189,248,.07); }
-.drs-rank { width: 1.3rem; text-align: center; font-weight: 800; color: #64748b; font-variant-numeric: tabular-nums; }
-.drs-name { flex: 1; color: #e2e8f0; font-weight: 700; font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.drs-meta { color: #64748b; font-size: .74rem; white-space: nowrap; }
-.drs-score { font-weight: 800; color: #94a3b8; font-variant-numeric: tabular-nums; }
+.drs-rank { width: 1.3rem; text-align: center; font-weight: 800; color: #64748b; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.drs-mid { flex: 1; min-width: 0; }
+.drs-name { color: #e2e8f0; font-weight: 700; font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.drs-meta { color: #64748b; font-size: .74rem; white-space: nowrap; margin-top: .1rem; }
+.drs-score { font-weight: 800; color: #94a3b8; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.drs-links { display: flex; gap: .3rem; flex-shrink: 0; }
+.drs-lk {
+  width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center;
+  justify-content: center; font-size: .72rem; font-weight: 800; text-decoration: none;
+}
+.drs-lk-n { background: rgba(3,199,90,.15); color: #03c75a; }
+.drs-lk-n:hover { background: #03c75a; color: #fff; }
+.drs-lk-h { background: rgba(255,110,60,.15); color: #ff6e3c; }
+.drs-lk-h:hover { background: #ff6e3c; color: #fff; }
+
+/* 상세 패널 링크 (네이버 + 호갱노노) */
+.ep-links { display: flex; gap: .5rem; }
+.ep-links .ep-naver, .ep-links .ep-hogang {
+  flex: 1; display: block; text-align: center; font-weight: 700; font-size: .85rem;
+  border-radius: 10px; padding: .65rem; text-decoration: none;
+}
+.ep-hogang { background: #ff6e3c; color: #fff; }
+.ep-hogang:hover { filter: brightness(1.08); }
 
 /* ── 예산 플래너 ───────────────────────────────────────── */
 .budget-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
