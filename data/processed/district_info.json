@@ -100,7 +100,7 @@
       "60대+": 11
     },
     "price_level": "중상",
-    "price_low": 13,
+    "price_low": 9,
     "price_high": 23,
     "description": "성수동 카페거리와 서울숲, 왕십리 교통 허브를 품은 '준강남' 입지입니다. 2호선·5호선·수인분당선·경의중앙선이 교차하는 왕십리역과 강남 접근성이 좋은 옥수·금호동 라인이 주거 축을 이룹니다. 성수전략정비구역 재개발과 IT기업 입주로 젊은 고소득층 유입이 활발합니다. 한강과 서울숲을 낀 주거환경으로 마용성 중에서도 상승기 탄력이 가장 컸던 지역입니다.",
     "strengths": [
@@ -138,7 +138,7 @@
       "60대+": 11
     },
     "price_level": "중",
-    "price_low": 17,
+    "price_low": 15,
     "price_high": 17,
     "description": "광장동 학군지와 건대입구 상권, 한강변 자양동이 공존합니다. 광장동은 '강북의 대치동'으로 불리는 전통 학군지로 대형 평형 위주의 안정적 수요가 있습니다. 2호선·5호선·7호선이 지나며 강남 접근성이 좋고, 자양동 일대 재개발로 신축 공급이 이어지고 있습니다. 조용한 주거지를 원하는 중산층 가족 수요가 두텁습니다.",
     "strengths": [
@@ -176,7 +176,7 @@
       "60대+": 17
     },
     "price_level": "중하",
-    "price_low": 7,
+    "price_low": 8,
     "price_high": 15,
     "description": "청량리역 GTX·수도권 광역교통 개발의 최대 수혜지로 꼽힙니다. 전농·답십리 뉴타운과 이문·휘경 뉴타운으로 신축 대단지가 대거 들어서며 주거지 이미지가 빠르게 바뀌고 있습니다. 경희대·외대·시립대 등 대학가 배후 수요도 탄탄합니다. 가격 대비 신축 접근성이 좋아 실수요 갈아타기 수요가 많은 지역입니다.",
     "strengths": [
@@ -365,7 +365,7 @@
       "60대+": 12
     },
     "price_level": "중상",
-    "price_low": 9,
+    "price_low": 11,
     "price_high": 16,
     "description": "여의도 금융가를 품은 서남권 업무 중심지입니다. 여의도 재건축(시범·한양 등)이 최대 재료로, 신속통합기획으로 사업이 진행되며 기대감이 높습니다. 신길뉴타운 신축 대단지와 당산동 한강변 단지가 실거주 축을 이룹니다. 5호선·9호선·1호선 교통망과 직주근접으로 금융권 종사자 수요가 두텁습니다.",
     "strengths": [
@@ -441,7 +441,7 @@
       "60대+": 11
     },
     "price_level": "하",
-    "price_low": 6,
+    "price_low": 4,
     "price_high": 11,
     "description": "서울대와 2호선 라인을 낀 가성비 주거지입니다. 신림선 개통과 신림뉴타운 재개발로 주거환경이 개선되고 있습니다. 강남 출퇴근이 가능한 2호선 역세권 대단지들이 신혼부부·1인 가구의 진입처 역할을 합니다. 서울 자치구 중 가격 부담이 가장 낮은 축에 속해 첫 내집 마련 수요가 집중됩니다.",
     "strengths": [
@@ -532,7 +532,7 @@
   },
   "중구": {
     "code": "11140",
-    "has_data": false,
+    "has_data": true,
     "color": "#fcd34d",
     "icon": "🏙️",
     "center": [
@@ -555,8 +555,8 @@
       "60대+": 19
     },
     "price_level": "중상",
-    "price_low": 12,
-    "price_high": 20,
+    "price_low": 10,
+    "price_high": 15,
     "description": "명동·을지로·서울시청 일대 업무·상업 중심지로, 주거보다 오피스·상가 비중이 압도적입니다. 500세대 이상 대단지 아파트가 드물어 수집 대상 확대가 필요한 지역입니다.",
     "strengths": [
       "도심 최고 직주근접",
@@ -569,7 +569,7 @@
   },
   "중랑구": {
     "code": "11260",
-    "has_data": false,
+    "has_data": true,
     "color": "#a3e635",
     "icon": "🌳",
     "center": [
@@ -591,8 +591,8 @@
       "60대+": 23
     },
     "price_level": "중하",
-    "price_low": 6,
-    "price_high": 10,
+    "price_low": 4,
+    "price_high": 8,
     "description": "동북권 외곽 주거지로 중랑천과 산자락을 낀 실수요 중심 지역입니다. 상대적으로 낮은 가격대로 첫 내집마련 수요가 꾸준합니다.",
     "strengths": [
       "상대적 저가",
@@ -605,7 +605,7 @@
   },
   "성북구": {
     "code": "11290",
-    "has_data": false,
+    "has_data": true,
     "color": "#fb7185",
     "icon": "📚",
     "center": [
@@ -628,8 +628,8 @@
       "60대+": 20
     },
     "price_level": "중상",
-    "price_low": 9,
-    "price_high": 16,
+    "price_low": 6,
+    "price_high": 14,
     "description": "고려대·성신여대 등 대학가와 성북동 전통 부촌이 함께 있는 지역으로, 길음뉴타운 등 재개발 신축 단지가 늘고 있습니다.",
     "strengths": [
       "대학가 임대 수요",
@@ -642,7 +642,7 @@
   },
   "강북구": {
     "code": "11305",
-    "has_data": false,
+    "has_data": true,
     "color": "#5eead4",
     "icon": "⛰️",
     "center": [
@@ -664,8 +664,8 @@
       "60대+": 29
     },
     "price_level": "중하",
-    "price_low": 5,
-    "price_high": 8,
+    "price_low": 6,
+    "price_high": 7,
     "description": "북한산을 끼고 있어 자연환경은 좋지만 서울 내 상대적으로 저평가된 지역입니다. 재개발·재건축 이슈가 꾸준히 거론됩니다.",
     "strengths": [
       "북한산 자연환경",
@@ -678,7 +678,7 @@
   },
   "도봉구": {
     "code": "11320",
-    "has_data": false,
+    "has_data": true,
     "color": "#7dd3fc",
     "icon": "🏔️",
     "center": [
@@ -700,8 +700,8 @@
       "60대+": 29
     },
     "price_level": "중하",
-    "price_low": 5,
-    "price_high": 8,
+    "price_low": 4,
+    "price_high": 7,
     "description": "도봉산 자락의 서울 최북단 지역으로, 창동차량기지 개발 등 호재가 있는 저평가 권역입니다.",
     "strengths": [
       "서울 내 최저가권 진입",
@@ -714,7 +714,7 @@
   },
   "노원구": {
     "code": "11350",
-    "has_data": false,
+    "has_data": true,
     "color": "#c4b5fd",
     "icon": "🏫",
     "center": [
@@ -737,8 +737,8 @@
       "60대+": 23
     },
     "price_level": "중",
-    "price_low": 6,
-    "price_high": 11,
+    "price_low": 5,
+    "price_high": 17,
     "description": "중계동 학원가로 대표되는 학군 특화 지역으로, 상계·중계·하계동 일대에 대단지 아파트가 밀집해 있습니다.",
     "strengths": [
       "중계동 학군 수요",
@@ -751,7 +751,7 @@
   },
   "구로구": {
     "code": "11530",
-    "has_data": false,
+    "has_data": true,
     "color": "#fdba74",
     "icon": "💻",
     "center": [
@@ -773,8 +773,8 @@
       "60대+": 22
     },
     "price_level": "중하",
-    "price_low": 7,
-    "price_high": 11,
+    "price_low": 6,
+    "price_high": 9,
     "description": "구로디지털단지(G밸리) IT·벤처 기업 배후 주거지로, 직주근접 수요와 항동지구 등 신규 공급이 함께 있는 지역입니다.",
     "strengths": [
       "G밸리 직주근접",
@@ -787,7 +787,7 @@
   },
   "금천구": {
     "code": "11545",
-    "has_data": false,
+    "has_data": true,
     "color": "#fca5a5",
     "icon": "🏭",
     "center": [
@@ -809,8 +809,8 @@
       "60대+": 22
     },
     "price_level": "중하",
-    "price_low": 6,
-    "price_high": 9,
+    "price_low": 4,
+    "price_high": 8,
     "description": "가산디지털단지 배후 주거지로 서울 내 상대적 저가권입니다. 직주근접 수요를 바탕으로 실거주 매수세가 꾸준합니다.",
     "strengths": [
       "가산디지털단지 직주근접",
@@ -861,7 +861,7 @@
   },
   "강남구": {
     "code": "11680",
-    "has_data": false,
+    "has_data": true,
     "color": "#fbbf24",
     "icon": "🏢",
     "center": [
@@ -885,8 +885,8 @@
       "60대+": 25
     },
     "price_level": "최상",
-    "price_low": 22,
-    "price_high": 35,
+    "price_low": 27,
+    "price_high": 27,
     "description": "압구정·대치·청담 등을 포함하는 대한민국 대표 부촌으로, 서울 내 가장 높은 가격대를 형성하며 재건축 이슈가 활발합니다.",
     "strengths": [
       "최고 학군(대치동)",
@@ -900,7 +900,7 @@
   },
   "송파구": {
     "code": "11710",
-    "has_data": false,
+    "has_data": true,
     "color": "#93c5fd",
     "icon": "🎡",
     "center": [
@@ -923,8 +923,8 @@
       "60대+": 23
     },
     "price_level": "최상",
-    "price_low": 17,
-    "price_high": 26,
+    "price_low": 18,
+    "price_high": 28,
     "description": "잠실 일대 대단지 재건축 단지와 롯데월드타워를 중심으로 한 강남 3구 지역으로, 대단지·신축 비중이 높아 거래가 활발합니다.",
     "strengths": [
       "잠실 대단지 프리미엄",
