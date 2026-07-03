@@ -1194,7 +1194,7 @@ function showAptList() {
       <div class="ep-list-rank">${i+1}</div>
       <div class="ep-list-main">
         <div class="ep-list-name">${a.apt_name}</div>
-        <div class="ep-list-sub">${a.district} · ${a.build_year}년 · ${a.area_exclusive}㎡${(() => { const c = commuteInfo(a); return c ? ` · <span class="ep-commute">${c.label}</span>` : ''; })()}</div>
+        <div class="ep-list-sub">${a.district} · ${a.build_year}년 · ${Math.round(a.area_exclusive)}㎡${(() => { const c = commuteInfo(a); return c ? ` · <span class="ep-commute">${c.label}</span>` : ''; })()}</div>
       </div>
       <div class="ep-list-right">
         <div class="ep-list-price">${eokFmt(a.latest_price)}</div>
@@ -1234,7 +1234,7 @@ function showAptDetail(a) {
     <button class="ep-back" id="epBack">← 목록으로</button>
     <div class="ep-head">
       <div class="ep-name">${a.apt_name}</div>
-      <div class="ep-loc">${a.district} · ${a.build_year}년 준공 · 전용 ${a.area_exclusive}㎡ · 종합 ${a.rank}위</div>
+      <div class="ep-loc">${a.district} · ${a.build_year}년 준공 · 전용 ${Math.round(a.area_exclusive)}㎡ · 종합 ${a.rank}위</div>
     </div>
     <div class="ep-price-grid">
       <div class="ep-price"><span class="epv">${eok(a.latest_price)}</span><span class="epk">최신 실거래</span></div>

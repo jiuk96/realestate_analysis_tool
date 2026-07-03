@@ -21,18 +21,15 @@ import pandas as pd
 import requests
 
 ROOT = Path(__file__).parent
+sys.path.insert(0, str(ROOT))
+from config import DISTRICTS as _DISTRICTS_BY_NAME
+
 CACHE = ROOT / "data" / "static" / "apt_locations.json"
 STATIONS = ROOT / "data" / "static" / "subway_stations.json"
 NEAR_M = 1000            # "역세권" 집계 반경
 MAX_M = 1500             # 이 거리 밖이면 역 없음 취급
 
-DISTRICTS = {
-    '11440': '마포구', '11170': '용산구', '11200': '성동구',
-    '11215': '광진구', '11230': '동대문구', '11380': '은평구',
-    '11410': '서대문구', '11470': '양천구', '11500': '강서구',
-    '11560': '영등포구', '11590': '동작구', '11620': '관악구',
-    '11740': '강동구', '11110': '종로구',
-}
+DISTRICTS = {v: k for k, v in _DISTRICTS_BY_NAME.items()}   # 코드 → 구 이름
 
 UA = {"User-Agent": "seoul-apt-analysis/1.0 (personal research)"}
 
@@ -47,6 +44,11 @@ def haversine_m(lat1, lng1, lat2, lng2) -> float:
 
 
 def load_kakao_key() -> str | None:
+    # 1) 환경변수 우선 (GitHub Actions secrets 등)
+    import os
+    if os.environ.get("KAKAO_REST_KEY"):
+        return os.environ["KAKAO_REST_KEY"]
+    # 2) 로컬 개발용 .env 파일
     env = ROOT / ".env"
     if env.exists():
         for line in env.read_text().splitlines():

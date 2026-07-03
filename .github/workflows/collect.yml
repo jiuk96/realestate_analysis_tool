@@ -39,6 +39,18 @@ jobs:
           echo "개 파일 수집됨"
           du -sh data/raw/ 2>/dev/null || echo "데이터 없음"
 
+      - name: 분석 파이프라인 실행 (1차 — 대상 단지 확정)
+        run: python build_data.py
+
+      - name: 단지 좌표·최근접역 지오코딩
+        env:
+          KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
+        run: |
+          python geocode_apts.py || echo "지오코딩 일부 실패 — 캐시된 결과만 반영"
+
+      - name: 분석 파이프라인 재실행 (2차 — 교통 축 반영)
+        run: python build_data.py
+
       - name: GitHub에 데이터 커밋·푸시
         run: |
           git config user.name  "github-actions[bot]"
@@ -47,7 +59,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "변경된 데이터 없음 — 스킵"
           else
-            git commit -m "data: 실거래가 수집 $(date +'%Y-%m-%d %H:%M') KST"
+            git commit -m "data: 실거래가 수집·분석 $(date +'%Y-%m-%d %H:%M') KST"
             git push
             echo "✅ 푸시 완료"
           fi

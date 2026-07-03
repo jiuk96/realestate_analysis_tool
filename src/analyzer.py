@@ -136,7 +136,7 @@ def detect_peak_trough(monthly: pd.DataFrame) -> pd.DataFrame:
             "mdd_pct":       round(mdd_pct, 2),
             "district_name": peak_row["district_name"],
             "build_year":    peak_row["build_year"],
-            "area_exclusive": peak_row["area_exclusive"],
+            "area_exclusive": round(float(peak_row["area_exclusive"]), 1),  # float32 꼬리자리 제거
         })
 
     result_df = pd.DataFrame(results)
