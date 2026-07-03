@@ -906,7 +906,7 @@ function renderBudgetChart(R) {
   if (typeof Plotly === 'undefined') {
     const total = c.cashGift + c.family + c.loan || 1;
     const seg = [
-      ['자기자본(현금+증여)', c.cashGift, '#38bdf8'],
+      ['자기자금(현금+증여)', c.cashGift, '#38bdf8'],
       ['부모 차용', c.family, '#a78bfa'], ['은행 대출', c.loan, '#fbbf24'],
     ];
     div.innerHTML = `
@@ -920,11 +920,13 @@ function renderBudgetChart(R) {
   }
   Plotly.react(div, [{
     type: 'pie', hole: 0.55,
-    labels: ['자기자본(현금+증여)', '부모 차용', '은행 대출'],
+    labels: ['자기자금', '부모 차용', '은행 대출'],
+    customdata: ['자기자금(현금+증여)', '부모 차용', '은행 대출'],
     values: [c.cashGift, c.family, c.loan],
     marker: { colors: ['#38bdf8', '#a78bfa', '#fbbf24'] },
-    textinfo: 'label+percent', textfont: { color: '#0f172a', size: 12 },
-    hovertemplate: '%{label}: %{value:,.0f}원<extra></extra>',
+    textinfo: 'label+percent', textposition: 'inside', insidetextorientation: 'horizontal',
+    textfont: { color: '#0f172a', size: 11 },
+    hovertemplate: '%{customdata}: %{value:,.0f}원<extra></extra>',
   }], {
     paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
     font: { color: '#e2e8f0' }, showlegend: false,
