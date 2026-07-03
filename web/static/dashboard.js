@@ -397,6 +397,84 @@ function buildApartmentAxes(apt) {
   ].filter(a => a.val != null);
 }
 
+// 축별 점수 근거 한 줄 — 실제 수치(MDD·회복률·거래공백률·평단가·역 거리 등)를
+// 그대로 인용해 "왜 이 점수인지"를 축마다 설명한다. 70점 이상일 때만 문구가
+// 뜨던 기존 buildApartmentInsights와 달리 점수 높낮이와 무관하게 항상 표시된다.
+function buildAxisReasons(apt) {
+  const pct = v => v != null ? Math.round(100 - v) : null;   // score(percentile) → "상위 X%"
+  const reasons = {};
+
+  if (apt.defense_score != null) {
+    const mdd = apt.mdd_pct, rec = apt.recovery_rate;
+    if (mdd != null && rec != null) {
+      const recPct = Math.round(rec * 100);
+      // 회복률이 100%를 넘으면 저점을 넘어 신고가를 갱신했다는 뜻 — "120% 회복"보다
+      // "전고점을 넘어섰다"는 표현이 더 자연스럽다.
+      const recPhrase = recPct >= 100 ? '저점 대비 이미 전고점을 넘어섰고' : `저점 대비 ${recPct}% 회복했고`;
+      const recPhraseMid = recPct >= 100 ? '저점 대비 전고점을 회복한 상태' : `저점 대비 회복률 ${recPct}%`;
+      reasons['가격방어력'] = apt.defense_score >= 70
+        ? `역대 최대 낙폭(MDD) ${mdd.toFixed(1)}%로 하락폭이 작았고, ${recPhrase} 방어력이 우수합니다.`
+        : apt.defense_score >= 45
+          ? `역대 최대 낙폭 ${mdd.toFixed(1)}%, ${recPhraseMid}로 준수한 방어력입니다.`
+          : `역대 최대 낙폭이 ${mdd.toFixed(1)}%로 컸고 회복률도 ${recPct}%에 그쳐 방어력이 약한 편입니다.`;
+    }
+  }
+
+  if (apt.liquidity_score != null && apt.gap_ratio != null) {
+    const gapPct = Math.round(apt.gap_ratio * 100);
+    const retPct = apt.retention != null ? Math.round(apt.retention * 100) : null;
+    reasons['거래유동성'] = apt.liquidity_score >= 70
+      ? `거래 공백률 ${gapPct}%로 낮고${retPct != null ? `, 하락기에도 거래량이 상승기의 ${retPct}% 수준으로 유지돼` : ''} 환금성이 좋습니다.`
+      : apt.liquidity_score >= 45
+        ? `거래 공백률 ${gapPct}%로 무난한 수준의 유동성입니다.`
+        : `거래 공백률이 ${gapPct}%로 높아 매매 타이밍을 잡기 어려울 수 있습니다.`;
+  }
+
+  if (apt.upside_score != null && apt.upside_pct != null) {
+    reasons['상승참여도'] = apt.upside_score >= 70
+      ? `2020년 기저가 대비 고점가가 +${apt.upside_pct.toFixed(1)}% 상승 — 상승장 참여도가 상위 ${pct(apt.upside_score)}% 수준입니다.`
+      : apt.upside_score >= 45
+        ? `2020년 기저가 대비 고점가가 +${apt.upside_pct.toFixed(1)}% 상승해 시장 평균 수준으로 상승장에 참여했습니다.`
+        : `2020년 기저가 대비 상승폭이 +${apt.upside_pct.toFixed(1)}%에 그쳐 상승장 참여도가 낮은 편입니다.`;
+  }
+
+  if (apt.momentum_score != null && apt.momentum_pct != null) {
+    const m = apt.momentum_pct;
+    reasons['회복모멘텀'] = m > 0
+      ? `최근 12개월 가격이 연 +${m.toFixed(1)}% 추세로 ${apt.momentum_score >= 70 ? '뚜렷하게 상승' : '완만하게 상승'} 중입니다.`
+      : `최근 12개월 가격이 연 ${m.toFixed(1)}% 추세로 하락 또는 보합 흐름입니다.`;
+  }
+
+  if (apt.premium_score != null && apt.price_per_m2 != null) {
+    reasons['입지프리미엄'] = `㎡당 최고가 ${apt.price_per_m2.toLocaleString()}만원 — 분석 대상 단지 중 상위 ${pct(apt.premium_score)}% 평단가 수준입니다.`;
+  }
+
+  if (apt.scale_score != null && apt.total_trades != null) {
+    reasons['규모'] = `누적 거래 ${apt.total_trades.toLocaleString()}건으로, 거래량 기준 상위 ${pct(apt.scale_score)}% 규모입니다.`;
+  }
+
+  if (apt.transit_score != null) {
+    reasons['교통'] = apt.nearest_station
+      ? `${apt.nearest_station} 도보 ${Math.round(apt.walk_min)}분${apt.stations_within_1km > 1 ? `, 반경 1km 내 역 ${apt.stations_within_1km}개(더블역세권)` : ''} — 교통 상위 ${pct(apt.transit_score)}% 입지입니다.`
+      : `반경 1.5km 내 지하철역이 없어 도보 접근성이 낮은 편입니다.`;
+  }
+
+  if (apt.redevelop_score != null && apt.apt_age != null) {
+    const age = apt.apt_age;
+    reasons['재건축잠재력'] = age >= 35
+      ? `준공 ${age}년차로 재건축 연한을 넘어 사업 추진이 본격화될 수 있는 구간입니다.`
+      : age >= 30
+        ? `준공 ${age}년차로 재건축 안전진단 연한(30년)에 도달했습니다.`
+        : age >= 27
+          ? `준공 ${age}년차로 재건축 연한이 임박했습니다.`
+          : age >= 22
+            ? `준공 ${age}년차로 중장기적으로 리모델링·재건축을 기대할 수 있는 연차입니다.`
+            : `준공 ${age}년차의 신축~준신축이라 재건축보다는 상품성 자체로 평가받는 단지입니다.`;
+  }
+
+  return reasons;
+}
+
 // 근거(왜 이 점수인가) 인사이트 리스트 — 전체 1위·상세 모달 공용
 function buildApartmentInsights(apt, comp, extraLines = []) {
   const lines = [
@@ -422,6 +500,7 @@ function renderApartmentDetail(containerId, radarId, priceChartId, apt, mddInfo,
   const radarVals = axes.map(a => a.val != null ? Math.min(100, a.val) : 0);
   const badgeHtml = opts.badgeHtml || '📍 동네별 추천 단지';
   const extraInsight = opts.extraInsight || [];
+  const axisReasons = buildAxisReasons(apt);
 
   const container = document.getElementById(containerId);
   if (!container) return;
@@ -443,13 +522,16 @@ function renderApartmentDetail(containerId, radarId, priceChartId, apt, mddInfo,
       <div class="top1-radar" id="${radarId}"></div>
       <div class="top1-axes">
         ${axes.map(a => `
-          <div class="top1-axis-row">
-            <span class="top1-ax-dot" style="background:${a.color}"></span>
-            <span class="top1-ax-name">${a.name}</span>
-            <div class="top1-ax-bar">
-              <div class="top1-ax-fill" style="width:${Math.min(100,a.val||0)}%;background:${a.color}"></div>
+          <div class="top1-ax-group">
+            <div class="top1-axis-row">
+              <span class="top1-ax-dot" style="background:${a.color}"></span>
+              <span class="top1-ax-name">${a.name}</span>
+              <div class="top1-ax-bar">
+                <div class="top1-ax-fill" style="width:${Math.min(100,a.val||0)}%;background:${a.color}"></div>
+              </div>
+              <span class="top1-ax-val">${a.val != null ? a.val.toFixed(1) : '—'}</span>
             </div>
-            <span class="top1-ax-val">${a.val != null ? a.val.toFixed(1) : '—'}</span>
+            ${axisReasons[a.name] ? `<div class="top1-ax-reason">${axisReasons[a.name]}</div>` : ''}
           </div>
         `).join('')}
       </div>
