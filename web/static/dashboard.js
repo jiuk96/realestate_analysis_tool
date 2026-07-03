@@ -827,6 +827,9 @@ function renderLegalAccordion() {
       const item = wrap.querySelector(`.legal-item[data-key="${key}"]`);
       if (item) {
         item.classList.add('open');
+        // 세법 설명이 접이식 <details> 안에 있으면 먼저 펼쳐야 스크롤이 보인다
+        const fold = item.closest('details.budget-fold');
+        if (fold) fold.open = true;
         item.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     });

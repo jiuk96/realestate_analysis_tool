@@ -783,6 +783,35 @@ body { font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSy
 .budget-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
 .budget-card { background: var(--bg2); border: 1px solid #334155; border-radius: 14px; padding: 1.2rem; }
 .budget-card-title { font-weight: 800; color: #f1f5f9; margin-bottom: 1rem; }
+
+/* 접이식 상세 카드: 기본은 제목 한 줄만, +/− 눌러 펼침 (details/summary 네이티브) */
+details.budget-fold { padding: 0; }
+details.budget-fold > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .6rem;
+  padding: 1.05rem 1.2rem;
+  margin-bottom: 0;
+  user-select: none;
+}
+details.budget-fold > summary::-webkit-details-marker { display: none; }
+details.budget-fold > summary::after {
+  content: '+';
+  flex: none;
+  font-size: 1.35rem;
+  font-weight: 400;
+  line-height: 1;
+  color: #94a3b8;
+  transition: color .15s;
+}
+details.budget-fold:hover > summary::after { color: #cbd5e1; }
+details.budget-fold[open] > summary::after { content: '\2212'; color: #38bdf8; }
+details.budget-fold[open] > summary { border-bottom: 1px solid #334155; }
+details.budget-fold > summary + * { padding: 1.1rem 1.2rem 1.2rem; }
+details.budget-fold .legal-hint { font-weight: 500; }
 .budget-field { margin-bottom: .85rem; }
 .budget-field label { display: block; color: #94a3b8; font-size: .8rem; margin-bottom: .35rem; }
 .bf-input { display: flex; align-items: center; gap: .45rem; }
