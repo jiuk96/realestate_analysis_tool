@@ -570,6 +570,7 @@ export function analyzeCouple(inA, inB, common) {
       burdenPct: P.netMonthly > 0 ? (mth / P.netMonthly) : 0,
       contrib: P.equity + P.family + ln,     // 각자 총 기여 가용자금
       dsrLoan: P.dsrLoan, familyOverLimit: P.familyOverLimit,
+      rate: P.rate, years: P.years,          // 대출 시뮬레이터용 (금리·만기)
     };
   };
 
