@@ -1629,7 +1629,7 @@ function initApartmentModal() {
 }
 
 function initNav() {
-  const sections = ['secExplorer','secBudget','secMap','secScoring','secDistrict','secTop1'];
+  const sections = ['secExplorer','secDistrict','secTop1','secScoring','secMap','secBudget'];
   const links = document.querySelectorAll('.nav-link');
   const observer = new IntersectionObserver(entries => {
     entries.forEach(e => {

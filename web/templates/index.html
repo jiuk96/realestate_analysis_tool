@@ -43,18 +43,18 @@
 <nav class="sticky-nav">
   <div class="nav-inner">
     <a href="#secExplorer" class="nav-link active">① 지도 탐색</a>
-    <a href="#secBudget" class="nav-link">② 예산 플래너</a>
-    <a href="#secMap" class="nav-link">③ 구별 소개</a>
-    <a href="#secScoring" class="nav-link">④ 점수 산출</a>
-    <a href="#secDistrict" class="nav-link">⑤ 동네별 TOP</a>
-    <a href="#secTop1" class="nav-link">⑥ 전체 1위</a>
+    <a href="#secDistrict" class="nav-link">② 동네별 TOP</a>
+    <a href="#secTop1" class="nav-link">③ 전체 1위</a>
+    <a href="#secScoring" class="nav-link">④ 점수 근거</a>
+    <a href="#secMap" class="nav-link">⑤ 구별 소개</a>
+    <a href="#secBudget" class="nav-link">⑥ 예산 플래너</a>
   </div>
 </nav>
 
 <!-- ── ① 지도 탐색기 (메인) ──────────────────────────── -->
 <section class="section" id="secExplorer">
   <div class="section-inner">
-    <div class="section-label">MAIN</div>
+    <div class="section-label">STEP 1 · 탐색</div>
     <h2 class="section-title">지도로 탐색하기</h2>
     <p class="section-desc">
       가격대를 설정하면 조건에 맞는 단지가 지도에 표시됩니다. 모든 가격은 <strong>전용 59㎡(18평)</strong> 기준입니다.
@@ -120,10 +120,100 @@
   </div>
 </section>
 
-<!-- ── ② 예산 플래너 ─────────────────────────────────── -->
+<section class="section section-alt" id="secDistrict">
+  <div class="section-inner">
+    <div class="section-label">STEP 2 · 추천</div>
+    <h2 class="section-title">동네별 추천 단지</h2>
+    <p class="section-desc">
+      구별 종합 점수 상위 3개 단지입니다. 단지명을 클릭하면 네이버부동산으로 연결됩니다.
+    </p>
+    <div id="districtRankings" class="district-rankings-simple">
+      <div class="skeleton" style="height:300px"></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="secTop1">
+  <div class="section-inner">
+    <div class="section-label">STEP 3 · 최상위</div>
+    <h2 class="section-title">전체 종합 1위 단지</h2>
+    <p class="section-desc">
+      전 분석 축에서 가장 높은 종합 점수를 받은 단지의 상세 분석입니다.
+    </p>
+    <div id="top1Detail">
+      <div class="skeleton" style="height:400px"></div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt" id="secScoring">
+  <div class="section-inner">
+    <div class="section-label">STEP 4 · 점수 근거</div>
+    <h2 class="section-title">점수를 어떻게 계산하나요?</h2>
+    <p class="section-desc">
+      단순 가격 하락폭(MDD)만 보지 않고 <strong>여러 축</strong>을 가중 합산합니다.
+      하락장을 버티고, 상승장에 참여하며, 꾸준히 거래되는 단지가 진정한 우량 단지입니다.
+    </p>
+
+    <!-- 점수 공식 시각화 -->
+    <div class="formula-visual">
+      <div class="formula-title">종합 점수 = Σ (각 축 점수 × 가중치)</div>
+      <div class="formula-axes" id="formulaAxes"></div>
+    </div>
+
+    <!-- 각 축 상세 설명 -->
+    <div class="axes-detail" id="axesDetail"></div>
+
+    <!-- MDD 설명 -->
+    <div class="mdd-explainer-box">
+      <div class="mdd-ex-left">
+        <div class="mdd-ex-title">📉 MDD (최대낙폭)란?</div>
+        <div class="mdd-formula-row">
+          MDD(%) = <span class="frac"><span class="fn">최저점 − 최고점</span><span class="fd">최고점</span></span> × 100
+        </div>
+        <p class="mdd-ex-desc">10억짜리 아파트가 7억까지 떨어지면 MDD = <strong>–30%</strong>.<br>
+        0에 가까울수록 방어력이 뛰어난 단지입니다.</p>
+      </div>
+      <div class="mdd-ex-steps">
+        <div class="mdd-step"><span class="step-n">1</span><span><strong>전체 수집 기간(2020~2026)</strong>에서 고점 대비 낙폭이 가장 컸던 구간을 탐색 (특정 연도로 고정하지 않음)</span></div>
+        <div class="mdd-step"><span class="step-n">2</span><span>다운계약·특수관계 거래 등 <strong>이상 저가 의심 거래</strong>는 주변 9개월 시세와 비교해 제외</span></div>
+        <div class="mdd-step"><span class="step-n">3</span><span><strong>3개월 이동 중앙값</strong>으로 노이즈 제거</span></div>
+        <div class="mdd-step"><span class="step-n">4</span><span>(최저 − 최고) ÷ 최고 × 100 = <strong>MDD(%)</strong></span></div>
+      </div>
+    </div>
+
+    <!-- 데이터 필터 요약 -->
+    <div class="filter-summary" id="filterSummary">
+      <div class="skeleton" style="height:80px"></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="secMap">
+  <div class="section-inner">
+    <div class="section-label">STEP 5 · 구별 소개</div>
+    <h2 class="section-title">서울 25개 구, 어떤 동네인가요?</h2>
+    <p class="section-desc">
+      지도에서 구를 클릭하면 상세 정보를 확인할 수 있습니다.
+      <span class="badge-data">● 분석 완료</span> 구는 실거래가 데이터가 적용된 결과입니다.
+    </p>
+
+    <!-- 지도 -->
+    <div id="seoulMap" class="map-container"></div>
+
+    <!-- 구 카드 그리드 -->
+    <div class="district-card-grid" id="districtCardGrid">
+      <div class="skeleton" style="height:200px"></div>
+      <div class="skeleton" style="height:200px"></div>
+      <div class="skeleton" style="height:200px"></div>
+      <div class="skeleton" style="height:200px"></div>
+    </div>
+  </div>
+</section>
+
 <section class="section section-alt" id="secBudget">
   <div class="section-inner">
-    <div class="section-label">CHAPTER 2</div>
+    <div class="section-label">STEP 6 · 예산</div>
     <h2 class="section-title">우리 예산 플래너</h2>
     <p class="section-desc">
       <strong>각자</strong>의 자금·소득·대출을 따로 입력해 각자의 가용자금을 구하고,
@@ -305,101 +395,6 @@
     <p class="explorer-note">
       ※ 대출 한도·금리·세율은 2025~2026년 기준 대표값입니다. 실제 조건은 소득·주택가·규제지역·개별 심사에 따라 달라지므로 반드시 은행/기금e든든/세무사에서 확인하세요.
     </p>
-  </div>
-</section>
-
-<!-- ── ③ 구별 지도 & 소개 ───────────────────────────── -->
-<section class="section" id="secMap">
-  <div class="section-inner">
-    <div class="section-label">CHAPTER 3</div>
-    <h2 class="section-title">서울 25개 구, 어떤 동네인가요?</h2>
-    <p class="section-desc">
-      지도에서 구를 클릭하면 상세 정보를 확인할 수 있습니다.
-      <span class="badge-data">● 분석 완료</span> 구는 실거래가 데이터가 적용된 결과입니다.
-    </p>
-
-    <!-- 지도 -->
-    <div id="seoulMap" class="map-container"></div>
-
-    <!-- 구 카드 그리드 -->
-    <div class="district-card-grid" id="districtCardGrid">
-      <div class="skeleton" style="height:200px"></div>
-      <div class="skeleton" style="height:200px"></div>
-      <div class="skeleton" style="height:200px"></div>
-      <div class="skeleton" style="height:200px"></div>
-    </div>
-  </div>
-</section>
-
-<!-- ── ④ 점수 산출 방식 ──────────────────────────────── -->
-<section class="section section-alt" id="secScoring">
-  <div class="section-inner">
-    <div class="section-label">CHAPTER 4</div>
-    <h2 class="section-title">점수를 어떻게 계산하나요?</h2>
-    <p class="section-desc">
-      단순 가격 하락폭(MDD)만 보지 않고 <strong>여러 축</strong>을 가중 합산합니다.
-      하락장을 버티고, 상승장에 참여하며, 꾸준히 거래되는 단지가 진정한 우량 단지입니다.
-    </p>
-
-    <!-- 점수 공식 시각화 -->
-    <div class="formula-visual">
-      <div class="formula-title">종합 점수 = Σ (각 축 점수 × 가중치)</div>
-      <div class="formula-axes" id="formulaAxes"></div>
-    </div>
-
-    <!-- 각 축 상세 설명 -->
-    <div class="axes-detail" id="axesDetail"></div>
-
-    <!-- MDD 설명 -->
-    <div class="mdd-explainer-box">
-      <div class="mdd-ex-left">
-        <div class="mdd-ex-title">📉 MDD (최대낙폭)란?</div>
-        <div class="mdd-formula-row">
-          MDD(%) = <span class="frac"><span class="fn">최저점 − 최고점</span><span class="fd">최고점</span></span> × 100
-        </div>
-        <p class="mdd-ex-desc">10억짜리 아파트가 7억까지 떨어지면 MDD = <strong>–30%</strong>.<br>
-        0에 가까울수록 방어력이 뛰어난 단지입니다.</p>
-      </div>
-      <div class="mdd-ex-steps">
-        <div class="mdd-step"><span class="step-n">1</span><span><strong>전체 수집 기간(2020~2026)</strong>에서 고점 대비 낙폭이 가장 컸던 구간을 탐색 (특정 연도로 고정하지 않음)</span></div>
-        <div class="mdd-step"><span class="step-n">2</span><span>다운계약·특수관계 거래 등 <strong>이상 저가 의심 거래</strong>는 주변 9개월 시세와 비교해 제외</span></div>
-        <div class="mdd-step"><span class="step-n">3</span><span><strong>3개월 이동 중앙값</strong>으로 노이즈 제거</span></div>
-        <div class="mdd-step"><span class="step-n">4</span><span>(최저 − 최고) ÷ 최고 × 100 = <strong>MDD(%)</strong></span></div>
-      </div>
-    </div>
-
-    <!-- 데이터 필터 요약 -->
-    <div class="filter-summary" id="filterSummary">
-      <div class="skeleton" style="height:80px"></div>
-    </div>
-  </div>
-</section>
-
-<!-- ── ⑤ 동네별 우수 아파트 ─────────────────────────── -->
-<section class="section" id="secDistrict">
-  <div class="section-inner">
-    <div class="section-label">CHAPTER 5</div>
-    <h2 class="section-title">동네별 추천 단지</h2>
-    <p class="section-desc">
-      구별 종합 점수 상위 3개 단지입니다. 단지명을 클릭하면 네이버부동산으로 연결됩니다.
-    </p>
-    <div id="districtRankings" class="district-rankings-simple">
-      <div class="skeleton" style="height:300px"></div>
-    </div>
-  </div>
-</section>
-
-<!-- ── ⑥ 전체 1위 단지 상세 ─────────────────────────── -->
-<section class="section section-alt" id="secTop1">
-  <div class="section-inner">
-    <div class="section-label">CHAPTER 6</div>
-    <h2 class="section-title">전체 종합 1위 단지</h2>
-    <p class="section-desc">
-      전 분석 축에서 가장 높은 종합 점수를 받은 단지의 상세 분석입니다.
-    </p>
-    <div id="top1Detail">
-      <div class="skeleton" style="height:400px"></div>
-    </div>
   </div>
 </section>
 
