@@ -880,7 +880,6 @@ body { font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSy
   border-radius: 8px; padding: .6rem .7rem; margin: -.3rem 0 .85rem;
   font-variant-numeric: tabular-nums;
 }
-.parent-compact:empty { display: none; }
 .pc-badges { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .55rem; }
 .pc-badge {
   font-size: .72rem; font-weight: 700; padding: .2rem .55rem; border-radius: 999px;
@@ -888,10 +887,19 @@ body { font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSy
 }
 .pc-badge.on { color: #34d399; background: rgba(52,211,153,.12); border-color: rgba(52,211,153,.3); }
 .pc-badge.off { color: #64748b; background: rgba(100,116,139,.1); }
-.pc-loanbar-row { display: flex; align-items: center; gap: .5rem; margin-bottom: .5rem; }
-.pc-loanbar-label { color: #94a3b8; font-size: .74rem; flex-shrink: 0; }
-.pc-loanbar { flex: 1; height: 7px; background: #1e293b; border-radius: 99px; overflow: hidden; }
-.pc-loanbar-fill { height: 100%; background: #a78bfa; border-radius: 99px; transition: width .3s; }
+.pc-loanbar-row { display: flex; align-items: center; gap: .6rem; margin-bottom: .5rem; }
+.pc-loanbar-label { color: #94a3b8; font-size: .74rem; flex-shrink: 0; white-space: nowrap; }
+.pc-loan-slider {
+  flex: 1; height: 6px; border-radius: 99px; appearance: none; -webkit-appearance: none;
+  background: #1e293b; outline: none; cursor: pointer; accent-color: #a78bfa;
+}
+.pc-loan-slider::-webkit-slider-thumb {
+  appearance: none; -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+  background: #f1f5f9; border: 2px solid #a78bfa; cursor: pointer;
+}
+.pc-loan-slider::-moz-range-thumb {
+  width: 14px; height: 14px; border-radius: 50%; background: #f1f5f9; border: 2px solid #a78bfa; cursor: pointer;
+}
 .pc-loanbar-val { color: #cbd5e1; font-size: .72rem; flex-shrink: 0; white-space: nowrap; }
 .pc-conclusion { color: #cbd5e1; font-size: .78rem; }
 .pc-conclusion b { color: #fbbf24; }

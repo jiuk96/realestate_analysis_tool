@@ -257,12 +257,29 @@ export function calcFamilyLoan(principal, years = 10) {
 }
 
 /**
- * 부모 지원 총액을 "세금·이자 부담이 없는 항목부터" 자동으로 채워 분해한다.
- * 순서: ① 직계존속 기본공제(0.5억, 항상 가능) → ② 혼인·출산공제(1억, 옵션 체크 시) →
- *       ③ 무이자 차용 한도(≈2.17억, 상증세법 §41-4) → ④ 그래도 남으면 과세 증여로 처리.
- * 사용자는 "부모 지원 총액"만 입력하면 되고, 증여/차용 비율은 이 함수가 정한다.
+ * 기본공제·혼인공제를 뺀 후 무이자 차용으로 돌릴 수 있는 최대 한도.
+ * = min(공제 후 남은 금액, 무이자 허용 최대 원금 2.17억)
+ * 슬라이더 상한값 계산에 사용한다.
  * @param {number} total 부모 지원 총액 (원)
- * @param {object} opt   { marriage, birth } 혼인·출산공제 적용 여부
+ * @param {object} opt   { marriage, birth }
+ */
+export function maxFamilyLoanFor(total, opt = {}) {
+  const bonusApplied = !!(opt.marriage || opt.birth);
+  let remaining = Math.max(0, total || 0);
+  remaining -= Math.min(remaining, GIFT.BASIC_DEDUCTION);
+  if (bonusApplied) remaining -= Math.min(remaining, GIFT.MARRIAGE_BIRTH_CAP);
+  return Math.min(remaining, FAMILY_LOAN.MAX_NO_INTEREST);
+}
+
+/**
+ * 부모 지원 총액을 "세금·이자 부담이 없는 항목부터" 채워 분해한다.
+ * 순서: ① 직계존속 기본공제(0.5억, 항상 가능) → ② 혼인·출산공제(1억, 옵션 체크 시) →
+ *       ③ 무이자 차용(기본은 한도 ≈2.17억까지 자동 사용, 슬라이더로 직접 조절 가능) →
+ *       ④ 그래도(혹은 차용을 줄여서) 남으면 과세 증여로 처리.
+ * 무이자 차용을 슬라이더로 줄이면 그만큼 "그 외 증여"가 늘어나 총액은 항상 보존된다.
+ * @param {number} total 부모 지원 총액 (원)
+ * @param {object} opt   { marriage, birth, familyLoanOverride }
+ *   familyLoanOverride: 사용자가 슬라이더로 지정한 무이자 차용액. null/undefined면 한도 최대치를 자동 사용.
  * @returns {{basicGift:number, bonusGift:number, familyLoan:number, extraGift:number, totalGift:number}}
  */
 export function splitParentSupport(total, opt = {}) {
@@ -275,10 +292,13 @@ export function splitParentSupport(total, opt = {}) {
   const bonusGift = bonusApplied ? Math.min(remaining, GIFT.MARRIAGE_BIRTH_CAP) : 0;
   remaining -= bonusGift;
 
-  const familyLoan = Math.min(remaining, FAMILY_LOAN.MAX_NO_INTEREST);
+  const autoFamilyLoan = Math.min(remaining, FAMILY_LOAN.MAX_NO_INTEREST);
+  const familyLoan = (opt.familyLoanOverride != null)
+    ? Math.min(Math.max(0, opt.familyLoanOverride), remaining, FAMILY_LOAN.MAX_NO_INTEREST)
+    : autoFamilyLoan;
   remaining -= familyLoan;
 
-  const extraGift = remaining;   // 무이자 차용 한도까지 넘으면 나머지는 과세 증여로 처리
+  const extraGift = remaining;   // 무이자 차용으로 쓰지 않은 나머지는 과세 증여로 처리
 
   return {
     basicGift, bonusGift, familyLoan, extraGift,

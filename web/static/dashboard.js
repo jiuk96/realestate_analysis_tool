@@ -1,5 +1,6 @@
 import {
-  LOAN_PRODUCTS, analyzeCouple, won2eok, won2man, calcMonthlyPayment, personDsrLoan, splitParentSupport,
+  LOAN_PRODUCTS, analyzeCouple, won2eok, won2man, calcMonthlyPayment, personDsrLoan,
+  splitParentSupport, maxFamilyLoanFor,
   LEGAL_BASIS, FAMILY_LOAN, REFERENCES, LOAN_RATE_SOURCES, GIFT_TAX_TABLE,
 } from './financeCalculator.js';
 
@@ -652,6 +653,16 @@ function initBudgetPlanner() {
     });
   });
 
+  // 무이자 차용 슬라이더: 줄이면 그만큼 "그 외 증여"로 넘어가도록 recalcBudget에서 재분배한다.
+  ['a', 'b'].forEach(prefix => {
+    const slider = document.getElementById(prefix + 'FamilyLoanOverride');
+    if (!slider) return;
+    slider.addEventListener('input', () => {
+      familyLoanOverrideState[prefix] = parseFloat(slider.value) || 0;
+      recalcBudget();
+    });
+  });
+
   renderLegalAccordion();
   renderReferences();
   renderRateSources();
@@ -731,14 +742,9 @@ function personInput(prefix, common) {
   const num = id => parseFloat(document.getElementById(id).value) || 0;
   const 억 = 1e8, 만 = 1e4;
   const product = LOAN_PRODUCTS.find(p => p.id === document.getElementById(prefix + 'Product').value) || LOAN_PRODUCTS[3];
-  // 부모 지원 총액을 세금·이자 부담이 없는 항목부터 자동으로 채워 분해
-  // (기본공제 → 혼인·출산공제 → 무이자 차용 한도 → 남으면 과세 증여)
-  const parentTotal = num(prefix + 'Parent') * 억;
-  const split = splitParentSupport(parentTotal, common);
   return {
     cash: num(prefix + 'Cash') * 억,
-    gift: split.totalGift, family: split.familyLoan,
-    parentSplit: split,   // 부모지원 분해 내역 표시용
+    parentTotal: num(prefix + 'Parent') * 억,   // 부모 지원 총액 (증여/차용 분해는 recalcBudget에서 처리)
     income: num(prefix + 'Income') * 만,
     netMonthly: num(prefix + 'NetMonthly') * 만,   // 실수령 월급(세후)
     product,
@@ -750,6 +756,8 @@ function personInput(prefix, common) {
 
 // 대출 시뮬레이터 슬라이더 상태: null이면 "한도 최대치 사용"(기존 기본 동작)
 const loanOverrideState = { a: null, b: null };
+// 무이자 차용 슬라이더 상태: null이면 "한도(2.17억 또는 공제 후 잔액) 최대치 자동 사용"
+const familyLoanOverrideState = { a: null, b: null };
 
 // 각자의 소득 기준 최대 대출 가능액(dsrLoan)에 맞춰 슬라이더 상한/기본값을 동기화
 function syncLoanSlider(prefix, maxLoan) {
@@ -765,6 +773,20 @@ function syncLoanSlider(prefix, maxLoan) {
   if (maxLabel) maxLabel.textContent = `최대 ${won2eok(maxLoan)}`;
 }
 
+// 공제 적용 후 남은 금액과 무이자 한도(2.17억) 중 작은 값에 맞춰 슬라이더 상한/기본값을 동기화
+function syncFamilyLoanSlider(prefix, parentTotal, common) {
+  const slider = document.getElementById(prefix + 'FamilyLoanOverride');
+  if (!slider) return 0;
+  const maxLoan = maxFamilyLoanFor(parentTotal, common);
+  const maxRounded = Math.max(0, Math.round(maxLoan));
+  slider.max = maxRounded;
+  if (familyLoanOverrideState[prefix] == null || familyLoanOverrideState[prefix] > maxRounded) {
+    familyLoanOverrideState[prefix] = maxRounded;
+  }
+  slider.value = familyLoanOverrideState[prefix];
+  return maxLoan;
+}
+
 function recalcBudget() {
   const chk = id => document.getElementById(id).checked;
   const 억 = 1e8;
@@ -778,6 +800,15 @@ function recalcBudget() {
   };
   const inA = personInput('a', common);
   const inB = personInput('b', common);
+
+  // 무이자 차용 슬라이더 동기화 후, 사용자가 정한 차용액으로 부모지원 총액을 분해
+  // (줄이면 그만큼 "그 외 증여"로 넘어가 세금이 발생 — 총액 3가지 항목은 항상 보존)
+  syncFamilyLoanSlider('a', inA.parentTotal, common);
+  syncFamilyLoanSlider('b', inB.parentTotal, common);
+  const splitA = splitParentSupport(inA.parentTotal, { ...common, familyLoanOverride: familyLoanOverrideState.a });
+  const splitB = splitParentSupport(inB.parentTotal, { ...common, familyLoanOverride: familyLoanOverrideState.b });
+  inA.gift = splitA.totalGift; inA.family = splitA.familyLoan; inA.parentSplit = splitA;
+  inB.gift = splitB.totalGift; inB.family = splitB.familyLoan; inB.parentSplit = splitB;
 
   // 소득만 기준으로 한 개인 최대 대출한도(LTV/주택가와 무관)를 슬라이더에 반영
   syncLoanSlider('a', personDsrLoan(inA));
@@ -799,32 +830,30 @@ function recalcBudget() {
   updateLoanOut('a', R.A);
   updateLoanOut('b', R.B);
 
-  // 자금 카드에는 간략 요약만: 기본/혼인공제 적용 배지 + 무이자차용 바(2.17억 기준) + 한 줄 결론
+  // 자금 카드에는 간략 요약만: 기본/혼인공제 적용 배지 + 무이자차용 슬라이더(공제 후 잔액과 2.17억 중 작은 값이 상한) + 한 줄 결론
+  // 슬라이더 자체는 정적 엘리먼트라 매번 새로 만들지 않고 값만 갱신한다(드래그 중 초기화 방지).
   // 자세한 계산 과정(공제 분해·세율·상환방식)은 아래 renderParentDetail에서 별도로 보여준다.
   const renderParentCompact = (prefix, P) => {
-    const el = document.getElementById(prefix + 'ParentCompact');
-    if (!el) return;
+    const wrap = document.querySelector(`#${prefix}ParentBadges`)?.closest('.parent-compact');
+    const badgesEl = document.getElementById(prefix + 'ParentBadges');
+    const valEl = document.getElementById(prefix + 'FamilyLoanVal');
+    const conclusionEl = document.getElementById(prefix + 'ParentConclusion');
+    if (!badgesEl) return;
     const S = P.parentSplit;
-    if (!S || P.parentTotal <= 0) { el.innerHTML = ''; return; }
+    if (!S || P.parentTotal <= 0) { if (wrap) wrap.style.display = 'none'; return; }
+    if (wrap) wrap.style.display = '';
 
     const basicOn = S.basicGift > 0;
     const bonusOn = S.bonusGift > 0;
-    const loanPct = Math.min(100, (S.familyLoan / FAMILY_LOAN.MAX_NO_INTEREST) * 100);
     const conclusion = S.extraGift > 0
       ? `그 외 증여 ${won2eok(S.extraGift)} → 세금 <b>${won2man(P.giftDetail.tax)}</b>`
       : `공제 범위 내 → 증여세 <b>0원</b>`;
 
-    el.innerHTML = `
-      <div class="pc-badges">
-        <span class="pc-badge ${basicOn ? 'on' : 'off'}">${basicOn ? '✔' : '✕'} 기본공제 0.5억</span>
-        <span class="pc-badge ${bonusOn ? 'on' : 'off'}">${bonusOn ? '✔' : '✕'} 혼인·출산공제 1억</span>
-      </div>
-      <div class="pc-loanbar-row">
-        <span class="pc-loanbar-label">무이자 차용</span>
-        <div class="pc-loanbar"><div class="pc-loanbar-fill" style="width:${loanPct}%"></div></div>
-        <span class="pc-loanbar-val">${won2eok(S.familyLoan)} / 2.17억</span>
-      </div>
-      <div class="pc-conclusion">${conclusion}</div>`;
+    badgesEl.innerHTML = `
+      <span class="pc-badge ${basicOn ? 'on' : 'off'}">${basicOn ? '✔' : '✕'} 기본공제 0.5억</span>
+      <span class="pc-badge ${bonusOn ? 'on' : 'off'}">${bonusOn ? '✔' : '✕'} 혼인·출산공제 1억</span>`;
+    if (valEl) valEl.textContent = `${won2eok(S.familyLoan)} / ${won2eok(Math.max(0, Math.round(document.getElementById(prefix + 'FamilyLoanOverride').max)))}`;
+    if (conclusionEl) conclusionEl.innerHTML = conclusion;
   };
   renderParentCompact('a', R.A);
   renderParentCompact('b', R.B);

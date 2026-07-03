@@ -143,7 +143,15 @@
           <div class="ls-out" id="aLoanOut"></div>
         </div>
         <div class="budget-field"><label>부모 지원 총액 <button class="legal-link" data-legal="family">?</button></label><div class="bf-input"><input type="number" id="aParent" value="3.67" step="0.1" min="0"><span>억</span></div></div>
-        <div id="aParentCompact" class="parent-compact"></div>
+        <div class="parent-compact">
+          <div class="pc-badges" id="aParentBadges"></div>
+          <div class="pc-loanbar-row">
+            <span class="pc-loanbar-label">무이자 차용</span>
+            <input type="range" class="pc-loan-slider" id="aFamilyLoanOverride" min="0" max="0" step="1000000" value="0">
+            <span class="pc-loanbar-val" id="aFamilyLoanVal"></span>
+          </div>
+          <div class="pc-conclusion" id="aParentConclusion"></div>
+        </div>
         <div id="aSummary" class="person-summary"></div>
       </div>
 
@@ -168,7 +176,15 @@
           <div class="ls-out" id="bLoanOut"></div>
         </div>
         <div class="budget-field"><label>부모 지원 총액 <button class="legal-link" data-legal="family">?</button></label><div class="bf-input"><input type="number" id="bParent" value="1.5" step="0.1" min="0"><span>억</span></div></div>
-        <div id="bParentCompact" class="parent-compact"></div>
+        <div class="parent-compact">
+          <div class="pc-badges" id="bParentBadges"></div>
+          <div class="pc-loanbar-row">
+            <span class="pc-loanbar-label">무이자 차용</span>
+            <input type="range" class="pc-loan-slider" id="bFamilyLoanOverride" min="0" max="0" step="1000000" value="0">
+            <span class="pc-loanbar-val" id="bFamilyLoanVal"></span>
+          </div>
+          <div class="pc-conclusion" id="bParentConclusion"></div>
+        </div>
         <div id="bSummary" class="person-summary"></div>
       </div>
     </div>
