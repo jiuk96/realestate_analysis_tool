@@ -48,20 +48,41 @@ const GIFT = {
  *          taxable=과세표준, tax=실질 증여세(신고공제 반영), netReceived=세후 실수령
  */
 export function calcGiftTax(amount, opt = {}) {
-  if (!amount || amount <= 0) return { taxable: 0, tax: 0, netReceived: 0, deduction: 0 };
+  const bonusApplied = !!(opt.marriage || opt.birth);
+  const basicDeduction = GIFT.BASIC_DEDUCTION;
+  const bonusDeduction = bonusApplied ? GIFT.MARRIAGE_BIRTH_CAP : 0;   // 혼인·출산 공제는 통합 1억 한도
+  const deduction = basicDeduction + bonusDeduction;
 
-  let deduction = GIFT.BASIC_DEDUCTION;
-  // 혼인·출산 공제는 통합 1억 한도
-  if (opt.marriage || opt.birth) deduction += GIFT.MARRIAGE_BIRTH_CAP;
+  if (!amount || amount <= 0) {
+    return {
+      taxable: 0, tax: 0, netReceived: 0, deduction,
+      basicDeduction, bonusDeduction, bonusApplied,
+      usedBasic: 0, usedBonus: 0, rate: 0, bracketDeduct: 0, grossTax: 0,
+    };
+  }
+
+  // 공제는 기본공제부터 먼저 채우고 남는 한도를 혼인/출산 공제로 채운다 (표시용 분해)
+  const usedBasic = Math.min(amount, basicDeduction);
+  const usedBonus = Math.min(Math.max(0, amount - usedBasic), bonusDeduction);
 
   const taxable = Math.max(0, amount - deduction);
-  if (taxable === 0) return { taxable: 0, tax: 0, netReceived: amount, deduction };
+  if (taxable === 0) {
+    return {
+      taxable: 0, tax: 0, netReceived: amount, deduction,
+      basicDeduction, bonusDeduction, bonusApplied,
+      usedBasic, usedBonus, rate: 0, bracketDeduct: 0, grossTax: 0,
+    };
+  }
 
   const b = GIFT.BRACKETS.find(br => taxable <= br.limit);
   const grossTax = taxable * b.rate - b.deduct;
   const tax = Math.max(0, grossTax * (1 - GIFT.REPORT_CREDIT));  // 자진신고 3% 공제
 
-  return { taxable, tax, netReceived: amount - tax, deduction };
+  return {
+    taxable, tax, netReceived: amount - tax, deduction,
+    basicDeduction, bonusDeduction, bonusApplied,
+    usedBasic, usedBonus, rate: b.rate, bracketDeduct: b.deduct, grossTax,
+  };
 }
 
 /* ============================================================
@@ -515,6 +536,7 @@ function analyzePerson(p, common) {
   );
   return {
     cash: p.cash || 0, giftGross: p.gift || 0, netGift: gift.netReceived, giftTax: gift.tax,
+    giftDetail: gift,   // 증여공제 내역(기본/혼인·출산 공제, 과세표준, 세율 등) 표시용
     family: p.family || 0, familyMonthly: fam.monthly, familyOverLimit: fam.overLimit,
     equity, dsrLoan, income: p.income || 0,
     // 실제 상환 여력은 사용자가 입력한 세후 실수령 월급 기준
@@ -580,6 +602,7 @@ export function analyzeCouple(inA, inB, common) {
     const bankMonthly = mth - P.familyMonthly;   // 은행 상환분
     return {
       cash: P.cash, netGift: P.netGift, giftGross: P.giftGross, giftTax: P.giftTax,
+      giftDetail: P.giftDetail,   // 증여공제 분해 내역 (기본/혼인·출산 공제, 과세표준, 세율)
       family: P.family, parentTotal: P.giftGross + P.family,   // 부모 지원 총액
       loan: ln, monthly: mth,
       bankMonthly, familyMonthly: P.familyMonthly,

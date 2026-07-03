@@ -798,13 +798,29 @@ function recalcBudget() {
   updateLoanOut('a', R.A);
   updateLoanOut('b', R.B);
 
-  // 부모 지원 분리 표시 (증여/차용 + 세금)
+  // 부모 지원 분리 표시 (증여/차용 + 증여공제 분해 + 세금 계산 과정)
   const renderParentSplit = (prefix, P) => {
     const el = document.getElementById(prefix + 'ParentSplit');
     if (!el) return;
     if (P.parentTotal <= 0) { el.innerHTML = ''; return; }
     const overMsg = P.familyOverLimit ? ` <span style="color:#f87171">차용 ${won2eok(FAMILY_LOAN.MAX_NO_INTEREST)} 초과</span>` : '';
-    el.innerHTML = `부모 지원 ${won2eok(P.parentTotal)} = 증여 ${won2eok(P.giftGross)}(세금 ${won2man(P.giftTax)}) + 무이자 차용 ${won2eok(P.family)}${overMsg}`;
+    const head = `부모 지원 ${won2eok(P.parentTotal)} = 증여 ${won2eok(P.giftGross)}(세금 ${won2man(P.giftTax)}) + 무이자 차용 ${won2eok(P.family)}${overMsg}`;
+
+    let detail = '';
+    const gd = P.giftDetail;
+    if (P.giftGross > 0 && gd) {
+      const dedParts = [`기본공제(직계존속→성년자녀·10년합산) ${won2eok(gd.usedBasic)}`];
+      if (gd.bonusApplied && gd.usedBonus > 0) dedParts.push(`혼인·출산공제 ${won2eok(gd.usedBonus)}`);
+      const taxLine = gd.taxable > 0
+        ? `과세표준 ${won2eok(gd.taxable)} × 세율 ${(gd.rate * 100).toFixed(0)}% − 누진공제 ${won2man(gd.bracketDeduct)} = 산출세액 ${won2man(gd.grossTax)} → 신고세액공제 3% 적용 후 <b>${won2man(gd.tax)}</b>`
+        : `과세표준 0원 → 증여세 없음`;
+      detail = `
+        <div class="ps-gift-detail">
+          증여 ${won2eok(P.giftGross)} − 공제(${dedParts.join(' + ')} = ${won2eok(gd.deduction)}) = 과세표준 ${won2eok(gd.taxable)}<br>
+          ${taxLine}
+        </div>`;
+    }
+    el.innerHTML = head + detail;
   };
   renderParentSplit('a', R.A);
   renderParentSplit('b', R.B);
