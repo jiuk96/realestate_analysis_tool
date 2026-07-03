@@ -157,7 +157,7 @@ body {
   border-color: rgba(56,189,248,.55);
   background: rgba(12,74,110,.92);
 }
-.map-popup { min-width: 140px; max-width: 260px; font-size: 13px; line-height: 1.7; color: #1e293b; }
+.map-popup { width: 100%; font-size: 13px; line-height: 1.6; color: #1e293b; }
 .map-popup b { font-size: 15px; }
 .map-popup-char {
   margin-top: 4px;
@@ -187,12 +187,18 @@ body {
 /* ── Leaflet override ───────────────────────────────────── */
 .leaflet-popup-content-wrapper { border-radius: 8px; }
 .district-tooltip.leaflet-tooltip {
+  /* Leaflet 기본 .leaflet-tooltip은 white-space:nowrap이라 내용 전체가 한 줄로
+     늘어지며 태그가 줄바꿈되지 않고 화면 밖으로 잘렸다 — 폭을 고정하고
+     줄바꿈을 강제로 허용해야 태그 칩이 여러 줄로 정상 랩된다. */
+  width: 220px;
+  white-space: normal !important;
   border-radius: 8px;
   border: 1px solid #cbd5e1;
   box-shadow: 0 6px 20px rgba(0,0,0,.25);
   padding: 10px 12px;
   opacity: 1 !important;
 }
+.district-tooltip.leaflet-tooltip::before { display: none; }
 
 /* ── 구 카드 그리드 ─────────────────────────────────────── */
 .district-card-grid {
