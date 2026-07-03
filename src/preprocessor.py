@@ -123,8 +123,8 @@ def _estimate_households(df: pd.DataFrame) -> pd.DataFrame:
 
 def filter_apartments(df: pd.DataFrame) -> pd.DataFrame:
     """
-    1) 추정 세대수 500 미만 단지 제거
-    2) 단지 전체 거래 중 벌점 제거 비율 > 30% 단지 제거
+    1) 추정 세대수 MIN_HOUSEHOLDS 미만 단지 제거 (단, FLAGSHIP_APARTMENTS 등재 단지는 예외)
+    2) 단지 전체 거래 중 벌점 제거 비율 > 30% 단지 제거 (대장아파트도 이 기준은 적용)
 
     ⚠️ "현대"·"삼성"·"동아" 같은 흔한 단지명은 서울 전역 10곳 넘게 겹친다.
     apt_name만으로 묶으면 서로 다른 단지의 거래·세대수가 합쳐져 필터가
@@ -148,13 +148,24 @@ def filter_apartments(df: pd.DataFrame) -> pd.DataFrame:
     hh = _estimate_households(df)
     quality = quality.merge(hh[key + ["est_households"]], on=key, how="left")
 
+    # 대장아파트 예외: 세대수 추정치가 낮게 잡히는 초고가·저유동 랜드마크 단지는
+    # MIN_HOUSEHOLDS 미달이어도 포함 (데이터 불량 비율 기준은 그대로 적용)
+    is_flagship = quality.apply(
+        lambda r: (r["district_name"], r["apt_name"]) in config.FLAGSHIP_APARTMENTS, axis=1
+    )
+
     # 조건 적용 (구+단지명 복합키 기준으로 필터)
     valid = quality.loc[
-        (quality["est_households"] >= config.MIN_HOUSEHOLDS) &
+        ((quality["est_households"] >= config.MIN_HOUSEHOLDS) | is_flagship) &
         (quality["remove_ratio"] <= 0.30),
         key
     ]
     valid_keys = pd.MultiIndex.from_frame(valid)
+
+    matched_flagships = set(map(tuple, quality.loc[is_flagship, key].values.tolist()))
+    missing_flagships = config.FLAGSHIP_APARTMENTS - matched_flagships
+    if missing_flagships:
+        log.warning(f"FLAGSHIP_APARTMENTS 중 원본 데이터에서 못 찾은 단지: {sorted(missing_flagships)}")
 
     before = df["apt_name"].nunique()
     df_keys = pd.MultiIndex.from_frame(df[key])
@@ -162,7 +173,7 @@ def filter_apartments(df: pd.DataFrame) -> pd.DataFrame:
     after = df["apt_name"].nunique()
     log.info(
         f"단지 필터: {before}개 → {after}개 단지명 "
-        f"(세대수 미달 또는 데이터 불량 제거, 구 구분 적용)"
+        f"(세대수 미달 또는 데이터 불량 제거, 구 구분 적용, 대장아파트 {len(matched_flagships)}개 구제)"
     )
     return df
 

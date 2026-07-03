@@ -11,7 +11,7 @@ from pathlib import Path
 from src.preprocessor import run as preprocess_run
 from src.analyzer import run as analyzer_run, build_monthly_median
 from src.scorer import compute_composite_score, WEIGHTS, WEIGHTS_TRANSIT
-from config import DISTRICTS
+from config import DISTRICTS, MIN_HOUSEHOLDS
 
 CODE2NAME = {v: k for k, v in DISTRICTS.items()}
 OUT = Path('data/processed')
@@ -83,7 +83,7 @@ save('quality.json', {
     'data_source': '국토교통부 실거래가 공개시스템',
     'collection_period': '2020.01 ~ 2026.06',
     'target_districts': list(DISTRICTS.keys()),
-    'min_households': 500,
+    'min_households': MIN_HOUSEHOLDS,
     'smoothing': '3개월 이동 중앙값',
     'outlier_method': 'z-score > 3.0 제거',
     'representative_area': '전용 59㎡ (18평)',
@@ -94,8 +94,8 @@ _mdd_keys = pd.MultiIndex.from_frame(mdd_df[['district_name', 'apt_name']])
 stages = [
     {'label': '원본 거래', 'count': len(df_raw), 'desc': 'API 수집 전체'},
     {'label': '필터 후', 'count': len(df), 'desc': '벌점 5점 미만'},
-    {'label': '500세대+', 'count': len(df[pd.MultiIndex.from_frame(df[['district_name', 'apt_name']]).isin(_mdd_keys)]),
-     'desc': '대단지 기준'},
+    {'label': f'{MIN_HOUSEHOLDS}세대+', 'count': len(df[pd.MultiIndex.from_frame(df[['district_name', 'apt_name']]).isin(_mdd_keys)]),
+     'desc': '대단지 기준 (대장아파트 일부 예외 포함)'},
 ]
 penalty_rules = [
     {'rule': '1층', 'score': 2, 'reason': '1층 거래는 시세보다 낮아 가격 왜곡 가능'},
