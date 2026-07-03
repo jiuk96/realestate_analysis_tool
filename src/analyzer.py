@@ -61,8 +61,13 @@ def build_monthly_median(df: pd.DataFrame) -> pd.DataFrame:
     # 거래가 1건뿐인 월은 노이즈가 크므로 제외
     monthly = monthly[monthly["trade_count"] >= 2].copy()
 
-    # 3개월 이동 중앙값으로 스무딩 (단기 스파이크 완화)
+    # 주변 기간 대비 비정상적으로 낮은 달(다운계약·지분거래·동명이인 단지 혼입 등
+    # 의심) 제거 — 3개월 스무딩만으로는 이상거래가 2~3개월 연속으로 몰리면
+    # 못 걸러지므로, 그 전에 넓은 이웃 구간 기준으로 먼저 걸러낸다.
     monthly = monthly.sort_values(["apt_name", "deal_date"])
+    monthly = _filter_price_outlier_months(monthly)
+
+    # 3개월 이동 중앙값으로 스무딩 (단기 스파이크 완화)
     monthly["smoothed_price"] = (
         monthly.groupby("apt_name", observed=True)["median_price"]
         .transform(lambda s: s.rolling(3, min_periods=1, center=True).median())
@@ -71,57 +76,140 @@ def build_monthly_median(df: pd.DataFrame) -> pd.DataFrame:
     return monthly
 
 
+OUTLIER_WINDOW = 9        # 이웃 구간 폭(개월, 짝수면 자동으로 +1)
+OUTLIER_MIN_PERIODS = 3   # 이웃 구간에 최소 이 정도는 있어야 판단
+OUTLIER_DROP_RATIO = 0.70 # 이웃 구간 중앙값 대비 이 비율 미만이면 이상치로 제외
+
+
+def _filter_price_outlier_months(monthly: pd.DataFrame) -> pd.DataFrame:
+    """
+    단지별 월별 시세 중 "넓은 이웃 구간(±4개월, 총 9개월)" 중앙값 대비
+    OUTLIER_DROP_RATIO(기본 70%) 미만으로 뚝 떨어진 달을 통계에서 제외한다.
+
+    바로 앞뒤 1개월만 비교하면 다운계약·지분거래·동일 단지명 다른 건물 혼입 등의
+    이상거래가 2~3개월 연속으로 몰릴 때 놓칠 수 있다. 예: A월 165,000 → B월
+    52,250 → C월 51,500 → D월 162,150 처럼 이상 저가가 2개월 이어지면 인접
+    1개월 비교로는 "그 다음 달에도 낮으니 정상 하락"으로 오판하지만, 9개월
+    폭의 중앙값과 비교하면 주변 시세(약 15만원대)에서 크게 벗어난 것이 드러난다.
+    """
+    def _flag(s: pd.Series) -> pd.Series:
+        baseline = s.rolling(OUTLIER_WINDOW, center=True, min_periods=OUTLIER_MIN_PERIODS).median()
+        return (s < baseline * OUTLIER_DROP_RATIO) & baseline.notna()
+
+    is_outlier = (
+        monthly.groupby("apt_name", observed=True)["median_price"]
+        .transform(_flag)
+    )
+    removed = int(is_outlier.sum())
+    if removed:
+        log.info(f"이상 저가 월 제외: {removed}건 (주변 9개월 중앙값 대비 70% 미만)")
+    return monthly[~is_outlier].copy()
+
+
 # ── 2. 최고점 / 최저점 탐지 ───────────────────────────────────
 
 def _period_to_str(p) -> str:
     return str(p) if p is not None else "N/A"
 
 
+ISOLATED_DIP_RATIO = 0.85   # 전/후 관측치 대비 이 비율 미만이면 '고립 저가' 의심
+
+
+def _is_isolated_dip(prices: pd.Series, i: int, drop_ratio: float = ISOLATED_DIP_RATIO) -> bool:
+    """
+    i번째 지점이 바로 이전·이후 관측치보다 급격히(기본 15%↑) 낮았다가 바로 회복되는
+    '고립된 저가'인지 판단한다.
+
+    다운계약·특수관계인 간 거래·급전 필요에 의한 저가 처분 등은 대개 한두 달만
+    반짝 나타나고 다음 관측치에서 곧바로 정상 시세로 돌아온다. 이런 패턴은
+    실제 "시장이 하락했다가 그 가격에서 유지"된 것이 아니라 개별 이상거래일
+    가능성이 높으므로 저점(trough) 후보에서 제외한다.
+    맨 앞/맨 뒤 지점은 비교할 이웃이 한쪽뿐이라 판단을 보류(고립 아님으로 간주)한다.
+    """
+    if i <= 0 or i >= len(prices) - 1:
+        return False
+    price = prices.iloc[i]
+    prev_p = prices.iloc[i - 1]
+    next_p = prices.iloc[i + 1]
+    return price < prev_p * drop_ratio and price < next_p * drop_ratio
+
+
+def _max_drawdown_indices(prices: np.ndarray, excluded: np.ndarray) -> tuple[int, int, float]:
+    """
+    표준 MDD(Maximum Drawdown) 알고리즘.
+    시계열을 한 번 훑으며 "그 시점까지의 최고가(running max) → 현재가"의 낙폭을
+    매 시점마다 계산해, 낙폭이 가장 컸던 (고점, 저점) 쌍을 찾는다.
+
+    특정 연도로 고점을 고정하는 대신 전체 기간에서 "실제로 있었던 가장 큰
+    하락 구간"을 그대로 찾아내므로, 특정 캘린더 구간에 거래가 적어 고점이
+    엉뚱하게(예: 최근 신고가) 잡히는 문제가 없다.
+
+    excluded=True인 지점(고립된 이상 저가)은 저점 후보에서 제외하되,
+    고점(running max) 갱신에는 계속 사용할 수 있게 한다 — 이상거래가 고점을
+    부풀리는 경우는 드물고(대개 저가 다운계약이 문제), 오히려 고점 후보에서
+    빼면 그 시점 이후의 정상적인 하락 구간을 놓칠 수 있기 때문이다.
+
+    반환: (peak_idx, trough_idx, worst_drawdown) — 하락이 전혀 없으면
+          worst_drawdown=0.0, peak_idx=trough_idx=전체 최고가 지점.
+    """
+    running_max = -np.inf
+    running_max_idx = 0
+    worst_dd = 0.0
+    peak_idx = trough_idx = 0
+
+    for i, price in enumerate(prices):
+        if price > running_max:
+            running_max = price
+            running_max_idx = i
+        if excluded[i] or running_max <= 0:
+            continue
+        dd = (price - running_max) / running_max
+        if dd < worst_dd:
+            worst_dd = dd
+            peak_idx = running_max_idx
+            trough_idx = i
+
+    if worst_dd == 0.0:
+        # 관측 기간 내내 하락을 겪지 않은 단지 → 현재까지의 최고가를 고점=저점으로 취급(MDD 0%)
+        best_i = int(np.argmax(prices))
+        peak_idx = trough_idx = best_i
+
+    return peak_idx, trough_idx, worst_dd
+
+
 def detect_peak_trough(monthly: pd.DataFrame) -> pd.DataFrame:
     """
-    단지별 최고점(peak)과 최저점(trough) 탐지.
+    단지별 최고점(peak)과 최저점(trough) 탐지 — 전체 수집 기간 기준 MDD.
 
-    1차: config 하드코딩 구간 내에서 탐지
-         - peak:   PEAK_START ~ PEAK_END
-         - trough: TROUGH_START ~ TROUGH_END
-    2차: 구간 내 데이터가 3개월 미만이면 전체 기간으로 확장 탐지
+    특정 연도 구간(예: 2021년)에 국한해 고점을 찾던 예전 방식은, 그 구간에
+    거래가 적은 고가·저유동 단지(강남3구 등)의 경우 "고점 이후 데이터가 없다"는
+    이유로 통째로 분석에서 빠지는 문제가 있었음. 전체 기간을 대상으로 표준 MDD
+    알고리즘(_max_drawdown_indices)을 적용해 실제 겪은 가장 큰 하락 구간을 찾고,
+    다운계약 등으로 의심되는 '고립된 저가'는 _is_isolated_dip()로 걸러 저점
+    후보에서 제외한다.
 
     반환: [apt_name, peak_date, peak_price, trough_date, trough_price,
            mdd_pct, district_name, build_year, area_exclusive]
     """
-    peak_start   = pd.Period(config.PEAK_START,   freq="M")
-    peak_end     = pd.Period(config.PEAK_END,     freq="M")
-    trough_start = pd.Period(config.TROUGH_START, freq="M")
-    trough_end   = pd.Period(config.TROUGH_END,   freq="M")
-
     results = []
 
     for apt_name, grp in monthly.groupby("apt_name", observed=True):
-        grp = grp.sort_values("deal_date")
-
-        # 최고점 탐지
-        peak_window = grp[(grp["deal_date"] >= peak_start) & (grp["deal_date"] <= peak_end)]
-        if len(peak_window) < 3:
-            peak_window = grp   # 구간 데이터 부족 → 전체 기간 사용
-        if peak_window.empty:
+        grp = grp.sort_values("deal_date").reset_index(drop=True)
+        if grp.empty:
             continue
-        peak_row = peak_window.loc[peak_window["smoothed_price"].idxmax()]
 
-        # 최저점 탐지 (최고점 이후 구간만)
-        trough_window = grp[
-            (grp["deal_date"] >= trough_start) &
-            (grp["deal_date"] <= trough_end) &
-            (grp["deal_date"] > peak_row["deal_date"])
-        ]
-        if len(trough_window) < 3:
-            trough_window = grp[grp["deal_date"] > peak_row["deal_date"]]
-        if trough_window.empty:
-            continue
-        trough_row = trough_window.loc[trough_window["smoothed_price"].idxmin()]
+        prices = grp["smoothed_price"]
+        prices_arr = prices.to_numpy()
 
+        # 고립된 이상 저가(다운계약·특수관계 거래 의심) 플래그
+        isolated = np.array([_is_isolated_dip(prices, i) for i in range(len(prices))])
+
+        peak_idx, trough_idx, _ = _max_drawdown_indices(prices_arr, isolated)
+
+        peak_row   = grp.loc[peak_idx]
+        trough_row = grp.loc[trough_idx]
         peak_price   = peak_row["smoothed_price"]
         trough_price = trough_row["smoothed_price"]
-
         if peak_price <= 0:
             continue
 
