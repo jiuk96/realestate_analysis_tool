@@ -157,11 +157,33 @@ body {
   border-color: rgba(56,189,248,.55);
   background: rgba(12,74,110,.92);
 }
-.map-popup { min-width: 140px; font-size: 13px; line-height: 1.7; color: #1e293b; }
+.map-popup { min-width: 140px; max-width: 260px; font-size: 13px; line-height: 1.7; color: #1e293b; }
 .map-popup b { font-size: 15px; }
+.map-popup-famous {
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: #475569;
+  white-space: normal;
+}
+.map-popup-desc {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid #e2e8f0;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: #334155;
+  white-space: normal;
+}
 
 /* ── Leaflet override ───────────────────────────────────── */
 .leaflet-popup-content-wrapper { border-radius: 8px; }
+.district-tooltip.leaflet-tooltip {
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 6px 20px rgba(0,0,0,.25);
+  padding: 10px 12px;
+  opacity: 1 !important;
+}
 
 /* ── 구 카드 그리드 ─────────────────────────────────────── */
 .district-card-grid {

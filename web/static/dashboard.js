@@ -90,13 +90,21 @@ async function renderMap() {
     }).addTo(seoulMap);
   }
 
-  const popupFor = d => d.has_data
-    ? `<div class="map-popup"><b>${d.name}</b><br>
-        분석 완료 ✓<br>
-        단지 수: ${d.apt_count}개<br>
-        최우수: ${d.top_apt_name || '—'}<br>
-        최고점: ${d.top_score != null ? d.top_score.toFixed(1) : '—'}점</div>`
-    : `<div class="map-popup"><b>${d.name}</b><br>데이터 수집 예정</div>`;
+  const popupFor = d => {
+    const famous = (d.famous || []).slice(0, 4).join(' · ');
+    const stat = d.has_data
+      ? `분석 완료 ✓<br>단지 수: ${d.apt_count}개<br>최우수: ${d.top_apt_name || '—'}<br>최고점: ${d.top_score != null ? d.top_score.toFixed(1) : '—'}점`
+      : `데이터 수집 예정`;
+    const desc = d.description
+      ? `<div class="map-popup-desc">${d.description}</div>`
+      : (d.character ? `<div class="map-popup-desc">${d.character}${d.demographics ? ' · ' + d.demographics : ''}</div>` : '');
+    return `<div class="map-popup">
+        <b>${d.icon ? d.icon + ' ' : ''}${d.name}</b><br>
+        ${stat}
+        ${famous ? `<div class="map-popup-famous">${famous}</div>` : ''}
+        ${desc}
+      </div>`;
+  };
 
   // 실제 구 경계 GeoJSON (jsDelivr CDN, 브라우저에서 직접 로드) — 실패 시 사각형 폴백
   let geo = null;
@@ -115,7 +123,7 @@ async function renderMap() {
       onEachFeature: (f, layer) => {
         const d = districtData.find(x => x.name === f.properties.name);
         if (!d) return;
-        layer.bindPopup(popupFor(d));
+        layer.bindTooltip(popupFor(d), { sticky: true, direction: 'top', className: 'district-tooltip' });
         layer.on('click', () => scrollToDistrict(d.name));
         layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.55 }));
         layer.on('mouseout', () => layer.setStyle({ fillOpacity: d.has_data ? 0.35 : 0.12 }));
@@ -137,7 +145,7 @@ async function renderMap() {
          [Math.max(...poly.map(p=>p[0])), Math.max(...poly.map(p=>p[1]))]],
         { color, weight: 2, fillColor: color, fillOpacity: d.has_data ? 0.35 : 0.12 }
       );
-      rect.bindPopup(popupFor(d));
+      rect.bindTooltip(popupFor(d), { sticky: true, direction: 'top', className: 'district-tooltip' });
       rect.on('click', () => scrollToDistrict(d.name));
       rect.addTo(seoulMap);
       mapLayers[d.name] = mapLayers[d.name] || {};
@@ -155,7 +163,7 @@ async function renderMap() {
       iconAnchor: [30, 12]
     });
     const marker = L.marker(center, { icon });
-    marker.bindPopup(popupFor(d));
+    marker.bindTooltip(popupFor(d), { sticky: true, direction: 'top', className: 'district-tooltip' });
     marker.on('click', () => scrollToDistrict(d.name));
     marker.addTo(seoulMap);
     mapLayers[d.name] = mapLayers[d.name] || {};
