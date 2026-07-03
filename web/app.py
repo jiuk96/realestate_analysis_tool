@@ -118,7 +118,6 @@ def api_apartments():
             "walk_min": r.get("walk_min"),
             "coord_source": loc.get("source", "geocoded"),
             "dong": loc.get("dong"),
-            "naver_id": r.get("naver_id"),
         })
     return jsonify({"apartments": out})
 

@@ -128,13 +128,6 @@ if _locpath.exists():
     score_df['dong'] = score_df.apply(lambda r: _locget(r, 'dong'), axis=1)
     score_df['lat'] = score_df.apply(lambda r: _locget(r, 'lat'), axis=1)
     score_df['lng'] = score_df.apply(lambda r: _locget(r, 'lng'), axis=1)
-# 네이버 부동산 단지 고유번호 병합 (resolve_naver_ids.py 캐시가 있으면)
-# — 있으면 대시보드가 검색 대신 단지 페이지로 바로 연결한다.
-_nidpath = Path('data/static/naver_ids.json')
-if _nidpath.exists():
-    _nid = json.loads(_nidpath.read_text(encoding='utf-8'))
-    score_df['naver_id'] = score_df.apply(
-        lambda r: (_nid.get(f"{r['district']}|{r['apt_name']}") or {}).get('complex_no'), axis=1)
 save('composite_score.json', {'ranking': score_df.to_dict('records'), 'weights': weights})
 
 # timeseries.json
