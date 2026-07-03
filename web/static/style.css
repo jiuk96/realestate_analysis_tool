@@ -159,20 +159,29 @@ body {
 }
 .map-popup { min-width: 140px; max-width: 260px; font-size: 13px; line-height: 1.7; color: #1e293b; }
 .map-popup b { font-size: 15px; }
-.map-popup-famous {
+.map-popup-char {
   margin-top: 4px;
   font-size: 11.5px;
   color: #475569;
   white-space: normal;
 }
-.map-popup-desc {
+.map-popup-tags {
   margin-top: 6px;
   padding-top: 6px;
   border-top: 1px solid #e2e8f0;
-  font-size: 11.5px;
-  line-height: 1.55;
-  color: #334155;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
   white-space: normal;
+}
+.map-popup-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: #0369a1;
+  background: #e0f2fe;
+  border-radius: 4px;
+  padding: 2px 6px;
+  white-space: nowrap;
 }
 
 /* ── Leaflet override ───────────────────────────────────── */
@@ -218,8 +227,13 @@ body {
 .tag-pending { background: rgba(100,116,139,.15); color: #64748b; border: 1px solid #334155; }
 .card-price { font-size: .85rem; color: var(--text2); }
 .card-body { padding: 1rem 1.2rem; }
-.card-desc { font-size: .85rem; color: var(--text2); margin-bottom: .7rem; line-height: 1.6; }
+.card-desc { font-size: .85rem; color: var(--text2); margin-bottom: .5rem; line-height: 1.6; }
 .card-famous { font-size: .8rem; color: var(--text2); margin-bottom: .8rem; }
+.card-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: .8rem; }
+.card-tag-chip {
+  font-size: .74rem; font-weight: 600; color: #0369a1;
+  background: rgba(56,189,248,.14); border-radius: 5px; padding: 2px 7px;
+}
 .card-top-apt {
   font-size: .85rem;
   background: rgba(56,189,248,.08);

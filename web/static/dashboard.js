@@ -91,18 +91,19 @@ async function renderMap() {
   }
 
   const popupFor = d => {
-    const famous = (d.famous || []).slice(0, 4).join(' · ');
     const stat = d.has_data
       ? `분석 완료 ✓<br>단지 수: ${d.apt_count}개<br>최우수: ${d.top_apt_name || '—'}<br>최고점: ${d.top_score != null ? d.top_score.toFixed(1) : '—'}점`
       : `데이터 수집 예정`;
-    const desc = d.description
-      ? `<div class="map-popup-desc">${d.description}</div>`
-      : (d.character ? `<div class="map-popup-desc">${d.character}${d.demographics ? ' · ' + d.demographics : ''}</div>` : '');
+    const tags = (d.tags && d.tags.length) ? d.tags : (d.famous || []).slice(0, 4).map(f => '#' + f);
+    const tagHtml = tags.length
+      ? `<div class="map-popup-tags">${tags.map(t => `<span class="map-popup-tag">${t}</span>`).join('')}</div>`
+      : '';
+    const oneLiner = d.character ? `<div class="map-popup-char">${d.character}</div>` : '';
     return `<div class="map-popup">
         <b>${d.icon ? d.icon + ' ' : ''}${d.name}</b><br>
         ${stat}
-        ${famous ? `<div class="map-popup-famous">${famous}</div>` : ''}
-        ${desc}
+        ${oneLiner}
+        ${tagHtml}
       </div>`;
   };
 
@@ -211,8 +212,8 @@ function renderDistrictCards(districts) {
         <div class="card-price">${priceStr}</div>
       </div>
       <div class="card-body">
-        <p class="card-desc">${d.description || d.character || ''}</p>
-        ${famousStr ? `<div class="card-famous">📍 ${famousStr}</div>` : ''}
+        <p class="card-desc">${d.character || ''}</p>
+        ${(d.tags && d.tags.length) ? `<div class="card-tags">${d.tags.map(t => `<span class="card-tag-chip">${t}</span>`).join('')}</div>` : (famousStr ? `<div class="card-famous">📍 ${famousStr}</div>` : '')}
         ${ageRows ? `<div class="age-chart">${ageRows}</div>` : ''}
         ${topApt}
       </div>
