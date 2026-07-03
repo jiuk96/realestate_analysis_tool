@@ -21,6 +21,7 @@ v1(HTML 검색결과 페이지에서 정규식으로 번호 추출)은 실전 Gi
     상태코드/응답 스니펫만 보고 바로 원인을 알 수 있게 하기 위함 (재실행 없이 디버깅)
 """
 
+import functools
 import json
 import re
 import time
@@ -30,11 +31,18 @@ from urllib.parse import quote
 
 import requests
 
+# Actions 로그가 완료/버퍼가 찰 때까지 안 보이던 문제 방지 — 모든 print를 즉시 flush.
+print = functools.partial(print, flush=True)
+
 ROOT = Path(__file__).parent
 sys.path.insert(0, str(ROOT))
 
 CACHE = ROOT / "data" / "static" / "naver_ids.json"
 COMP = ROOT / "data" / "processed" / "composite_score.json"
+
+REQUEST_TIMEOUT = 6           # 초 (기존 12초 → 단축, 막혀있을 때 오래 안 붙잡도록)
+TIME_BUDGET_SEC = 20 * 60     # 이 시간을 넘기면 남은 단지는 다음 실행으로 미루고 저장 후 종료
+CONSECUTIVE_NETWORK_FAIL_LIMIT = 8   # 이 횟수만큼 연속 네트워크 예외가 나면 그 방법은 이번 실행에서 포기
 
 DESKTOP_UA = {
     "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -92,21 +100,47 @@ def search_terms(district: str, apt_name: str) -> list[str]:
     return out
 
 
+# ── 네트워크 서킷 브레이커 ───────────────────────────────────
+# 요청이 (막혀서) 연속으로 예외/타임아웃을 내면, 이후 단지들에도 같은 일이
+# 반복될 게 뻔하므로 그 방법은 이번 실행에서 포기하고 즉시 다음 단계로 넘어간다.
+# 이게 없으면 394개 단지 × 여러 검색어 × 6초 타임아웃이 겹쳐 몇 시간씩 멈춘 것처럼
+# 보일 수 있다 (이번에 실제로 발생한 문제).
+_circuit = {"new_land": 0, "mland": 0}
+_tripped = {"new_land": False, "mland": False}
+
+
+def _note_network_result(method: str, ok: bool):
+    if ok:
+        _circuit[method] = 0
+        return
+    _circuit[method] += 1
+    if _circuit[method] >= CONSECUTIVE_NETWORK_FAIL_LIMIT and not _tripped[method]:
+        _tripped[method] = True
+        print(f"[경고] {method} 연속 {CONSECUTIVE_NETWORK_FAIL_LIMIT}회 네트워크 실패 — "
+              f"이번 실행에서 {method}는 더 이상 시도하지 않습니다 (막혀 있는 것으로 판단).")
+
+
 # ── 방법 1: new.land.naver.com JSON 검색 API (주 방법) ────────────
 
 def search_new_land(session: requests.Session, keyword: str, debug: bool = False) -> list[dict]:
     """네이버부동산 PC웹(new.land.naver.com)이 쓰는 검색 API. 단지 후보 목록 반환."""
+    if _tripped["new_land"] and not debug:
+        return []
     url = "https://new.land.naver.com/api/search"
     try:
-        r = session.get(url, params={"keyword": keyword}, headers=DESKTOP_UA, timeout=12)
+        r = session.get(url, params={"keyword": keyword}, headers=DESKTOP_UA, timeout=REQUEST_TIMEOUT)
     except Exception as e:
         if debug:
             print(f"    [진단] new.land 요청 예외: {e}")
+        _note_network_result("new_land", ok=False)
         return []
     if debug:
         print(f"    [진단] new.land status={r.status_code} body[:300]={r.text[:300]!r}")
     if r.status_code != 200:
+        # 200이 아닌 것도 "막힘" 신호로 취급 (403/999 등 차단 응답이 반복되면 서킷 트립)
+        _note_network_result("new_land", ok=False)
         return []
+    _note_network_result("new_land", ok=True)
     try:
         data = r.json()
     except Exception:
@@ -126,13 +160,18 @@ ID_PATTERNS = [
 
 
 def search_mland_fallback(session: requests.Session, keyword: str) -> str | None:
+    if _tripped["mland"]:
+        return None
     url = f"https://m.land.naver.com/search/result/{quote(keyword)}"
     try:
-        r = session.get(url, headers=MOBILE_UA, timeout=12, allow_redirects=True)
+        r = session.get(url, headers=MOBILE_UA, timeout=REQUEST_TIMEOUT, allow_redirects=True)
     except Exception:
+        _note_network_result("mland", ok=False)
         return None
     if r.status_code != 200:
+        _note_network_result("mland", ok=False)
         return None
+    _note_network_result("mland", ok=True)
     m = ID_PATTERNS[0].search(r.url)
     if m:
         return m.group(1)
@@ -202,8 +241,14 @@ def main():
     print("[진단] new.land 검색 API 연결 테스트...")
     search_new_land(session, "래미안", debug=True)
 
-    ok = fail = skip = 0
+    start = time.monotonic()
+    ok = fail = skip = timed_out = 0
     for i, (apt_name, district) in enumerate(targets):
+        if time.monotonic() - start > TIME_BUDGET_SEC:
+            timed_out = len(targets) - i
+            print(f"[알림] 시간 예산({TIME_BUDGET_SEC//60}분) 초과 — 남은 {timed_out}개는 다음 실행으로 미룹니다.")
+            break
+
         cache_key = f"{district}|{apt_name}"
         if cache.get(cache_key, {}).get("complex_no"):
             skip += 1
@@ -220,14 +265,21 @@ def main():
             print(f"  ✗ {district} {apt_name}: 단지번호 못 찾음")
             fail += 1
 
-        # 25건마다 중간 저장 — 도중에 끊겨도 그동안 찾은 결과는 보존
+        # 25건마다 중간 저장 + 진행상황 표시 — 도중에 끊겨도 그동안 찾은 결과는 보존
         if (ok + fail) % 25 == 0:
+            elapsed = time.monotonic() - start
+            print(f"  ... 진행 {i+1}/{len(targets)} (경과 {elapsed:.0f}초)")
             CACHE.parent.mkdir(parents=True, exist_ok=True)
             CACHE.write_text(json.dumps(cache, ensure_ascii=False, indent=2), encoding="utf-8")
 
+        if _tripped["new_land"] and _tripped["mland"]:
+            timed_out = len(targets) - i - 1
+            print("[알림] 두 방법 모두 네트워크가 막힌 것으로 판단돼 — 나머지는 스킵하고 종료합니다.")
+            break
+
     CACHE.parent.mkdir(parents=True, exist_ok=True)
     CACHE.write_text(json.dumps(cache, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"\n완료: 신규 {ok}, 실패 {fail}, 스킵 {skip} → {CACHE}")
+    print(f"\n완료: 신규 {ok}, 실패 {fail}, 스킵 {skip}, 미처리(다음 실행) {timed_out} → {CACHE}")
     print("이제 python build_data.py 를 다시 실행하면 단지 링크에 반영됩니다.")
 
 

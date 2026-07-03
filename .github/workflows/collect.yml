@@ -49,6 +49,9 @@ jobs:
           python geocode_apts.py || echo "지오코딩 일부 실패 — 캐시된 결과만 반영"
 
       - name: 네이버 부동산 단지번호 수집
+        timeout-minutes: 25
+        env:
+          PYTHONUNBUFFERED: "1"
         run: |
           python resolve_naver_ids.py || echo "단지번호 수집 일부 실패 — 검색 링크로 폴백"
 
