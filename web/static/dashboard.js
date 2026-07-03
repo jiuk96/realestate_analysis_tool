@@ -595,19 +595,17 @@ function normalizeAptName(name) {
     .trim();
 }
 
-// 검색어 생성: 이름이 충분히 고유하면 이름만으로(가장 잘 잡힘), 흔한 단지명이거나
-// 너무 짧으면 지역(동 우선, 없으면 구)을 앞에 붙여 구분한다.
-// dong이 대부분 비어 있어 "구 + 풀네임"으로만 검색하면 0건이 자주 나므로,
-// 고유한 브랜드명은 지역 없이 이름만 넘겨 매칭 확률을 높인다.
+// 검색어 생성: "동"(법정동) 정보가 있으면 항상 붙인다 — 구보다 훨씬 좁은 단위라
+// "현대"·"주공10"처럼 흔한 이름도 정확히 구분되면서, 고유 브랜드명에도 붙여서
+// 나쁠 게 없다(오히려 동명 단지가 다른 동네에도 있는 경우를 막아줌).
+// dong이 없는 예외적인 경우에만: 흔한 이름은 구라도 붙이고, 고유한 이름은
+// 지역 없이 이름만 넘겨 "구+풀네임"이 너무 좁아 0건이 뜨는 걸 피한다.
 function naverSearchTerm(district, aptName, dong) {
   const name = normalizeAptName(aptName);
   const core = name.replace(/\s+/g, '');   // 공백 제거한 순수 글자 길이로 고유성 판단
   const isCommon = COMMON_APT_NAMES.has(core) || core.length <= 4;
-  if (isCommon) {
-    const area = dong || district || '';
-    return `${area} ${name}`.trim();
-  }
-  return name;
+  const area = dong || (isCommon ? district : '');
+  return area ? `${area} ${name}`.trim() : name;
 }
 
 // 네이버 지도(위치 확인). 좌표 중심으로 열어 항상 정확한 위치 표시.

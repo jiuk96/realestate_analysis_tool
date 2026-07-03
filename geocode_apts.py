@@ -193,7 +193,10 @@ def main():
             continue
 
         addr, umd = representative_address(raw, apt_name, district)
-        entry = {"apt_name": apt_name, "district": district, "address": addr,
+        # umd(법정동)는 이미 계산해두고도 캐시에 저장을 안 해서, 대시보드의 네이버
+        # 검색어가 "구"까지만 붙는 바람에(너무 넓어 오매칭/0건) 흔한 단지명일수록
+        # 잘 안 열리는 문제가 있었다 — "동"까지 저장해 검색 정확도를 높인다.
+        entry = {"apt_name": apt_name, "district": district, "address": addr, "dong": umd,
                  "lat": None, "lng": None,
                  "nearest_station": None, "nearest_station_m": None,
                  "stations_within_1km": 0}

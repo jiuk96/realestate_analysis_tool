@@ -7,7 +7,8 @@
     "lng": 127.1396098,
     "nearest_station": "명일역",
     "nearest_station_m": 458,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "암사동"
   },
   "성동구|대림e-편한세상": {
     "apt_name": "대림e-편한세상",
@@ -17,7 +18,8 @@
     "lng": 127.03571,
     "nearest_station": "왕십리역",
     "nearest_station_m": 448,
-    "stations_within_1km": 5
+    "stations_within_1km": 5,
+    "dong": "행당동"
   },
   "강동구|선사현대아파트": {
     "apt_name": "선사현대아파트",
@@ -27,7 +29,8 @@
     "lng": 127.1258631,
     "nearest_station": "암사역",
     "nearest_station_m": 304,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "암사동"
   },
   "용산구|한가람": {
     "apt_name": "한가람",
@@ -37,7 +40,8 @@
     "lng": 126.96612,
     "nearest_station": "이촌역",
     "nearest_station_m": 742,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "이촌동"
   },
   "성동구|신금호파크자이": {
     "apt_name": "신금호파크자이",
@@ -47,7 +51,8 @@
     "lng": 127.0211,
     "nearest_station": "신금호역",
     "nearest_station_m": 173,
-    "stations_within_1km": 4
+    "stations_within_1km": 4,
+    "dong": "금호동2가"
   },
   "은평구|녹번역e편한세상캐슬": {
     "apt_name": "녹번역e편한세상캐슬",
@@ -57,7 +62,8 @@
     "lng": 126.92555,
     "nearest_station": "응암역",
     "nearest_station_m": 1007,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "응암동"
   },
   "용산구|삼성래미안": {
     "apt_name": "삼성래미안",
@@ -67,7 +73,8 @@
     "lng": 126.95576,
     "nearest_station": "효창공원앞역",
     "nearest_station_m": 498,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "도원동"
   },
   "영등포구|양평한신": {
     "apt_name": "양평한신",
@@ -77,7 +84,8 @@
     "lng": 126.891746,
     "nearest_station": "선유도역",
     "nearest_station_m": 296,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "양평동5가"
   },
   "영등포구|삼환": {
     "apt_name": "삼환",
@@ -87,7 +95,8 @@
     "lng": 126.9200328,
     "nearest_station": "보라매역",
     "nearest_station_m": 817,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "신길동"
   },
   "성동구|대림강변타운": {
     "apt_name": "대림강변타운",
@@ -97,7 +106,8 @@
     "lng": 127.03356,
     "nearest_station": "응봉역",
     "nearest_station_m": 281,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "응봉동"
   },
   "광진구|현대3": {
     "apt_name": "현대3",
@@ -107,7 +117,8 @@
     "lng": 127.10414,
     "nearest_station": "광나루역",
     "nearest_station_m": 207,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "광장동"
   },
   "성동구|대우": {
     "apt_name": "대우",
@@ -117,7 +128,8 @@
     "lng": 127.02339,
     "nearest_station": "옥수역",
     "nearest_station_m": 661,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "금호동4가"
   },
   "동작구|대림아파트": {
     "apt_name": "대림아파트",
@@ -127,7 +139,8 @@
     "lng": 126.953475,
     "nearest_station": "숭실대입구역",
     "nearest_station_m": 336,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "대방동"
   },
   "동작구|롯데낙천대": {
     "apt_name": "롯데낙천대",
@@ -137,7 +150,8 @@
     "lng": 126.9195788,
     "nearest_station": "보라매역",
     "nearest_station_m": 483,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "신대방동"
   },
   "관악구|관악푸르지오": {
     "apt_name": "관악푸르지오",
@@ -147,7 +161,8 @@
     "lng": 126.9601186,
     "nearest_station": "서울대입구역",
     "nearest_station_m": 894,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "봉천동"
   },
   "강동구|고덕자이": {
     "apt_name": "고덕자이",
@@ -157,7 +172,8 @@
     "lng": 127.170958,
     "nearest_station": "상일동역",
     "nearest_station_m": 652,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "상일동"
   },
   "동대문구|래미안장안2차": {
     "apt_name": "래미안장안2차",
@@ -179,7 +195,8 @@
     "lng": 127.01648,
     "nearest_station": "옥수역",
     "nearest_station_m": 177,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "옥수동"
   },
   "동대문구|래미안크레시티": {
     "apt_name": "래미안크레시티",
@@ -189,7 +206,8 @@
     "lng": 127.05543,
     "nearest_station": "청량리역",
     "nearest_station_m": 758,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "전농동"
   },
   "영등포구|영등포푸르지오": {
     "apt_name": "영등포푸르지오",
@@ -199,7 +217,8 @@
     "lng": 126.9034273,
     "nearest_station": "영등포역",
     "nearest_station_m": 550,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "영등포동"
   },
   "성동구|신동아": {
     "apt_name": "신동아",
@@ -209,7 +228,8 @@
     "lng": 127.03571,
     "nearest_station": "왕십리역",
     "nearest_station_m": 448,
-    "stations_within_1km": 5
+    "stations_within_1km": 5,
+    "dong": "행당동"
   },
   "강서구|강변": {
     "apt_name": "강변",
@@ -231,7 +251,8 @@
     "lng": 127.01648,
     "nearest_station": "옥수역",
     "nearest_station_m": 177,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "옥수동"
   },
   "마포구|마포래미안푸르지오4단지": {
     "apt_name": "마포래미안푸르지오4단지",
@@ -241,7 +262,8 @@
     "lng": 126.9525116,
     "nearest_station": "애오개역",
     "nearest_station_m": 518,
-    "stations_within_1km": 5
+    "stations_within_1km": 5,
+    "dong": "아현동"
   },
   "관악구|현대(관악)": {
     "apt_name": "현대(관악)",
@@ -251,7 +273,8 @@
     "lng": 126.9484961,
     "nearest_station": "서울대입구역",
     "nearest_station_m": 533,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "봉천동"
   },
   "강서구|강서힐스테이트": {
     "apt_name": "강서힐스테이트",
@@ -261,7 +284,8 @@
     "lng": 126.8372165,
     "nearest_station": "우장산역",
     "nearest_station_m": 122,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "화곡동"
   },
   "마포구|대흥동태영아파트": {
     "apt_name": "대흥동태영아파트",
@@ -271,7 +295,8 @@
     "lng": 126.9419496,
     "nearest_station": "대흥역",
     "nearest_station_m": 359,
-    "stations_within_1km": 5
+    "stations_within_1km": 5,
+    "dong": "대흥동"
   },
   "성동구|행당한진타운": {
     "apt_name": "행당한진타운",
@@ -281,7 +306,8 @@
     "lng": 127.03571,
     "nearest_station": "왕십리역",
     "nearest_station_m": 448,
-    "stations_within_1km": 5
+    "stations_within_1km": 5,
+    "dong": "행당동"
   },
   "관악구|벽산블루밍": {
     "apt_name": "벽산블루밍",
@@ -291,7 +317,8 @@
     "lng": 126.9310534,
     "nearest_station": null,
     "nearest_station_m": null,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "봉천동"
   },
   "관악구|관악드림(삼성)": {
     "apt_name": "관악드림(삼성)",
@@ -301,7 +328,8 @@
     "lng": 126.9484961,
     "nearest_station": "서울대입구역",
     "nearest_station_m": 533,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "봉천동"
   },
   "강서구|우장산아이파크,이편한세상": {
     "apt_name": "우장산아이파크,이편한세상",
@@ -311,7 +339,8 @@
     "lng": 126.84656,
     "nearest_station": "화곡역",
     "nearest_station_m": 541,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "화곡동"
   },
   "서대문구|천연뜨란채": {
     "apt_name": "천연뜨란채",
@@ -321,7 +350,8 @@
     "lng": 126.9582352,
     "nearest_station": "서대문역",
     "nearest_station_m": 769,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "천연동"
   },
   "성동구|이편한세상금호파크힐스": {
     "apt_name": "이편한세상금호파크힐스",
@@ -331,7 +361,8 @@
     "lng": 127.02393,
     "nearest_station": "신금호역",
     "nearest_station_m": 368,
-    "stations_within_1km": 4
+    "stations_within_1km": 4,
+    "dong": "금호동1가"
   },
   "동작구|현대": {
     "apt_name": "현대",
@@ -341,7 +372,8 @@
     "lng": 126.9195788,
     "nearest_station": "보라매역",
     "nearest_station_m": 483,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "신대방동"
   },
   "양천구|목동신시가지7": {
     "apt_name": "목동신시가지7",
@@ -351,7 +383,8 @@
     "lng": 126.87585,
     "nearest_station": "신목동역",
     "nearest_station_m": 1112,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "목동"
   },
   "관악구|봉천우성": {
     "apt_name": "봉천우성",
@@ -361,7 +394,8 @@
     "lng": 126.9484961,
     "nearest_station": "서울대입구역",
     "nearest_station_m": 533,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "봉천동"
   },
   "강서구|가양6단지": {
     "apt_name": "가양6단지",
@@ -371,7 +405,8 @@
     "lng": 126.8525524,
     "nearest_station": "가양역",
     "nearest_station_m": 576,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "가양동"
   },
   "동작구|신동아리버파크": {
     "apt_name": "신동아리버파크",
@@ -381,7 +416,8 @@
     "lng": 126.9444394,
     "nearest_station": "장승배기역",
     "nearest_station_m": 536,
-    "stations_within_1km": 4
+    "stations_within_1km": 4,
+    "dong": "노량진동"
   },
   "강동구|롯데캐슬퍼스트": {
     "apt_name": "롯데캐슬퍼스트",
@@ -391,7 +427,8 @@
     "lng": 127.1308542,
     "nearest_station": "암사역",
     "nearest_station_m": 938,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "암사동"
   },
   "동대문구|전농SK": {
     "apt_name": "전농SK",
@@ -401,7 +438,8 @@
     "lng": 127.0436848,
     "nearest_station": "청량리역",
     "nearest_station_m": 315,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "전농동"
   },
   "강서구|가양2단지(성지)": {
     "apt_name": "가양2단지(성지)",
@@ -423,7 +461,8 @@
     "lng": 127.0556486,
     "nearest_station": "회기역",
     "nearest_station_m": 266,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "이문동"
   },
   "관악구|관악드림(동아)": {
     "apt_name": "관악드림(동아)",
@@ -433,7 +472,8 @@
     "lng": 126.9484961,
     "nearest_station": "서울대입구역",
     "nearest_station_m": 533,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "봉천동"
   },
   "강서구|우장산힐스테이트": {
     "apt_name": "우장산힐스테이트",
@@ -443,7 +483,8 @@
     "lng": 126.8375119,
     "nearest_station": "발산역",
     "nearest_station_m": 281,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "내발산동"
   },
   "동대문구|전농우성": {
     "apt_name": "전농우성",
@@ -453,7 +494,8 @@
     "lng": 127.0437257,
     "nearest_station": "청량리역",
     "nearest_station_m": 279,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "전농동"
   },
   "강동구|래미안강동팰리스": {
     "apt_name": "래미안강동팰리스",
@@ -463,7 +505,8 @@
     "lng": 127.1320174,
     "nearest_station": "강동역",
     "nearest_station_m": 177,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "천호동"
   },
   "강동구|중앙하이츠": {
     "apt_name": "중앙하이츠",
@@ -473,7 +516,8 @@
     "lng": 127.1590523,
     "nearest_station": "고덕역",
     "nearest_station_m": 702,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "상일동"
   },
   "성동구|옥수삼성": {
     "apt_name": "옥수삼성",
@@ -483,7 +527,8 @@
     "lng": 127.01648,
     "nearest_station": "옥수역",
     "nearest_station_m": 177,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "옥수동"
   },
   "서대문구|DMC래미안e편한세상": {
     "apt_name": "DMC래미안e편한세상",
@@ -493,7 +538,8 @@
     "lng": 126.91156,
     "nearest_station": "증산역",
     "nearest_station_m": 511,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "북가좌동"
   },
   "동작구|래미안상도3차": {
     "apt_name": "래미안상도3차",
@@ -503,7 +549,8 @@
     "lng": 126.9441045,
     "nearest_station": "상도역",
     "nearest_station_m": 558,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "상도동"
   },
   "서대문구|남가좌동현대": {
     "apt_name": "남가좌동현대",
@@ -513,7 +560,8 @@
     "lng": 126.9179,
     "nearest_station": "가좌역",
     "nearest_station_m": 1017,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "남가좌동"
   },
   "서대문구|두산": {
     "apt_name": "두산",
@@ -523,7 +571,8 @@
     "lng": 126.9552494,
     "nearest_station": "아현역",
     "nearest_station_m": 249,
-    "stations_within_1km": 4
+    "stations_within_1km": 4,
+    "dong": "북아현동"
   },
   "강서구|주공5": {
     "apt_name": "주공5",
@@ -533,7 +582,8 @@
     "lng": 126.86025,
     "nearest_station": "등촌역",
     "nearest_station_m": 486,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "등촌동"
   },
   "동대문구|래미안위브": {
     "apt_name": "래미안위브",
@@ -543,7 +593,8 @@
     "lng": 127.053952,
     "nearest_station": "답십리역",
     "nearest_station_m": 598,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "답십리동"
   },
   "동대문구|장안현대홈타운(336)": {
     "apt_name": "장안현대홈타운(336)",
@@ -553,7 +604,8 @@
     "lng": 127.06806,
     "nearest_station": "장한평역",
     "nearest_station_m": 1110,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "장안동"
   },
   "강동구|고덕그라시움": {
     "apt_name": "고덕그라시움",
@@ -563,7 +615,8 @@
     "lng": 127.1607169,
     "nearest_station": "상일동역",
     "nearest_station_m": 507,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "고덕동"
   },
   "강동구|삼익그린2차": {
     "apt_name": "삼익그린2차",
@@ -585,7 +638,8 @@
     "lng": 127.144187,
     "nearest_station": "명일역",
     "nearest_station_m": 59,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "명일동"
   },
   "광진구|현대프라임": {
     "apt_name": "현대프라임",
@@ -595,7 +649,8 @@
     "lng": 127.0874678,
     "nearest_station": "아차산역",
     "nearest_station_m": 825,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "구의동"
   },
   "영등포구|현대3차": {
     "apt_name": "현대3차",
@@ -605,7 +660,8 @@
     "lng": 126.8845016,
     "nearest_station": "도림천역",
     "nearest_station_m": 259,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "대림동"
   },
   "영등포구|래미안에스티움": {
     "apt_name": "래미안에스티움",
@@ -615,7 +671,8 @@
     "lng": 126.9131315,
     "nearest_station": "신풍역",
     "nearest_station_m": 319,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "신길동"
   },
   "영등포구|당산현대5차": {
     "apt_name": "당산현대5차",
@@ -625,7 +682,8 @@
     "lng": 126.89894,
     "nearest_station": "영등포구청역",
     "nearest_station_m": 534,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "당산동4가"
   },
   "강서구|동아": {
     "apt_name": "동아",
@@ -635,7 +693,8 @@
     "lng": 126.8773969,
     "nearest_station": "염창역",
     "nearest_station_m": 428,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "염창동"
   },
   "강서구|방화5": {
     "apt_name": "방화5",
@@ -657,7 +716,8 @@
     "lng": 127.0489794,
     "nearest_station": "회기역",
     "nearest_station_m": 775,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "제기동"
   },
   "서대문구|독립문극동(200-0)": {
     "apt_name": "독립문극동(200-0)",
@@ -667,7 +727,8 @@
     "lng": 126.9541,
     "nearest_station": "독립문역",
     "nearest_station_m": 331,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "현저동"
   },
   "강동구|고덕아르테온": {
     "apt_name": "고덕아르테온",
@@ -677,7 +738,8 @@
     "lng": 127.1686571,
     "nearest_station": "상일동역",
     "nearest_station_m": 249,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "상일동"
   },
   "강서구|가양도시개발9-2단지": {
     "apt_name": "가양도시개발9-2단지",
@@ -711,7 +773,8 @@
     "lng": 127.03571,
     "nearest_station": "왕십리역",
     "nearest_station_m": 448,
-    "stations_within_1km": 5
+    "stations_within_1km": 5,
+    "dong": "행당동"
   },
   "양천구|신트리1": {
     "apt_name": "신트리1",
@@ -721,7 +784,8 @@
     "lng": 126.8521196,
     "nearest_station": "신정네거리역",
     "nearest_station_m": 431,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "신정동"
   },
   "강서구|마곡13단지힐스테이트마스터": {
     "apt_name": "마곡13단지힐스테이트마스터",
@@ -731,7 +795,8 @@
     "lng": 126.818695,
     "nearest_station": "마곡역",
     "nearest_station_m": 706,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "마곡동"
   },
   "양천구|목동신시가지14": {
     "apt_name": "목동신시가지14",
@@ -741,7 +806,8 @@
     "lng": 126.8521196,
     "nearest_station": "신정네거리역",
     "nearest_station_m": 431,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "신정동"
   },
   "강동구|래미안힐스테이트고덕": {
     "apt_name": "래미안힐스테이트고덕",
@@ -751,7 +817,8 @@
     "lng": 127.1505478,
     "nearest_station": "고덕역",
     "nearest_station_m": 814,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "고덕동"
   },
   "영등포구|경남아너스빌": {
     "apt_name": "경남아너스빌",
@@ -761,7 +828,8 @@
     "lng": 126.8962148,
     "nearest_station": "선유도역",
     "nearest_station_m": 352,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "영등포동7가"
   },
   "동작구|힐스테이트 상도 센트럴파크": {
     "apt_name": "힐스테이트 상도 센트럴파크",
@@ -771,7 +839,8 @@
     "lng": 126.9441045,
     "nearest_station": "상도역",
     "nearest_station_m": 558,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "상도동"
   },
   "강서구|마곡중앙하이츠아파트": {
     "apt_name": "마곡중앙하이츠아파트",
@@ -781,7 +850,8 @@
     "lng": 126.81422,
     "nearest_station": "방화역",
     "nearest_station_m": 147,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "방화동"
   },
   "은평구|북한산현대힐스테이트3차아파트": {
     "apt_name": "북한산현대힐스테이트3차아파트",
@@ -791,7 +861,8 @@
     "lng": 126.9339579,
     "nearest_station": "독바위역",
     "nearest_station_m": 278,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "불광동"
   },
   "강동구|고덕롯데캐슬베네루체": {
     "apt_name": "고덕롯데캐슬베네루체",
@@ -801,7 +872,8 @@
     "lng": 127.1677617,
     "nearest_station": "상일동역",
     "nearest_station_m": 877,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "상일동"
   },
   "영등포구|현대1": {
     "apt_name": "현대1",
@@ -835,7 +907,8 @@
     "lng": 126.928177,
     "nearest_station": "신림역",
     "nearest_station_m": 329,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "신림동"
   },
   "은평구|북한산푸르지오": {
     "apt_name": "북한산푸르지오",
@@ -845,7 +918,8 @@
     "lng": 126.9339284,
     "nearest_station": "녹번역",
     "nearest_station_m": 589,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "녹번동"
   },
   "영등포구|시범": {
     "apt_name": "시범",
@@ -855,7 +929,8 @@
     "lng": 126.9350637,
     "nearest_station": "여의나루역",
     "nearest_station_m": 695,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "여의도동"
   },
   "강서구|방화그린": {
     "apt_name": "방화그린",
@@ -877,7 +952,8 @@
     "lng": 126.8335466,
     "nearest_station": "까치산역",
     "nearest_station_m": 1197,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "신월동"
   },
   "서대문구|극동": {
     "apt_name": "극동",
@@ -899,7 +975,8 @@
     "lng": 126.93733,
     "nearest_station": "홍제역",
     "nearest_station_m": 711,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "홍은동"
   },
   "동대문구|삼익": {
     "apt_name": "삼익",
@@ -921,7 +998,8 @@
     "lng": 126.928177,
     "nearest_station": "신림역",
     "nearest_station_m": 329,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "신림동"
   },
   "구로구|한마을": {
     "apt_name": "한마을",
@@ -931,7 +1009,8 @@
     "lng": 126.851736,
     "nearest_station": "오류동역",
     "nearest_station_m": 582,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "개봉동"
   },
   "중랑구|한신아파트상가동유치원동(103~109)": {
     "apt_name": "한신아파트상가동유치원동(103~109)",
@@ -941,7 +1020,8 @@
     "lng": 127.07783,
     "nearest_station": "중랑역",
     "nearest_station_m": 329,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "중화동"
   },
   "영등포구|신동아파밀리에": {
     "apt_name": "신동아파밀리에",
@@ -951,7 +1031,8 @@
     "lng": 126.9029299,
     "nearest_station": "대림역",
     "nearest_station_m": 669,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "당산동1가"
   },
   "성북구|길음뉴타운4단지(e편한세상)": {
     "apt_name": "길음뉴타운4단지(e편한세상)",
@@ -961,7 +1042,8 @@
     "lng": 127.0201946,
     "nearest_station": "길음역",
     "nearest_station_m": 712,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "길음동"
   },
   "중구|약수하이츠": {
     "apt_name": "약수하이츠",
@@ -971,7 +1053,8 @@
     "lng": 127.0143702,
     "nearest_station": "약수역",
     "nearest_station_m": 333,
-    "stations_within_1km": 5
+    "stations_within_1km": 5,
+    "dong": "신당동"
   },
   "중구|남산타운": {
     "apt_name": "남산타운",
@@ -981,7 +1064,8 @@
     "lng": 127.0092806,
     "nearest_station": "버티고개역",
     "nearest_station_m": 225,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "신당동"
   },
   "송파구|트리지움": {
     "apt_name": "트리지움",
@@ -991,7 +1075,8 @@
     "lng": 127.0875391,
     "nearest_station": "잠실새내역",
     "nearest_station_m": 242,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "잠실동"
   },
   "성동구|현대": {
     "apt_name": "현대",
@@ -1001,7 +1086,8 @@
     "lng": 127.0680005,
     "nearest_station": "장한평역",
     "nearest_station_m": 375,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "마장동"
   },
   "구로구|현대홈타운": {
     "apt_name": "현대홈타운",
@@ -1011,7 +1097,8 @@
     "lng": 126.851736,
     "nearest_station": "오류동역",
     "nearest_station_m": 582,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "개봉동"
   },
   "중구|삼성": {
     "apt_name": "삼성",
@@ -1021,7 +1108,8 @@
     "lng": 126.9727125,
     "nearest_station": "회현역",
     "nearest_station_m": 527,
-    "stations_within_1km": 5
+    "stations_within_1km": 5,
+    "dong": "신당동"
   },
   "성북구|동아에코빌": {
     "apt_name": "동아에코빌",
@@ -1031,7 +1119,8 @@
     "lng": 127.04629,
     "nearest_station": "상월곡역",
     "nearest_station_m": 196,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "상월곡동"
   },
   "성북구|월곡두산위브": {
     "apt_name": "월곡두산위브",
@@ -1041,7 +1130,8 @@
     "lng": 127.03764,
     "nearest_station": "월곡역",
     "nearest_station_m": 439,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "하월곡동"
   },
   "노원구|풍림아파트A": {
     "apt_name": "풍림아파트A",
@@ -1051,7 +1141,8 @@
     "lng": 127.08818,
     "nearest_station": "화랑대역",
     "nearest_station_m": 1169,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "공릉동"
   },
   "노원구|벽산": {
     "apt_name": "벽산",
@@ -1061,7 +1152,8 @@
     "lng": 127.07242,
     "nearest_station": "당고개역",
     "nearest_station_m": 673,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "상계동"
   },
   "송파구|가락(1차)쌍용아파트": {
     "apt_name": "가락(1차)쌍용아파트",
@@ -1071,7 +1163,8 @@
     "lng": 127.11744,
     "nearest_station": "가락시장역",
     "nearest_station_m": 472,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "가락동"
   },
   "노원구|한진한화그랑빌": {
     "apt_name": "한진한화그랑빌",
@@ -1081,7 +1174,8 @@
     "lng": 127.0524345,
     "nearest_station": "월계역",
     "nearest_station_m": 764,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "월계동"
   },
   "중구|롯데캐슬": {
     "apt_name": "롯데캐슬",
@@ -1091,7 +1185,8 @@
     "lng": 126.9820497,
     "nearest_station": "회현역",
     "nearest_station_m": 336,
-    "stations_within_1km": 5
+    "stations_within_1km": 5,
+    "dong": "황학동"
   },
   "광진구|청구": {
     "apt_name": "청구",
@@ -1101,7 +1196,8 @@
     "lng": 127.10414,
     "nearest_station": "광나루역",
     "nearest_station_m": 207,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "광장동"
   },
   "성북구|길음뉴타운1단지(래미안길음1차)": {
     "apt_name": "길음뉴타운1단지(래미안길음1차)",
@@ -1111,7 +1207,8 @@
     "lng": 127.0201946,
     "nearest_station": "길음역",
     "nearest_station_m": 712,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "길음동"
   },
   "성북구|동신": {
     "apt_name": "동신",
@@ -1121,7 +1218,8 @@
     "lng": 127.0352638,
     "nearest_station": "월곡역",
     "nearest_station_m": 622,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "하월곡동"
   },
   "노원구|상계주공6(고층)": {
     "apt_name": "상계주공6(고층)",
@@ -1131,7 +1229,8 @@
     "lng": 127.07242,
     "nearest_station": "당고개역",
     "nearest_station_m": 673,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "상계동"
   },
   "성북구|한진(609-1)": {
     "apt_name": "한진(609-1)",
@@ -1141,7 +1240,8 @@
     "lng": 127.0209865,
     "nearest_station": "성신여대입구역",
     "nearest_station_m": 708,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "돈암동"
   },
   "강남구|개포래미안포레스트": {
     "apt_name": "개포래미안포레스트",
@@ -1151,7 +1251,8 @@
     "lng": 127.0548388,
     "nearest_station": "구룡역",
     "nearest_station_m": 860,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "개포동"
   },
   "성북구|래미안길음센터피스": {
     "apt_name": "래미안길음센터피스",
@@ -1161,7 +1262,8 @@
     "lng": 127.028415,
     "nearest_station": "미아사거리역",
     "nearest_station_m": 460,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "길음동"
   },
   "성북구|길음동동부센트레빌(1278-0)": {
     "apt_name": "길음동동부센트레빌(1278-0)",
@@ -1171,7 +1273,8 @@
     "lng": 127.0201946,
     "nearest_station": "길음역",
     "nearest_station_m": 712,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "길음동"
   },
   "구로구|한진": {
     "apt_name": "한진",
@@ -1181,7 +1284,8 @@
     "lng": 126.851736,
     "nearest_station": "오류동역",
     "nearest_station_m": 582,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "개봉동"
   },
   "성북구|길음뉴타운8단지(래미안)": {
     "apt_name": "길음뉴타운8단지(래미안)",
@@ -1191,7 +1295,8 @@
     "lng": 127.0201946,
     "nearest_station": "길음역",
     "nearest_station_m": 712,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "길음동"
   },
   "노원구|극동": {
     "apt_name": "극동",
@@ -1201,7 +1306,8 @@
     "lng": 127.0738302,
     "nearest_station": "월계역",
     "nearest_station_m": 1434,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "하계동"
   },
   "송파구|잠실엘스": {
     "apt_name": "잠실엘스",
@@ -1211,7 +1317,8 @@
     "lng": 127.0855986,
     "nearest_station": "잠실새내역",
     "nearest_station_m": 82,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "잠실동"
   },
   "도봉구|창동주공3단지(해등마을)": {
     "apt_name": "창동주공3단지(해등마을)",
@@ -1221,7 +1328,8 @@
     "lng": 127.04326,
     "nearest_station": "녹천역",
     "nearest_station_m": 728,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "창동"
   },
   "성북구|래미안크리시엘": {
     "apt_name": "래미안크리시엘",
@@ -1231,7 +1339,8 @@
     "lng": 127.03333,
     "nearest_station": "고려대역",
     "nearest_station_m": 696,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "종암동"
   },
   "노원구|상계주공3(고층)": {
     "apt_name": "상계주공3(고층)",
@@ -1241,7 +1350,8 @@
     "lng": 127.07242,
     "nearest_station": "당고개역",
     "nearest_station_m": 673,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "상계동"
   },
   "노원구|상계주공2(고층)": {
     "apt_name": "상계주공2(고층)",
@@ -1251,7 +1361,8 @@
     "lng": 127.07242,
     "nearest_station": "당고개역",
     "nearest_station_m": 673,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "상계동"
   },
   "도봉구|한양2": {
     "apt_name": "한양2",
@@ -1261,7 +1372,8 @@
     "lng": 127.0314175,
     "nearest_station": "쌍문역",
     "nearest_station_m": 990,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "쌍문동"
   },
   "송파구|파크리오": {
     "apt_name": "파크리오",
@@ -1271,7 +1383,8 @@
     "lng": 127.1097261,
     "nearest_station": "몽촌토성역",
     "nearest_station_m": 450,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "신천동"
   },
   "노원구|상계주공1(고층)": {
     "apt_name": "상계주공1(고층)",
@@ -1281,7 +1394,8 @@
     "lng": 127.07242,
     "nearest_station": "당고개역",
     "nearest_station_m": 673,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "상계동"
   },
   "동대문구|주공2": {
     "apt_name": "주공2",
@@ -1291,7 +1405,8 @@
     "lng": 127.0594703,
     "nearest_station": "회기역",
     "nearest_station_m": 167,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "휘경동"
   },
   "성북구|보문파크뷰자이": {
     "apt_name": "보문파크뷰자이",
@@ -1301,7 +1416,8 @@
     "lng": 127.0183493,
     "nearest_station": "창신역",
     "nearest_station_m": 291,
-    "stations_within_1km": 4
+    "stations_within_1km": 4,
+    "dong": "보문동6가"
   },
   "노원구|상계주공10(고층)": {
     "apt_name": "상계주공10(고층)",
@@ -1311,7 +1427,8 @@
     "lng": 127.07242,
     "nearest_station": "당고개역",
     "nearest_station_m": 673,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "상계동"
   },
   "노원구|중계무지개": {
     "apt_name": "중계무지개",
@@ -1321,7 +1438,8 @@
     "lng": 127.07678,
     "nearest_station": "상계역",
     "nearest_station_m": 1457,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "중계동"
   },
   "중랑구|라이프미성": {
     "apt_name": "라이프미성",
@@ -1331,7 +1449,8 @@
     "lng": 127.09298,
     "nearest_station": "봉화산역",
     "nearest_station_m": 623,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "신내동"
   },
   "중랑구|신내": {
     "apt_name": "신내",
@@ -1341,7 +1460,8 @@
     "lng": 127.1040904,
     "nearest_station": "신내역",
     "nearest_station_m": 85,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "묵동"
   },
   "성북구|래미안월곡": {
     "apt_name": "래미안월곡",
@@ -1351,7 +1471,8 @@
     "lng": 127.03764,
     "nearest_station": "월곡역",
     "nearest_station_m": 439,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "하월곡동"
   },
   "노원구|상계주공16(고층)": {
     "apt_name": "상계주공16(고층)",
@@ -1361,7 +1482,8 @@
     "lng": 127.07242,
     "nearest_station": "당고개역",
     "nearest_station_m": 673,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "상계동"
   },
   "금천구|삼익": {
     "apt_name": "삼익",
@@ -1371,7 +1493,8 @@
     "lng": 126.9085555,
     "nearest_station": "금천구청역",
     "nearest_station_m": 1398,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "시흥동"
   },
   "송파구|헬리오시티": {
     "apt_name": "헬리오시티",
@@ -1381,7 +1504,8 @@
     "lng": 127.1070187,
     "nearest_station": "송파역",
     "nearest_station_m": 520,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "가락동"
   },
   "서대문구|DMC래미안클라시스": {
     "apt_name": "DMC래미안클라시스",
@@ -1391,7 +1515,8 @@
     "lng": 126.9179,
     "nearest_station": "가좌역",
     "nearest_station_m": 1017,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "남가좌동"
   },
   "중랑구|신내6대주": {
     "apt_name": "신내6대주",
@@ -1401,7 +1526,8 @@
     "lng": 127.09298,
     "nearest_station": "봉화산역",
     "nearest_station_m": 623,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "신내동"
   },
   "노원구|태강아파트(아이파크)": {
     "apt_name": "태강아파트(아이파크)",
@@ -1411,7 +1537,8 @@
     "lng": 127.0724119,
     "nearest_station": "태릉입구역",
     "nearest_station_m": 495,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "공릉동"
   },
   "성북구|코오롱": {
     "apt_name": "코오롱",
@@ -1421,7 +1548,8 @@
     "lng": 127.06116,
     "nearest_station": "돌곶이역",
     "nearest_station_m": 510,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "석관동"
   },
   "노원구|상계주공4(고층)": {
     "apt_name": "상계주공4(고층)",
@@ -1431,7 +1559,8 @@
     "lng": 127.07242,
     "nearest_station": "당고개역",
     "nearest_station_m": 673,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "상계동"
   },
   "노원구|학여울청구": {
     "apt_name": "학여울청구",
@@ -1441,7 +1570,8 @@
     "lng": 127.07251,
     "nearest_station": "월계역",
     "nearest_station_m": 1313,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "하계동"
   },
   "강북구|벽산라이브파크": {
     "apt_name": "벽산라이브파크",
@@ -1451,7 +1581,8 @@
     "lng": 127.0257543,
     "nearest_station": "미아역",
     "nearest_station_m": 259,
-    "stations_within_1km": 4
+    "stations_within_1km": 4,
+    "dong": "미아동"
   },
   "도봉구|신동아아파트1": {
     "apt_name": "신동아아파트1",
@@ -1461,7 +1592,8 @@
     "lng": 127.033378,
     "nearest_station": null,
     "nearest_station_m": null,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "방학동"
   },
   "성북구|래미안장위퍼스트하이": {
     "apt_name": "래미안장위퍼스트하이",
@@ -1471,7 +1603,8 @@
     "lng": 127.0514574,
     "nearest_station": "광운대역",
     "nearest_station_m": 997,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "장위동"
   },
   "강북구|에스케이북한산시티": {
     "apt_name": "에스케이북한산시티",
@@ -1481,7 +1614,8 @@
     "lng": 127.0257543,
     "nearest_station": "미아역",
     "nearest_station_m": 259,
-    "stations_within_1km": 4
+    "stations_within_1km": 4,
+    "dong": "미아동"
   },
   "도봉구|서원": {
     "apt_name": "서원",
@@ -1491,7 +1625,8 @@
     "lng": 127.0465568,
     "nearest_station": null,
     "nearest_station_m": null,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "도봉동"
   },
   "노원구|상계주공9(고층)": {
     "apt_name": "상계주공9(고층)",
@@ -1501,7 +1636,8 @@
     "lng": 127.07242,
     "nearest_station": "당고개역",
     "nearest_station_m": 673,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "상계동"
   },
   "관악구|주공1": {
     "apt_name": "주공1",
@@ -1511,7 +1647,8 @@
     "lng": 126.9282982,
     "nearest_station": "신림역",
     "nearest_station_m": 1241,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "신림동"
   },
   "금천구|관악산벽산타운5": {
     "apt_name": "관악산벽산타운5",
@@ -1521,7 +1658,8 @@
     "lng": 126.9085555,
     "nearest_station": "금천구청역",
     "nearest_station_m": 1398,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "시흥동"
   },
   "노원구|은빛2단지": {
     "apt_name": "은빛2단지",
@@ -1531,7 +1669,8 @@
     "lng": 127.07242,
     "nearest_station": "당고개역",
     "nearest_station_m": 673,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "상계동"
   },
   "성북구|정릉풍림아이원": {
     "apt_name": "정릉풍림아이원",
@@ -1541,7 +1680,8 @@
     "lng": 126.99794,
     "nearest_station": "북한산보국문역",
     "nearest_station_m": 1002,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "정릉동"
   },
   "노원구|은빛1단지": {
     "apt_name": "은빛1단지",
@@ -1551,7 +1691,8 @@
     "lng": 127.055168,
     "nearest_station": null,
     "nearest_station_m": null,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "상계동"
   },
   "노원구|상계주공11(고층)": {
     "apt_name": "상계주공11(고층)",
@@ -1561,7 +1702,8 @@
     "lng": 127.07242,
     "nearest_station": "당고개역",
     "nearest_station_m": 673,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "상계동"
   },
   "도봉구|삼익세라믹": {
     "apt_name": "삼익세라믹",
@@ -1571,7 +1713,8 @@
     "lng": 127.0386138,
     "nearest_station": "창동역",
     "nearest_station_m": 1157,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "쌍문동"
   },
   "금천구|남서울힐스테이트": {
     "apt_name": "남서울힐스테이트",
@@ -1581,7 +1724,8 @@
     "lng": 126.9033113,
     "nearest_station": "금천구청역",
     "nearest_station_m": 1273,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "시흥동"
   },
   "금천구|우방": {
     "apt_name": "우방",
@@ -1591,7 +1735,8 @@
     "lng": 126.9136833,
     "nearest_station": null,
     "nearest_station_m": null,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "시흥동"
   },
   "관악구|건영1": {
     "apt_name": "건영1",
@@ -1601,7 +1746,8 @@
     "lng": 126.928177,
     "nearest_station": "신림역",
     "nearest_station_m": 329,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "신림동"
   },
   "성동구|두산": {
     "apt_name": "두산",
@@ -1611,7 +1757,8 @@
     "lng": 127.02213,
     "nearest_station": "신금호역",
     "nearest_station_m": 532,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "금호동3가"
   },
   "노원구|삼호3": {
     "apt_name": "삼호3",
@@ -1621,7 +1768,8 @@
     "lng": 127.0666033,
     "nearest_station": "석계역",
     "nearest_station_m": 144,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "월계동"
   },
   "강동구|성내동삼성아파트": {
     "apt_name": "성내동삼성아파트",
@@ -1631,7 +1779,8 @@
     "lng": 127.12875,
     "nearest_station": "둔촌동역",
     "nearest_station_m": 704,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "성내동"
   },
   "강서구|주공10": {
     "apt_name": "주공10",
@@ -1641,7 +1790,8 @@
     "lng": 126.86025,
     "nearest_station": "등촌역",
     "nearest_station_m": 486,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "등촌동"
   },
   "송파구|우성": {
     "apt_name": "우성",
@@ -1651,7 +1801,8 @@
     "lng": 127.1191293,
     "nearest_station": "가락시장역",
     "nearest_station_m": 254,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "가락동"
   },
   "영등포구|양평현대6차": {
     "apt_name": "양평현대6차",
@@ -1661,7 +1812,8 @@
     "lng": 126.8914746,
     "nearest_station": "영등포구청역",
     "nearest_station_m": 537,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "양평동3가"
   },
   "성동구|극동": {
     "apt_name": "극동",
@@ -1671,7 +1823,8 @@
     "lng": 127.01648,
     "nearest_station": "옥수역",
     "nearest_station_m": 177,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "옥수동"
   },
   "성동구|벽산": {
     "apt_name": "벽산",
@@ -1681,7 +1834,8 @@
     "lng": 127.02393,
     "nearest_station": "신금호역",
     "nearest_station_m": 368,
-    "stations_within_1km": 4
+    "stations_within_1km": 4,
+    "dong": "금호동1가"
   },
   "용산구|강촌": {
     "apt_name": "강촌",
@@ -1691,7 +1845,8 @@
     "lng": 126.96612,
     "nearest_station": "이촌역",
     "nearest_station_m": 742,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "이촌동"
   },
   "강남구|도곡렉슬": {
     "apt_name": "도곡렉슬",
@@ -1701,7 +1856,8 @@
     "lng": 127.0438569,
     "nearest_station": "매봉역",
     "nearest_station_m": 275,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "도곡동"
   },
   "강서구|마곡수명산파크4단지": {
     "apt_name": "마곡수명산파크4단지",
@@ -1711,7 +1867,8 @@
     "lng": 126.8234279,
     "nearest_station": "마곡역",
     "nearest_station_m": 1012,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "내발산동"
   },
   "성북구|두산": {
     "apt_name": "두산",
@@ -1721,7 +1878,8 @@
     "lng": 127.0387807,
     "nearest_station": "월곡역",
     "nearest_station_m": 557,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "석관동"
   },
   "성북구|꿈의숲아이파크": {
     "apt_name": "꿈의숲아이파크",
@@ -1731,7 +1889,8 @@
     "lng": 127.0488475,
     "nearest_station": "돌곶이역",
     "nearest_station_m": 1112,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "장위동"
   },
   "구로구|대림1": {
     "apt_name": "대림1",
@@ -1741,7 +1900,8 @@
     "lng": 126.8779707,
     "nearest_station": "구로역",
     "nearest_station_m": 506,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "신도림동"
   },
   "노원구|삼호4": {
     "apt_name": "삼호4",
@@ -1751,7 +1911,8 @@
     "lng": 127.0667965,
     "nearest_station": "석계역",
     "nearest_station_m": 148,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "월계동"
   },
   "동작구|사당롯데캐슬골든포레": {
     "apt_name": "사당롯데캐슬골든포레",
@@ -1761,7 +1922,8 @@
     "lng": 126.9635567,
     "nearest_station": "숭실대입구역",
     "nearest_station_m": 956,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "사당동"
   },
   "마포구|신공덕1차삼성래미안1아파트": {
     "apt_name": "신공덕1차삼성래미안1아파트",
@@ -1771,7 +1933,8 @@
     "lng": 126.95606,
     "nearest_station": "공덕역",
     "nearest_station_m": 401,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "신공덕동"
   },
   "동작구|사당우성3": {
     "apt_name": "사당우성3",
@@ -1781,7 +1944,8 @@
     "lng": 126.9723525,
     "nearest_station": "남성역",
     "nearest_station_m": 156,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "사당동"
   },
   "송파구|가락금호아파트": {
     "apt_name": "가락금호아파트",
@@ -1791,7 +1955,8 @@
     "lng": 127.116441,
     "nearest_station": "가락시장역",
     "nearest_station_m": 447,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "가락동"
   },
   "동작구|상도역롯데캐슬파크엘": {
     "apt_name": "상도역롯데캐슬파크엘",
@@ -1801,7 +1966,8 @@
     "lng": 126.9455956,
     "nearest_station": "상도역",
     "nearest_station_m": 219,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "상도동"
   },
   "마포구|상암월드컵파크2단지": {
     "apt_name": "상암월드컵파크2단지",
@@ -1811,7 +1977,8 @@
     "lng": 126.8914496,
     "nearest_station": "수색역",
     "nearest_station_m": 747,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "상암동"
   },
   "서대문구|홍제한양": {
     "apt_name": "홍제한양",
@@ -1821,7 +1988,8 @@
     "lng": 126.94676,
     "nearest_station": "홍제역",
     "nearest_station_m": 344,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "홍제동"
   },
   "마포구|성산시영(유원)": {
     "apt_name": "성산시영(유원)",
@@ -1831,7 +1999,8 @@
     "lng": 126.90263,
     "nearest_station": "월드컵경기장역",
     "nearest_station_m": 354,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "성산동"
   },
   "구로구|대림2": {
     "apt_name": "대림2",
@@ -1841,7 +2010,8 @@
     "lng": 126.88285,
     "nearest_station": "도림천역",
     "nearest_station_m": 542,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "신도림동"
   },
   "서초구|래미안퍼스티지": {
     "apt_name": "래미안퍼스티지",
@@ -1851,7 +2021,8 @@
     "lng": 127.0008014,
     "nearest_station": "고속터미널역",
     "nearest_station_m": 368,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "반포동"
   },
   "서초구|동아": {
     "apt_name": "동아",
@@ -1861,7 +2032,8 @@
     "lng": 127.025171,
     "nearest_station": "강남역",
     "nearest_station_m": 272,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "잠원동"
   },
   "강동구|명일지에스아파트": {
     "apt_name": "명일지에스아파트",
@@ -1871,7 +2043,8 @@
     "lng": 127.15158,
     "nearest_station": "명일역",
     "nearest_station_m": 744,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "명일동"
   },
   "동작구|우성": {
     "apt_name": "우성",
@@ -1881,7 +2054,8 @@
     "lng": 126.9777475,
     "nearest_station": "총신대입구역",
     "nearest_station_m": 462,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "노량진동"
   },
   "광진구|현대파크빌": {
     "apt_name": "현대파크빌",
@@ -1891,7 +2065,8 @@
     "lng": 127.10414,
     "nearest_station": "광나루역",
     "nearest_station_m": 207,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "광장동"
   },
   "성북구|돈암동삼성": {
     "apt_name": "돈암동삼성",
@@ -1901,7 +2076,8 @@
     "lng": 127.0209865,
     "nearest_station": "성신여대입구역",
     "nearest_station_m": 708,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "돈암동"
   },
   "노원구|현대": {
     "apt_name": "현대",
@@ -1911,7 +2087,8 @@
     "lng": 127.073419,
     "nearest_station": "상계역",
     "nearest_station_m": 512,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "월계동"
   },
   "강서구|주공3": {
     "apt_name": "주공3",
@@ -1921,7 +2098,8 @@
     "lng": 126.86025,
     "nearest_station": "등촌역",
     "nearest_station_m": 486,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "등촌동"
   },
   "동작구|사당자이": {
     "apt_name": "사당자이",
@@ -1931,7 +2109,8 @@
     "lng": 126.9723525,
     "nearest_station": "남성역",
     "nearest_station_m": 156,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "사당동"
   },
   "성동구|왕십리풍림아이원": {
     "apt_name": "왕십리풍림아이원",
@@ -1941,7 +2120,8 @@
     "lng": 127.02715,
     "nearest_station": "상왕십리역",
     "nearest_station_m": 390,
-    "stations_within_1km": 5
+    "stations_within_1km": 5,
+    "dong": "하왕십리동"
   },
   "동작구|아크로리버하임": {
     "apt_name": "아크로리버하임",
@@ -1951,7 +2131,8 @@
     "lng": 126.9597036,
     "nearest_station": "흑석역",
     "nearest_station_m": 405,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "흑석동"
   },
   "구로구|동아1": {
     "apt_name": "동아1",
@@ -1961,7 +2142,8 @@
     "lng": 126.8858884,
     "nearest_station": "신도림역",
     "nearest_station_m": 478,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "신도림동"
   },
   "서초구|반포자이": {
     "apt_name": "반포자이",
@@ -1971,7 +2153,8 @@
     "lng": 127.0017984,
     "nearest_station": "고속터미널역",
     "nearest_station_m": 291,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "반포동"
   },
   "구로구|현대": {
     "apt_name": "현대",
@@ -1981,7 +2164,8 @@
     "lng": 126.8596675,
     "nearest_station": "개봉역",
     "nearest_station_m": 554,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "개봉동"
   },
   "관악구|두산": {
     "apt_name": "두산",
@@ -1991,7 +2175,8 @@
     "lng": 126.9397014,
     "nearest_station": "봉천역",
     "nearest_station_m": 203,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "봉천동"
   },
   "강서구|신동아": {
     "apt_name": "신동아",
@@ -2001,7 +2186,8 @@
     "lng": 126.869227,
     "nearest_station": "등촌역",
     "nearest_station_m": 573,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "염창동"
   },
   "노원구|중계그린1단지": {
     "apt_name": "중계그린1단지",
@@ -2011,7 +2197,8 @@
     "lng": 127.0810259,
     "nearest_station": "상계역",
     "nearest_station_m": 1281,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "중계동"
   },
   "서대문구|인왕산현대": {
     "apt_name": "인왕산현대",
@@ -2021,7 +2208,8 @@
     "lng": 126.94676,
     "nearest_station": "홍제역",
     "nearest_station_m": 344,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "홍제동"
   },
   "성북구|롯데캐슬클라시아": {
     "apt_name": "롯데캐슬클라시아",
@@ -2031,7 +2219,8 @@
     "lng": 127.0260696,
     "nearest_station": "길음역",
     "nearest_station_m": 405,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "길음동"
   },
   "종로구|현대": {
     "apt_name": "현대",
@@ -2041,7 +2230,8 @@
     "lng": 126.9906235,
     "nearest_station": "종로3가역",
     "nearest_station_m": 421,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "무악동"
   },
   "동작구|사당우성2": {
     "apt_name": "사당우성2",
@@ -2051,7 +2241,8 @@
     "lng": 126.9723525,
     "nearest_station": "남성역",
     "nearest_station_m": 156,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "사당동"
   },
   "서대문구|홍제원현대(459-0)": {
     "apt_name": "홍제원현대(459-0)",
@@ -2061,7 +2252,8 @@
     "lng": 126.94676,
     "nearest_station": "홍제역",
     "nearest_station_m": 344,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "홍제동"
   },
   "마포구|마포프레스티지자이": {
     "apt_name": "마포프레스티지자이",
@@ -2071,7 +2263,8 @@
     "lng": 126.9466934,
     "nearest_station": "이대역",
     "nearest_station_m": 581,
-    "stations_within_1km": 6
+    "stations_within_1km": 6,
+    "dong": "염리동"
   },
   "영등포구|삼성래미안": {
     "apt_name": "삼성래미안",
@@ -2081,7 +2274,8 @@
     "lng": 126.9028974,
     "nearest_station": "당산역",
     "nearest_station_m": 278,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "신길동"
   },
   "구로구|동아3": {
     "apt_name": "동아3",
@@ -2091,7 +2285,8 @@
     "lng": 126.88285,
     "nearest_station": "도림천역",
     "nearest_station_m": 542,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "신도림동"
   },
   "영등포구|강변래미안": {
     "apt_name": "강변래미안",
@@ -2101,7 +2296,8 @@
     "lng": 126.9065487,
     "nearest_station": "당산역",
     "nearest_station_m": 377,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "당산동"
   },
   "서초구|래미안원베일리": {
     "apt_name": "래미안원베일리",
@@ -2111,7 +2307,8 @@
     "lng": 126.998573,
     "nearest_station": "신반포역",
     "nearest_station_m": 567,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "반포동"
   },
   "용산구|리버힐삼성": {
     "apt_name": "리버힐삼성",
@@ -2121,7 +2318,8 @@
     "lng": 126.95029,
     "nearest_station": "마포역",
     "nearest_station_m": 587,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "산천동"
   },
   "성동구|텐즈힐(2단지)": {
     "apt_name": "텐즈힐(2단지)",
@@ -2131,7 +2329,8 @@
     "lng": 127.0245724,
     "nearest_station": "상왕십리역",
     "nearest_station_m": 609,
-    "stations_within_1km": 4
+    "stations_within_1km": 4,
+    "dong": "상왕십리동"
   },
   "송파구|래미안파크팰리스": {
     "apt_name": "래미안파크팰리스",
@@ -2141,7 +2340,8 @@
     "lng": 127.11744,
     "nearest_station": "가락시장역",
     "nearest_station_m": 472,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "가락동"
   },
   "동대문구|신동아": {
     "apt_name": "신동아",
@@ -2151,7 +2351,8 @@
     "lng": 127.0320748,
     "nearest_station": "용두역",
     "nearest_station_m": 555,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "용두동"
   },
   "서초구|호반써밋서초파크": {
     "apt_name": "호반써밋서초파크",
@@ -2161,7 +2362,8 @@
     "lng": 127.0237919,
     "nearest_station": null,
     "nearest_station_m": null,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "우면동"
   },
   "서대문구|신촌럭키": {
     "apt_name": "신촌럭키",
@@ -2171,7 +2373,8 @@
     "lng": 126.94496,
     "nearest_station": "이대역",
     "nearest_station_m": 437,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "대현동"
   },
   "구로구|대우": {
     "apt_name": "대우",
@@ -2181,7 +2384,8 @@
     "lng": 126.8588409,
     "nearest_station": "개봉역",
     "nearest_station_m": 961,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "고척동"
   },
   "마포구|신촌숲아이파크": {
     "apt_name": "신촌숲아이파크",
@@ -2191,7 +2395,8 @@
     "lng": 126.9359375,
     "nearest_station": "광흥창역",
     "nearest_station_m": 374,
-    "stations_within_1km": 4
+    "stations_within_1km": 4,
+    "dong": "신수동"
   },
   "성북구|꿈의숲푸르지오": {
     "apt_name": "꿈의숲푸르지오",
@@ -2201,7 +2406,8 @@
     "lng": 127.03764,
     "nearest_station": "월곡역",
     "nearest_station_m": 439,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "하월곡동"
   },
   "송파구|레이크팰리스": {
     "apt_name": "레이크팰리스",
@@ -2211,7 +2417,8 @@
     "lng": 127.0947018,
     "nearest_station": "잠실새내역",
     "nearest_station_m": 824,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "잠실동"
   },
   "서초구|서초힐스": {
     "apt_name": "서초힐스",
@@ -2221,7 +2428,8 @@
     "lng": 127.0188666,
     "nearest_station": null,
     "nearest_station_m": null,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "우면동"
   },
   "동대문구|휘경SK뷰": {
     "apt_name": "휘경SK뷰",
@@ -2231,7 +2439,8 @@
     "lng": 127.06526,
     "nearest_station": "회기역",
     "nearest_station_m": 703,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "휘경동"
   },
   "관악구|봉천동아": {
     "apt_name": "봉천동아",
@@ -2241,7 +2450,8 @@
     "lng": 126.9484961,
     "nearest_station": "서울대입구역",
     "nearest_station_m": 533,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "봉천동"
   },
   "강북구|래미안트리베라1단지": {
     "apt_name": "래미안트리베라1단지",
@@ -2251,7 +2461,8 @@
     "lng": 127.0257543,
     "nearest_station": "미아역",
     "nearest_station_m": 259,
-    "stations_within_1km": 4
+    "stations_within_1km": 4,
+    "dong": "미아동"
   },
   "동대문구|장안힐스테이트": {
     "apt_name": "장안힐스테이트",
@@ -2261,7 +2472,8 @@
     "lng": 127.070845,
     "nearest_station": "장한평역",
     "nearest_station_m": 1120,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "장안동"
   },
   "영등포구|래미안영등포프레비뉴": {
     "apt_name": "래미안영등포프레비뉴",
@@ -2271,7 +2483,8 @@
     "lng": 126.9079887,
     "nearest_station": "신풍역",
     "nearest_station_m": 562,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "신길동"
   },
   "강남구|역삼래미안": {
     "apt_name": "역삼래미안",
@@ -2281,7 +2494,8 @@
     "lng": 127.03856,
     "nearest_station": "역삼역",
     "nearest_station_m": 203,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "역삼동"
   },
   "동대문구|대림e-편한세상": {
     "apt_name": "대림e-편한세상",
@@ -2291,7 +2505,8 @@
     "lng": 127.06124,
     "nearest_station": "외대앞역",
     "nearest_station_m": 502,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "이문동"
   },
   "동작구|포스코더샵": {
     "apt_name": "포스코더샵",
@@ -2301,7 +2516,8 @@
     "lng": 126.9441045,
     "nearest_station": "상도역",
     "nearest_station_m": 558,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "상도동"
   },
   "송파구|상아2차아파트": {
     "apt_name": "상아2차아파트",
@@ -2311,7 +2527,8 @@
     "lng": 127.13379,
     "nearest_station": "오금역",
     "nearest_station_m": 524,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "오금동"
   },
   "송파구|거여4단지": {
     "apt_name": "거여4단지",
@@ -2321,7 +2538,8 @@
     "lng": 127.14667,
     "nearest_station": "거여역",
     "nearest_station_m": 486,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "거여동"
   },
   "강남구|푸른마을아파트101동~111동": {
     "apt_name": "푸른마을아파트101동~111동",
@@ -2331,7 +2549,8 @@
     "lng": 127.08705,
     "nearest_station": "일원역",
     "nearest_station_m": 489,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "일원동"
   },
   "성북구|이수브라운스톤돈암": {
     "apt_name": "이수브라운스톤돈암",
@@ -2341,7 +2560,8 @@
     "lng": 127.01841,
     "nearest_station": "성신여대입구역",
     "nearest_station_m": 561,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "돈암동"
   },
   "도봉구|동아청솔": {
     "apt_name": "동아청솔",
@@ -2351,7 +2571,8 @@
     "lng": 127.04326,
     "nearest_station": "녹천역",
     "nearest_station_m": 728,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "창동"
   },
   "송파구|거여1단지": {
     "apt_name": "거여1단지",
@@ -2361,7 +2582,8 @@
     "lng": 127.14667,
     "nearest_station": "거여역",
     "nearest_station_m": 486,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "거여동"
   },
   "동대문구|현대": {
     "apt_name": "현대",
@@ -2371,7 +2593,8 @@
     "lng": 127.0473638,
     "nearest_station": "신답역",
     "nearest_station_m": 164,
-    "stations_within_1km": 5
+    "stations_within_1km": 5,
+    "dong": "이문동"
   },
   "강남구|세곡푸르지오": {
     "apt_name": "세곡푸르지오",
@@ -2381,7 +2604,8 @@
     "lng": 127.0947792,
     "nearest_station": null,
     "nearest_station_m": null,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "세곡동"
   },
   "구로구|두산": {
     "apt_name": "두산",
@@ -2391,7 +2615,8 @@
     "lng": 126.851736,
     "nearest_station": "오류동역",
     "nearest_station_m": 582,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "개봉동"
   },
   "동대문구|청계한신휴플러스": {
     "apt_name": "청계한신휴플러스",
@@ -2401,7 +2626,8 @@
     "lng": 127.0459143,
     "nearest_station": "신답역",
     "nearest_station_m": 324,
-    "stations_within_1km": 5
+    "stations_within_1km": 5,
+    "dong": "답십리동"
   },
   "성북구|길음뉴타운2단지푸르지오": {
     "apt_name": "길음뉴타운2단지푸르지오",
@@ -2411,7 +2637,8 @@
     "lng": 127.0201946,
     "nearest_station": "길음역",
     "nearest_station_m": 712,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "길음동"
   },
   "중랑구|사가정센트럴아이파크": {
     "apt_name": "사가정센트럴아이파크",
@@ -2421,7 +2648,8 @@
     "lng": 127.0796029,
     "nearest_station": "사가정역",
     "nearest_station_m": 820,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "면목동"
   },
   "동대문구|두산": {
     "apt_name": "두산",
@@ -2431,7 +2659,8 @@
     "lng": 127.0362695,
     "nearest_station": "용두역",
     "nearest_station_m": 176,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "답십리동"
   },
   "마포구|래미안공덕4차": {
     "apt_name": "래미안공덕4차",
@@ -2441,7 +2670,8 @@
     "lng": 126.9592897,
     "nearest_station": "애오개역",
     "nearest_station_m": 476,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "공덕동"
   },
   "성북구|길음뉴타운6단지(래미안)": {
     "apt_name": "길음뉴타운6단지(래미안)",
@@ -2451,7 +2681,8 @@
     "lng": 127.0201946,
     "nearest_station": "길음역",
     "nearest_station_m": 712,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "길음동"
   },
   "구로구|신도림태영타운": {
     "apt_name": "신도림태영타운",
@@ -2461,7 +2692,8 @@
     "lng": 126.8845477,
     "nearest_station": "구로역",
     "nearest_station_m": 967,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "구로동"
   },
   "송파구|송파더센트레": {
     "apt_name": "송파더센트레",
@@ -2471,7 +2703,8 @@
     "lng": 127.1402253,
     "nearest_station": "장지역",
     "nearest_station_m": 1240,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "장지동"
   },
   "성동구|텐즈힐(1단지)": {
     "apt_name": "텐즈힐(1단지)",
@@ -2481,7 +2714,8 @@
     "lng": 127.02715,
     "nearest_station": "상왕십리역",
     "nearest_station_m": 390,
-    "stations_within_1km": 5
+    "stations_within_1km": 5,
+    "dong": "하왕십리동"
   },
   "중구|래미안하이베르": {
     "apt_name": "래미안하이베르",
@@ -2491,7 +2725,8 @@
     "lng": 127.01322,
     "nearest_station": "신당역",
     "nearest_station_m": 414,
-    "stations_within_1km": 6
+    "stations_within_1km": 6,
+    "dong": "신당동"
   },
   "은평구|힐스테이트녹번": {
     "apt_name": "힐스테이트녹번",
@@ -2501,7 +2736,8 @@
     "lng": 126.93437,
     "nearest_station": "녹번역",
     "nearest_station_m": 357,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "녹번동"
   },
   "성동구|왕십리자이": {
     "apt_name": "왕십리자이",
@@ -2511,7 +2747,8 @@
     "lng": 127.023698,
     "nearest_station": "행당역",
     "nearest_station_m": 636,
-    "stations_within_1km": 5
+    "stations_within_1km": 5,
+    "dong": "하왕십리동"
   },
   "동대문구|한신": {
     "apt_name": "한신",
@@ -2521,7 +2758,8 @@
     "lng": 127.023931,
     "nearest_station": "신설동역",
     "nearest_station_m": 169,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "청량리동"
   },
   "서초구|아크로리버파크": {
     "apt_name": "아크로리버파크",
@@ -2531,7 +2769,8 @@
     "lng": 126.9938756,
     "nearest_station": "신반포역",
     "nearest_station_m": 356,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "반포동"
   },
   "성동구|서울숲리버뷰자이": {
     "apt_name": "서울숲리버뷰자이",
@@ -2541,7 +2780,8 @@
     "lng": 127.03571,
     "nearest_station": "왕십리역",
     "nearest_station_m": 448,
-    "stations_within_1km": 5
+    "stations_within_1km": 5,
+    "dong": "행당동"
   },
   "송파구|리센츠": {
     "apt_name": "리센츠",
@@ -2551,7 +2791,8 @@
     "lng": 127.0862914,
     "nearest_station": "잠실새내역",
     "nearest_station_m": 293,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "잠실동"
   },
   "양천구|목동신시가지12": {
     "apt_name": "목동신시가지12",
@@ -2561,7 +2802,8 @@
     "lng": 126.8521196,
     "nearest_station": "신정네거리역",
     "nearest_station_m": 431,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "신정동"
   },
   "영등포구|신동아": {
     "apt_name": "신동아",
@@ -2571,7 +2813,8 @@
     "lng": 126.8946571,
     "nearest_station": "대림역",
     "nearest_station_m": 339,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "대림동"
   },
   "서대문구|문화촌현대": {
     "apt_name": "문화촌현대",
@@ -2581,7 +2824,8 @@
     "lng": 126.9465959,
     "nearest_station": "홍제역",
     "nearest_station_m": 428,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "홍제동"
   },
   "강서구|가양강나루현대": {
     "apt_name": "가양강나루현대",
@@ -2591,7 +2835,8 @@
     "lng": 126.8498488,
     "nearest_station": "양천향교역",
     "nearest_station_m": 752,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "가양동"
   },
   "성동구|래미안하이리버": {
     "apt_name": "래미안하이리버",
@@ -2601,7 +2846,8 @@
     "lng": 127.0211,
     "nearest_station": "신금호역",
     "nearest_station_m": 173,
-    "stations_within_1km": 4
+    "stations_within_1km": 4,
+    "dong": "금호동2가"
   },
   "서대문구|신촌푸르지오": {
     "apt_name": "신촌푸르지오",
@@ -2611,7 +2857,8 @@
     "lng": 126.9552494,
     "nearest_station": "아현역",
     "nearest_station_m": 249,
-    "stations_within_1km": 4
+    "stations_within_1km": 4,
+    "dong": "북아현동"
   },
   "도봉구|대우": {
     "apt_name": "대우",
@@ -2621,7 +2868,8 @@
     "lng": 127.0465305,
     "nearest_station": null,
     "nearest_station_m": null,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "창동"
   },
   "동대문구|답십리청솔우성": {
     "apt_name": "답십리청솔우성",
@@ -2631,7 +2879,8 @@
     "lng": 127.0619959,
     "nearest_station": "답십리역",
     "nearest_station_m": 1277,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "답십리동"
   },
   "노원구|주공5": {
     "apt_name": "주공5",
@@ -2641,7 +2890,8 @@
     "lng": 127.0810259,
     "nearest_station": "상계역",
     "nearest_station_m": 1281,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "중계동"
   },
   "서초구|반포리체": {
     "apt_name": "반포리체",
@@ -2651,7 +2901,8 @@
     "lng": 127.0140046,
     "nearest_station": "사평역",
     "nearest_station_m": 230,
-    "stations_within_1km": 4
+    "stations_within_1km": 4,
+    "dong": "반포동"
   },
   "강동구|길동우성": {
     "apt_name": "길동우성",
@@ -2661,7 +2912,8 @@
     "lng": 127.14703,
     "nearest_station": "길동역",
     "nearest_station_m": 621,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "길동"
   },
   "영등포구|아크로타워스퀘어": {
     "apt_name": "아크로타워스퀘어",
@@ -2671,7 +2923,8 @@
     "lng": 126.9065622,
     "nearest_station": "영등포시장역",
     "nearest_station_m": 192,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "영등포동7가"
   },
   "강남구|삼익대청아파트": {
     "apt_name": "삼익대청아파트",
@@ -2681,7 +2934,8 @@
     "lng": 127.0770577,
     "nearest_station": "대청역",
     "nearest_station_m": 284,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "개포동"
   },
   "동작구|삼성래미안": {
     "apt_name": "삼성래미안",
@@ -2691,7 +2945,8 @@
     "lng": 126.9343328,
     "nearest_station": "장승배기역",
     "nearest_station_m": 431,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "사당동"
   },
   "동작구|신동아4": {
     "apt_name": "신동아4",
@@ -2701,7 +2956,8 @@
     "lng": 126.9723525,
     "nearest_station": "남성역",
     "nearest_station_m": 156,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "사당동"
   },
   "서초구|래미안 리더스원": {
     "apt_name": "래미안 리더스원",
@@ -2711,7 +2967,8 @@
     "lng": 127.01751,
     "nearest_station": "남부터미널역",
     "nearest_station_m": 370,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "서초동"
   },
   "종로구|경희궁자이(3단지)": {
     "apt_name": "경희궁자이(3단지)",
@@ -2721,7 +2978,8 @@
     "lng": 126.9669813,
     "nearest_station": "서대문역",
     "nearest_station_m": 288,
-    "stations_within_1km": 4
+    "stations_within_1km": 4,
+    "dong": "평동"
   },
   "강동구|둔촌푸르지오": {
     "apt_name": "둔촌푸르지오",
@@ -2731,7 +2989,8 @@
     "lng": 127.1447659,
     "nearest_station": "둔촌동역",
     "nearest_station_m": 762,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "둔촌동"
   },
   "마포구|마포그랑자이": {
     "apt_name": "마포그랑자이",
@@ -2741,7 +3000,8 @@
     "lng": 126.9419496,
     "nearest_station": "대흥역",
     "nearest_station_m": 359,
-    "stations_within_1km": 5
+    "stations_within_1km": 5,
+    "dong": "대흥동"
   },
   "구로구|삼성래미안": {
     "apt_name": "삼성래미안",
@@ -2751,7 +3011,8 @@
     "lng": 126.8845477,
     "nearest_station": "구로역",
     "nearest_station_m": 967,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "구로동"
   },
   "성북구|길음뉴타운경남아너스빌": {
     "apt_name": "길음뉴타운경남아너스빌",
@@ -2761,7 +3022,8 @@
     "lng": 126.99794,
     "nearest_station": "북한산보국문역",
     "nearest_station_m": 1002,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "정릉동"
   },
   "송파구|위례24단지(꿈에그린)": {
     "apt_name": "위례24단지(꿈에그린)",
@@ -2771,7 +3033,8 @@
     "lng": 127.1310225,
     "nearest_station": "장지역",
     "nearest_station_m": 444,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "장지동"
   },
   "영등포구|힐스테이트클래시안": {
     "apt_name": "힐스테이트클래시안",
@@ -2781,7 +3044,8 @@
     "lng": 126.9121234,
     "nearest_station": "신풍역",
     "nearest_station_m": 470,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "신길동"
   },
   "성북구|래미안아트리치": {
     "apt_name": "래미안아트리치",
@@ -2791,7 +3055,8 @@
     "lng": 127.0614852,
     "nearest_station": "돌곶이역",
     "nearest_station_m": 533,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "석관동"
   },
   "금천구|두산": {
     "apt_name": "두산",
@@ -2801,7 +3066,8 @@
     "lng": 126.892249,
     "nearest_station": "독산역",
     "nearest_station_m": 830,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "가산동"
   },
   "서대문구|홍제삼성래미안": {
     "apt_name": "홍제삼성래미안",
@@ -2811,7 +3077,8 @@
     "lng": 126.94676,
     "nearest_station": "홍제역",
     "nearest_station_m": 344,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "홍제동"
   },
   "동대문구|동서울한양": {
     "apt_name": "동서울한양",
@@ -2821,7 +3088,8 @@
     "lng": 127.0540803,
     "nearest_station": "답십리역",
     "nearest_station_m": 766,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "답십리동"
   },
   "용산구|한남더힐": {
     "apt_name": "한남더힐",
@@ -2831,7 +3099,8 @@
     "lng": 127.0074,
     "nearest_station": "한강진역",
     "nearest_station_m": 524,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "한남동"
   },
   "서대문구|성원": {
     "apt_name": "성원",
@@ -2841,7 +3110,8 @@
     "lng": 126.93084,
     "nearest_station": "가좌역",
     "nearest_station_m": 1419,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "연희동"
   },
   "노원구|상계2차중앙하이츠": {
     "apt_name": "상계2차중앙하이츠",
@@ -2851,7 +3121,8 @@
     "lng": 127.07242,
     "nearest_station": "당고개역",
     "nearest_station_m": 673,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "상계동"
   },
   "동대문구|래미안미드카운티": {
     "apt_name": "래미안미드카운티",
@@ -2861,7 +3132,8 @@
     "lng": 127.05467,
     "nearest_station": "답십리역",
     "nearest_station_m": 403,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "답십리동"
   },
   "강남구|래미안블레스티지": {
     "apt_name": "래미안블레스티지",
@@ -2871,7 +3143,8 @@
     "lng": 127.063042,
     "nearest_station": "구룡역",
     "nearest_station_m": 758,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "개포동"
   },
   "성북구|종암에스케이": {
     "apt_name": "종암에스케이",
@@ -2881,7 +3154,8 @@
     "lng": 127.03333,
     "nearest_station": "고려대역",
     "nearest_station_m": 696,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "종암동"
   },
   "송파구|대림": {
     "apt_name": "대림",
@@ -2891,7 +3165,8 @@
     "lng": 127.130402,
     "nearest_station": "방이역",
     "nearest_station_m": 430,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "오금동"
   },
   "양천구|롯데캐슬": {
     "apt_name": "롯데캐슬",
@@ -2901,7 +3176,8 @@
     "lng": 126.83692,
     "nearest_station": "까치산역",
     "nearest_station_m": 966,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "신월동"
   },
   "양천구|목동센트럴아이파크위브1단지": {
     "apt_name": "목동센트럴아이파크위브1단지",
@@ -2911,7 +3187,8 @@
     "lng": 126.83692,
     "nearest_station": "까치산역",
     "nearest_station_m": 966,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "신월동"
   },
   "서대문구|DMC에코자이": {
     "apt_name": "DMC에코자이",
@@ -2921,7 +3198,8 @@
     "lng": 126.9179,
     "nearest_station": "가좌역",
     "nearest_station_m": 1017,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "남가좌동"
   },
   "양천구|롯데캐슬위너": {
     "apt_name": "롯데캐슬위너",
@@ -2931,7 +3209,8 @@
     "lng": 126.87585,
     "nearest_station": "신목동역",
     "nearest_station_m": 1112,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "목동"
   },
   "서대문구|e편한세상신촌1단지": {
     "apt_name": "e편한세상신촌1단지",
@@ -2941,7 +3220,8 @@
     "lng": 126.95426,
     "nearest_station": "아현역",
     "nearest_station_m": 702,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "북아현동"
   },
   "성북구|삼선푸르지오": {
     "apt_name": "삼선푸르지오",
@@ -2951,7 +3231,8 @@
     "lng": 127.0145481,
     "nearest_station": "창신역",
     "nearest_station_m": 290,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "삼선동2가"
   },
   "금천구|독산주공14단지": {
     "apt_name": "독산주공14단지",
@@ -2961,7 +3242,8 @@
     "lng": 126.8868844,
     "nearest_station": "독산역",
     "nearest_station_m": 635,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "독산동"
   },
   "마포구|래미안공덕5차": {
     "apt_name": "래미안공덕5차",
@@ -2971,7 +3253,8 @@
     "lng": 126.9592897,
     "nearest_station": "애오개역",
     "nearest_station_m": 476,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "공덕동"
   },
   "마포구|마포래미안푸르지오3단지": {
     "apt_name": "마포래미안푸르지오3단지",
@@ -2981,7 +3264,8 @@
     "lng": 126.9525116,
     "nearest_station": "애오개역",
     "nearest_station_m": 518,
-    "stations_within_1km": 5
+    "stations_within_1km": 5,
+    "dong": "아현동"
   },
   "도봉구|주공19단지(창동리버타운)": {
     "apt_name": "주공19단지(창동리버타운)",
@@ -2991,7 +3275,8 @@
     "lng": 127.04326,
     "nearest_station": "녹천역",
     "nearest_station_m": 728,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "창동"
   },
   "성동구|서울숲푸르지오": {
     "apt_name": "서울숲푸르지오",
@@ -3001,7 +3286,8 @@
     "lng": 127.02339,
     "nearest_station": "옥수역",
     "nearest_station_m": 661,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "금호동4가"
   },
   "서대문구|DMC파크뷰자이2단지": {
     "apt_name": "DMC파크뷰자이2단지",
@@ -3011,7 +3297,8 @@
     "lng": 126.9179,
     "nearest_station": "가좌역",
     "nearest_station_m": 1017,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "남가좌동"
   },
   "도봉구|쌍용": {
     "apt_name": "쌍용",
@@ -3021,7 +3308,8 @@
     "lng": 127.04326,
     "nearest_station": "녹천역",
     "nearest_station_m": 728,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "창동"
   },
   "강남구|동부센트레빌": {
     "apt_name": "동부센트레빌",
@@ -3031,7 +3319,8 @@
     "lng": 127.0494128,
     "nearest_station": "선릉역",
     "nearest_station_m": 234,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "대치동"
   },
   "성북구|길음뉴타운9단지(래미안)": {
     "apt_name": "길음뉴타운9단지(래미안)",
@@ -3041,7 +3330,8 @@
     "lng": 127.0201946,
     "nearest_station": "길음역",
     "nearest_station_m": 712,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "길음동"
   },
   "동대문구|답십리파크자이": {
     "apt_name": "답십리파크자이",
@@ -3051,7 +3341,8 @@
     "lng": 127.05467,
     "nearest_station": "답십리역",
     "nearest_station_m": 403,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "답십리동"
   },
   "영등포구|현대2차": {
     "apt_name": "현대2차",
@@ -3061,7 +3352,8 @@
     "lng": 126.8829212,
     "nearest_station": "양평역",
     "nearest_station_m": 635,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "문래동6가"
   },
   "중랑구|면목한신": {
     "apt_name": "면목한신",
@@ -3071,7 +3363,8 @@
     "lng": 127.0910424,
     "nearest_station": "사가정역",
     "nearest_station_m": 247,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "면목동"
   },
   "동대문구|동아": {
     "apt_name": "동아",
@@ -3081,7 +3374,8 @@
     "lng": 127.050971,
     "nearest_station": "답십리역",
     "nearest_station_m": 315,
-    "stations_within_1km": 4
+    "stations_within_1km": 4,
+    "dong": "답십리동"
   },
   "강동구|고덕센트럴푸르지오": {
     "apt_name": "고덕센트럴푸르지오",
@@ -3091,7 +3385,8 @@
     "lng": 127.1701391,
     "nearest_station": "상일동역",
     "nearest_station_m": 346,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "고덕동"
   },
   "영등포구|신길센트럴자이아파트": {
     "apt_name": "신길센트럴자이아파트",
@@ -3101,7 +3396,8 @@
     "lng": 126.9068993,
     "nearest_station": "신풍역",
     "nearest_station_m": 469,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "신길동"
   },
   "양천구|래미안목동아델리체(101동~118동)": {
     "apt_name": "래미안목동아델리체(101동~118동)",
@@ -3111,7 +3407,8 @@
     "lng": 126.8521196,
     "nearest_station": "신정네거리역",
     "nearest_station_m": 431,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "신정동"
   },
   "동대문구|힐스테이트청계": {
     "apt_name": "힐스테이트청계",
@@ -3121,7 +3418,8 @@
     "lng": 127.05467,
     "nearest_station": "답십리역",
     "nearest_station_m": 403,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "답십리동"
   },
   "강동구|고덕 아이파크": {
     "apt_name": "고덕 아이파크",
@@ -3131,7 +3429,8 @@
     "lng": 127.15761,
     "nearest_station": "고덕역",
     "nearest_station_m": 1182,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "고덕동"
   },
   "강서구|마곡수명산파크5단지": {
     "apt_name": "마곡수명산파크5단지",
@@ -3141,7 +3440,8 @@
     "lng": 126.8274584,
     "nearest_station": "우장산역",
     "nearest_station_m": 863,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "내발산동"
   },
   "양천구|목동센트럴아이파크위브2단지": {
     "apt_name": "목동센트럴아이파크위브2단지",
@@ -3151,7 +3451,8 @@
     "lng": 126.83692,
     "nearest_station": "까치산역",
     "nearest_station_m": 966,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "신월동"
   },
   "강남구|디에이치아너힐즈": {
     "apt_name": "디에이치아너힐즈",
@@ -3161,7 +3462,8 @@
     "lng": 127.0682003,
     "nearest_station": "개포동역",
     "nearest_station_m": 544,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "개포동"
   },
   "성동구|센트라스": {
     "apt_name": "센트라스",
@@ -3171,7 +3473,8 @@
     "lng": 127.02715,
     "nearest_station": "상왕십리역",
     "nearest_station_m": 390,
-    "stations_within_1km": 5
+    "stations_within_1km": 5,
+    "dong": "하왕십리동"
   },
   "성북구|정릉e-편한세상": {
     "apt_name": "정릉e-편한세상",
@@ -3181,7 +3484,8 @@
     "lng": 126.99794,
     "nearest_station": "북한산보국문역",
     "nearest_station_m": 1002,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "정릉동"
   },
   "강서구|청솔": {
     "apt_name": "청솔",
@@ -3191,7 +3495,8 @@
     "lng": 126.850865,
     "nearest_station": "까치산역",
     "nearest_station_m": 373,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "방화동"
   },
   "성북구|대우": {
     "apt_name": "대우",
@@ -3201,7 +3506,8 @@
     "lng": 126.99794,
     "nearest_station": "북한산보국문역",
     "nearest_station_m": 1002,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "정릉동"
   },
   "동작구|e편한세상상도노빌리티": {
     "apt_name": "e편한세상상도노빌리티",
@@ -3211,7 +3517,8 @@
     "lng": 126.9441045,
     "nearest_station": "상도역",
     "nearest_station_m": 558,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "상도동"
   },
   "동작구|신동아": {
     "apt_name": "신동아",
@@ -3221,7 +3528,8 @@
     "lng": 126.9144867,
     "nearest_station": "신대방역",
     "nearest_station_m": 488,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "본동"
   },
   "동작구|극동(105)": {
     "apt_name": "극동(105)",
@@ -3231,7 +3539,8 @@
     "lng": 126.9723525,
     "nearest_station": "남성역",
     "nearest_station_m": 156,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "사당동"
   },
   "강동구|삼익파크맨션": {
     "apt_name": "삼익파크맨션",
@@ -3241,7 +3550,8 @@
     "lng": 127.1456493,
     "nearest_station": "굽은다리역",
     "nearest_station_m": 413,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "길동"
   },
   "금천구|금천현대": {
     "apt_name": "금천현대",
@@ -3251,7 +3561,8 @@
     "lng": 126.8979571,
     "nearest_station": "독산역",
     "nearest_station_m": 793,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "독산동"
   },
   "동작구|래미안로이파크": {
     "apt_name": "래미안로이파크",
@@ -3261,7 +3572,8 @@
     "lng": 126.9723525,
     "nearest_station": "남성역",
     "nearest_station_m": 156,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "사당동"
   },
   "마포구|마포래미안푸르지오2단지": {
     "apt_name": "마포래미안푸르지오2단지",
@@ -3271,7 +3583,8 @@
     "lng": 126.9525116,
     "nearest_station": "애오개역",
     "nearest_station_m": 518,
-    "stations_within_1km": 5
+    "stations_within_1km": 5,
+    "dong": "아현동"
   },
   "구로구|개봉동현대아이파크": {
     "apt_name": "개봉동현대아이파크",
@@ -3281,7 +3594,8 @@
     "lng": 126.851736,
     "nearest_station": "오류동역",
     "nearest_station_m": 582,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "개봉동"
   },
   "도봉구|창동주공18단지": {
     "apt_name": "창동주공18단지",
@@ -3291,7 +3605,8 @@
     "lng": 127.053,
     "nearest_station": "녹천역",
     "nearest_station_m": 291,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "창동"
   },
   "양천구|학마을1단지": {
     "apt_name": "학마을1단지",
@@ -3301,7 +3616,8 @@
     "lng": 126.8521196,
     "nearest_station": "신정네거리역",
     "nearest_station_m": 431,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "신정동"
   },
   "구로구|삼환": {
     "apt_name": "삼환",
@@ -3311,7 +3627,8 @@
     "lng": 126.8577874,
     "nearest_station": "개봉역",
     "nearest_station_m": 385,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "개봉동"
   },
   "노원구|미성": {
     "apt_name": "미성",
@@ -3321,7 +3638,8 @@
     "lng": 127.0678883,
     "nearest_station": "광운대역",
     "nearest_station_m": 609,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "월계동"
   },
   "동작구|대림(169-8)": {
     "apt_name": "대림(169-8)",
@@ -3331,7 +3649,8 @@
     "lng": 126.9704949,
     "nearest_station": "남성역",
     "nearest_station_m": 85,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "사당동"
   },
   "도봉구|창동주공1단지": {
     "apt_name": "창동주공1단지",
@@ -3341,7 +3660,8 @@
     "lng": 127.04096,
     "nearest_station": "창동역",
     "nearest_station_m": 607,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "창동"
   },
   "노원구|상계주공12(고층)": {
     "apt_name": "상계주공12(고층)",
@@ -3351,7 +3671,8 @@
     "lng": 127.07242,
     "nearest_station": "당고개역",
     "nearest_station_m": 673,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "상계동"
   },
   "노원구|주공2": {
     "apt_name": "주공2",
@@ -3361,7 +3682,8 @@
     "lng": 127.0740242,
     "nearest_station": "상계역",
     "nearest_station_m": 282,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "중계동"
   },
   "노원구|장미(시영6)": {
     "apt_name": "장미(시영6)",
@@ -3371,7 +3693,8 @@
     "lng": 127.07251,
     "nearest_station": "월계역",
     "nearest_station_m": 1313,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "하계동"
   },
   "송파구|송파시그니처롯데캐슬": {
     "apt_name": "송파시그니처롯데캐슬",
@@ -3381,7 +3704,8 @@
     "lng": 127.1473885,
     "nearest_station": "거여역",
     "nearest_station_m": 457,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "거여동"
   },
   "동작구|흑석한강푸르지오": {
     "apt_name": "흑석한강푸르지오",
@@ -3391,7 +3715,8 @@
     "lng": 126.9647141,
     "nearest_station": "흑석역",
     "nearest_station_m": 635,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "흑석동"
   },
   "영등포구|보라매에스케이뷰": {
     "apt_name": "보라매에스케이뷰",
@@ -3401,7 +3726,8 @@
     "lng": 126.9119108,
     "nearest_station": "신풍역",
     "nearest_station_m": 737,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "신길동"
   },
   "마포구|현대홈타운": {
     "apt_name": "현대홈타운",
@@ -3411,7 +3737,8 @@
     "lng": 126.931942,
     "nearest_station": "서강대역",
     "nearest_station_m": 343,
-    "stations_within_1km": 6
+    "stations_within_1km": 6,
+    "dong": "도화동"
   },
   "강북구|삼각산아이원": {
     "apt_name": "삼각산아이원",
@@ -3421,7 +3748,8 @@
     "lng": 127.0257543,
     "nearest_station": "미아역",
     "nearest_station_m": 259,
-    "stations_within_1km": 4
+    "stations_within_1km": 4,
+    "dong": "미아동"
   },
   "서대문구|DMC파크뷰자이1단지": {
     "apt_name": "DMC파크뷰자이1단지",
@@ -3431,7 +3759,8 @@
     "lng": 126.9186037,
     "nearest_station": "가좌역",
     "nearest_station_m": 372,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "남가좌동"
   },
   "동작구|힐스테이트 상도 프레스티지": {
     "apt_name": "힐스테이트 상도 프레스티지",
@@ -3441,7 +3770,8 @@
     "lng": 126.9441045,
     "nearest_station": "상도역",
     "nearest_station_m": 558,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "상도동"
   },
   "노원구|청솔(시영7)": {
     "apt_name": "청솔(시영7)",
@@ -3451,7 +3781,8 @@
     "lng": 127.07251,
     "nearest_station": "월계역",
     "nearest_station_m": 1313,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "하계동"
   },
   "강북구|삼성래미안트리베라2단지": {
     "apt_name": "삼성래미안트리베라2단지",
@@ -3461,7 +3792,8 @@
     "lng": 127.0257543,
     "nearest_station": "미아역",
     "nearest_station_m": 259,
-    "stations_within_1km": 4
+    "stations_within_1km": 4,
+    "dong": "미아동"
   },
   "서대문구|힐스테이트신촌": {
     "apt_name": "힐스테이트신촌",
@@ -3471,7 +3803,8 @@
     "lng": 126.9510502,
     "nearest_station": "아현역",
     "nearest_station_m": 685,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "북아현동"
   },
   "성북구|월곡래미안루나밸리": {
     "apt_name": "월곡래미안루나밸리",
@@ -3481,7 +3814,8 @@
     "lng": 127.03764,
     "nearest_station": "월곡역",
     "nearest_station_m": 439,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "하월곡동"
   },
   "강북구|경남아너스빌(1356-0)": {
     "apt_name": "경남아너스빌(1356-0)",
@@ -3491,7 +3825,8 @@
     "lng": 127.0257543,
     "nearest_station": "미아역",
     "nearest_station_m": 259,
-    "stations_within_1km": 4
+    "stations_within_1km": 4,
+    "dong": "미아동"
   },
   "관악구|e편한세상서울대입구1단지": {
     "apt_name": "e편한세상서울대입구1단지",
@@ -3501,7 +3836,8 @@
     "lng": 126.9484961,
     "nearest_station": "서울대입구역",
     "nearest_station_m": 533,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "봉천동"
   },
   "중랑구|동성1": {
     "apt_name": "동성1",
@@ -3511,7 +3847,8 @@
     "lng": 127.0974939,
     "nearest_station": "신내역",
     "nearest_station_m": 614,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "신내동"
   },
   "노원구|상계주공7(고층)": {
     "apt_name": "상계주공7(고층)",
@@ -3521,7 +3858,8 @@
     "lng": 127.07242,
     "nearest_station": "당고개역",
     "nearest_station_m": 673,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "상계동"
   },
   "동작구|흑석한강센트레빌Ⅱ": {
     "apt_name": "흑석한강센트레빌Ⅱ",
@@ -3531,7 +3869,8 @@
     "lng": 126.963687,
     "nearest_station": "흑석역",
     "nearest_station_m": 259,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "흑석동"
   },
   "은평구|e편한세상 수색 에코포레": {
     "apt_name": "e편한세상 수색 에코포레",
@@ -3541,7 +3880,8 @@
     "lng": 126.8948584,
     "nearest_station": "수색역",
     "nearest_station_m": 487,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "수색동"
   },
   "구로구|구일우성": {
     "apt_name": "구일우성",
@@ -3551,7 +3891,8 @@
     "lng": 126.876259,
     "nearest_station": "구일역",
     "nearest_station_m": 927,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "구로동"
   },
   "양천구|목동힐스테이트": {
     "apt_name": "목동힐스테이트",
@@ -3561,7 +3902,8 @@
     "lng": 126.8521196,
     "nearest_station": "신정네거리역",
     "nearest_station_m": 431,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "신정동"
   },
   "은평구|백련산에스케이뷰아이파크": {
     "apt_name": "백련산에스케이뷰아이파크",
@@ -3571,7 +3913,8 @@
     "lng": 126.92555,
     "nearest_station": "응암역",
     "nearest_station_m": 1007,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "응암동"
   },
   "서초구|서초더샵포레": {
     "apt_name": "서초더샵포레",
@@ -3581,7 +3924,8 @@
     "lng": 127.0634204,
     "nearest_station": null,
     "nearest_station_m": null,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "내곡동"
   },
   "서대문구|홍제센트럴IPARK": {
     "apt_name": "홍제센트럴IPARK",
@@ -3591,7 +3935,8 @@
     "lng": 126.94676,
     "nearest_station": "홍제역",
     "nearest_station_m": 344,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "홍제동"
   },
   "성북구|래미안세레니티": {
     "apt_name": "래미안세레니티",
@@ -3601,7 +3946,8 @@
     "lng": 127.03333,
     "nearest_station": "고려대역",
     "nearest_station_m": 696,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "종암동"
   },
   "노원구|월계센트럴아이파크": {
     "apt_name": "월계센트럴아이파크",
@@ -3611,7 +3957,8 @@
     "lng": 127.0579062,
     "nearest_station": "월계역",
     "nearest_station_m": 385,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "월계동"
   },
   "은평구|래미안베라힐즈": {
     "apt_name": "래미안베라힐즈",
@@ -3621,7 +3968,8 @@
     "lng": 126.93437,
     "nearest_station": "녹번역",
     "nearest_station_m": 357,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "녹번동"
   },
   "서대문구|DMC센트럴아이파크": {
     "apt_name": "DMC센트럴아이파크",
@@ -3631,7 +3979,8 @@
     "lng": 126.9179,
     "nearest_station": "가좌역",
     "nearest_station_m": 1017,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "남가좌동"
   },
   "중구|서울역센트럴자이": {
     "apt_name": "서울역센트럴자이",
@@ -3641,7 +3990,8 @@
     "lng": 126.9639221,
     "nearest_station": "충정로역",
     "nearest_station_m": 568,
-    "stations_within_1km": 4
+    "stations_within_1km": 4,
+    "dong": "만리동2가"
   },
   "노원구|태릉해링턴플레이스": {
     "apt_name": "태릉해링턴플레이스",
@@ -3651,7 +4001,8 @@
     "lng": 127.08818,
     "nearest_station": "화랑대역",
     "nearest_station_m": 1169,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "공릉동"
   },
   "노원구|상계주공14(고층)": {
     "apt_name": "상계주공14(고층)",
@@ -3661,7 +4012,8 @@
     "lng": 127.07242,
     "nearest_station": "당고개역",
     "nearest_station_m": 673,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "상계동"
   },
   "은평구|백련산힐스테이트1차": {
     "apt_name": "백련산힐스테이트1차",
@@ -3671,7 +4023,8 @@
     "lng": 126.92555,
     "nearest_station": "응암역",
     "nearest_station_m": 1007,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "응암동"
   },
   "강남구|강남자곡아이파크": {
     "apt_name": "강남자곡아이파크",
@@ -3681,7 +4034,8 @@
     "lng": 127.0987522,
     "nearest_station": null,
     "nearest_station_m": null,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "자곡동"
   },
   "중랑구|신내11대명": {
     "apt_name": "신내11대명",
@@ -3691,7 +4045,8 @@
     "lng": 127.09298,
     "nearest_station": "봉화산역",
     "nearest_station_m": 623,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "신내동"
   },
   "강동구|고덕센트럴IPARK": {
     "apt_name": "고덕센트럴IPARK",
@@ -3701,7 +4056,8 @@
     "lng": 127.1704,
     "nearest_station": "상일동역",
     "nearest_station_m": 752,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "상일동"
   },
   "금천구|금천롯데캐슬골드파크3차": {
     "apt_name": "금천롯데캐슬골드파크3차",
@@ -3711,7 +4067,8 @@
     "lng": 126.8979571,
     "nearest_station": "독산역",
     "nearest_station_m": 793,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "독산동"
   },
   "구로구|한신": {
     "apt_name": "한신",
@@ -3721,7 +4078,8 @@
     "lng": 126.8942065,
     "nearest_station": "구로디지털단지역",
     "nearest_station_m": 708,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "구로동"
   },
   "종로구|경희궁자이(2단지)": {
     "apt_name": "경희궁자이(2단지)",
@@ -3731,7 +4089,8 @@
     "lng": 126.9638497,
     "nearest_station": "서대문역",
     "nearest_station_m": 640,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "홍파동"
   },
   "양천구|신트리4": {
     "apt_name": "신트리4",
@@ -3741,7 +4100,8 @@
     "lng": 126.8521196,
     "nearest_station": "신정네거리역",
     "nearest_station_m": 431,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "신정동"
   },
   "도봉구|대상타운현대아파트": {
     "apt_name": "대상타운현대아파트",
@@ -3751,7 +4111,8 @@
     "lng": 127.0482151,
     "nearest_station": "창동역",
     "nearest_station_m": 1307,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "방학동"
   },
   "동대문구|래미안 허브리츠": {
     "apt_name": "래미안 허브리츠",
@@ -3761,7 +4122,8 @@
     "lng": 127.03476,
     "nearest_station": "용두역",
     "nearest_station_m": 377,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "용두동"
   },
   "양천구|목동센트럴아이파크위브3단지": {
     "apt_name": "목동센트럴아이파크위브3단지",
@@ -3771,7 +4133,8 @@
     "lng": 126.83692,
     "nearest_station": "까치산역",
     "nearest_station_m": 966,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "신월동"
   },
   "은평구|DMC롯데캐슬더퍼스트": {
     "apt_name": "DMC롯데캐슬더퍼스트",
@@ -3781,7 +4144,8 @@
     "lng": 126.8948584,
     "nearest_station": "수색역",
     "nearest_station_m": 487,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "수색동"
   },
   "영등포구|우성1": {
     "apt_name": "우성1",
@@ -3791,7 +4155,8 @@
     "lng": 126.9119108,
     "nearest_station": "신풍역",
     "nearest_station_m": 737,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "신길동"
   },
   "노원구|포레나노원": {
     "apt_name": "포레나노원",
@@ -3801,7 +4166,8 @@
     "lng": 127.07242,
     "nearest_station": "당고개역",
     "nearest_station_m": 673,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "상계동"
   },
   "광진구|래미안파크스위트": {
     "apt_name": "래미안파크스위트",
@@ -3811,7 +4177,8 @@
     "lng": 127.09262,
     "nearest_station": "아차산역",
     "nearest_station_m": 873,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "구의동"
   },
   "성북구|래미안포레카운티": {
     "apt_name": "래미안포레카운티",
@@ -3821,7 +4188,8 @@
     "lng": 127.05086,
     "nearest_station": "돌곶이역",
     "nearest_station_m": 798,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "장위동"
   },
   "마포구|한화오벨리스크": {
     "apt_name": "한화오벨리스크",
@@ -3831,7 +4199,8 @@
     "lng": 126.9318667,
     "nearest_station": "광흥창역",
     "nearest_station_m": 93,
-    "stations_within_1km": 4
+    "stations_within_1km": 4,
+    "dong": "도화동"
   },
   "강북구|두산위브트레지움": {
     "apt_name": "두산위브트레지움",
@@ -3841,7 +4210,8 @@
     "lng": 127.0257543,
     "nearest_station": "미아역",
     "nearest_station_m": 259,
-    "stations_within_1km": 4
+    "stations_within_1km": 4,
+    "dong": "미아동"
   },
   "강북구|꿈의숲해링턴플레이스": {
     "apt_name": "꿈의숲해링턴플레이스",
@@ -3851,7 +4221,8 @@
     "lng": 127.0257543,
     "nearest_station": "미아역",
     "nearest_station_m": 259,
-    "stations_within_1km": 4
+    "stations_within_1km": 4,
+    "dong": "미아동"
   },
   "관악구|신림푸르지오": {
     "apt_name": "신림푸르지오",
@@ -3861,7 +4232,8 @@
     "lng": 126.9112483,
     "nearest_station": "신대방역",
     "nearest_station_m": 699,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "신림동"
   },
   "구로구|구로두산위브": {
     "apt_name": "구로두산위브",
@@ -3871,7 +4243,8 @@
     "lng": 126.8845477,
     "nearest_station": "구로역",
     "nearest_station_m": 967,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "구로동"
   },
   "구로구|온수힐스테이트": {
     "apt_name": "온수힐스테이트",
@@ -3881,7 +4254,8 @@
     "lng": 126.8215634,
     "nearest_station": "온수역",
     "nearest_station_m": 663,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "온수동"
   },
   "은평구|백련산힐스테이트4차": {
     "apt_name": "백련산힐스테이트4차",
@@ -3891,7 +4265,8 @@
     "lng": 126.9227607,
     "nearest_station": "새절역",
     "nearest_station_m": 812,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "응암동"
   },
   "구로구|개봉푸르지오": {
     "apt_name": "개봉푸르지오",
@@ -3901,7 +4276,8 @@
     "lng": 126.8481475,
     "nearest_station": "오류동역",
     "nearest_station_m": 698,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "개봉동"
   },
   "노원구|비선아파트": {
     "apt_name": "비선아파트",
@@ -3911,7 +4287,8 @@
     "lng": 127.0872338,
     "nearest_station": "화랑대역",
     "nearest_station_m": 666,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "공릉동"
   },
   "관악구|삼성산주공(주공3단지)": {
     "apt_name": "삼성산주공(주공3단지)",
@@ -3921,7 +4298,8 @@
     "lng": 126.928177,
     "nearest_station": "신림역",
     "nearest_station_m": 329,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "신림동"
   },
   "은평구|백련산파크자이": {
     "apt_name": "백련산파크자이",
@@ -3931,7 +4309,8 @@
     "lng": 126.92555,
     "nearest_station": "응암역",
     "nearest_station_m": 1007,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "응암동"
   },
   "금천구|금천롯데캐슬골드파크1차": {
     "apt_name": "금천롯데캐슬골드파크1차",
@@ -3941,7 +4320,8 @@
     "lng": 126.8979571,
     "nearest_station": "독산역",
     "nearest_station_m": 793,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "독산동"
   },
   "은평구|백련산힐스테이트3차": {
     "apt_name": "백련산힐스테이트3차",
@@ -3951,7 +4331,8 @@
     "lng": 126.9226762,
     "nearest_station": "새절역",
     "nearest_station_m": 841,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "응암동"
   },
   "금천구|벽산": {
     "apt_name": "벽산",
@@ -3961,7 +4342,8 @@
     "lng": 126.885391,
     "nearest_station": "가산디지털단지역",
     "nearest_station_m": 597,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "시흥동"
   },
   "강남구|대우디오빌": {
     "apt_name": "대우디오빌",
@@ -3971,7 +4353,8 @@
     "lng": 127.03856,
     "nearest_station": "역삼역",
     "nearest_station_m": 203,
-    "stations_within_1km": 3
+    "stations_within_1km": 3,
+    "dong": "역삼동"
   },
   "노원구|상계주공13(고층)": {
     "apt_name": "상계주공13(고층)",
@@ -3981,7 +4364,8 @@
     "lng": 127.07242,
     "nearest_station": "당고개역",
     "nearest_station_m": 673,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "상계동"
   },
   "은평구|백련산힐스테이트2차": {
     "apt_name": "백련산힐스테이트2차",
@@ -3991,7 +4375,8 @@
     "lng": 126.9228812,
     "nearest_station": "새절역",
     "nearest_station_m": 818,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "응암동"
   },
   "성북구|정릉우성아파트 101~105동": {
     "apt_name": "정릉우성아파트 101~105동",
@@ -4001,7 +4386,8 @@
     "lng": 126.99794,
     "nearest_station": "북한산보국문역",
     "nearest_station_m": 1002,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "정릉동"
   },
   "관악구|LIG대학마을(건영아파트3차)": {
     "apt_name": "LIG대학마을(건영아파트3차)",
@@ -4011,7 +4397,8 @@
     "lng": 126.928177,
     "nearest_station": "신림역",
     "nearest_station_m": 329,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "신림동"
   },
   "구로구|동부골든": {
     "apt_name": "동부골든",
@@ -4021,7 +4408,8 @@
     "lng": 126.8399442,
     "nearest_station": "오류동역",
     "nearest_station_m": 644,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "오류동"
   },
   "노원구|청암2단지": {
     "apt_name": "청암2단지",
@@ -4031,7 +4419,8 @@
     "lng": 127.07242,
     "nearest_station": "당고개역",
     "nearest_station_m": 673,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "상계동"
   },
   "노원구|성원(사슴4)": {
     "apt_name": "성원(사슴4)",
@@ -4041,7 +4430,8 @@
     "lng": 127.0541062,
     "nearest_station": "월계역",
     "nearest_station_m": 559,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "월계동"
   },
   "양천구|목동신시가지11": {
     "apt_name": "목동신시가지11",
@@ -4051,7 +4441,8 @@
     "lng": 126.8521196,
     "nearest_station": "신정네거리역",
     "nearest_station_m": 431,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "신정동"
   },
   "송파구|올림픽선수기자촌1단지": {
     "apt_name": "올림픽선수기자촌1단지",
@@ -4061,7 +4452,8 @@
     "lng": 127.1195472,
     "nearest_station": "몽촌토성역",
     "nearest_station_m": 729,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "방이동"
   },
   "양천구|목동신시가지10": {
     "apt_name": "목동신시가지10",
@@ -4071,7 +4463,8 @@
     "lng": 126.8521196,
     "nearest_station": "신정네거리역",
     "nearest_station_m": 431,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "신정동"
   },
   "송파구|올림픽선수기자촌2단지": {
     "apt_name": "올림픽선수기자촌2단지",
@@ -4081,7 +4474,8 @@
     "lng": 127.1195472,
     "nearest_station": "몽촌토성역",
     "nearest_station_m": 729,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "방이동"
   },
   "강남구|래미안대치팰리스": {
     "apt_name": "래미안대치팰리스",
@@ -4091,7 +4485,8 @@
     "lng": 127.06566,
     "nearest_station": "학여울역",
     "nearest_station_m": 496,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "대치동"
   },
   "종로구|인왕산아이파크": {
     "apt_name": "인왕산아이파크",
@@ -4101,7 +4496,8 @@
     "lng": 126.957666,
     "nearest_station": "독립문역",
     "nearest_station_m": 266,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "무악동"
   },
   "강북구|주공1단지": {
     "apt_name": "주공1단지",
@@ -4111,7 +4507,8 @@
     "lng": 127.03684,
     "nearest_station": "미아역",
     "nearest_station_m": 999,
-    "stations_within_1km": 1
+    "stations_within_1km": 1,
+    "dong": "번동"
   },
   "강서구|부영": {
     "apt_name": "부영",
@@ -4121,7 +4518,8 @@
     "lng": 126.8615649,
     "nearest_station": "등촌역",
     "nearest_station_m": 396,
-    "stations_within_1km": 2
+    "stations_within_1km": 2,
+    "dong": "등촌동"
   },
   "노원구|건영": {
     "apt_name": "건영",
@@ -4131,6 +4529,7 @@
     "lng": 127.0739961,
     "nearest_station": "노원역",
     "nearest_station_m": 1315,
-    "stations_within_1km": 0
+    "stations_within_1km": 0,
+    "dong": "하계동"
   }
 }
