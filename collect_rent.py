@@ -108,10 +108,36 @@ def _collect_rent_month(api_key: str, code: str, ym: str) -> pd.DataFrame:
     return df
 
 
+def _diagnose(api_key: str):
+    """전월세 API가 이 키로 호출 가능한지 첫 요청으로 확인해 로그에 남긴다.
+    data.go.kr에서 '아파트 전월세' API를 활용신청하지 않았으면, 매매 키로도
+    호출이 거부되는데(HTTP 200 + XML 에러 본문) 조용히 0건으로 넘어가기 쉽다.
+    그 경우를 명확히 드러내기 위함."""
+    code = next(iter(config.DISTRICTS.values()))
+    url = (f"{RENT_API_URL}?serviceKey={api_key}&LAWD_CD={code}"
+           f"&DEAL_YMD={config.END_YEAR_MONTH}&pageNo=1&numOfRows=1")
+    try:
+        txt = requests.get(url, timeout=30).text
+    except Exception as e:
+        log.warning(f"[진단] 전월세 API 연결 실패: {e}")
+        return
+    head = txt[:400].replace("\n", " ")
+    log.info(f"[진단] 전월세 API 응답 head: {head}")
+    low = txt.upper()
+    if "NOT_REGISTERED" in low or "SERVICE_KEY" in low and "ERROR" in low:
+        log.error("[진단] ⚠️ 이 인증키로 '아파트 전월세' API가 활용신청되어 있지 않은 것 같습니다.\n"
+                  "        data.go.kr → '국토교통부_아파트 전월세 실거래가' 검색 → 활용신청 후 재실행하세요.\n"
+                  "        (매매와 별개 API라 매매 키만으로는 호출이 거부됩니다.)")
+    elif "<item>" in txt or "totalCount" in txt:
+        log.info("[진단] ✅ 전월세 API 정상 호출 가능 — 수집을 시작합니다.")
+
+
 def main():
     api_key = os.getenv("MOLIT_API_KEY")
     if not api_key:
         raise EnvironmentError("MOLIT_API_KEY 환경변수가 없습니다 (매매 수집과 동일 키).")
+
+    _diagnose(api_key)
 
     months = _month_range(config.START_YEAR_MONTH, config.END_YEAR_MONTH)
     tasks = [(name, code, ym) for name, code in config.DISTRICTS.items() for ym in months]
