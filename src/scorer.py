@@ -82,7 +82,7 @@ def _pct_rank(s: pd.Series, low_is_good: bool = False) -> pd.Series:
 
 def _price_defense(mdd_df: pd.DataFrame, monthly: pd.DataFrame) -> pd.DataFrame:
     """
-    MDD(60%) + 회복률(40%).
+    MDD(50%) + 회복률(30%) + 가격 안정성(20%, 연율화 변동성 낮을수록 좋음).
     회복률 = (최신가 - trough) / (peak - trough)
     1.0 초과(신고가 갱신)는 1.2까지 인정해 완전회복 단지에 가점.
 
@@ -107,10 +107,23 @@ def _price_defense(mdd_df: pd.DataFrame, monthly: pd.DataFrame) -> pd.DataFrame:
         0.5,
     )
 
+    # 가격 안정성(연율화 변동성): 월간 수익률 std × √12.
+    # MDD는 "최악의 한 번"만 보지만, 변동성은 "평소에 얼마나 출렁이는가"를 잡는다 —
+    # 같은 MDD라도 평소 변동이 작은 단지가 실거주자에게 심리적·재무적으로 안전하다.
+    vol_rows = []
+    for (d, a), grp in monthly.sort_values("deal_date").groupby(["district_name", "apt_name"], observed=True):
+        ret = grp["smoothed_price"].pct_change().dropna()
+        vol = float(ret.std() * np.sqrt(12)) if len(ret) >= 5 else np.nan
+        vol_rows.append({"district_name": d, "apt_name": a, "price_vol_annual": vol})
+    df = df.merge(pd.DataFrame(vol_rows), on=["district_name", "apt_name"], how="left")
+
     df["score_mdd"]      = _pct_rank(df["mdd_pct"], low_is_good=False)  # mdd_pct는 음수, 0에 가까울수록(클수록) 우수
     df["score_recovery"] = _pct_rank(df["recovery_rate"])
+    # 변동성 결측(관측 부족)은 중립 50 — 다른 단지와의 비교에서 불이익 없도록
+    df["score_vol"]      = _pct_rank(df["price_vol_annual"], low_is_good=True).fillna(50.0)
 
-    df["defense_score"] = df["score_mdd"] * 0.6 + df["score_recovery"] * 0.4
+    # MDD 50% + 회복률 30% + 가격 안정성 20%
+    df["defense_score"] = df["score_mdd"] * 0.5 + df["score_recovery"] * 0.3 + df["score_vol"] * 0.2
 
     # 하락장 미경험 단지의 "가짜 0% MDD"만 중립(50) 처리한다.
     # 단, 실제로 유의미한 하락(예: -5% 초과)을 데이터에서 보인 단지는 그 하락이
@@ -123,7 +136,7 @@ def _price_defense(mdd_df: pd.DataFrame, monthly: pd.DataFrame) -> pd.DataFrame:
         if n_neutral:
             log.info(f"방어력 중립 처리(하락장 미경험 + MDD 평탄): {n_neutral}개 단지")
 
-    return df[["district_name", "apt_name", "defense_score", "mdd_pct", "recovery_rate"]]
+    return df[["district_name", "apt_name", "defense_score", "mdd_pct", "recovery_rate", "price_vol_annual"]]
 
 
 # ── ② 거래 유동성 ─────────────────────────────────────────────
@@ -259,24 +272,43 @@ def _upside_participation(mdd_df: pd.DataFrame, monthly: pd.DataFrame) -> pd.Dat
 
 # ── ④ 회복 모멘텀 ─────────────────────────────────────────────
 
+def _theil_sen_slope(x: np.ndarray, y: np.ndarray) -> float:
+    """Theil-Sen 기울기: 모든 점 쌍의 기울기 중앙값.
+    OLS(polyfit)는 관측이 적을 때 이상거래 한 달에 기울기가 통째로 끌려가지만,
+    중앙값 기반이라 최대 29%의 이상치까지 견딘다(모멘텀의 강건성 확보)."""
+    slopes = []
+    n = len(x)
+    for i in range(n):
+        for j in range(i + 1, n):
+            if x[j] != x[i]:
+                slopes.append((y[j] - y[i]) / (x[j] - x[i]))
+    return float(np.median(slopes)) if slopes else 0.0
+
+
 def _recovery_momentum(monthly: pd.DataFrame) -> pd.DataFrame:
     """
-    최근 12개월(데이터 마지막 시점 기준) 스무딩 가격의 선형 추세.
+    최근 12개월(데이터 마지막 시점 기준) 스무딩 가격의 추세.
     연율화 기울기(%/년) = slope × 12 / 평균가 × 100.
     하락 후 다시 오르는 단지와 바닥에 머무는 단지를 구분.
+
+    강건화: ① 관측 6개월 미만이면 계산하지 않고 중립(중앙값) 처리 —
+    점 3~5개로 뽑은 기울기는 노이즈가 심해 오히려 오판을 부른다.
+    ② OLS 대신 Theil-Sen(쌍별 기울기의 중앙값)을 사용해 이상거래 한 달이
+    추세 전체를 왜곡하지 못하게 한다.
     """
     end = monthly["deal_date"].max()
     start = end - 11
+    MIN_OBS = 6
 
     rows = []
     for (district_name, apt_name), grp in monthly.groupby(["district_name", "apt_name"], observed=True):
         w = grp[(grp["deal_date"] >= start)].sort_values("deal_date")
-        if len(w) < 3:
+        if len(w) < MIN_OBS:
             rows.append({"district_name": district_name, "apt_name": apt_name, "momentum_pct": np.nan})
             continue
         x = (w["deal_date"] - start).apply(lambda p: p.n).to_numpy(dtype=float)
         y = w["smoothed_price"].to_numpy(dtype=float)
-        slope = np.polyfit(x, y, 1)[0]           # 원/월
+        slope = _theil_sen_slope(x, y)           # 원/월
         mean_price = y.mean()
         momentum_pct = slope * 12 / mean_price * 100 if mean_price > 0 else 0
         rows.append({"district_name": district_name, "apt_name": apt_name, "momentum_pct": round(momentum_pct, 2)})
@@ -284,6 +316,9 @@ def _recovery_momentum(monthly: pd.DataFrame) -> pd.DataFrame:
     mo = pd.DataFrame(rows)
     if mo.empty:
         return mo
+    n_neutral = int(mo["momentum_pct"].isna().sum())
+    if n_neutral:
+        log.info(f"모멘텀 중립 처리(최근 12개월 관측 {MIN_OBS}개월 미만): {n_neutral}개 단지")
     # 데이터 부족 단지는 중립(중앙값)으로
     mo["momentum_pct"] = mo["momentum_pct"].fillna(mo["momentum_pct"].median())
     mo["momentum_score"] = _pct_rank(mo["momentum_pct"])

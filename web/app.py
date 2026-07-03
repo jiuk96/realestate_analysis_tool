@@ -63,6 +63,15 @@ def api_composite_score():
     return jsonify(_load("composite_score.json"))
 
 
+@app.route("/api/backtest")
+def api_backtest():
+    """점수 백테스트 결과 (backtest_scores.py 산출). 없으면 빈 dict."""
+    try:
+        return jsonify(_load("backtest.json"))
+    except FileNotFoundError:
+        return jsonify({})
+
+
 @app.route("/api/trades")
 def api_trades():
     """단지별 최근 실거래 내역: /api/trades?district=성동구&apt=행당한진타운"""

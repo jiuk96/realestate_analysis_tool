@@ -236,7 +236,7 @@ function renderScoring() {
   const axes = [
     { key: '가격방어력', weight: 25, color: '#34d399',
       desc: '전체 수집 기간 중 겪었던 가장 큰 하락(MDD)이 얼마나 작았는지와, 그 저점 이후 얼마나 회복했는지를 함께 봅니다. 신고가를 갱신한 단지는 가점을 받습니다. 단, 2022~23년 하락장을 데이터로 겪지 않은 신축 등은 "MDD 0%"가 방어력 근거가 될 수 없어 중립(50점) 처리합니다.',
-      metric: 'MDD(60%) + 회복률(40%) · 하락장 미경험 단지는 중립', example: 'MDD -12% & 전고점 회복 → 최상위 방어력' },
+      metric: 'MDD(50%) + 회복률(30%) + 가격 안정성(20%) · 하락장 미경험 단지는 중립', example: 'MDD -12% & 전고점 회복 & 변동 작음 → 최상위 방어력' },
     { key: '전세가율', weight: 10, color: '#4ade80',
       desc: '전세가가 매매가에 얼마나 가까운지(전세가율 = 전세÷매매)를 봅니다. 전세가율이 높으면 실거주 수요가 매매가를 아래에서 떠받쳐, 시세가 급락할 때 "이 아래로는 잘 안 떨어지는" 지지선 역할을 합니다. 전용 59㎡ 순수 전세 실거래로 계산하며, 전월세 데이터가 수집된 단지에만 적용됩니다.',
       metric: '전세 중앙값 ÷ 매매 중앙값 (최근 18개월, 전용 59㎡)', example: '전세가율 80% → 강한 하방 지지력' },
@@ -247,8 +247,8 @@ function renderScoring() {
       desc: '2021년 상승장에서 얼마나 올랐는지를 측정합니다. 하락에 강하면서 상승에도 참여해야 진정한 우량 단지입니다.',
       metric: '(고점가 − 2020년 기저가) / 기저가', example: '기저 대비 +50% 상승 → 높은 참여도' },
     { key: '회복모멘텀', weight: 15, color: '#a78bfa',
-      desc: '최근 12개월 가격 추세를 측정합니다. 하락 후 다시 오르는 단지와 바닥에 머무는 단지를 구분하는 핵심 지표입니다.',
-      metric: '최근 12개월 가격 추세 (연율화 %)', example: '최근 1년간 연 +8% 추세 → 강한 모멘텀' },
+      desc: '최근 12개월 가격 추세를 측정합니다. 하락 후 다시 오르는 단지와 바닥에 머무는 단지를 구분합니다. 이상거래 한 달에 흔들리지 않도록 중앙값 기반(Theil-Sen) 추세를 쓰고, 관측이 6개월 미만이면 판단을 보류(중립)합니다.',
+      metric: '최근 12개월 Theil-Sen 추세 (연율화 %) · 6개월 미만 관측은 중립', example: '최근 1년간 연 +8% 추세 → 강한 모멘텀' },
     { key: '입지프리미엄', weight: 15, color: '#fb923c',
       desc: '단위면적(m²)당 가격 수준입니다. 교통·학군·인프라 가치는 이미 시장가격에 반영되어 있어, 평단가가 가장 객관적인 입지 지표입니다.',
       metric: 'm²당 고점 거래가 percentile', example: '평단가 상위 10% → 시장이 인정한 입지' },
@@ -315,6 +315,44 @@ function renderScoring() {
   }).catch(() => {
     document.getElementById('filterSummary').innerHTML = `<p class="filter-note">데이터 로딩 중...</p>`;
   });
+
+  renderBacktest();
+}
+
+/* ── 점수 백테스트: "이 점수, 실제로 맞았나?" ─────────────────
+   2022-06까지의 데이터만으로 점수를 매긴 뒤, 이후 실제 하락장(22.7~23.12)과
+   회복(최신가)을 얼마나 맞췄는지 공개한다. 잘 맞은 것과 못 맞은 것을 함께
+   보여주는 것이 이 도구의 신뢰 원칙이다. */
+async function renderBacktest() {
+  const box = document.getElementById('backtestBox');
+  if (!box) return;
+  let bt;
+  try { bt = await fetchJSON('/api/backtest'); } catch (e) { return; }
+  if (!bt || !bt.quintiles) { box.innerHTML = ''; return; }
+
+  const h = bt.headline;
+  const rows = bt.quintiles.map(q => {
+    const w = Math.min(100, Math.abs(q.avg_realized_dd) * 3.2);
+    return `
+      <div class="bt-row">
+        <span class="bt-q">${q.label}</span>
+        <div class="bt-bar"><div class="bt-fill" style="width:${w}%"></div></div>
+        <span class="bt-dd">${q.avg_realized_dd.toFixed(1)}%</span>
+        <span class="bt-ret">${q.avg_total_ret >= 0 ? '+' : ''}${q.avg_total_ret.toFixed(1)}%</span>
+      </div>`;
+  }).join('');
+
+  box.innerHTML = `
+    <div class="backtest-box">
+      <div class="bt-title">🔬 이 점수, 실제로 맞았나요? <span class="bt-sub">${bt.train_cutoff}까지의 데이터로 점수를 매기고, 이후 실제 하락장과 비교한 백테스트</span></div>
+      <div class="bt-head-row"><span></span><span></span><span class="bt-col-label">하락장 실현낙폭</span><span class="bt-col-label">현재까지 총수익</span></div>
+      ${rows}
+      <div class="bt-notes">
+        <p>✅ <b>전체 사이클로 보면</b> 점수 상위 20% 단지의 평균 총수익(${h.top20_ret >= 0 ? '+' : ''}${h.top20_ret}%)이 하위 20%(${h.bottom20_ret >= 0 ? '+' : ''}${h.bottom20_ret}%)보다 높았습니다.</p>
+        <p>⚠️ <b>정직한 한계</b>: 하락장 직전엔 점수 상위 단지가 오히려 더 크게 조정받았습니다(당시 점수엔 직전 상승세가 반영돼 있었기 때문). 특히 <b>직전에 가장 많이 오른 단지일수록 이후 전체 수익이 나빴습니다</b>(상관 ${bt.axis_corr?.upside?.vs_ret ?? '—'}) — 급등 단지 추격 매수를 경계해야 하는 이유입니다.</p>
+        <p>💡 현재 점수의 방어력 축은 하락장을 <b>실제로 통과한 뒤의</b> 데이터로 계산되므로, 백테스트 시점(하락장 이전)의 점수보다 정보량이 많습니다.</p>
+      </div>
+    </div>`;
 }
 
 /* ── ③ 동네별 우수 아파트 ─────────────────────────────────── */
@@ -420,11 +458,15 @@ function buildAxisReasons(apt) {
       // "전고점을 넘어섰다"는 표현이 더 자연스럽다.
       const recPhrase = recPct >= 100 ? '저점 대비 이미 전고점을 넘어섰고' : `저점 대비 ${recPct}% 회복했고`;
       const recPhraseMid = recPct >= 100 ? '저점 대비 전고점을 회복한 상태' : `저점 대비 회복률 ${recPct}%`;
-      reasons['가격방어력'] = apt.defense_score >= 70
+      // 가격 안정성(연 변동성)이 있으면 함께 언급 — 낮을수록 평소 가격이 안정적
+      const volPhrase = apt.price_vol_annual != null
+        ? ` 연 변동성은 ${(apt.price_vol_annual * 100).toFixed(1)}%${apt.price_vol_annual < 0.10 ? '로 안정적' : apt.price_vol_annual > 0.18 ? '로 출렁임이 큰 편' : ''}입니다.`
+        : '';
+      reasons['가격방어력'] = (apt.defense_score >= 70
         ? `역대 최대 낙폭(MDD) ${mdd.toFixed(1)}%로 하락폭이 작았고, ${recPhrase} 방어력이 우수합니다.`
         : apt.defense_score >= 45
           ? `역대 최대 낙폭 ${mdd.toFixed(1)}%, ${recPhraseMid}로 준수한 방어력입니다.`
-          : `역대 최대 낙폭이 ${mdd.toFixed(1)}%로 컸고 회복률도 ${recPct}%에 그쳐 방어력이 약한 편입니다.`;
+          : `역대 최대 낙폭이 ${mdd.toFixed(1)}%로 컸고 회복률도 ${recPct}%에 그쳐 방어력이 약한 편입니다.`) + volPhrase;
     }
   }
 

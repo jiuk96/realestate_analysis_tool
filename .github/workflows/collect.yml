@@ -58,6 +58,10 @@ jobs:
       - name: 분석 파이프라인 재실행 (2차 — 교통 축 반영)
         run: python build_data.py
 
+      - name: 점수 백테스트 (하락장 예측력 검증)
+        run: |
+          python backtest_scores.py || echo "백테스트 실패 — 기존 backtest.json 유지"
+
       - name: 커밋 서명 설정 (SSH, best-effort)
         env:
           SSH_SIGNING_KEY: ${{ secrets.SSH_SIGNING_KEY }}

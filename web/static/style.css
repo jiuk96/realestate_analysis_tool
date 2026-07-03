@@ -395,6 +395,32 @@ body {
 
 /* 필터 요약 */
 .filter-summary { margin-top: 1.5rem; }
+
+/* ── 점수 백테스트 박스 ─────────────────────────────────── */
+.backtest-box {
+  margin-top: 1.5rem; background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 1.3rem 1.4rem; box-shadow: var(--shadow-sm);
+}
+.bt-title { font-weight: 800; color: #f1f5f9; margin-bottom: 1rem; }
+.bt-sub { display: block; font-weight: 500; font-size: .78rem; color: var(--text2); margin-top: .25rem; }
+.bt-head-row, .bt-row {
+  display: grid; grid-template-columns: 110px 1fr 90px 90px;
+  gap: .8rem; align-items: center;
+}
+.bt-head-row { margin-bottom: .3rem; }
+.bt-col-label { font-size: .7rem; color: var(--text3); text-align: right; }
+.bt-row { padding: .3rem 0; font-variant-numeric: tabular-nums; }
+.bt-q { font-size: .8rem; color: var(--text2); }
+.bt-bar { background: var(--bg3); border-radius: 99px; height: 8px; overflow: hidden; }
+.bt-fill { height: 100%; background: linear-gradient(90deg, #f87171, #fbbf24); border-radius: 99px; }
+.bt-dd { font-size: .82rem; color: #f87171; text-align: right; font-weight: 600; }
+.bt-ret { font-size: .82rem; color: #34d399; text-align: right; font-weight: 600; }
+.bt-notes { margin-top: 1rem; padding-top: .9rem; border-top: 1px solid var(--border); }
+.bt-notes p { font-size: .82rem; color: var(--text2); line-height: 1.65; margin-bottom: .5rem; }
+.bt-notes b { color: var(--text); }
+@media (max-width: 600px) {
+  .bt-head-row, .bt-row { grid-template-columns: 90px 1fr 70px 70px; gap: .5rem; }
+}
 .filter-sum-grid {
   display: flex;
   align-items: center;
