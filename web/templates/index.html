@@ -126,8 +126,6 @@
       <div class="budget-card person-card person-a">
         <div class="budget-card-title">💼 나</div>
         <div class="budget-field"><label>현금</label><div class="bf-input"><input type="number" id="aCash" value="2.0" step="0.1" min="0"><span>억</span></div></div>
-        <div class="budget-field"><label>부모 지원 총액 <button class="legal-link" data-legal="family">?</button></label><div class="bf-input"><input type="number" id="aParent" value="3.67" step="0.1" min="0"><span>억</span></div></div>
-        <div id="aParentSplit" class="parent-split"></div>
         <div class="budget-field-row">
           <div class="budget-field"><label>연소득(세전)</label><div class="bf-input"><input type="number" id="aIncome" value="5500" step="500" min="0"><span>만원</span></div></div>
           <div class="budget-field"><label>실수령 월급(세후)</label><div class="bf-input"><input type="number" id="aNetMonthly" value="380" step="10" min="0"><span>만원</span></div></div>
@@ -144,6 +142,8 @@
           <input type="range" class="ls-slider" id="aLoanOverride" min="0" max="0" step="1000000" value="0">
           <div class="ls-out" id="aLoanOut"></div>
         </div>
+        <div class="budget-field"><label>부모 지원 총액 <button class="legal-link" data-legal="family">?</button></label><div class="bf-input"><input type="number" id="aParent" value="3.67" step="0.1" min="0"><span>억</span></div></div>
+        <div id="aParentCompact" class="parent-compact"></div>
         <div id="aSummary" class="person-summary"></div>
       </div>
 
@@ -151,8 +151,6 @@
       <div class="budget-card person-card person-b">
         <div class="budget-card-title">💗 여자친구</div>
         <div class="budget-field"><label>현금</label><div class="bf-input"><input type="number" id="bCash" value="1.5" step="0.1" min="0"><span>억</span></div></div>
-        <div class="budget-field"><label>부모 지원 총액 <button class="legal-link" data-legal="family">?</button></label><div class="bf-input"><input type="number" id="bParent" value="1.5" step="0.1" min="0"><span>억</span></div></div>
-        <div id="bParentSplit" class="parent-split"></div>
         <div class="budget-field-row">
           <div class="budget-field"><label>연소득(세전)</label><div class="bf-input"><input type="number" id="bIncome" value="3500" step="500" min="0"><span>만원</span></div></div>
           <div class="budget-field"><label>실수령 월급(세후)</label><div class="bf-input"><input type="number" id="bNetMonthly" value="250" step="10" min="0"><span>만원</span></div></div>
@@ -169,6 +167,8 @@
           <input type="range" class="ls-slider" id="bLoanOverride" min="0" max="0" step="1000000" value="0">
           <div class="ls-out" id="bLoanOut"></div>
         </div>
+        <div class="budget-field"><label>부모 지원 총액 <button class="legal-link" data-legal="family">?</button></label><div class="bf-input"><input type="number" id="bParent" value="1.5" step="0.1" min="0"><span>억</span></div></div>
+        <div id="bParentCompact" class="parent-compact"></div>
         <div id="bSummary" class="person-summary"></div>
       </div>
     </div>
@@ -203,6 +203,12 @@
     <div class="budget-card" style="margin-top:1rem">
       <div class="budget-card-title">💸 매달 얼마가, 누구에게 나가나요?</div>
       <div id="repayDetail" class="repay-detail"></div>
+    </div>
+
+    <!-- 부모님 지원 상세: 기본공제/혼인공제/무이자차용/과세증여 분해 + 세금 계산식 -->
+    <div class="budget-card" style="margin-top:1rem">
+      <div class="budget-card-title">👪 부모님 지원, 어떻게 나뉘나요?</div>
+      <div id="parentDetail" class="parent-detail"></div>
     </div>
 
     <!-- 자금 구성 차트 + 부대비용 상세 -->

@@ -799,46 +799,36 @@ function recalcBudget() {
   updateLoanOut('a', R.A);
   updateLoanOut('b', R.B);
 
-  // 부모 지원 총액 자동 분해 표시: 기본공제 → 혼인·출산공제 → 무이자 차용 한도 → 그 외 과세 증여
-  // (splitParentSupport가 정한 배분 순서 그대로 보여주고, 그에 따른 세금·원리금 계산 과정을 붙인다)
-  const familyYears = parseInt(document.getElementById('familyYears').value) || 10;
-  const renderParentSplit = (prefix, P) => {
-    const el = document.getElementById(prefix + 'ParentSplit');
+  // 자금 카드에는 간략 요약만: 기본/혼인공제 적용 배지 + 무이자차용 바(2.17억 기준) + 한 줄 결론
+  // 자세한 계산 과정(공제 분해·세율·상환방식)은 아래 renderParentDetail에서 별도로 보여준다.
+  const renderParentCompact = (prefix, P) => {
+    const el = document.getElementById(prefix + 'ParentCompact');
     if (!el) return;
     const S = P.parentSplit;
     if (!S || P.parentTotal <= 0) { el.innerHTML = ''; return; }
 
-    const parts = [];
-    if (S.bonusGift > 0) parts.push(`혼인·출산공제 ${won2eok(S.bonusGift)}`);
-    if (S.basicGift > 0) parts.push(`기본공제(직계존속) ${won2eok(S.basicGift)}`);
-    if (S.familyLoan > 0) parts.push(`무이자 차용 ${won2eok(S.familyLoan)}`);
-    if (S.extraGift > 0) parts.push(`그 외 증여(과세) ${won2eok(S.extraGift)}`);
-    const overMsg = P.familyOverLimit ? ` <span style="color:#f87171">(무이자 한도 ${won2eok(FAMILY_LOAN.MAX_NO_INTEREST)} 초과분은 과세 증여로 처리됨)</span>` : '';
-    const head = `부모 지원 ${won2eok(P.parentTotal)} = ${parts.join(' + ')}${overMsg}`;
+    const basicOn = S.basicGift > 0;
+    const bonusOn = S.bonusGift > 0;
+    const loanPct = Math.min(100, (S.familyLoan / FAMILY_LOAN.MAX_NO_INTEREST) * 100);
+    const conclusion = S.extraGift > 0
+      ? `그 외 증여 ${won2eok(S.extraGift)} → 세금 <b>${won2man(P.giftDetail.tax)}</b>`
+      : `공제 범위 내 → 증여세 <b>0원</b>`;
 
-    let detail = '';
-    const gd = P.giftDetail;
-    if (S.extraGift > 0 && gd) {
-      detail += `
-        <div class="ps-gift-detail">
-          🧾 그 외 증여 ${won2eok(S.extraGift)}는 기본·혼인공제를 이미 다 써서 전액 과세표준입니다.<br>
-          과세표준 ${won2eok(gd.taxable)} × 세율 ${(gd.rate * 100).toFixed(0)}% − 누진공제 ${won2man(gd.bracketDeduct)}
-          = 산출세액 ${won2man(gd.grossTax)} → 신고세액공제 3% 적용 후 증여세 <b>${won2man(gd.tax)}</b>
-        </div>`;
-    } else if (S.totalGift > 0) {
-      detail += `<div class="ps-gift-detail">🧾 공제 범위 내라 증여세는 0원입니다.</div>`;
-    }
-    if (S.familyLoan > 0) {
-      detail += `
-        <div class="ps-gift-detail">
-          👪 무이자 차용 ${won2eok(S.familyLoan)}은 빚이므로 상환해야 합니다 — 원금균등(무이자) ${familyYears}년 분할,
-          월 <b>${won2man(P.familyMonthly)}</b>씩 부모님께 갚습니다. (연 4.6% 적정이자 대비 이자 절감분이 연 1,000만원 미만이라 증여세 없음)
-        </div>`;
-    }
-    el.innerHTML = head + detail;
+    el.innerHTML = `
+      <div class="pc-badges">
+        <span class="pc-badge ${basicOn ? 'on' : 'off'}">${basicOn ? '✔' : '✕'} 기본공제 0.5억</span>
+        <span class="pc-badge ${bonusOn ? 'on' : 'off'}">${bonusOn ? '✔' : '✕'} 혼인·출산공제 1억</span>
+      </div>
+      <div class="pc-loanbar-row">
+        <span class="pc-loanbar-label">무이자 차용</span>
+        <div class="pc-loanbar"><div class="pc-loanbar-fill" style="width:${loanPct}%"></div></div>
+        <span class="pc-loanbar-val">${won2eok(S.familyLoan)} / 2.17억</span>
+      </div>
+      <div class="pc-conclusion">${conclusion}</div>`;
   };
-  renderParentSplit('a', R.A);
-  renderParentSplit('b', R.B);
+  renderParentCompact('a', R.A);
+  renderParentCompact('b', R.B);
+  renderParentDetail(R, document.getElementById('familyYears').value);
 
   // 각자 카드 하단 요약 (각자 가용자금 + 소득 대비 상환 비중)
   const personSummary = (P, label) => {
@@ -885,6 +875,50 @@ function recalcBudget() {
   renderBudgetChart(R);
   renderFundFlow(R);
   renderRepayDetail(R);
+}
+
+// 부모님 지원 상세: 기본공제 → 혼인·출산공제 → 무이자 차용 → 과세 증여 순 분해 +
+// 증여세 계산식 + 무이자 차용 원리금 상환 방식을 사람별로 자세히 보여준다.
+function renderParentDetail(R, familyYears) {
+  const el = document.getElementById('parentDetail');
+  if (!el) return;
+  const years = parseInt(familyYears) || 10;
+
+  const block = (P, label, color) => {
+    const S = P.parentSplit;
+    if (!S || P.parentTotal <= 0) return '';
+    const gd = P.giftDetail;
+
+    const parts = [];
+    if (S.basicGift > 0) parts.push(`기본공제(직계존속→성년자녀·10년합산) ${won2eok(S.basicGift)}`);
+    if (S.bonusGift > 0) parts.push(`혼인·출산공제 ${won2eok(S.bonusGift)}`);
+    if (S.familyLoan > 0) parts.push(`무이자 차용 ${won2eok(S.familyLoan)}`);
+    if (S.extraGift > 0) parts.push(`그 외 증여(과세) ${won2eok(S.extraGift)}`);
+    const overMsg = P.familyOverLimit ? ` <span style="color:#f87171">(무이자 한도 ${won2eok(FAMILY_LOAN.MAX_NO_INTEREST)} 초과분은 과세 증여로 처리됨)</span>` : '';
+
+    const taxLine = S.extraGift > 0
+      ? `과세표준 ${won2eok(gd.taxable)} × 세율 ${(gd.rate * 100).toFixed(0)}% − 누진공제 ${won2man(gd.bracketDeduct)}
+         = 산출세액 ${won2man(gd.grossTax)} → 신고세액공제 3% 적용 후 증여세 <b>${won2man(gd.tax)}</b>`
+      : `과세표준 0원 → 증여세 없음`;
+
+    const loanLine = S.familyLoan > 0
+      ? `무이자 차용 ${won2eok(S.familyLoan)}은 빚이므로 상환해야 합니다 — 원금균등(무이자) ${years}년 분할,
+         월 <b>${won2man(P.familyMonthly)}</b>씩 부모님께 갚습니다.
+         (연 4.6% 적정이자 대비 이자 절감분이 연 1,000만원 미만이라 증여세 없음)`
+      : '';
+
+    return `
+      <div class="pd-person">
+        <div class="pd-head"><span class="pd-name" style="color:${color}">${label}</span>
+          <span class="pd-total">부모 지원 ${won2eok(P.parentTotal)}</span></div>
+        <div class="pd-parts">${parts.join(' + ')}${overMsg}</div>
+        <div class="pd-line">🧾 ${taxLine}</div>
+        ${loanLine ? `<div class="pd-line">👪 ${loanLine}</div>` : ''}
+      </div>`;
+  };
+
+  const html = block(R.A, '💼 나', '#38bdf8') + block(R.B, '💗 여자친구', '#f472b6');
+  el.innerHTML = html || `<div class="empty-state" style="padding:1.2rem">부모 지원 총액을 입력하면 여기에 자세한 계산 과정이 표시됩니다.</div>`;
 }
 
 // 월 상환 상세: 누구에게 얼마가 나가고, 각자 월급 대비 몇 %인지
