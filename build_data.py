@@ -184,9 +184,15 @@ save('composite_score.json', {'ranking': score_df.to_dict('records'), 'weights':
 # 서로 다른 단지의 시계열이 하나로 합쳐지지 않는다.
 apt_list = []
 for (district_name, apt_name), grp in monthly.groupby(['district_name', 'apt_name']):
-    records = grp.sort_values('deal_date')[['deal_date', 'smoothed_price']].rename(columns={'deal_date': 'ym', 'smoothed_price': 'median'}).to_dict('records')
+    g = grp.sort_values('deal_date')
+    # median=스무딩 가격(라인용), raw=해당 월 실제 중앙 거래가, vol=월 거래 건수(거래량 바용)
+    records = g[['deal_date', 'smoothed_price', 'median_price', 'trade_count']].rename(
+        columns={'deal_date': 'ym', 'smoothed_price': 'median', 'median_price': 'raw', 'trade_count': 'vol'}
+    ).to_dict('records')
     for r in records:
         r['ym'] = str(r['ym'])
+        r['vol'] = int(r['vol']) if r['vol'] == r['vol'] else 0
+        r['raw'] = round(float(r['raw'])) if r['raw'] == r['raw'] else None
     apt_list.append({'district': district_name, 'apt_name': apt_name, 'monthly': records})
 save('timeseries.json', {'apartments': apt_list})
 

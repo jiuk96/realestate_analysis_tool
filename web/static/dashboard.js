@@ -569,7 +569,13 @@ function renderApartmentDetail(containerId, radarId, priceChartId, apt, mddInfo,
       <ul class="insight-list">${buildApartmentInsights(apt, comp, extraInsight)}</ul>
     </div>
 
-    <div id="${priceChartId}" class="top1-price-chart" style="height:260px"></div>
+    <div class="top1-chart-legend">
+      <span><span class="tcl-dot" style="background:#38bdf8"></span>가격(억)</span>
+      <span><span class="tcl-dot" style="background:#fbbf24"></span>⭐ 최고 거래가</span>
+      <span><span class="tcl-dot" style="background:#f87171"></span>▽ 저점</span>
+      <span><span class="tcl-bar tcl-up"></span><span class="tcl-bar tcl-down"></span>월 거래량(상승/하락)</span>
+    </div>
+    <div id="${priceChartId}" class="top1-price-chart" style="height:320px"></div>
   `;
 
   // 레이더 차트 렌더링
@@ -597,9 +603,9 @@ function renderApartmentDetail(containerId, radarId, priceChartId, apt, mddInfo,
     showlegend: false
   }, { responsive: true, displayModeBar: false });
 
-  // 가격 추이 차트 (있는 경우)
+  // 가격 추이 차트 (있는 경우) — 주식 차트 스타일(가격 라인 + 최고가/저점 마커 + 거래량 바)
   if (aptTs && aptTs.monthly) {
-    renderPriceChart(priceChartId, aptTs);
+    renderPriceChart(priceChartId, aptTs, mddInfo);
   }
 }
 
@@ -625,30 +631,83 @@ async function renderTop1() {
   });
 }
 
-function renderPriceChart(chartId, aptTs) {
-  const months = aptTs.monthly.map(m => m.ym);
-  const prices = aptTs.monthly.map(m => m.median != null ? +(m.median/10000).toFixed(2) : null);
+// 주식 차트 스타일: 상단 가격 라인(+최고가⭐·저점▽ 마커) / 하단 거래량 바(상승월 초록·하락월 빨강)
+function renderPriceChart(chartId, aptTs, mddInfo = {}) {
+  const rows = aptTs.monthly;
+  const months = rows.map(m => m.ym);                                  // 'YYYY-MM'
+  const prices = rows.map(m => m.median != null ? +(m.median/10000).toFixed(2) : null);
+  const vols   = rows.map(m => m.vol != null ? m.vol : 0);
 
-  Plotly.newPlot(chartId, [{
-    x: months, y: prices,
-    type: 'scatter', mode: 'lines+markers',
-    line: { color: '#38bdf8', width: 2 },
-    marker: { color: '#38bdf8', size: 4 },
-    name: '월별 중앙값(억)',
-    connectgaps: false
-  }], {
-    xaxis: { color: '#94a3b8', gridcolor: '#1e293b' },
-    yaxis: { color: '#94a3b8', gridcolor: '#1e293b', ticksuffix: '억' },
+  // 거래량 바 색: 전월 대비 가격이 오른 달=초록, 내린 달=빨강, 판단불가=회색
+  const volColors = prices.map((p, i) => {
+    const prev = i > 0 ? prices[i-1] : null;
+    if (p == null || prev == null) return 'rgba(100,116,139,.55)';
+    return p >= prev ? 'rgba(52,211,153,.6)' : 'rgba(248,113,113,.6)';
+  });
+
+  const traces = [
+    // ① 가격 라인 (상단 subplot)
+    {
+      x: months, y: prices, type: 'scatter', mode: 'lines',
+      line: { color: '#38bdf8', width: 2.2, shape: 'spline', smoothing: 0.6 },
+      name: '가격(억)', yaxis: 'y', connectgaps: false,
+      hovertemplate: '%{x}<br>%{y}억<extra></extra>',
+    },
+    // ② 거래량 바 (하단 subplot)
+    {
+      x: months, y: vols, type: 'bar',
+      marker: { color: volColors },
+      name: '거래량(건)', yaxis: 'y2',
+      hovertemplate: '%{x}<br>거래 %{y}건<extra></extra>',
+    },
+  ];
+
+  // ③ 최고가·저점 마커 (mddInfo 기준)
+  const markX = [], markY = [], markText = [], markPos = [], markSym = [], markColor = [], markSize = [];
+  if (mddInfo.peak_date && mddInfo.peak_price != null && months.includes(mddInfo.peak_date)) {
+    markX.push(mddInfo.peak_date); markY.push(+(mddInfo.peak_price/10000).toFixed(2));
+    markText.push(`최고 ${(mddInfo.peak_price/10000).toFixed(1)}억`); markPos.push('top center');
+    markSym.push('star'); markColor.push('#fbbf24'); markSize.push(14);
+  }
+  if (mddInfo.trough_date && mddInfo.trough_price != null && months.includes(mddInfo.trough_date)
+      && mddInfo.trough_date !== mddInfo.peak_date) {
+    markX.push(mddInfo.trough_date); markY.push(+(mddInfo.trough_price/10000).toFixed(2));
+    markText.push(`저점 ${(mddInfo.trough_price/10000).toFixed(1)}억`); markPos.push('bottom center');
+    markSym.push('triangle-down'); markColor.push('#f87171'); markSize.push(12);
+  }
+  if (markX.length) {
+    traces.push({
+      x: markX, y: markY, type: 'scatter', mode: 'markers+text',
+      marker: { symbol: markSym, size: markSize, color: markColor,
+                line: { color: '#0f172a', width: 1.5 } },
+      text: markText, textposition: markPos,
+      textfont: { size: 11, color: '#e2e8f0' },
+      yaxis: 'y', hoverinfo: 'skip', showlegend: false,
+    });
+  }
+
+  Plotly.newPlot(chartId, traces, {
+    // 상단 70% = 가격, 하단 18% = 거래량 (주식창 레이아웃)
+    xaxis: { color: '#94a3b8', gridcolor: 'rgba(148,163,184,.08)', anchor: 'y2',
+             showspikes: true, spikecolor: '#475569', spikethickness: 1, spikemode: 'across' },
+    yaxis: { domain: [0.30, 1], color: '#94a3b8', gridcolor: 'rgba(148,163,184,.08)',
+             ticksuffix: '억', fixedrange: true },
+    yaxis2: { domain: [0, 0.18], color: '#64748b', gridcolor: 'rgba(148,163,184,.05)',
+              title: { text: '거래량', font: { size: 10, color: '#64748b' } },
+              fixedrange: true, rangemode: 'tozero' },
     paper_bgcolor: 'transparent',
     plot_bgcolor: '#0f172a',
     font: { color: '#e2e8f0' },
-    margin: { t: 20, b: 50, l: 60, r: 20 },
+    margin: { t: 24, b: 40, l: 52, r: 16 },
     showlegend: false,
+    bargap: 0.35,
+    hovermode: 'x unified',
     shapes: [
-      { type: 'rect', xref: 'x', yref: 'paper', x0: '202101', x1: '202112', y0: 0, y1: 1,
-        fillcolor: 'rgba(251,191,36,0.08)', line: { width: 0 } },
-      { type: 'rect', xref: 'x', yref: 'paper', x0: '202207', x1: '202306', y0: 0, y1: 1,
-        fillcolor: 'rgba(248,113,113,0.08)', line: { width: 0 } },
+      // 2021 상승장 / 2022~23 하락장 배경 (가격 subplot 영역에만)
+      { type: 'rect', xref: 'x', yref: 'paper', x0: '2021-01', x1: '2021-12', y0: 0.30, y1: 1,
+        fillcolor: 'rgba(251,191,36,0.06)', line: { width: 0 }, layer: 'below' },
+      { type: 'rect', xref: 'x', yref: 'paper', x0: '2022-07', x1: '2023-06', y0: 0.30, y1: 1,
+        fillcolor: 'rgba(248,113,113,0.06)', line: { width: 0 }, layer: 'below' },
     ]
   }, { responsive: true, displayModeBar: false });
 }

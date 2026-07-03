@@ -545,8 +545,18 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--r);
   padding: 1rem;
-  margin-top: 1.5rem;
+  margin-top: .6rem;
 }
+.top1-chart-legend {
+  display: flex; flex-wrap: wrap; gap: .5rem 1.1rem;
+  margin-top: 1.5rem; padding: 0 .2rem;
+  font-size: .76rem; color: var(--text2);
+}
+.top1-chart-legend > span { display: inline-flex; align-items: center; gap: .35rem; }
+.tcl-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.tcl-bar { width: 5px; height: 11px; border-radius: 1px; display: inline-block; }
+.tcl-bar.tcl-up { background: rgba(52,211,153,.7); }
+.tcl-bar.tcl-down { background: rgba(248,113,113,.7); margin-left: -2px; }
 
 /* ── 빈 상태 ─────────────────────────────────────────────── */
 .empty-state {
