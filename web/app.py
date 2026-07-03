@@ -76,19 +76,22 @@ def api_trades():
 @app.route("/api/apartments")
 def api_apartments():
     """지도 탐색기용: 단지별 좌표 + 가격 + 점수 통합"""
+    # ⚠️ "현대"·"삼성"처럼 여러 구에 겹치는 단지명이 있어 (구, 단지명) 복합키로
+    # 조회해야 한다. apt_name만으로 키를 만들면 동명이인 단지끼리 덮어써진다.
     comp = _load("composite_score.json")
-    mdd  = {r["apt_name"]: r for r in _load("mdd_ranking.json")["ranking"]}
-    ts   = {a["apt_name"]: a["monthly"] for a in _load("timeseries.json")["apartments"]}
+    mdd  = {(r["district"], r["apt_name"]): r for r in _load("mdd_ranking.json")["ranking"]}
+    ts   = {(a["district"], a["apt_name"]): a["monthly"] for a in _load("timeseries.json")["apartments"]}
 
     loc_path = DATA_DIR.parent / "static" / "apt_locations.json"
     locs = json.loads(loc_path.read_text(encoding="utf-8")) if loc_path.exists() else {}
 
     out = []
     for r in comp["ranking"]:
+        key = (r["district"], r["apt_name"])
         loc = locs.get(f"{r['district']}|{r['apt_name']}", {})
-        monthly = ts.get(r["apt_name"], [])
+        monthly = ts.get(key, [])
         latest = monthly[-1]["median"] if monthly else None
-        m = mdd.get(r["apt_name"], {})
+        m = mdd.get(key, {})
         out.append({
             "apt_name": r["apt_name"],
             "district": r["district"],

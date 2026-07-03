@@ -35,23 +35,25 @@ def build_monthly_median(df: pd.DataFrame) -> pd.DataFrame:
     ].copy()
 
     # 59㎡대 안에서 단지별 최다 거래 면적을 대표 타입으로 선정
+    # ⚠️ "현대"·"삼성"처럼 여러 구에 겹치는 단지명이 많아 district_name을
+    # 반드시 함께 키로 써야 한다(안 그러면 서로 다른 단지의 거래가 섞인다).
+    key = ["district_name", "apt_name"]
     dominant_area = (
-        df.groupby(["apt_name", "area_exclusive"], observed=True)
+        df.groupby(key + ["area_exclusive"], observed=True)
         .size()
         .reset_index(name="cnt")
         .sort_values("cnt", ascending=False)
-        .drop_duplicates("apt_name")
-        [["apt_name", "area_exclusive"]]
+        .drop_duplicates(key)
+        [key + ["area_exclusive"]]
     )
 
-    df = df.merge(dominant_area, on=["apt_name", "area_exclusive"], how="inner")
+    df = df.merge(dominant_area, on=key + ["area_exclusive"], how="inner")
 
     monthly = (
-        df.groupby(["apt_name", "deal_date"], observed=True)
+        df.groupby(key + ["deal_date"], observed=True)
         .agg(
             median_price   = ("deal_amount", "median"),
             trade_count    = ("deal_amount", "count"),
-            district_name  = ("district_name", "first"),
             build_year     = ("build_year", "first"),
             area_exclusive = ("area_exclusive", "first"),
         )
@@ -64,12 +66,12 @@ def build_monthly_median(df: pd.DataFrame) -> pd.DataFrame:
     # 주변 기간 대비 비정상적으로 낮은 달(다운계약·지분거래·동명이인 단지 혼입 등
     # 의심) 제거 — 3개월 스무딩만으로는 이상거래가 2~3개월 연속으로 몰리면
     # 못 걸러지므로, 그 전에 넓은 이웃 구간 기준으로 먼저 걸러낸다.
-    monthly = monthly.sort_values(["apt_name", "deal_date"])
+    monthly = monthly.sort_values(key + ["deal_date"])
     monthly = _filter_price_outlier_months(monthly)
 
     # 3개월 이동 중앙값으로 스무딩 (단기 스파이크 완화)
     monthly["smoothed_price"] = (
-        monthly.groupby("apt_name", observed=True)["median_price"]
+        monthly.groupby(key, observed=True)["median_price"]
         .transform(lambda s: s.rolling(3, min_periods=1, center=True).median())
     )
 
@@ -97,7 +99,7 @@ def _filter_price_outlier_months(monthly: pd.DataFrame) -> pd.DataFrame:
         return (s < baseline * OUTLIER_DROP_RATIO) & baseline.notna()
 
     is_outlier = (
-        monthly.groupby("apt_name", observed=True)["median_price"]
+        monthly.groupby(["district_name", "apt_name"], observed=True)["median_price"]
         .transform(_flag)
     )
     removed = int(is_outlier.sum())
@@ -193,7 +195,9 @@ def detect_peak_trough(monthly: pd.DataFrame) -> pd.DataFrame:
     """
     results = []
 
-    for apt_name, grp in monthly.groupby("apt_name", observed=True):
+    # ⚠️ apt_name만으로 묶으면 "현대"·"삼성"처럼 여러 구에 겹치는 단지명이
+    # 서로 다른 단지인데도 하나로 합쳐진다. district_name까지 함께 묶어야 한다.
+    for (district_name, apt_name), grp in monthly.groupby(["district_name", "apt_name"], observed=True):
         grp = grp.sort_values("deal_date").reset_index(drop=True)
         if grp.empty:
             continue
@@ -222,7 +226,7 @@ def detect_peak_trough(monthly: pd.DataFrame) -> pd.DataFrame:
             "trough_date":   trough_row["deal_date"],
             "trough_price":  round(trough_price),
             "mdd_pct":       round(mdd_pct, 2),
-            "district_name": peak_row["district_name"],
+            "district_name": district_name,
             "build_year":    peak_row["build_year"],
             "area_exclusive": round(float(peak_row["area_exclusive"]), 1),  # float32 꼬리자리 제거
         })

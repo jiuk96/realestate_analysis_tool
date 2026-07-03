@@ -32,11 +32,15 @@ def _penalty_direct_deal(df: pd.DataFrame) -> pd.Series:
     """
     직거래 의심: 단지×면적 그룹 월별 중앙값 대비 60% 이하 → +3점
     cdealType 컬럼이 있으면 명시적 직거래도 추가 +1점
+
+    ⚠️ 그룹핑은 반드시 district_name까지 포함해야 한다. "현대"·"삼성"처럼 흔한
+    단지명은 서울 전역 10여 개 구에 걸쳐 있어, apt_name만으로 묶으면 전혀 다른
+    단지의 거래가 한 그룹으로 섞여 중앙값·이상치 판정이 왜곡된다.
     """
     penalty = pd.Series(0, index=df.index, dtype="int8")
 
     group_median = (
-        df.groupby(["apt_name", "area_exclusive", "deal_ym"], observed=True)["deal_amount"]
+        df.groupby(["district_name", "apt_name", "area_exclusive", "deal_ym"], observed=True)["deal_amount"]
         .transform("median")
     )
     low_ratio = df["deal_amount"] < group_median * config.DIRECT_DEAL_RATIO
@@ -53,6 +57,7 @@ def _penalty_zscore(df: pd.DataFrame) -> pd.Series:
     """
     단지×면적 그룹 내 z-score 이상치: 절댓값 > 3.0 → +2점
     그룹 내 거래 건수 < 3이면 z-score 계산 불가 → 0점
+    (district_name을 포함해 동명이인 단지가 섞이지 않도록 함 — _penalty_direct_deal 참고)
     """
     penalty = pd.Series(0, index=df.index, dtype="int8")
 
@@ -62,7 +67,7 @@ def _penalty_zscore(df: pd.DataFrame) -> pd.Series:
         z = (group - group.mean()) / (group.std() + 1e-9)
         return (z.abs() > config.OUTLIER_ZSCORE_THRESHOLD).astype("int8") * 2
 
-    result = df.groupby(["apt_name", "area_exclusive"], observed=True)["deal_amount"].transform(zscore_penalty)
+    result = df.groupby(["district_name", "apt_name", "area_exclusive"], observed=True)["deal_amount"].transform(zscore_penalty)
     penalty += result.fillna(0).astype("int8")
     return penalty
 
@@ -103,10 +108,11 @@ def _estimate_households(df: pd.DataFrame) -> pd.DataFrame:
     실거래 건수로 세대수를 역산하는 휴리스틱:
     6년치 데이터에서 동일 단지 거래 건수 ÷ 6 × 10 ≈ 연간 회전율 10% 가정
     → 추정 세대수 = 총 거래건수 / 6 * 10
-    실제 세대수 데이터가 있으면 교체 가능한 컬럼 구조
+    실제 세대수 데이터가 있으면 교체 가능한 컬럼 구조.
+    (district_name까지 묶어야 동명이인 단지가 세대수를 부풀리지 않는다)
     """
     trade_count = (
-        df.groupby("apt_name", observed=True)["deal_amount"]
+        df.groupby(["district_name", "apt_name"], observed=True)["deal_amount"]
         .count()
         .rename("trade_count")
         .reset_index()
@@ -119,37 +125,44 @@ def filter_apartments(df: pd.DataFrame) -> pd.DataFrame:
     """
     1) 추정 세대수 500 미만 단지 제거
     2) 단지 전체 거래 중 벌점 제거 비율 > 30% 단지 제거
+
+    ⚠️ "현대"·"삼성"·"동아" 같은 흔한 단지명은 서울 전역 10곳 넘게 겹친다.
+    apt_name만으로 묶으면 서로 다른 단지의 거래·세대수가 합쳐져 필터가
+    왜곡되므로, 이 함수의 모든 집계는 district_name을 함께 키로 사용한다.
     """
     # 벌점 제거 비율 계산 (compute_penalties 이전 원본 건수 필요하므로 컬럼으로 기록)
     if "penalty" not in df.columns:
         raise ValueError("compute_penalties() 를 먼저 실행해주세요.")
 
-    total_per_apt   = df.groupby("apt_name", observed=True)["penalty"].count().rename("total_trades")
+    key = ["district_name", "apt_name"]
+    total_per_apt   = df.groupby(key, observed=True)["penalty"].count().rename("total_trades")
     removed_per_apt = (
         df[df["penalty"] >= config.PENALTY_THRESHOLD]
-        .groupby("apt_name", observed=True)["penalty"].count()
+        .groupby(key, observed=True)["penalty"].count()
         .rename("removed_trades")
     )
-    quality = pd.concat([total_per_apt, removed_per_apt], axis=1).fillna(0)
+    quality = pd.concat([total_per_apt, removed_per_apt], axis=1).fillna(0).reset_index()
     quality["remove_ratio"] = quality["removed_trades"] / quality["total_trades"]
 
     # 세대수 추정 (필터 전 전체 df 기준)
     hh = _estimate_households(df)
-    quality = quality.merge(hh[["apt_name", "est_households"]], on="apt_name", how="left")
+    quality = quality.merge(hh[key + ["est_households"]], on=key, how="left")
 
-    # 조건 적용 (merge 후 apt_name 컬럼 기준으로 필터)
-    valid_apts = quality.loc[
+    # 조건 적용 (구+단지명 복합키 기준으로 필터)
+    valid = quality.loc[
         (quality["est_households"] >= config.MIN_HOUSEHOLDS) &
         (quality["remove_ratio"] <= 0.30),
-        "apt_name"
-    ].values
+        key
+    ]
+    valid_keys = pd.MultiIndex.from_frame(valid)
 
     before = df["apt_name"].nunique()
-    df = df[df["apt_name"].isin(valid_apts)].copy()
+    df_keys = pd.MultiIndex.from_frame(df[key])
+    df = df[df_keys.isin(valid_keys)].copy()
     after = df["apt_name"].nunique()
     log.info(
-        f"단지 필터: {before}개 → {after}개 단지 "
-        f"(세대수 미달 또는 데이터 불량 제거)"
+        f"단지 필터: {before}개 → {after}개 단지명 "
+        f"(세대수 미달 또는 데이터 불량 제거, 구 구분 적용)"
     )
     return df
 

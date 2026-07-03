@@ -365,7 +365,7 @@ async function renderTop1() {
     return;
   }
 
-  const mddInfo = (mdd.ranking||[]).find(r => r.apt_name === top.apt_name) || {};
+  const mddInfo = (mdd.ranking||[]).find(r => r.apt_name === top.apt_name && r.district === top.district) || {};
   const distInfo = districtData.find(d => d.name === top.district) || {};
   const color = distInfo.color || '#38bdf8';
 
@@ -462,7 +462,7 @@ async function renderTop1() {
   }, { responsive: true, displayModeBar: false });
 
   // 가격 추이 차트 (있는 경우)
-  const aptTs = (ts.apartments || []).find(a => a.apt_name === top.apt_name);
+  const aptTs = (ts.apartments || []).find(a => a.apt_name === top.apt_name && a.district === top.district);
   if (aptTs && aptTs.monthly) {
     renderPriceChart(aptTs);
   }

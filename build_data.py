@@ -90,10 +90,11 @@ save('quality.json', {
 })
 
 # pipeline.json
+_mdd_keys = pd.MultiIndex.from_frame(mdd_df[['district_name', 'apt_name']])
 stages = [
     {'label': '원본 거래', 'count': len(df_raw), 'desc': 'API 수집 전체'},
     {'label': '필터 후', 'count': len(df), 'desc': '벌점 5점 미만'},
-    {'label': '500세대+', 'count': len(df[df['apt_name'].isin(mdd_df['apt_name'])]),
+    {'label': '500세대+', 'count': len(df[pd.MultiIndex.from_frame(df[['district_name', 'apt_name']]).isin(_mdd_keys)]),
      'desc': '대단지 기준'},
 ]
 penalty_rules = [
@@ -106,7 +107,10 @@ save('pipeline.json', {'stages': stages, 'penalty_rules': penalty_rules, 'apt_co
 
 # mdd_ranking.json
 mdd_out = mdd_df.rename(columns={'district_name': 'district', 'mdd_pct': 'mdd'})
-mdd_out['total_trades'] = mdd_out['apt_name'].map(df.groupby('apt_name').size())
+_trades_by_key = df.groupby(['district_name', 'apt_name']).size()
+mdd_out['total_trades'] = mdd_out.apply(
+    lambda r: _trades_by_key.get((r['district'], r['apt_name']), 0), axis=1
+)
 save('mdd_ranking.json', {'ranking': mdd_out.sort_values('mdd', ascending=False).to_dict('records')})
 
 # composite_score.json
@@ -127,12 +131,14 @@ if _locpath.exists():
 save('composite_score.json', {'ranking': score_df.to_dict('records'), 'weights': weights})
 
 # timeseries.json
+# ⚠️ "현대"·"삼성"처럼 여러 구에 겹치는 단지명이 있어 district까지 함께 키로 써야
+# 서로 다른 단지의 시계열이 하나로 합쳐지지 않는다.
 apt_list = []
-for apt_name, grp in monthly.groupby('apt_name'):
+for (district_name, apt_name), grp in monthly.groupby(['district_name', 'apt_name']):
     records = grp.sort_values('deal_date')[['deal_date', 'smoothed_price']].rename(columns={'deal_date': 'ym', 'smoothed_price': 'median'}).to_dict('records')
     for r in records:
         r['ym'] = str(r['ym'])
-    apt_list.append({'apt_name': apt_name, 'monthly': records})
+    apt_list.append({'district': district_name, 'apt_name': apt_name, 'monthly': records})
 save('timeseries.json', {'apartments': apt_list})
 
 # traits.json
@@ -161,13 +167,13 @@ save('trades.json', trades)
 info_path = OUT / 'district_info.json'
 if info_path.exists():
     info = json.loads(info_path.read_text(encoding='utf-8'))
-    latest_by_apt = {}
+    latest_by_key = {}
     for a in apt_list:
         if a['monthly']:
-            latest_by_apt[a['apt_name']] = a['monthly'][-1]['median']
+            latest_by_key[(a['district'], a['apt_name'])] = a['monthly'][-1]['median']
     by_dist = {}
     for _, r in score_df.iterrows():
-        p = latest_by_apt.get(r['apt_name'])
+        p = latest_by_key.get((r['district'], r['apt_name']))
         if p:
             by_dist.setdefault(r['district'], []).append(p / 10000)
     for name, meta in info.items():
