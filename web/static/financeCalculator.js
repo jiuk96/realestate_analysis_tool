@@ -288,6 +288,13 @@ export const LEGAL_BASIS = {
           '자기자본과 대출만으로 매수 자금을 마련해야 합니다. 또한 2년간 실거주 의무가 있어 매수 직후 ' +
           '전월세를 놓을 수 없습니다.',
   },
+  rate: {
+    title: '대출 금리는 4.1% 고정인가요?',
+    body: '아닙니다. 일반 주택담보대출 금리(기본값 4.10%)는 대표 참고값일 뿐, 은행·시점·개인 신용·고정/변동 ' +
+          '방식에 따라 매일 달라집니다. 정확히 하려면 아래 "실제 대출 금리 확인하기"의 공식 사이트(금융감독원 ' +
+          '금융상품 한눈에, 은행연합회 소비자포털 등)에서 현재 금리를 확인해 각자 금리(%) 칸에 직접 입력하세요. ' +
+          '디딤돌·보금자리론·신생아 특례는 주택도시기금·주택금융공사 공시금리를 따릅니다.',
+  },
 };
 
 /**
@@ -548,12 +555,20 @@ export function analyzeCouple(inA, inB, common) {
   const monthlyA = calcMonthlyPayment(loanA, A.rate, A.years, repay).first + A.familyMonthly;
   const monthlyB = calcMonthlyPayment(loanB, B.rate, B.years, repay).first + B.familyMonthly;
 
-  const person = (P, ln, mth) => ({
-    cash: P.cash, netGift: P.netGift, giftTax: P.giftTax, family: P.family,
-    loan: ln, monthly: mth, familyMonthly: P.familyMonthly,
-    contrib: P.equity + P.family + ln,     // 각자 총 기여 가용자금
-    dsrLoan: P.dsrLoan, familyOverLimit: P.familyOverLimit,
-  });
+  const person = (P, ln, mth) => {
+    const bankMonthly = mth - P.familyMonthly;   // 은행 상환분
+    const incomeMonthly = P.income / 12;
+    return {
+      cash: P.cash, netGift: P.netGift, giftGross: P.giftGross, giftTax: P.giftTax,
+      family: P.family, parentTotal: P.giftGross + P.family,   // 부모 지원 총액
+      loan: ln, monthly: mth,
+      bankMonthly, familyMonthly: P.familyMonthly,
+      income: P.income, incomeMonthly,
+      burdenPct: P.income > 0 ? (mth * 12 / P.income) : 0,       // 연 상환/연소득
+      contrib: P.equity + P.family + ln,     // 각자 총 기여 가용자금
+      dsrLoan: P.dsrLoan, familyOverLimit: P.familyOverLimit,
+    };
+  };
 
   const warnings = [];
   if (regulated) warnings.push('토지거래허가구역/규제지역: 실거주 목적만 허가·2년 실거주 의무, 갭투자 불가, LTV·6억 규제 적용.');
@@ -596,6 +611,18 @@ export const REFERENCES = [
     url: 'https://www.law.go.kr/법령/부동산거래신고등에관한법률' },
   { name: '실거래가 공개시스템 (분석 데이터 원천)', org: '국토교통부',
     url: 'https://rt.molit.go.kr' },
+];
+
+/* 실제 대출 금리를 직접 확인할 수 있는 사이트 (금리 입력란에 반영용) */
+export const LOAN_RATE_SOURCES = [
+  { name: '금융상품 한눈에 (주택담보대출 금리 비교)', org: '금융감독원',
+    url: 'https://finlife.fss.or.kr/finlife/ldng/houseMrtg/list.do?menuNo=700007' },
+  { name: '대출금리비교 (은행별 가계대출)', org: '전국은행연합회 소비자포털',
+    url: 'https://portal.kfb.or.kr/compare/loan_household.php' },
+  { name: '주택담보대출 찾기 (보금자리·디딤돌·특례)', org: '한국주택금융공사',
+    url: 'https://www.hf.go.kr/ko/sub01/sub01_04.do' },
+  { name: '주택도시기금 (디딤돌·신생아 특례 공시금리)', org: '주택도시보증공사',
+    url: 'https://nhuf.molit.go.kr' },
 ];
 
 /* 포맷 헬퍼 (UI 공용) */

@@ -125,19 +125,18 @@
       <!-- 💼 나 -->
       <div class="budget-card person-card person-a">
         <div class="budget-card-title">💼 나</div>
+        <div class="budget-field"><label>현금</label><div class="bf-input"><input type="number" id="aCash" value="2.0" step="0.1" min="0"><span>억</span></div></div>
         <div class="budget-field-row">
-          <div class="budget-field"><label>현금</label><div class="bf-input"><input type="number" id="aCash" value="2.0" step="0.1" min="0"><span>억</span></div></div>
-          <div class="budget-field"><label>부모 증여</label><div class="bf-input"><input type="number" id="aGift" value="1.5" step="0.5" min="0"><span>억</span></div></div>
+          <div class="budget-field"><label>부모 지원 총액 <button class="legal-link" data-legal="family">?</button></label><div class="bf-input"><input type="number" id="aParent" value="3.67" step="0.1" min="0"><span>억</span></div></div>
+          <div class="budget-field"><label>그중 증여 (나머지 차용)</label><div class="bf-input"><input type="number" id="aGiftPortion" value="1.5" step="0.1" min="0"><span>억</span></div></div>
         </div>
-        <div class="budget-field-row">
-          <div class="budget-field"><label>부모 차용 <button class="legal-link" data-legal="family">?</button></label><div class="bf-input"><input type="number" id="aFamily" value="2.17" step="0.1" min="0"><span>억</span></div></div>
-          <div class="budget-field"><label>연소득</label><div class="bf-input"><input type="number" id="aIncome" value="5500" step="500" min="0"><span>만원</span></div></div>
-        </div>
+        <div id="aParentSplit" class="parent-split"></div>
+        <div class="budget-field"><label>연소득</label><div class="bf-input"><input type="number" id="aIncome" value="5500" step="500" min="0"><span>만원</span></div></div>
         <div class="budget-field"><label>대출 상품</label>
           <select id="aProduct" class="explorer-sort" style="width:100%"></select>
         </div>
         <div class="budget-field-row">
-          <div class="budget-field"><label>금리 (%)</label><div class="bf-input"><input type="number" id="aRate" step="0.05" min="0"></div></div>
+          <div class="budget-field"><label>금리 (%) <button class="legal-link" data-legal="rate">?</button></label><div class="bf-input"><input type="number" id="aRate" step="0.05" min="0"></div></div>
           <div class="budget-field"><label>만기 (년)</label><div class="bf-input"><input type="number" id="aYears" step="5" min="5" max="50"></div></div>
         </div>
         <div id="aSummary" class="person-summary"></div>
@@ -146,19 +145,18 @@
       <!-- 💗 여자친구 -->
       <div class="budget-card person-card person-b">
         <div class="budget-card-title">💗 여자친구</div>
+        <div class="budget-field"><label>현금</label><div class="bf-input"><input type="number" id="bCash" value="1.5" step="0.1" min="0"><span>억</span></div></div>
         <div class="budget-field-row">
-          <div class="budget-field"><label>현금</label><div class="bf-input"><input type="number" id="bCash" value="1.5" step="0.1" min="0"><span>억</span></div></div>
-          <div class="budget-field"><label>부모 증여</label><div class="bf-input"><input type="number" id="bGift" value="1.5" step="0.5" min="0"><span>억</span></div></div>
+          <div class="budget-field"><label>부모 지원 총액 <button class="legal-link" data-legal="family">?</button></label><div class="bf-input"><input type="number" id="bParent" value="1.5" step="0.1" min="0"><span>억</span></div></div>
+          <div class="budget-field"><label>그중 증여 (나머지 차용)</label><div class="bf-input"><input type="number" id="bGiftPortion" value="1.5" step="0.1" min="0"><span>억</span></div></div>
         </div>
-        <div class="budget-field-row">
-          <div class="budget-field"><label>부모 차용 <button class="legal-link" data-legal="family">?</button></label><div class="bf-input"><input type="number" id="bFamily" value="0" step="0.1" min="0"><span>억</span></div></div>
-          <div class="budget-field"><label>연소득</label><div class="bf-input"><input type="number" id="bIncome" value="3500" step="500" min="0"><span>만원</span></div></div>
-        </div>
+        <div id="bParentSplit" class="parent-split"></div>
+        <div class="budget-field"><label>연소득</label><div class="bf-input"><input type="number" id="bIncome" value="3500" step="500" min="0"><span>만원</span></div></div>
         <div class="budget-field"><label>대출 상품</label>
           <select id="bProduct" class="explorer-sort" style="width:100%"></select>
         </div>
         <div class="budget-field-row">
-          <div class="budget-field"><label>금리 (%)</label><div class="bf-input"><input type="number" id="bRate" step="0.05" min="0"></div></div>
+          <div class="budget-field"><label>금리 (%) <button class="legal-link" data-legal="rate">?</button></label><div class="bf-input"><input type="number" id="bRate" step="0.05" min="0"></div></div>
           <div class="budget-field"><label>만기 (년)</label><div class="bf-input"><input type="number" id="bYears" step="5" min="5" max="50"></div></div>
         </div>
         <div id="bSummary" class="person-summary"></div>
@@ -191,6 +189,12 @@
     <!-- 결과 (전체 폭) -->
     <div class="budget-card budget-card-result" id="budgetOutput"></div>
 
+    <!-- 월 상환 상세 (누구에게 얼마가 나가는지 + 월급 대비 비중) -->
+    <div class="budget-card" style="margin-top:1rem">
+      <div class="budget-card-title">💸 매달 얼마가, 누구에게 나가나요?</div>
+      <div id="repayDetail" class="repay-detail"></div>
+    </div>
+
     <!-- 자금 구성 차트 + 부대비용 상세 -->
     <div class="budget-detail-grid">
       <div class="budget-card">
@@ -213,6 +217,13 @@
     <div class="legal-section">
       <div class="legal-section-title">📖 계산 근거 · 세법/규제 설명 <span class="legal-hint">항목을 눌러 펼쳐보세요</span></div>
       <div id="legalAccordion" class="legal-accordion"></div>
+    </div>
+
+    <!-- 실제 금리 확인 사이트 -->
+    <div class="legal-section">
+      <div class="legal-section-title">🏦 실제 대출 금리 확인하기 <span class="legal-hint">직접 확인 후 위 금리(%) 칸에 입력하세요</span></div>
+      <ul id="rateSourceList" class="reference-list"></ul>
+      <p class="lp-note">일반 주택담보대출 금리(기본 4.10%)는 은행·시점·개인 신용에 따라 매일 달라집니다. 아래 공식 비교 사이트에서 실제 금리를 확인해 각자 금리 칸에 넣으면 정확한 상환액이 계산됩니다.</p>
     </div>
 
     <!-- 참고문헌 · 법령 출처 -->

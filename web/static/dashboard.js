@@ -1,6 +1,6 @@
 import {
   LOAN_PRODUCTS, analyzeCouple, won2eok, won2man,
-  LEGAL_BASIS, FAMILY_LOAN, REFERENCES,
+  LEGAL_BASIS, FAMILY_LOAN, REFERENCES, LOAN_RATE_SOURCES,
 } from './financeCalculator.js';
 
 /* ── 유틸 ──────────────────────────────────────────────── */
@@ -633,8 +633,8 @@ function initBudgetPlanner() {
   initProductSelect('b');
 
   // 모든 입력에 반응형 바인딩 (입력 즉시 재계산)
-  ['aCash','aGift','aFamily','aIncome','aRate','aYears',
-   'bCash','bGift','bFamily','bIncome','bRate','bYears',
+  ['aCash','aParent','aGiftPortion','aIncome','aRate','aYears',
+   'bCash','bParent','bGiftPortion','bIncome','bRate','bYears',
    'repayType','familyYears','optMarriage','optBirth','optFirstHome','optRegulated'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', recalcBudget);
@@ -643,7 +643,16 @@ function initBudgetPlanner() {
 
   renderLegalAccordion();
   renderReferences();
+  renderRateSources();
   recalcBudget();
+}
+
+function renderRateSources() {
+  const el = document.getElementById('rateSourceList');
+  if (!el) return;
+  el.innerHTML = LOAN_RATE_SOURCES.map(r =>
+    `<li><a href="${r.url}" target="_blank" rel="noopener">${r.name}</a> <span class="ref-org">${r.org}</span></li>`
+  ).join('');
 }
 
 /* 세법·규제 근거 아코디언 */
@@ -684,10 +693,13 @@ function personInput(prefix) {
   const num = id => parseFloat(document.getElementById(id).value) || 0;
   const 억 = 1e8, 만 = 1e4;
   const product = LOAN_PRODUCTS.find(p => p.id === document.getElementById(prefix + 'Product').value) || LOAN_PRODUCTS[3];
+  // 부모 지원 총액에서 증여분/차용분 분리 (증여 상한 = 총액)
+  const parentTotal = num(prefix + 'Parent') * 억;
+  const gift = Math.min(num(prefix + 'GiftPortion') * 억, parentTotal);
+  const family = parentTotal - gift;
   return {
     cash: num(prefix + 'Cash') * 억,
-    gift: num(prefix + 'Gift') * 억,
-    family: num(prefix + 'Family') * 억,
+    gift, family,
     income: num(prefix + 'Income') * 만,
     product,
     rate: (num(prefix + 'Rate') / 100) || product.rate,
@@ -713,14 +725,30 @@ function recalcBudget() {
   const R = analyzeCouple(inA, inB, common);
   lastAnalysis = R;
 
-  // 각자 카드 하단 요약 (각자 가용자금)
-  const personSummary = (P, label) => `
+  // 부모 지원 분리 표시 (증여/차용 + 세금)
+  const renderParentSplit = (prefix, P) => {
+    const el = document.getElementById(prefix + 'ParentSplit');
+    if (!el) return;
+    if (P.parentTotal <= 0) { el.innerHTML = ''; return; }
+    const overMsg = P.familyOverLimit ? ` <span style="color:#f87171">차용 ${won2eok(FAMILY_LOAN.MAX_NO_INTEREST)} 초과</span>` : '';
+    el.innerHTML = `부모 지원 ${won2eok(P.parentTotal)} = 증여 ${won2eok(P.giftGross)}(세금 ${won2man(P.giftTax)}) + 무이자 차용 ${won2eok(P.family)}${overMsg}`;
+  };
+  renderParentSplit('a', R.A);
+  renderParentSplit('b', R.B);
+
+  // 각자 카드 하단 요약 (각자 가용자금 + 소득 대비 상환 비중)
+  const personSummary = (P, label) => {
+    const burden = (P.burdenPct * 100).toFixed(0);
+    const bc = P.burdenPct > 0.40 ? '#f87171' : P.burdenPct > 0.30 ? '#fbbf24' : '#34d399';
+    return `
     <div class="ps-title">${label} 가용자금 <b>${won2eok(P.contrib)}</b></div>
     <div class="ps-rows">
       <span>현금 ${won2eok(P.cash)}</span><span>증여(세후) ${won2eok(P.netGift)}</span>
       <span>부모차용 ${won2eok(P.family)}</span><span>대출 ${won2eok(P.loan)}</span>
     </div>
-    <div class="ps-month">월 상환 ${won2man(P.monthly)} (은행 ${won2man(P.monthly - P.familyMonthly)} + 부모 ${won2man(P.familyMonthly)})</div>`;
+    <div class="ps-month">월 상환 <b>${won2man(P.monthly)}</b> = 은행 ${won2man(P.bankMonthly)} + 부모 ${won2man(P.familyMonthly)}
+      · 월급 ${won2man(P.incomeMonthly)}의 <b style="color:${bc}">${burden}%</b></div>`;
+  };
   document.getElementById('aSummary').innerHTML = personSummary(R.A, '💼 내');
   document.getElementById('bSummary').innerHTML = personSummary(R.B, '💗 여자친구');
 
@@ -752,6 +780,42 @@ function recalcBudget() {
   renderBudgetBreakdown(R);
   renderBudgetChart(R);
   renderFundFlow(R);
+  renderRepayDetail(R);
+}
+
+// 월 상환 상세: 누구에게 얼마가 나가고, 각자 월급 대비 몇 %인지
+function renderRepayDetail(R) {
+  const el = document.getElementById('repayDetail');
+  if (!el) return;
+  const row = (P, label, color) => {
+    const burden = (P.burdenPct * 100).toFixed(0);
+    const bc = P.burdenPct > 0.40 ? '#f87171' : P.burdenPct > 0.30 ? '#fbbf24' : '#34d399';
+    const barW = Math.min(100, P.burdenPct * 100);
+    return `
+      <div class="rp-person">
+        <div class="rp-head"><span class="rp-name" style="color:${color}">${label}</span>
+          <span class="rp-total">${won2man(P.monthly)}/월</span></div>
+        <div class="rp-lines">
+          <div class="rp-line"><span>🏦 은행 대출 상환</span><b>${won2man(P.bankMonthly)}</b></div>
+          <div class="rp-line"><span>👪 부모님께 원금 상환</span><b>${won2man(P.familyMonthly)}</b></div>
+        </div>
+        <div class="rp-burden">
+          <div class="rp-bar"><div class="rp-fill" style="width:${barW}%;background:${bc}"></div></div>
+          <div class="rp-burden-txt">내 월급 ${won2man(P.incomeMonthly)} 중 <b style="color:${bc}">${burden}%</b>가 상환에 쓰입니다</div>
+        </div>
+      </div>`;
+  };
+  const totalIncome = R.A.incomeMonthly + R.B.incomeMonthly;
+  const totalBurden = totalIncome > 0 ? (R.totalMonthly / totalIncome * 100).toFixed(0) : 0;
+  el.innerHTML = `
+    <div class="rp-grid">
+      ${row(R.A, '💼 나', '#38bdf8')}
+      ${row(R.B, '💗 여자친구', '#f472b6')}
+    </div>
+    <div class="rp-summary">
+      합산 월 상환 <b>${won2man(R.totalMonthly)}</b> · 두 사람 월소득 합 ${won2man(totalIncome)}의 <b>${totalBurden}%</b>
+      <span class="rp-note">(통상 소득의 40% 이내 권장 — DSR 규제선)</span>
+    </div>`;
 }
 
 // 자금 흐름: 전체 자금 → 세금·부대비용 차감 → 자기자본 + 부모 + 대출 = 최대 매수가
