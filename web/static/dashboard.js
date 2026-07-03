@@ -565,10 +565,27 @@ const NAVER_ALIAS = {
   '이편한세상금호파크힐스': 'e편한세상금호파크힐스',
 };
 
-// 단지명을 네이버 검색에 맞게 정규화 (괄호·동번호·시공사 병기 제거)
+// 로마숫자(Ⅰ~Ⅹ) → 아라비아숫자. 국토부 실거래명에 "센트레빌Ⅱ"처럼 로마숫자로
+// 표기된 단지가 있는데, 네이버·호갱노노에는 "센트레빌2차"처럼 아라비아숫자로
+// 등록돼 있어 로마숫자 그대로 검색하면 결과가 0건으로 뜬다.
+const ROMAN_MAP = { 'Ⅰ':'1','Ⅱ':'2','Ⅲ':'3','Ⅳ':'4','Ⅴ':'5','Ⅵ':'6','Ⅶ':'7','Ⅷ':'8','Ⅸ':'9','Ⅹ':'10',
+                    'ⅰ':'1','ⅱ':'2','ⅲ':'3','ⅳ':'4','ⅴ':'5','ⅵ':'6','ⅶ':'7','ⅷ':'8','ⅸ':'9','ⅹ':'10' };
+
+// 구 없이 이름만으로 검색하면 엉뚱한 단지가 잡히는 흔한 단지명(서울 전역 다수 존재).
+// 이런 이름만 지역(동/구)을 함께 붙여 구분하고, 나머지 고유한 브랜드명은 이름만으로
+// 검색해 "구 + 풀네임"이 너무 좁아 0건이 뜨는 문제를 피한다.
+const COMMON_APT_NAMES = new Set([
+  '현대','삼성','우성','대림','한신','두산','쌍용','보람','경남','신동아','동아','럭키',
+  '청구','삼익','미성','진흥','벽산','한양','삼부','극동','신성','성원','대우','롯데',
+  '한일','태영','동부','서희','한라','금호','건영','우방','삼호','신안','풍림','대주',
+]);
+
+// 단지명을 네이버 검색에 맞게 정규화 (괄호·동번호·시공사 병기·로마숫자 제거/변환)
 function normalizeAptName(name) {
   if (NAVER_ALIAS[name]) return NAVER_ALIAS[name];
-  return name
+  let n = name;
+  for (const [r, a] of Object.entries(ROMAN_MAP)) n = n.split(r).join(a);
+  return n
     .replace(/\([^)]*\)/g, '')       // (삼성), (336), (200-0) 등 괄호 제거
     .replace(/\d+동\s*~\s*\d+동/g, '') // 101동~116동 동범위 제거
     .replace(/,/g, ' ')              // 쉼표 → 공백
@@ -578,28 +595,40 @@ function normalizeAptName(name) {
     .trim();
 }
 
+// 검색어 생성: 이름이 충분히 고유하면 이름만으로(가장 잘 잡힘), 흔한 단지명이거나
+// 너무 짧으면 지역(동 우선, 없으면 구)을 앞에 붙여 구분한다.
+// dong이 대부분 비어 있어 "구 + 풀네임"으로만 검색하면 0건이 자주 나므로,
+// 고유한 브랜드명은 지역 없이 이름만 넘겨 매칭 확률을 높인다.
+function naverSearchTerm(district, aptName, dong) {
+  const name = normalizeAptName(aptName);
+  const core = name.replace(/\s+/g, '');   // 공백 제거한 순수 글자 길이로 고유성 판단
+  const isCommon = COMMON_APT_NAMES.has(core) || core.length <= 4;
+  if (isCommon) {
+    const area = dong || district || '';
+    return `${area} ${name}`.trim();
+  }
+  return name;
+}
+
 // 네이버 지도(위치 확인). 좌표 중심으로 열어 항상 정확한 위치 표시.
 function naverMapUrl(district, aptName, dong, lat, lng) {
   const label = encodeURIComponent(normalizeAptName(aptName));
   if (lat && lng) return `https://map.naver.com/p?lat=${lat}&lng=${lng}&title=${label}&level=2`;
-  const area = dong || district;
-  return `https://map.naver.com/p/search/${encodeURIComponent(`${area} ${normalizeAptName(aptName)}`.trim())}`;
+  return `https://map.naver.com/p/search/${encodeURIComponent(naverSearchTerm(district, aptName, dong))}`;
 }
 
-// 네이버 부동산(매물). 동+정규화 단지명으로 검색 (대부분 매물 목록이 열림).
+// 네이버 부동산(매물). 고유 단지명은 이름만, 흔한 이름은 지역+이름으로 검색.
 // 좌표/이름이 전혀 없으면 네이버 부동산 홈으로 폴백.
 function naverLandUrl(district, aptName, dong, lat, lng) {
-  const area = dong || district;
-  const name = normalizeAptName(aptName);
-  if (!area && !name) return `https://m.land.naver.com/`;
-  return `https://m.land.naver.com/search/result/${encodeURIComponent(`${area} ${name}`.trim())}`;
+  const term = naverSearchTerm(district, aptName, dong);
+  if (!term) return `https://m.land.naver.com/`;
+  return `https://m.land.naver.com/search/result/${encodeURIComponent(term)}`;
 }
 
-// 호갱노노. 좌표가 있으면 좌표 중심 지도로, 없으면 이름 검색.
+// 호갱노노. 좌표가 있으면 좌표 중심 지도로, 없으면 이름 검색(로마숫자·고유성 로직 공유).
 function hogangnonoUrl(district, aptName, dong, lat, lng) {
   if (lat && lng) return `https://hogangnono.com/?zoom=16&lat=${lat}&lng=${lng}`;
-  const area = dong || district;
-  return `https://hogangnono.com/search/${encodeURIComponent(`${area} ${normalizeAptName(aptName)}`.trim())}`;
+  return `https://hogangnono.com/search/${encodeURIComponent(naverSearchTerm(district, aptName, dong))}`;
 }
 
 const askKey = a => `ask|${a.district}|${a.apt_name}`;
