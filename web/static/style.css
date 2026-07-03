@@ -880,12 +880,19 @@ body { font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSy
 .pc-loanbar-row { display: flex; align-items: center; gap: .6rem; margin-bottom: .5rem; }
 .pc-loanbar-label { color: #94a3b8; font-size: .74rem; flex-shrink: 0; white-space: nowrap; }
 .pc-loan-slider {
-  flex: 1; height: 6px; border-radius: 99px; appearance: none; -webkit-appearance: none;
-  background: #1e293b; outline: none; cursor: pointer; accent-color: #a78bfa;
+  flex: 1; height: 14px; appearance: none; -webkit-appearance: none;
+  background: transparent; outline: none; cursor: pointer; accent-color: #a78bfa;
+}
+/* 트랙(선)을 명시적으로 그려줘야 일부 브라우저에서 원만 보이고 선이 안 보이는 문제가 없음 */
+.pc-loan-slider::-webkit-slider-runnable-track {
+  height: 6px; border-radius: 99px; background: #334155; border: 1px solid #475569;
+}
+.pc-loan-slider::-moz-range-track {
+  height: 6px; border-radius: 99px; background: #334155; border: 1px solid #475569;
 }
 .pc-loan-slider::-webkit-slider-thumb {
   appearance: none; -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
-  background: #f1f5f9; border: 2px solid #a78bfa; cursor: pointer;
+  background: #f1f5f9; border: 2px solid #a78bfa; cursor: pointer; margin-top: -4.5px;
 }
 .pc-loan-slider::-moz-range-thumb {
   width: 14px; height: 14px; border-radius: 50%; background: #f1f5f9; border: 2px solid #a78bfa; cursor: pointer;
