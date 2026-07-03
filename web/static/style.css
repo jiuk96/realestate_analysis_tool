@@ -984,3 +984,29 @@ body { font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSy
 .person-a .ls-slider::-webkit-slider-thumb { border-color: #38bdf8; }
 .person-b .ls-slider { accent-color: #f472b6; }
 .person-b .ls-slider::-webkit-slider-thumb { border-color: #f472b6; }
+
+/* ── 동네별 추천 단지 클릭 → 상세 점수 모달 ─────────────── */
+.drs-row { cursor: pointer; }
+.apt-modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(2,6,23,.75); backdrop-filter: blur(2px);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 3rem 1rem; overflow-y: auto;
+}
+.apt-modal {
+  position: relative; width: 100%; max-width: 760px;
+  background: var(--bg2); border: 1px solid #334155; border-radius: 16px;
+  padding: 1.5rem; box-shadow: 0 20px 60px rgba(0,0,0,.5);
+}
+.apt-modal-close {
+  position: absolute; top: .8rem; right: .8rem; z-index: 1;
+  width: 32px; height: 32px; border-radius: 50%; border: none;
+  background: #0f172a; color: #94a3b8; font-size: 1rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s, color .15s;
+}
+.apt-modal-close:hover { background: #334155; color: #e2e8f0; }
+@media (max-width: 640px) {
+  .apt-modal-overlay { padding: 1rem .6rem; }
+  .apt-modal { padding: 1.1rem; }
+}

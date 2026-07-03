@@ -10,6 +10,20 @@ async function fetchJSON(url) {
   return r.json();
 }
 
+// composite_score/mdd_ranking/timeseries는 여러 화면(전체 1위, 동네별 추천 상세 모달)에서
+// 공통으로 쓰이므로 한 번만 불러와 캐시한다.
+let _scoreDataCache = null;
+async function loadScoreData() {
+  if (_scoreDataCache) return _scoreDataCache;
+  const [comp, mdd, ts] = await Promise.all([
+    fetchJSON('/api/composite_score'),
+    fetchJSON('/api/mdd_ranking'),
+    fetchJSON('/api/timeseries'),
+  ]);
+  _scoreDataCache = { comp, mdd, ts };
+  return _scoreDataCache;
+}
+
 const fmt = n => n != null ? n.toLocaleString() : '—';
 const fmtScore = v => v != null ? v.toFixed(1) : '—';
 
@@ -292,9 +306,13 @@ function renderScoring() {
 }
 
 /* ── ③ 동네별 우수 아파트 ─────────────────────────────────── */
+// 동네별 추천 목록 행 클릭 시 (구, 단지명)을 조회하기 위한 인덱스 (renderDistrictRankings에서 채움)
+let _rankingRowMap = [];
+
 async function renderDistrictRankings() {
-  const data = await fetchJSON('/api/composite_score');
+  const { comp: data } = await loadScoreData();
   const ranking = data.ranking || [];
+  _rankingRowMap = [];
 
   // 구별 그룹핑
   const byDistrict = {};
@@ -324,8 +342,12 @@ async function renderDistrictRankings() {
       ].filter(x => x[1] != null);
       const best = axes.reduce((p,c) => c[1] > p[1] ? c : p, ['', -1]);
 
+      // apt_name에 특수문자가 있어도 안전하도록, 클릭 시 조회할 (구, 단지명)은
+      // 인덱스로 저장해두고 클릭 핸들러에서 _rankingRowMap을 통해 꺼내 쓴다.
+      const ridx = _rankingRowMap.push({ district: a.district, apt_name: a.apt_name }) - 1;
+
       return `
-      <div class="drs-row">
+      <div class="drs-row" data-ridx="${ridx}" title="클릭하면 상세 점수를 볼 수 있습니다">
         <span class="drs-rank" style="${i===0?`color:${color}`:''}">${i+1}</span>
         <div class="drs-mid">
           <div class="drs-name">${a.apt_name}</div>
@@ -352,53 +374,64 @@ async function renderDistrictRankings() {
 }
 
 /* ── ④ 전체 1위 단지 상세 ──────────────────────────────────── */
-async function renderTop1() {
-  const [comp, mdd, ts] = await Promise.all([
-    fetchJSON('/api/composite_score'),
-    fetchJSON('/api/mdd_ranking'),
-    fetchJSON('/api/timeseries'),
-  ]);
-
-  const top = comp.ranking?.[0];
-  if (!top) {
-    document.getElementById('top1Detail').innerHTML = `<div class="empty-state">데이터 없음</div>`;
-    return;
-  }
-
-  const mddInfo = (mdd.ranking||[]).find(r => r.apt_name === top.apt_name && r.district === top.district) || {};
-  const distInfo = districtData.find(d => d.name === top.district) || {};
-  const color = distInfo.color || '#38bdf8';
-
-  const axes = [
-    { name: '가격방어력', val: top.defense_score, w: 25, color: '#34d399' },
-    { name: '거래유동성', val: top.liquidity_score, w: 20, color: '#38bdf8' },
-    { name: '상승참여도', val: top.upside_score, w: 15, color: '#fbbf24' },
-    { name: '회복모멘텀', val: top.momentum_score, w: 15, color: '#a78bfa' },
-    { name: '입지프리미엄', val: top.premium_score, w: 13, color: '#fb923c' },
-    { name: '규모', val: top.scale_score, w: 7, color: '#f472b6' },
-    { name: '교통', val: top.transit_score, w: 10, color: '#f87171' },
-    { name: '재건축잠재력', val: top.redevelop_score, w: 8, color: '#22d3ee' },
+// 8개 채점 축 → 레이더/막대에 쓸 공통 배열 (전체 1위·동네별 추천 상세 모달 공용)
+function buildApartmentAxes(apt) {
+  return [
+    { name: '가격방어력', val: apt.defense_score, w: 25, color: '#34d399' },
+    { name: '거래유동성', val: apt.liquidity_score, w: 20, color: '#38bdf8' },
+    { name: '상승참여도', val: apt.upside_score, w: 15, color: '#fbbf24' },
+    { name: '회복모멘텀', val: apt.momentum_score, w: 15, color: '#a78bfa' },
+    { name: '입지프리미엄', val: apt.premium_score, w: 13, color: '#fb923c' },
+    { name: '규모', val: apt.scale_score, w: 7, color: '#f472b6' },
+    { name: '교통', val: apt.transit_score, w: 10, color: '#f87171' },
+    { name: '재건축잠재력', val: apt.redevelop_score, w: 8, color: '#22d3ee' },
   ].filter(a => a.val != null);
+}
 
-  // 레이더 차트 (Plotly)
+// 근거(왜 이 점수인가) 인사이트 리스트 — 전체 1위·상세 모달 공용
+function buildApartmentInsights(apt, comp, extraLines = []) {
+  const lines = [
+    apt.defense_score >= 70 ? '<li>하락장에서 가격 방어력이 매우 뛰어나고 회복도 빠릅니다</li>' : '',
+    apt.liquidity_score >= 70 ? '<li>6년간 꾸준한 거래가 이어진 환금성 높은 단지입니다</li>' : '',
+    apt.upside_score >= 70 ? '<li>상승장에서도 시장 평균을 웃도는 상승률을 기록했습니다</li>' : '',
+    apt.momentum_score >= 70 ? '<li>최근 12개월 가격 추세가 뚜렷한 상승 흐름입니다</li>' : '',
+    apt.premium_score >= 70 ? '<li>단위면적당 가격 상위권 — 시장이 인정한 입지입니다</li>' : '',
+    apt.transit_score >= 70 && apt.nearest_station ? `<li>${apt.nearest_station} 도보 ${Math.round(apt.walk_min)}분 거리의 역세권 단지입니다</li>` : '',
+    apt.redevelop_score >= 70 ? `<li>준공 ${apt.apt_age || ''}년차 — 재건축 연한에 근접해 미래가치 상승 잠재력이 있습니다</li>` : '',
+    ...extraLines,
+  ].filter(Boolean);
+  return lines.join('');
+}
+
+// 단지 상세(레이더+축별 점수+통계+근거) 공통 렌더러. containerId에 HTML을 채우고
+// radarId/priceChartId에 Plotly 차트를 그린다. 전체 1위(top1Detail)와 동네별 추천
+// 상세 모달(aptModalBody) 양쪽에서 재사용한다.
+function renderApartmentDetail(containerId, radarId, priceChartId, apt, mddInfo, comp, aptTs, opts = {}) {
+  const distInfo = districtData.find(d => d.name === apt.district) || {};
+  const axes = buildApartmentAxes(apt);
   const radarLabels = axes.map(a => a.name);
   const radarVals = axes.map(a => a.val != null ? Math.min(100, a.val) : 0);
+  const badgeHtml = opts.badgeHtml || '📍 동네별 추천 단지';
+  const extraInsight = opts.extraInsight || [];
 
-  document.getElementById('top1Detail').innerHTML = `
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = `
     <div class="top1-hero">
-      <div class="top1-badge">🏆 전체 종합 1위</div>
-      <h3 class="top1-name">${top.apt_name}</h3>
-      <div class="top1-loc">${top.district} ${distInfo.icon||''}</div>
-      <div class="top1-score-big">${fmtScore(top.composite_score)}<span class="top1-score-unit">점</span></div>
+      <div class="top1-badge">${badgeHtml}</div>
+      <h3 class="top1-name">${apt.apt_name}</h3>
+      <div class="top1-loc">${apt.district} ${distInfo.icon||''}</div>
+      <div class="top1-score-big">${fmtScore(apt.composite_score)}<span class="top1-score-unit">점</span></div>
       <div class="ep-links" style="justify-content:center;margin-top:.8rem">
-        <a class="ep-map" href="${naverMapUrl(top.district, top.apt_name, top.dong, top.lat, top.lng)}" target="_blank" rel="noopener">네이버 지도 ↗</a>
-        <a class="ep-naver" href="${naverLandUrl(top.district, top.apt_name, top.dong, top.lat, top.lng)}" target="_blank" rel="noopener">네이버 부동산 ↗</a>
-        <a class="ep-hogang" href="${hogangnonoUrl(top.district, top.apt_name, top.dong, top.lat, top.lng)}" target="_blank" rel="noopener">호갱노노 ↗</a>
+        <a class="ep-map" href="${naverMapUrl(apt.district, apt.apt_name, apt.dong, apt.lat, apt.lng)}" target="_blank" rel="noopener">네이버 지도 ↗</a>
+        <a class="ep-naver" href="${naverLandUrl(apt.district, apt.apt_name, apt.dong, apt.lat, apt.lng)}" target="_blank" rel="noopener">네이버 부동산 ↗</a>
+        <a class="ep-hogang" href="${hogangnonoUrl(apt.district, apt.apt_name, apt.dong, apt.lat, apt.lng)}" target="_blank" rel="noopener">호갱노노 ↗</a>
       </div>
     </div>
 
     <div class="top1-body">
-      <div class="top1-radar" id="top1Radar"></div>
+      <div class="top1-radar" id="${radarId}"></div>
       <div class="top1-axes">
         ${axes.map(a => `
           <div class="top1-axis-row">
@@ -417,29 +450,21 @@ async function renderTop1() {
       <div class="top1-stat"><div class="ts-val">${mddInfo.peak_price != null ? (mddInfo.peak_price/10000).toFixed(1)+'억' : '—'}</div><div class="ts-key">최고 거래가</div></div>
       <div class="top1-stat"><div class="ts-val" style="color:#34d399">${mddInfo.mdd != null ? mddInfo.mdd.toFixed(1)+'%' : '—'}</div><div class="ts-key">MDD (최대낙폭)</div></div>
       <div class="top1-stat"><div class="ts-val">${mddInfo.total_trades != null ? mddInfo.total_trades.toLocaleString()+'건' : '—'}</div><div class="ts-key">총 거래 건수</div></div>
-      <div class="top1-stat"><div class="ts-val">${top.active_months != null ? top.active_months+'개월' : '—'}</div><div class="ts-key">활성 거래 기간</div></div>
+      <div class="top1-stat"><div class="ts-val">${apt.active_months != null ? apt.active_months+'개월' : '—'}</div><div class="ts-key">활성 거래 기간</div></div>
     </div>
 
     <div class="top1-insight">
-      <div class="insight-title">왜 1위인가요?</div>
-      <ul class="insight-list">
-        ${top.defense_score >= 70 ? '<li>하락장에서 가격 방어력이 매우 뛰어나고 회복도 빠릅니다</li>' : ''}
-        ${top.liquidity_score >= 70 ? '<li>6년간 꾸준한 거래가 이어진 환금성 높은 단지입니다</li>' : ''}
-        ${top.upside_score >= 70 ? '<li>상승장에서도 시장 평균을 웃도는 상승률을 기록했습니다</li>' : ''}
-        ${top.momentum_score >= 70 ? '<li>최근 12개월 가격 추세가 뚜렷한 상승 흐름입니다</li>' : ''}
-        ${top.premium_score >= 70 ? '<li>단위면적당 가격 상위권 — 시장이 인정한 입지입니다</li>' : ''}
-        ${top.transit_score >= 70 && top.nearest_station ? `<li>${top.nearest_station} 도보 ${Math.round(top.walk_min)}분 거리의 역세권 단지입니다</li>` : ''}
-        ${top.redevelop_score >= 70 ? `<li>준공 ${top.apt_age || ''}년차 — 재건축 연한에 근접해 미래가치 상승 잠재력이 있습니다</li>` : ''}
-        <li>${top.district} 내 ${comp.ranking.filter(r=>r.district===top.district).length}개 단지 중 종합 1위를 차지했습니다</li>
-        <li>6가지 분석 축에서 균형 잡힌 고득점을 기록했습니다</li>
-      </ul>
+      <div class="insight-title">왜 이 점수인가요?</div>
+      <ul class="insight-list">${buildApartmentInsights(apt, comp, extraInsight)}</ul>
     </div>
+
+    <div id="${priceChartId}" class="top1-price-chart" style="height:260px"></div>
   `;
 
   // 레이더 차트 렌더링
   const radarFull = [...radarVals, radarVals[0]];
   const radarFull2 = [...radarLabels, radarLabels[0]];
-  Plotly.newPlot('top1Radar', [{
+  Plotly.newPlot(radarId, [{
     type: 'scatterpolar',
     r: radarFull,
     theta: radarFull2,
@@ -447,7 +472,7 @@ async function renderTop1() {
     fillcolor: 'rgba(56,189,248,0.2)',
     line: { color: '#38bdf8', width: 2 },
     marker: { color: '#38bdf8', size: 6 },
-    name: top.apt_name
+    name: apt.apt_name
   }], {
     polar: {
       radialaxis: { visible: true, range: [0, 100], color: '#475569', gridcolor: '#334155' },
@@ -462,26 +487,38 @@ async function renderTop1() {
   }, { responsive: true, displayModeBar: false });
 
   // 가격 추이 차트 (있는 경우)
-  const aptTs = (ts.apartments || []).find(a => a.apt_name === top.apt_name && a.district === top.district);
   if (aptTs && aptTs.monthly) {
-    renderPriceChart(aptTs);
+    renderPriceChart(priceChartId, aptTs);
   }
 }
 
-function renderPriceChart(aptTs) {
+async function renderTop1() {
+  const { comp, mdd, ts } = await loadScoreData();
+
+  const top = comp.ranking?.[0];
+  if (!top) {
+    document.getElementById('top1Detail').innerHTML = `<div class="empty-state">데이터 없음</div>`;
+    return;
+  }
+
+  const mddInfo = (mdd.ranking||[]).find(r => r.apt_name === top.apt_name && r.district === top.district) || {};
+  const aptTs = (ts.apartments || []).find(a => a.apt_name === top.apt_name && a.district === top.district);
+  const sameDistrictCount = comp.ranking.filter(r => r.district === top.district).length;
+
+  renderApartmentDetail('top1Detail', 'top1Radar', 'top1PriceChart', top, mddInfo, comp, aptTs, {
+    badgeHtml: '🏆 전체 종합 1위',
+    extraInsight: [
+      `<li>${top.district} 내 ${sameDistrictCount}개 단지 중 종합 1위를 차지했습니다</li>`,
+      '<li>여러 분석 축에서 균형 잡힌 고득점을 기록했습니다</li>',
+    ],
+  });
+}
+
+function renderPriceChart(chartId, aptTs) {
   const months = aptTs.monthly.map(m => m.ym);
   const prices = aptTs.monthly.map(m => m.median != null ? +(m.median/10000).toFixed(2) : null);
 
-  const existing = document.getElementById('top1PriceChart');
-  if (!existing) {
-    const chartDiv = document.createElement('div');
-    chartDiv.id = 'top1PriceChart';
-    chartDiv.className = 'top1-price-chart';
-    chartDiv.style.height = '260px';
-    document.getElementById('top1Detail').appendChild(chartDiv);
-  }
-
-  Plotly.newPlot('top1PriceChart', [{
+  Plotly.newPlot(chartId, [{
     x: months, y: prices,
     type: 'scatter', mode: 'lines+markers',
     line: { color: '#38bdf8', width: 2 },
@@ -1307,6 +1344,62 @@ function showAptDetail(a) {
 }
 
 /* ── 네비게이션 활성화 ──────────────────────────────────── */
+/* ── 동네별 추천 단지 상세 모달 ────────────────────────────── */
+// "동네별 추천 단지" 목록의 아무 행이나 클릭하면 전체 1위와 같은 형식(레이더+축별
+// 점수+통계+근거)으로 그 단지의 상세 점수를 모달로 보여준다.
+async function openApartmentModal(district, aptName) {
+  const overlay = document.getElementById('aptModalOverlay');
+  const body = document.getElementById('aptModalBody');
+  if (!overlay || !body) return;
+
+  body.innerHTML = `<div class="skeleton" style="height:400px"></div>`;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+
+  const { comp, mdd, ts } = await loadScoreData();
+  const apt = (comp.ranking || []).find(r => r.district === district && r.apt_name === aptName);
+  if (!apt) {
+    body.innerHTML = `<div class="empty-state">데이터를 찾을 수 없습니다.</div>`;
+    return;
+  }
+  const mddInfo = (mdd.ranking || []).find(r => r.apt_name === apt.apt_name && r.district === apt.district) || {};
+  const aptTs = (ts.apartments || []).find(a => a.apt_name === apt.apt_name && a.district === apt.district);
+  const sameDistrictRanked = comp.ranking
+    .filter(r => r.district === apt.district)
+    .sort((a, b) => b.composite_score - a.composite_score);
+  const localRank = sameDistrictRanked.findIndex(r => r.apt_name === apt.apt_name) + 1;
+
+  renderApartmentDetail('aptModalBody', 'aptModalRadar', 'aptModalPriceChart', apt, mddInfo, comp, aptTs, {
+    badgeHtml: `📍 ${apt.district} 내 ${localRank || '—'}위`,
+    extraInsight: [`<li>${apt.district} 내 ${sameDistrictRanked.length}개 분석 단지 중 ${localRank}위입니다</li>`],
+  });
+}
+
+function closeApartmentModal() {
+  const overlay = document.getElementById('aptModalOverlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function initApartmentModal() {
+  const list = document.getElementById('districtRankings');
+  if (list) {
+    list.addEventListener('click', (e) => {
+      const row = e.target.closest('.drs-row');
+      if (!row || e.target.closest('a')) return;   // 링크 클릭은 그대로 새 탭으로
+      const entry = _rankingRowMap[Number(row.dataset.ridx)];
+      if (entry) openApartmentModal(entry.district, entry.apt_name);
+    });
+  }
+  document.getElementById('aptModalClose')?.addEventListener('click', closeApartmentModal);
+  document.getElementById('aptModalOverlay')?.addEventListener('click', (e) => {
+    if (e.target.id === 'aptModalOverlay') closeApartmentModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeApartmentModal();
+  });
+}
+
 function initNav() {
   const sections = ['secExplorer','secBudget','secMap','secScoring','secDistrict','secTop1'];
   const links = document.querySelectorAll('.nav-link');
@@ -1336,4 +1429,5 @@ function initNav() {
   await safe(renderMap);
   await safe(renderDistrictRankings);
   await safe(renderTop1);
+  initApartmentModal();
 })();
