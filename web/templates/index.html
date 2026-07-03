@@ -142,6 +142,11 @@
           <div class="budget-field"><label>금리 (%) <button class="legal-link" data-legal="rate">?</button></label><div class="bf-input"><input type="number" id="aRate" step="0.05" min="0"></div></div>
           <div class="budget-field"><label>만기 (년)</label><div class="bf-input"><input type="number" id="aYears" step="5" min="5" max="50"></div></div>
         </div>
+        <div class="budget-field ls-field">
+          <label>실제 사용할 대출액 <span class="ls-max" id="aLoanMax"></span></label>
+          <input type="range" class="ls-slider" id="aLoanOverride" min="0" max="0" step="1000000" value="0">
+          <div class="ls-out" id="aLoanOut"></div>
+        </div>
         <div id="aSummary" class="person-summary"></div>
       </div>
 
@@ -164,6 +169,11 @@
         <div class="budget-field-row">
           <div class="budget-field"><label>금리 (%) <button class="legal-link" data-legal="rate">?</button></label><div class="bf-input"><input type="number" id="bRate" step="0.05" min="0"></div></div>
           <div class="budget-field"><label>만기 (년)</label><div class="bf-input"><input type="number" id="bYears" step="5" min="5" max="50"></div></div>
+        </div>
+        <div class="budget-field ls-field">
+          <label>실제 사용할 대출액 <span class="ls-max" id="bLoanMax"></span></label>
+          <input type="range" class="ls-slider" id="bLoanOverride" min="0" max="0" step="1000000" value="0">
+          <div class="ls-out" id="bLoanOut"></div>
         </div>
         <div id="bSummary" class="person-summary"></div>
       </div>
@@ -199,12 +209,6 @@
     <div class="budget-card" style="margin-top:1rem">
       <div class="budget-card-title">💸 매달 얼마가, 누구에게 나가나요?</div>
       <div id="repayDetail" class="repay-detail"></div>
-    </div>
-
-    <!-- 대출 시뮬레이터: 최대 대출 한도 내에서 직접 조절하며 원리금 확인 -->
-    <div class="budget-card" style="margin-top:1rem">
-      <div class="budget-card-title">🎚 대출 시뮬레이터 — 한도 내에서 직접 조절해보기</div>
-      <div id="loanSimulator" class="loan-sim"></div>
     </div>
 
     <!-- 자금 구성 차트 + 부대비용 상세 -->

@@ -934,9 +934,16 @@ body { font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSy
 .ls-slider::-moz-range-thumb {
   width: 16px; height: 16px; border-radius: 50%; background: #f1f5f9; border: 2px solid #38bdf8; cursor: pointer;
 }
-.ls-fill-track { display: none; }
-.ls-out { display: flex; flex-wrap: wrap; gap: .4rem; color: #cbd5e1; font-size: .85rem; font-variant-numeric: tabular-nums; }
+.ls-out { display: flex; flex-wrap: wrap; gap: .4rem; color: #cbd5e1; font-size: .85rem; font-variant-numeric: tabular-nums; margin-top: .1rem; }
 .ls-out b { color: #f1f5f9; }
 .ls-loanval b { color: #38bdf8; }
 .ls-sep { color: #475569; }
 .ls-note { margin-top: .2rem; }
+
+/* 2인 예산 카드 안에 들어간 대출 슬라이더: 카드 형태 필드로 표시 */
+.ls-field { background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: .7rem .8rem; margin-bottom: .85rem; }
+.ls-field label { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .5rem; }
+.person-a .ls-slider { accent-color: #38bdf8; }
+.person-a .ls-slider::-webkit-slider-thumb { border-color: #38bdf8; }
+.person-b .ls-slider { accent-color: #f472b6; }
+.person-b .ls-slider::-webkit-slider-thumb { border-color: #f472b6; }

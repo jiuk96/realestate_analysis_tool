@@ -1,5 +1,5 @@
 import {
-  LOAN_PRODUCTS, analyzeCouple, won2eok, won2man, calcMonthlyPayment,
+  LOAN_PRODUCTS, analyzeCouple, won2eok, won2man, calcMonthlyPayment, personDsrLoan,
   LEGAL_BASIS, FAMILY_LOAN, REFERENCES, LOAN_RATE_SOURCES, GIFT_TAX_TABLE,
 } from './financeCalculator.js';
 
@@ -641,6 +641,17 @@ function initBudgetPlanner() {
     if (el) el.addEventListener('change', recalcBudget);
   });
 
+  // 대출 시뮬레이터 슬라이더: 사용자가 직접 움직인 값을 기억해두었다가
+  // 다음 재계산에서도 유지한다 (다른 입력이 바뀌어 한도가 변해도 유지, 단 새 한도 초과 시 clamp).
+  ['a', 'b'].forEach(prefix => {
+    const slider = document.getElementById(prefix + 'LoanOverride');
+    if (!slider) return;
+    slider.addEventListener('input', () => {
+      loanOverrideState[prefix] = parseFloat(slider.value) || 0;
+      recalcBudget();
+    });
+  });
+
   renderLegalAccordion();
   renderReferences();
   renderRateSources();
@@ -736,6 +747,23 @@ function personInput(prefix) {
   };
 }
 
+// 대출 시뮬레이터 슬라이더 상태: null이면 "한도 최대치 사용"(기존 기본 동작)
+const loanOverrideState = { a: null, b: null };
+
+// 각자의 소득 기준 최대 대출 가능액(dsrLoan)에 맞춰 슬라이더 상한/기본값을 동기화
+function syncLoanSlider(prefix, maxLoan) {
+  const slider = document.getElementById(prefix + 'LoanOverride');
+  const maxLabel = document.getElementById(prefix + 'LoanMax');
+  if (!slider) return;
+  const maxRounded = Math.max(0, Math.round(maxLoan));
+  slider.max = maxRounded;
+  if (loanOverrideState[prefix] == null || loanOverrideState[prefix] > maxRounded) {
+    loanOverrideState[prefix] = maxRounded;
+  }
+  slider.value = loanOverrideState[prefix];
+  if (maxLabel) maxLabel.textContent = `최대 ${won2eok(maxLoan)}`;
+}
+
 function recalcBudget() {
   const chk = id => document.getElementById(id).checked;
   const 억 = 1e8;
@@ -750,8 +778,25 @@ function recalcBudget() {
     repay: document.getElementById('repayType').value,
   };
 
+  // 소득만 기준으로 한 개인 최대 대출한도(LTV/주택가와 무관)를 슬라이더에 반영
+  syncLoanSlider('a', personDsrLoan(inA));
+  syncLoanSlider('b', personDsrLoan(inB));
+  inA.loanOverride = loanOverrideState.a;
+  inB.loanOverride = loanOverrideState.b;
+
   const R = analyzeCouple(inA, inB, common);
   lastAnalysis = R;
+
+  // 대출 슬라이더 하단 읽기값: 실제 반영된 대출액·월 원리금·총이자
+  // (LTV 등으로 인해 슬라이더로 요청한 금액보다 실제 대출액이 낮아질 수 있음)
+  const updateLoanOut = (prefix, P) => {
+    const out = document.getElementById(prefix + 'LoanOut');
+    if (!out) return;
+    const pm = calcMonthlyPayment(P.loan, P.rate || 0.041, P.years || 40, common.repay);
+    out.innerHTML = `대출액 <b>${won2eok(P.loan)}</b> <span class="ls-sep">·</span> 월 원리금 <b>${won2man(pm.first)}</b> <span class="ls-sep">·</span> 총이자 ${won2eok(pm.totalInterest)}`;
+  };
+  updateLoanOut('a', R.A);
+  updateLoanOut('b', R.B);
 
   // 부모 지원 분리 표시 (증여/차용 + 세금)
   const renderParentSplit = (prefix, P) => {
@@ -809,63 +854,6 @@ function recalcBudget() {
   renderBudgetChart(R);
   renderFundFlow(R);
   renderRepayDetail(R);
-  renderLoanSimulator(R, common);
-}
-
-// 대출 시뮬레이터: 각자 최대 대출한도(R.A.loan/R.B.loan)를 상한으로 하는 슬라이더.
-// 슬라이더를 움직이면 recalcBudget 전체를 다시 돌리지 않고, 그 금액 기준
-// 월 원리금(calcMonthlyPayment)만 즉시 재계산해 보여준다.
-const loanSimState = { a: null, b: null };
-
-function renderLoanSimulator(R, common) {
-  const el = document.getElementById('loanSimulator');
-  if (!el) return;
-  const repay = common.repay;
-
-  const block = (P, prefix, label, color) => {
-    const maxLoan = Math.max(0, P.loan);
-    // 기존에 사용자가 조절해둔 값이 있으면 유지(단, 새 한도를 넘지 않게 clamp)
-    if (loanSimState[prefix] == null || loanSimState[prefix] > maxLoan) {
-      loanSimState[prefix] = maxLoan;
-    }
-    const val = loanSimState[prefix];
-    const pm = calcMonthlyPayment(val, P.rate || 0.041, P.years || 40, repay);
-    return `
-      <div class="ls-person" data-prefix="${prefix}">
-        <div class="ls-head"><span class="ls-name" style="color:${color}">${label}</span>
-          <span class="ls-max">최대 대출한도 ${won2eok(maxLoan)} (금리 ${((P.rate||0.041)*100).toFixed(2)}% · ${P.years||40}년)</span></div>
-        <input type="range" class="ls-slider" min="0" max="${Math.round(maxLoan)}" step="1000000"
-               value="${Math.round(val)}" data-prefix="${prefix}" style="accent-color:${color}">
-        <div class="ls-out" id="ls-out-${prefix}">
-          <span class="ls-loanval">대출액 <b>${won2eok(val)}</b></span>
-          <span class="ls-sep">·</span>
-          <span>월 원리금 <b>${won2man(pm.first)}</b></span>
-          <span class="ls-sep">·</span>
-          <span>총이자 ${won2eok(pm.totalInterest)}</span>
-        </div>
-      </div>`;
-  };
-
-  el.innerHTML = `
-    ${block(R.A, 'a', '💼 나', '#38bdf8')}
-    ${block(R.B, 'b', '💗 여자친구', '#f472b6')}
-    <p class="lp-note ls-note">위 대출한도는 현재 입력된 소득(DSR)·LTV·정책상품 한도 기준 최대치입니다. 슬라이더로 실제로 받고 싶은 대출액을 낮춰보면서 월 원리금이 어떻게 줄어드는지 확인해보세요.</p>`;
-
-  el.querySelectorAll('.ls-slider').forEach(input => {
-    input.addEventListener('input', () => {
-      const prefix = input.dataset.prefix;
-      loanSimState[prefix] = parseFloat(input.value) || 0;
-      const P = prefix === 'a' ? R.A : R.B;
-      const pm = calcMonthlyPayment(loanSimState[prefix], P.rate || 0.041, P.years || 40, repay);
-      const wrap = input.closest('.ls-person');
-      wrap.querySelector('#ls-out-' + prefix).innerHTML = `
-        <span class="ls-loanval">대출액 <b>${won2eok(loanSimState[prefix])}</b></span>
-        <span class="ls-sep">·</span>
-        <span>월 원리금 <b>${won2man(pm.first)}</b></span>
-        <span class="ls-sep">·</span>
-        <span>총이자 ${won2eok(pm.totalInterest)}</span>`;
-    });
-  });
 }
 
 // 월 상환 상세: 누구에게 얼마가 나가고, 각자 월급 대비 몇 %인지

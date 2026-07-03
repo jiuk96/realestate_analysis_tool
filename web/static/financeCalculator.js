@@ -490,6 +490,18 @@ export function analyzeFinance(input) {
  *  - LTV·6억 캡·부대비용은 주택(공통)에 적용
  *  - 결과에 각자 기여 가용자금과 월 상환액을 분리해 보여준다.
  */
+/**
+ * 개인 소득만으로 산정한 최대 대출 가능액(DSR·상품한도 기준, 주택가/LTV와 무관).
+ * 대출 시뮬레이터 슬라이더의 상한값으로 사용한다.
+ */
+export function personDsrLoan(p) {
+  const stressRate = (p.rate || 0.041) + REGULATION.STRESS_DSR_ADDON;
+  return Math.min(
+    maxLoanByDSR(p.income || 0, stressRate, p.years || 40),
+    (p.product && p.product.maxLoan) || Infinity
+  );
+}
+
 function analyzePerson(p, common) {
   const { marriage, birth } = common;
   const gift = calcGiftTax(p.gift || 0, { marriage, birth });
@@ -519,7 +531,13 @@ export function analyzeCouple(inA, inB, common) {
   const ownEquity = A.equity + B.equity;                 // 두 사람 자기자본(현금+세후증여)
   const familyTotal = A.family + B.family;               // 부모 무이자 차용 합
   const available = ownEquity + familyTotal;             // 매수 투입 가능 현금성 자금
-  const dsrTotal = A.dsrLoan + B.dsrLoan;                // 소득 기준 대출 합
+  const dsrTotal = A.dsrLoan + B.dsrLoan;                // 소득 기준 대출 한도(각자 최대치) 합
+
+  // 사용자가 대출 시뮬레이터 슬라이더로 실제 사용할 대출액을 낮췄다면 그 값을 쓰고,
+  // 손대지 않았다면(loanOverride 미지정) 기존처럼 각자 최대 한도(dsrLoan)를 그대로 사용한다.
+  const reqA = (inA.loanOverride != null) ? Math.min(Math.max(0, inA.loanOverride), A.dsrLoan) : A.dsrLoan;
+  const reqB = (inB.loanOverride != null) ? Math.min(Math.max(0, inB.loanOverride), B.dsrLoan) : B.dsrLoan;
+  const reqTotal = reqA + reqB;                          // 실제 조달하려는 대출 희망액 합
 
   // LTV (공통, 일반 주담대 기준)
   let ltv;
@@ -527,7 +545,7 @@ export function analyzeCouple(inA, inB, common) {
   else ltv = firstHome ? REGULATION.LTV_NORMAL_FIRST : REGULATION.LTV_NORMAL;
 
   const loanCapAt = (price) => {
-    let loan = Math.min(dsrTotal, price * ltv);
+    let loan = Math.min(reqTotal, price * ltv);
     if (regulated) loan = Math.min(loan, REGULATION.METRO_LOAN_CAP);
     return loan;
   };
@@ -547,13 +565,13 @@ export function analyzeCouple(inA, inB, common) {
   const acq = calcAcquisitionTax(maxPrice, firstHome);
   const broker = calcBrokerFee(maxPrice);
   const byLTV = maxPrice * ltv;
-  let loan = Math.min(dsrTotal, byLTV);
-  let bind = 'DSR 합산';
+  let loan = Math.min(reqTotal, byLTV);
+  let bind = '희망 대출액';
   if (loan === byLTV) bind = `LTV ${(ltv * 100).toFixed(0)}%${regulated ? '(규제지역)' : ''}`;
   if (regulated && loan > REGULATION.METRO_LOAN_CAP) { loan = REGULATION.METRO_LOAN_CAP; bind = '6·27 대책 6억'; }
 
-  // 대출을 각자 DSR 여력 비율로 배분
-  const loanA = dsrTotal > 0 ? loan * A.dsrLoan / dsrTotal : loan / 2;
+  // 대출을 각자 희망(요청) 대출액 비율로 배분
+  const loanA = reqTotal > 0 ? loan * reqA / reqTotal : loan / 2;
   const loanB = loan - loanA;
   const monthlyA = calcMonthlyPayment(loanA, A.rate, A.years, repay).first + A.familyMonthly;
   const monthlyB = calcMonthlyPayment(loanB, B.rate, B.years, repay).first + B.familyMonthly;
