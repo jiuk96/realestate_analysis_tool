@@ -396,6 +396,14 @@ body {
 /* 필터 요약 */
 .filter-summary { margin-top: 1.5rem; }
 
+/* ── 데이터 신뢰도 배지 ─────────────────────────────────── */
+.conf-badge {
+  display: inline-block; margin-top: .55rem; padding: .3rem .8rem;
+  border-radius: 99px; font-size: .74rem; font-weight: 600;
+}
+.conf-low  { background: rgba(251,191,36,.12); color: #fbbf24; border: 1px solid rgba(251,191,36,.3); }
+.conf-high { background: rgba(52,211,153,.1); color: #34d399; border: 1px solid rgba(52,211,153,.22); }
+
 /* ── 점수 백테스트 박스 ─────────────────────────────────── */
 .backtest-box {
   margin-top: 1.5rem; background: var(--bg2); border: 1px solid var(--border);

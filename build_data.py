@@ -118,6 +118,19 @@ score_df = score_df.rename(columns={'district_name': 'district'})
 # mdd 컬럼 추가 (dashboard.js에서 a.mdd 참조)
 if 'mdd_pct' in score_df.columns and 'mdd' not in score_df.columns:
     score_df['mdd'] = score_df['mdd_pct']
+
+# 데이터 신뢰도 배지: 59㎡ 대표평형 관측이 얇은 단지는 점수의 불확실성이 크다는
+# 것을 사용자에게 정직하게 표시 (high=충분 / mid=보통 / low=주의)
+def _confidence(r):
+    am = r.get('active_months') or 0
+    tt = r.get('total_trades') or 0
+    if am >= 24 and tt >= 40:
+        return 'high'
+    if am < 12 or tt < 15:
+        return 'low'
+    return 'mid'
+score_df['data_confidence'] = score_df.apply(_confidence, axis=1)
+print('  데이터 신뢰도:', score_df['data_confidence'].value_counts().to_dict())
 print(f'  상위 10:')
 print(score_df[['apt_name', 'district', 'composite_score']].head(10).to_string(index=False))
 

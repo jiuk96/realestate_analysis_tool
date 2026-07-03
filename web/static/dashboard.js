@@ -250,11 +250,8 @@ function renderScoring() {
       desc: '최근 12개월 가격 추세를 측정합니다. 하락 후 다시 오르는 단지와 바닥에 머무는 단지를 구분합니다. 이상거래 한 달에 흔들리지 않도록 중앙값 기반(Theil-Sen) 추세를 쓰고, 관측이 6개월 미만이면 판단을 보류(중립)합니다.',
       metric: '최근 12개월 Theil-Sen 추세 (연율화 %) · 6개월 미만 관측은 중립', example: '최근 1년간 연 +8% 추세 → 강한 모멘텀' },
     { key: '입지프리미엄', weight: 15, color: '#fb923c',
-      desc: '단위면적(m²)당 가격 수준입니다. 교통·학군·인프라 가치는 이미 시장가격에 반영되어 있어, 평단가가 가장 객관적인 입지 지표입니다.',
-      metric: 'm²당 고점 거래가 percentile', example: '평단가 상위 10% → 시장이 인정한 입지' },
-    { key: '규모', weight: 8, color: '#f472b6',
-      desc: '총 거래량으로 단지 규모(세대수)를 가늠합니다. 대단지는 매물·수요가 풍부해 환금성이 높습니다.',
-      metric: '총 거래 건수 percentile', example: '1,000+ 거래 대단지 → 높은 환금성' },
+      desc: '단위면적(m²)당 가격 수준입니다. 교통·학군·인프라 가치는 이미 시장가격에 반영되어 있어, 평단가가 가장 객관적인 입지 지표입니다. 단지마다 고점 시점이 달라 비교가 어긋나던 문제를 피하기 위해, 전 단지 동일 시점인 최신 시세 기준으로 계산합니다.',
+      metric: 'm²당 최신 시세 percentile (전 단지 동일 시점)', example: '평단가 상위 10% → 시장이 인정한 입지' },
     { key: '교통', weight: 10, color: '#f87171',
       desc: '단지 좌표에서 가장 가까운 지하철역까지의 도보거리(직선거리 기반)와 반경 1km 내 역 수(더블역세권)를 평가합니다.',
       metric: '최근접역 도보 분(80%) + 1km 내 역 수(20%)', example: '도보 5분 역세권 + 더블역세권 → 최고점' },
@@ -386,8 +383,8 @@ async function renderDistrictRankings() {
 
     const rows = apts.map((a, i) => {
       const axes = [
-        ['가격방어', a.defense_score], ['유동성', a.liquidity_score], ['상승참여', a.upside_score],
-        ['모멘텀', a.momentum_score], ['프리미엄', a.premium_score], ['규모', a.scale_score],
+        ['가격방어', a.defense_score], ['전세가율', a.jeonse_score], ['유동성', a.liquidity_score],
+        ['상승참여', a.upside_score], ['모멘텀', a.momentum_score], ['프리미엄', a.premium_score],
         ['교통', a.transit_score], ['재건축', a.redevelop_score],
       ].filter(x => x[1] != null);
       const best = axes.reduce((p,c) => c[1] > p[1] ? c : p, ['', -1]);
@@ -434,7 +431,6 @@ function buildApartmentAxes(apt) {
     { name: '회복모멘텀', val: apt.momentum_score, color: '#a78bfa' },
     { name: '입지프리미엄', val: apt.premium_score, color: '#fb923c' },
     { name: '교통', val: apt.transit_score, color: '#f87171' },
-    { name: '규모', val: apt.scale_score, color: '#f472b6' },
     { name: '재건축잠재력', val: apt.redevelop_score, color: '#22d3ee' },
   ].filter(a => a.val != null);
 }
@@ -508,11 +504,7 @@ function buildAxisReasons(apt) {
   }
 
   if (apt.premium_score != null && apt.price_per_m2 != null) {
-    reasons['입지프리미엄'] = `㎡당 최고가 ${apt.price_per_m2.toLocaleString()}만원 — 분석 대상 단지 중 상위 ${pct(apt.premium_score)}% 평단가 수준입니다.`;
-  }
-
-  if (apt.scale_score != null && apt.total_trades != null) {
-    reasons['규모'] = `누적 거래 ${apt.total_trades.toLocaleString()}건으로, 거래량 기준 상위 ${pct(apt.scale_score)}% 규모입니다.`;
+    reasons['입지프리미엄'] = `㎡당 최신 시세 ${apt.price_per_m2.toLocaleString()}만원 — 분석 대상 단지 중 상위 ${pct(apt.premium_score)}% 평단가 수준입니다 (전 단지 동일 시점 비교).`;
   }
 
   if (apt.transit_score != null) {
@@ -572,6 +564,11 @@ function renderApartmentDetail(containerId, radarId, priceChartId, apt, mddInfo,
       <div class="top1-badge">${badgeHtml}</div>
       <h3 class="top1-name">${apt.apt_name}</h3>
       <div class="top1-loc">${apt.district} ${distInfo.icon||''}</div>
+      ${apt.data_confidence === 'low'
+        ? `<div class="conf-badge conf-low">⚠️ 데이터 부족 주의 — 59㎡ 관측 ${apt.active_months ?? '—'}개월 · 거래 ${apt.total_trades ?? '—'}건이라 점수 불확실성이 큽니다</div>`
+        : apt.data_confidence === 'high'
+          ? `<div class="conf-badge conf-high">✓ 데이터 충분 (관측 ${apt.active_months}개월 · 거래 ${apt.total_trades}건)</div>`
+          : ''}
       <div class="top1-score-big">${fmtScore(apt.composite_score)}<span class="top1-score-unit">점</span></div>
       <div class="ep-links" style="justify-content:center;margin-top:.8rem">
         <a class="ep-map" href="${naverMapUrl(apt.district, apt.apt_name, apt.dong, apt.lat, apt.lng)}" target="_blank" rel="noopener">네이버 지도 ↗</a>

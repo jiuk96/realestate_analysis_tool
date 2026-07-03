@@ -131,6 +131,7 @@ def api_apartments():
             "turnover": r.get("turnover"),
             "jeonse_score": r.get("jeonse_score"),
             "jeonse_ratio": r.get("jeonse_ratio"),
+            "data_confidence": r.get("data_confidence"),
         })
     return jsonify({"apartments": out})
 

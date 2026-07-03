@@ -33,29 +33,30 @@ log = logging.getLogger(__name__)
 # "있는 축만" 남겨 합이 1이 되도록 재정규화한다(compute_composite_score).
 # 이렇게 하면 축을 추가/제거해도 나머지 비중이 자동으로 맞춰진다.
 AXIS_WEIGHTS = {
-    "defense":   0.22,   # 가격 방어력 (하락장 MDD + 회복)
+    "defense":   0.22,   # 가격 방어력 (하락장 MDD + 회복 + 안정성)
     "jeonse":    0.10,   # 전세가율 (하방 지지력 — 전세 데이터 있을 때만)
-    "liquidity": 0.15,   # 거래 유동성 (꾸준함 + 회전율)
+    "liquidity": 0.18,   # 거래 유동성 (꾸준함 + 회전율) — 규모 축 통합분 반영
     "upside":    0.12,   # 상승 참여도
     "momentum":  0.11,   # 회복 모멘텀
-    "premium":   0.09,   # 입지 프리미엄 (평단가)
-    "transit":   0.09,   # 교통 접근성 (실측 좌표 있을 때만)
-    "scale":     0.06,   # 규모(거래량)
-    "redevelop": 0.06,   # 재건축 잠재력 (준공연도 기반)
+    "premium":   0.10,   # 입지 프리미엄 (최신가 기준 평단가)
+    "transit":   0.10,   # 교통 접근성 (실측 좌표 있을 때만)
+    "redevelop": 0.07,   # 재건축 잠재력 (준공연도 기반)
 }
+# ⚠️ '규모' 축은 제거됨 — 유동성 축과 스피어만 +0.79로 같은 신호(거래건수)에
+# 이중 가중을 주고 있었다. 규모 정보는 회전율(거래÷세대수)로 유동성에 이미 반영.
 
 # 각 축 점수 컬럼명 (fillna 기본값과 함께 사용)
 AXIS_SCORE_COL = {
     "defense": "defense_score", "jeonse": "jeonse_score", "liquidity": "liquidity_score",
     "upside": "upside_score", "momentum": "momentum_score", "premium": "premium_score",
-    "transit": "transit_score", "scale": "scale_score", "redevelop": "redevelop_score",
+    "transit": "transit_score", "redevelop": "redevelop_score",
 }
 
 # 한글 라벨 (composite_score.json weights 표시용)
 AXIS_KR = {
     "defense": "가격방어력", "jeonse": "전세가율", "liquidity": "거래유동성",
     "upside": "상승참여도", "momentum": "회복모멘텀", "premium": "입지프리미엄",
-    "transit": "교통", "scale": "규모", "redevelop": "재건축잠재력",
+    "transit": "교통", "redevelop": "재건축잠재력",
 }
 
 # 하위호환용(기존 build_data가 import) — 전세·교통 없는 기본 구성
@@ -291,34 +292,38 @@ def _recovery_momentum(monthly: pd.DataFrame) -> pd.DataFrame:
     연율화 기울기(%/년) = slope × 12 / 평균가 × 100.
     하락 후 다시 오르는 단지와 바닥에 머무는 단지를 구분.
 
-    강건화: ① 관측 6개월 미만이면 계산하지 않고 중립(중앙값) 처리 —
-    점 3~5개로 뽑은 기울기는 노이즈가 심해 오히려 오판을 부른다.
+    강건화: ① 관측 6개월 미만이면 판단 보류가 아니라 먼저 윈도우를 18개월로
+    넓혀 재시도한다(저유동 단지 구제 — 표본의 23%가 중립 처리되던 것을 축소).
+    18개월로도 6개 미만이면 그때 중립(중앙값) 처리.
     ② OLS 대신 Theil-Sen(쌍별 기울기의 중앙값)을 사용해 이상거래 한 달이
     추세 전체를 왜곡하지 못하게 한다.
     """
     end = monthly["deal_date"].max()
-    start = end - 11
     MIN_OBS = 6
+    WINDOWS = (12, 18)   # 순서대로 시도
 
     rows = []
     for (district_name, apt_name), grp in monthly.groupby(["district_name", "apt_name"], observed=True):
-        w = grp[(grp["deal_date"] >= start)].sort_values("deal_date")
-        if len(w) < MIN_OBS:
-            rows.append({"district_name": district_name, "apt_name": apt_name, "momentum_pct": np.nan})
-            continue
-        x = (w["deal_date"] - start).apply(lambda p: p.n).to_numpy(dtype=float)
-        y = w["smoothed_price"].to_numpy(dtype=float)
-        slope = _theil_sen_slope(x, y)           # 원/월
-        mean_price = y.mean()
-        momentum_pct = slope * 12 / mean_price * 100 if mean_price > 0 else 0
-        rows.append({"district_name": district_name, "apt_name": apt_name, "momentum_pct": round(momentum_pct, 2)})
+        momentum_pct = np.nan
+        for win in WINDOWS:
+            start = end - (win - 1)
+            w = grp[(grp["deal_date"] >= start)].sort_values("deal_date")
+            if len(w) < MIN_OBS:
+                continue
+            x = (w["deal_date"] - start).apply(lambda p: p.n).to_numpy(dtype=float)
+            y = w["smoothed_price"].to_numpy(dtype=float)
+            slope = _theil_sen_slope(x, y)           # 원/월
+            mean_price = y.mean()
+            momentum_pct = round(slope * 12 / mean_price * 100, 2) if mean_price > 0 else 0.0
+            break
+        rows.append({"district_name": district_name, "apt_name": apt_name, "momentum_pct": momentum_pct})
 
     mo = pd.DataFrame(rows)
     if mo.empty:
         return mo
     n_neutral = int(mo["momentum_pct"].isna().sum())
     if n_neutral:
-        log.info(f"모멘텀 중립 처리(최근 12개월 관측 {MIN_OBS}개월 미만): {n_neutral}개 단지")
+        log.info(f"모멘텀 중립 처리(12→18개월 확장에도 관측 {MIN_OBS}개월 미만): {n_neutral}개 단지")
     # 데이터 부족 단지는 중립(중앙값)으로
     mo["momentum_pct"] = mo["momentum_pct"].fillna(mo["momentum_pct"].median())
     mo["momentum_score"] = _pct_rank(mo["momentum_pct"])
@@ -327,14 +332,25 @@ def _recovery_momentum(monthly: pd.DataFrame) -> pd.DataFrame:
 
 # ── ⑤ 입지 프리미엄 ───────────────────────────────────────────
 
-def _location_premium(mdd_df: pd.DataFrame) -> pd.DataFrame:
+def _location_premium(mdd_df: pd.DataFrame, monthly: pd.DataFrame) -> pd.DataFrame:
     """
-    주력 면적 m²당 고점가 percentile.
+    주력 면적 m²당 '최신가' percentile.
     교통·학군·인프라 가치는 시장가격에 이미 반영되어 있으므로(헤도닉 원리)
     단위면적당 가격이 가장 객관적인 입지 지표.
+
+    ⚠️ 예전엔 고점가(peak_price) 기준이었는데, 감사 결과 고점 시점이 단지마다
+    달랐다(323개는 2021년, 21개는 2025~26년 신고가). 서로 다른 시대의 가격을
+    한 줄에 세우면 2021년 이후 시장 전체 상승분만큼 비교가 왜곡되므로,
+    모든 단지가 같은 시점인 '최신 스무딩가' 기준으로 교체했다.
     """
-    df = mdd_df[["district_name", "apt_name", "peak_price", "area_exclusive"]].copy()
-    df["price_per_m2"] = df["peak_price"] / df["area_exclusive"]
+    latest = (
+        monthly.sort_values("deal_date")
+        .groupby(["district_name", "apt_name"], observed=True)["smoothed_price"]
+        .last().rename("latest_for_premium").reset_index()
+    )
+    df = mdd_df[["district_name", "apt_name", "area_exclusive"]].merge(
+        latest, on=["district_name", "apt_name"], how="left")
+    df["price_per_m2"] = df["latest_for_premium"] / df["area_exclusive"]
     df["premium_score"] = _pct_rank(df["price_per_m2"])
     df["price_per_m2"] = df["price_per_m2"].round(1)
     return df[["district_name", "apt_name", "premium_score", "price_per_m2"]]
@@ -344,8 +360,10 @@ def _location_premium(mdd_df: pd.DataFrame) -> pd.DataFrame:
 
 def _scale(mdd_df: pd.DataFrame, monthly: pd.DataFrame) -> pd.DataFrame:
     """
-    총 거래건수 percentile — 세대수(대단지 프리미엄·환금성)의 프록시.
-    연식은 별도의 재건축 잠재력 축으로 분리했다.
+    총 거래건수 — 정보용으로만 병합하고 더 이상 점수 축으로 쓰지 않는다.
+    감사 결과 scale_score와 liquidity_score의 상관이 +0.79로, 같은 신호
+    (거래건수)에 사실상 이중 가중을 주고 있었다. 규모 정보는 유동성 축의
+    회전율(거래÷세대수)에 이미 정규화되어 들어가므로 별도 축은 제거.
     """
     vol = (
         monthly.groupby(["district_name", "apt_name"], observed=True)["trade_count"]
@@ -355,8 +373,7 @@ def _scale(mdd_df: pd.DataFrame, monthly: pd.DataFrame) -> pd.DataFrame:
     )
     df = mdd_df[["district_name", "apt_name"]].merge(vol, on=["district_name", "apt_name"], how="left")
     df["total_trades"] = df["total_trades"].fillna(0)
-    df["scale_score"] = _pct_rank(df["total_trades"])
-    return df[["district_name", "apt_name", "scale_score", "total_trades"]]
+    return df[["district_name", "apt_name", "total_trades"]]
 
 
 # ── 재건축 잠재력 (준공연도 기반) ─────────────────────────────
@@ -449,7 +466,7 @@ def compute_composite_score(
     lq  = _liquidity(monthly, households)
     ups = _upside_participation(mdd_df, monthly)
     mo  = _recovery_momentum(monthly)
-    pr  = _location_premium(mdd_df)
+    pr  = _location_premium(mdd_df, monthly)
     sc  = _scale(mdd_df, monthly)
     rd  = _redevelopment(mdd_df)
     tr  = _transit_access(mdd_df)
