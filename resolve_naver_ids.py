@@ -44,6 +44,12 @@ REQUEST_TIMEOUT = 6           # 초 (기존 12초 → 단축, 막혀있을 때 �
 TIME_BUDGET_SEC = 20 * 60     # 이 시간을 넘기면 남은 단지는 다음 실행으로 미루고 저장 후 종료
 CONSECUTIVE_NETWORK_FAIL_LIMIT = 8   # 이 횟수만큼 연속 네트워크 예외가 나면 그 방법은 이번 실행에서 포기
 
+# 429(Rate limit)는 "막힘"이 아니라 "너무 빠르다"는 신호라 재시도 가치가 있다.
+# 요청 간 기본 간격을 넉넉히 두고, 그래도 429가 오면 지수백오프로 몇 번 더 기다렸다 재시도한다.
+BASE_INTERVAL_SEC = 1.2
+RATE_LIMIT_MAX_RETRIES = 3
+RATE_LIMIT_BASE_WAIT = 4
+
 DESKTOP_UA = {
     "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                    "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"),
@@ -123,31 +129,53 @@ def _note_network_result(method: str, ok: bool):
 # ── 방법 1: new.land.naver.com JSON 검색 API (주 방법) ────────────
 
 def search_new_land(session: requests.Session, keyword: str, debug: bool = False) -> list[dict]:
-    """네이버부동산 PC웹(new.land.naver.com)이 쓰는 검색 API. 단지 후보 목록 반환."""
+    """네이버부동산 PC웹(new.land.naver.com)이 쓰는 검색 API. 단지 후보 목록 반환.
+
+    429(Rate limit exceeded)는 차단이 아니라 "속도를 늦춰라"는 신호이므로,
+    지수백오프로 몇 번 더 기다렸다 재시도한다. 그 외 4xx/5xx나 네트워크 예외는
+    서킷 브레이커 카운트에 반영해 계속 반복되면 이번 실행에서 이 방법을 포기한다.
+    """
     if _tripped["new_land"] and not debug:
         return []
     url = "https://new.land.naver.com/api/search"
-    try:
-        r = session.get(url, params={"keyword": keyword}, headers=DESKTOP_UA, timeout=REQUEST_TIMEOUT)
-    except Exception as e:
+
+    for attempt in range(RATE_LIMIT_MAX_RETRIES + 1):
+        try:
+            r = session.get(url, params={"keyword": keyword}, headers=DESKTOP_UA, timeout=REQUEST_TIMEOUT)
+        except Exception as e:
+            if debug:
+                print(f"    [진단] new.land 요청 예외: {e}")
+            _note_network_result("new_land", ok=False)
+            return []
+
         if debug:
-            print(f"    [진단] new.land 요청 예외: {e}")
-        _note_network_result("new_land", ok=False)
-        return []
-    if debug:
-        print(f"    [진단] new.land status={r.status_code} body[:300]={r.text[:300]!r}")
-    if r.status_code != 200:
-        # 200이 아닌 것도 "막힘" 신호로 취급 (403/999 등 차단 응답이 반복되면 서킷 트립)
-        _note_network_result("new_land", ok=False)
-        return []
-    _note_network_result("new_land", ok=True)
-    try:
-        data = r.json()
-    except Exception:
-        return []
-    complexes = data.get("complexes") or []
-    return [{"complex_no": str(c.get("complexNo")), "name": c.get("complexName", "")}
-            for c in complexes if c.get("complexNo")]
+            print(f"    [진단] new.land status={r.status_code} body[:300]={r.text[:300]!r}")
+
+        if r.status_code == 429:
+            wait = RATE_LIMIT_BASE_WAIT * (2 ** attempt)
+            if attempt < RATE_LIMIT_MAX_RETRIES:
+                print(f"    [rate-limit] 429 응답 — {wait}초 대기 후 재시도 ({attempt+1}/{RATE_LIMIT_MAX_RETRIES})")
+                time.sleep(wait)
+                continue
+            print("    [rate-limit] 재시도 한도 초과 — 이번 단지는 건너뜁니다.")
+            _note_network_result("new_land", ok=False)
+            return []
+
+        if r.status_code != 200:
+            # 200/429가 아닌 다른 응답(403/999 등)은 "막힘" 신호로 취급
+            _note_network_result("new_land", ok=False)
+            return []
+
+        _note_network_result("new_land", ok=True)
+        try:
+            data = r.json()
+        except Exception:
+            return []
+        complexes = data.get("complexes") or []
+        return [{"complex_no": str(c.get("complexNo")), "name": c.get("complexName", "")}
+                for c in complexes if c.get("complexNo")]
+
+    return []
 
 
 # ── 방법 2: m.land 검색결과 HTML (폴백) ─────────────────────────
@@ -211,12 +239,12 @@ def resolve_one(session: requests.Session, district: str, apt_name: str,
             m = best_match(candidates, apt_name)
             if m:
                 return m["complex_no"], term
-        time.sleep(0.3)
+        time.sleep(BASE_INTERVAL_SEC)
 
     # new.land가 전부 막혀 있거나 매칭 실패 시 m.land HTML로 폴백
     for term in search_terms(district, apt_name):
         found = search_mland_fallback(session, term)
-        time.sleep(0.3)
+        time.sleep(BASE_INTERVAL_SEC)
         if found:
             return found, f"{term} (mland 폴백)"
     return None, None
