@@ -365,7 +365,7 @@ async function renderDistrictRankings() {
         <span class="drs-score" style="${i===0?`color:${color}`:''}">${fmtScore(a.composite_score)}</span>
         <span class="drs-links">
           <a href="${naverMapUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener" class="drs-lk drs-lk-m" title="네이버 지도">지</a>
-          <a href="${naverLandUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener" class="drs-lk drs-lk-n" title="네이버 부동산">부</a>
+          <a href="${naverLandUrl(a.district, a.apt_name, a.dong, a.lat, a.lng, a.naver_id)}" target="_blank" rel="noopener" class="drs-lk drs-lk-n" title="네이버 부동산">부</a>
           <a href="${hogangnonoUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener" class="drs-lk drs-lk-h" title="호갱노노">호</a>
         </span>
       </div>`;
@@ -434,7 +434,7 @@ function renderApartmentDetail(containerId, radarId, priceChartId, apt, mddInfo,
       <div class="top1-score-big">${fmtScore(apt.composite_score)}<span class="top1-score-unit">점</span></div>
       <div class="ep-links" style="justify-content:center;margin-top:.8rem">
         <a class="ep-map" href="${naverMapUrl(apt.district, apt.apt_name, apt.dong, apt.lat, apt.lng)}" target="_blank" rel="noopener">네이버 지도 ↗</a>
-        <a class="ep-naver" href="${naverLandUrl(apt.district, apt.apt_name, apt.dong, apt.lat, apt.lng)}" target="_blank" rel="noopener">네이버 부동산 ↗</a>
+        <a class="ep-naver" href="${naverLandUrl(apt.district, apt.apt_name, apt.dong, apt.lat, apt.lng, apt.naver_id)}" target="_blank" rel="noopener">네이버 부동산 ↗</a>
         <a class="ep-hogang" href="${hogangnonoUrl(apt.district, apt.apt_name, apt.dong, apt.lat, apt.lng)}" target="_blank" rel="noopener">호갱노노 ↗</a>
       </div>
     </div>
@@ -617,9 +617,11 @@ function naverMapUrl(district, aptName, dong, lat, lng) {
   return `https://map.naver.com/p/search/${encodeURIComponent(naverSearchTerm(district, aptName, dong))}`;
 }
 
-// 네이버 부동산(매물). 고유 단지명은 이름만, 흔한 이름은 지역+이름으로 검색.
-// 좌표/이름이 전혀 없으면 네이버 부동산 홈으로 폴백.
-function naverLandUrl(district, aptName, dong, lat, lng) {
+// 네이버 부동산(매물). 단지 고유번호(resolve_naver_ids.py로 수집)가 있으면 검색을
+// 건너뛰고 단지 페이지로 바로 연결 — 검색 0건/오매칭 없이 항상 정확히 열린다.
+// 번호가 없으면 이름 검색으로 폴백(고유명은 이름만, 흔한 이름은 지역+이름).
+function naverLandUrl(district, aptName, dong, lat, lng, naverId) {
+  if (naverId) return `https://m.land.naver.com/complex/info/${naverId}`;
   const term = naverSearchTerm(district, aptName, dong);
   if (!term) return `https://m.land.naver.com/`;
   return `https://m.land.naver.com/search/result/${encodeURIComponent(term)}`;
@@ -1333,7 +1335,7 @@ function showAptDetail(a) {
     </div>
     <div class="ep-links">
       <a class="ep-map" href="${naverMapUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener">네이버 지도 ↗</a>
-      <a class="ep-naver" href="${naverLandUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener">네이버 부동산 ↗</a>
+      <a class="ep-naver" href="${naverLandUrl(a.district, a.apt_name, a.dong, a.lat, a.lng, a.naver_id)}" target="_blank" rel="noopener">네이버 부동산 ↗</a>
       <a class="ep-hogang" href="${hogangnonoUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener">호갱노노 ↗</a>
     </div>
     <div class="ep-trades">
