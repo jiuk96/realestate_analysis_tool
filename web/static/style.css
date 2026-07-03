@@ -599,6 +599,27 @@ body {
 .bubble-hot  { background: #f59e0b; }
 .bubble-mid  { background: #38bdf8; }
 .bubble-cool { background: #64748b; color: #f1f5f9; }
+/* 가격대 색상 모드 (저가→고가 순 그라데이션) */
+.bubble-p1 { background: #34d399; }
+.bubble-p2 { background: #38bdf8; }
+.bubble-p3 { background: #a78bfa; }
+.bubble-p4 { background: #f472b6; }
+
+.explorer-legend-bar {
+  display: flex; align-items: center; flex-wrap: wrap; gap: .8rem;
+  margin-top: .7rem;
+}
+.legend-mode-toggle { display: flex; gap: .4rem; }
+.legend-mode-btn {
+  background: var(--bg2); border: 1px solid #334155; color: #94a3b8;
+  font-size: .78rem; font-weight: 600; border-radius: 8px; padding: .35rem .7rem;
+  cursor: pointer; transition: all .15s;
+}
+.legend-mode-btn:hover { border-color: #475569; color: #cbd5e1; }
+.legend-mode-btn.active { background: #38bdf8; border-color: #38bdf8; color: #0f172a; }
+.explorer-legend { display: flex; flex-wrap: wrap; gap: .7rem; }
+.legend-chip { display: flex; align-items: center; gap: .35rem; font-size: .78rem; color: #94a3b8; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
 
 .ep-head { border-bottom: 1px solid #334155; padding-bottom: .8rem; margin-bottom: .9rem; }
 .ep-name { font-size: 1.15rem; font-weight: 800; color: #f1f5f9; }
@@ -648,6 +669,10 @@ body {
 .bubble-hot::after  { border-top-color: #f59e0b; }
 .bubble-mid::after  { border-top-color: #38bdf8; }
 .bubble-cool::after { border-top-color: #64748b; }
+.bubble-p1::after { border-top-color: #34d399; }
+.bubble-p2::after { border-top-color: #38bdf8; }
+.bubble-p3::after { border-top-color: #a78bfa; }
+.bubble-p4::after { border-top-color: #f472b6; }
 .apt-bubble-name { font-size: .62rem; font-weight: 600; opacity: .85; letter-spacing: -.02em; }
 .apt-bubble-price { font-size: .82rem; font-weight: 800; }
 

@@ -1219,6 +1219,14 @@ async function renderExplorer() {
   document.getElementById('explorerSort').addEventListener('change', () => {
     applyPriceFilter(explorerFilter.min, explorerFilter.max);
   });
+  document.querySelectorAll('.legend-mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.legend-mode-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      bubbleColorMode = btn.dataset.mode;
+      applyPriceFilter(explorerFilter.min, explorerFilter.max);
+    });
+  });
 
   initCoupleTools();
   applyPriceFilter(0, 9999);
@@ -1238,6 +1246,39 @@ function sortApts(list) {
   return s;
 }
 
+// 버블 색상 기준: 'score'(종합점수 구간) 또는 'price'(가격대 구간)
+let bubbleColorMode = 'score';
+
+const SCORE_TIERS = [
+  { cls: 'bubble-hot',  label: '60점 이상', test: v => v >= 60 },
+  { cls: 'bubble-mid',  label: '55~60점',   test: v => v >= 55 },
+  { cls: 'bubble-cool', label: '55점 미만', test: () => true },
+];
+// 지도 탐색 가격 필터 구간(8/12/16억)과 동일한 경계를 사용해 필터 칩과 헷갈리지 않게 함
+const PRICE_TIERS = [
+  { cls: 'bubble-p1', label: '8억 이하',   test: v => v <= 8 },
+  { cls: 'bubble-p2', label: '8~12억',     test: v => v <= 12 },
+  { cls: 'bubble-p3', label: '12~16억',    test: v => v <= 16 },
+  { cls: 'bubble-p4', label: '16억 이상',  test: () => true },
+];
+
+function bubbleClass(a) {
+  if (bubbleColorMode === 'price') {
+    const eok = a.latest_price != null ? a.latest_price / 10000 : null;
+    if (eok == null) return 'bubble-cool';
+    return (PRICE_TIERS.find(t => t.test(eok)) || PRICE_TIERS[PRICE_TIERS.length - 1]).cls;
+  }
+  const v = a.composite_score ?? 0;
+  return (SCORE_TIERS.find(t => t.test(v)) || SCORE_TIERS[SCORE_TIERS.length - 1]).cls;
+}
+
+function renderExplorerLegend() {
+  const tiers = bubbleColorMode === 'price' ? PRICE_TIERS : SCORE_TIERS;
+  document.getElementById('explorerLegend').innerHTML = tiers.map(t =>
+    `<span class="legend-chip"><span class="legend-dot ${t.cls}"></span>${t.label}</span>`
+  ).join('');
+}
+
 function applyPriceFilter(minEok, maxEok) {
   explorerFilter = { min: minEok, max: maxEok };
   explorerMarkers.forEach(m => explorerMap.removeLayer(m));
@@ -1248,8 +1289,10 @@ function applyPriceFilter(minEok, maxEok) {
     return p != null && p >= minEok && p <= maxEok;
   }));
 
+  renderExplorerLegend();
+
   explorerVisible.forEach(a => {
-    const cls = a.composite_score >= 60 ? 'bubble-hot' : a.composite_score >= 55 ? 'bubble-mid' : 'bubble-cool';
+    const cls = bubbleClass(a);
     const icon = L.divIcon({
       className: '',
       html: `<div class="apt-bubble ${cls}">
