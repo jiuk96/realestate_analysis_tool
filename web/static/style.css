@@ -785,7 +785,8 @@ body { font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSy
 
 /* ── 예산 플래너 확장 (증여/세금/차트) ─────────────────── */
 .budget-checks { display: flex; flex-direction: column; gap: .5rem; margin-top: .3rem; }
-.budget-checks .bc { display: flex; align-items: center; gap: .45rem; color: #cbd5e1; font-size: .82rem; cursor: pointer; }
+.budget-checks .bc, .common-checks .bc, .pc-checks .bc { display: flex; align-items: center; gap: .45rem; color: #cbd5e1; font-size: .82rem; cursor: pointer; }
+.pc-checks { display: flex; flex-direction: column; gap: .45rem; margin: .3rem 0 .7rem; }
 .budget-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
 .budget-breakdown .budget-row small { color: #64748b; font-weight: 400; font-size: .72rem; }
 @media (max-width: 960px) { .budget-detail-grid { grid-template-columns: 1fr; } }
@@ -864,9 +865,10 @@ body { font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSy
   .common-grid { grid-template-columns: 1fr; }
   .common-checks { grid-template-columns: 1fr; }
 }
-.person-a { border-top: 3px solid #38bdf8; }
-.person-b { border-top: 3px solid #f472b6; }
-.person-summary { margin-top: .9rem; background: #0f172a; border-radius: 10px; padding: .7rem .8rem; }
+.person-col { display: flex; flex-direction: column; gap: 1rem; }
+.person-col.person-a .budget-card { border-top: 3px solid #38bdf8; }
+.person-col.person-b .budget-card { border-top: 3px solid #f472b6; }
+.person-summary { background: #0f172a; border-radius: 10px; padding: .7rem .8rem; }
 .ps-title { color: #94a3b8; font-size: .8rem; }
 .ps-title b { color: #fbbf24; font-size: 1.05rem; margin-left: .3rem; font-variant-numeric: tabular-nums; }
 .ps-rows { display: flex; flex-wrap: wrap; gap: .3rem .8rem; margin-top: .4rem; color: #64748b; font-size: .74rem; font-variant-numeric: tabular-nums; }
@@ -875,18 +877,6 @@ body { font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSy
 @media (max-width: 960px) { .budget-grid-3 { grid-template-columns: 1fr; } .ff-parts-2 { grid-template-columns: 1fr; } }
 
 /* ── 부모 지원: 자금 카드 내 간략 요약 ──────────────────── */
-.parent-compact {
-  background: rgba(167,139,250,.08); border: 1px solid rgba(167,139,250,.25);
-  border-radius: 8px; padding: .6rem .7rem; margin: -.3rem 0 .85rem;
-  font-variant-numeric: tabular-nums;
-}
-.pc-badges { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .55rem; }
-.pc-badge {
-  font-size: .72rem; font-weight: 700; padding: .2rem .55rem; border-radius: 999px;
-  border: 1px solid #334155;
-}
-.pc-badge.on { color: #34d399; background: rgba(52,211,153,.12); border-color: rgba(52,211,153,.3); }
-.pc-badge.off { color: #64748b; background: rgba(100,116,139,.1); }
 .pc-loanbar-row { display: flex; align-items: center; gap: .6rem; margin-bottom: .5rem; }
 .pc-loanbar-label { color: #94a3b8; font-size: .74rem; flex-shrink: 0; white-space: nowrap; }
 .pc-loan-slider {

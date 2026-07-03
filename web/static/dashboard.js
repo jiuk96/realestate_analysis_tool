@@ -634,9 +634,9 @@ function initBudgetPlanner() {
   initProductSelect('b');
 
   // 모든 입력에 반응형 바인딩 (입력 즉시 재계산)
-  ['aCash','aParent','aIncome','aNetMonthly','aRate','aYears',
-   'bCash','bParent','bIncome','bNetMonthly','bRate','bYears',
-   'repayType','familyYears','optMarriage','optBirth','optFirstHome','optRegulated'].forEach(id => {
+  ['aCash','aParent','aIncome','aNetMonthly','aRate','aYears','aBasicOn','aMarriageOn',
+   'bCash','bParent','bIncome','bNetMonthly','bRate','bYears','bBasicOn','bMarriageOn',
+   'repayType','familyYears','optBirth','optFirstHome','optRegulated'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', recalcBudget);
     if (el) el.addEventListener('change', recalcBudget);
@@ -742,9 +742,12 @@ function personInput(prefix, common) {
   const num = id => parseFloat(document.getElementById(id).value) || 0;
   const 억 = 1e8, 만 = 1e4;
   const product = LOAN_PRODUCTS.find(p => p.id === document.getElementById(prefix + 'Product').value) || LOAN_PRODUCTS[3];
+  const chkEl = id => document.getElementById(id);
   return {
     cash: num(prefix + 'Cash') * 억,
     parentTotal: num(prefix + 'Parent') * 억,   // 부모 지원 총액 (증여/차용 분해는 recalcBudget에서 처리)
+    useBasic: chkEl(prefix + 'BasicOn') ? chkEl(prefix + 'BasicOn').checked : true,
+    marriage: chkEl(prefix + 'MarriageOn') ? chkEl(prefix + 'MarriageOn').checked : false,
     income: num(prefix + 'Income') * 만,
     netMonthly: num(prefix + 'NetMonthly') * 만,   // 실수령 월급(세후)
     product,
@@ -792,7 +795,6 @@ function recalcBudget() {
   const 억 = 1e8;
 
   const common = {
-    marriage: chk('optMarriage'),
     birth: chk('optBirth'),
     firstHome: chk('optFirstHome'),
     regulated: chk('optRegulated'),
@@ -803,10 +805,13 @@ function recalcBudget() {
 
   // 무이자 차용 슬라이더 동기화 후, 사용자가 정한 차용액으로 부모지원 총액을 분해
   // (줄이면 그만큼 "그 외 증여"로 넘어가 세금이 발생 — 총액 3가지 항목은 항상 보존)
-  syncFamilyLoanSlider('a', inA.parentTotal, common);
-  syncFamilyLoanSlider('b', inB.parentTotal, common);
-  const splitA = splitParentSupport(inA.parentTotal, { ...common, familyLoanOverride: familyLoanOverrideState.a });
-  const splitB = splitParentSupport(inB.parentTotal, { ...common, familyLoanOverride: familyLoanOverrideState.b });
+  // 기본공제/혼인공제는 각자(useBasic/marriage) 설정, 출산공제는 공통(birth) 설정을 함께 반영
+  const optsA = { marriage: inA.marriage, birth: common.birth, useBasic: inA.useBasic };
+  const optsB = { marriage: inB.marriage, birth: common.birth, useBasic: inB.useBasic };
+  syncFamilyLoanSlider('a', inA.parentTotal, optsA);
+  syncFamilyLoanSlider('b', inB.parentTotal, optsB);
+  const splitA = splitParentSupport(inA.parentTotal, { ...optsA, familyLoanOverride: familyLoanOverrideState.a });
+  const splitB = splitParentSupport(inB.parentTotal, { ...optsB, familyLoanOverride: familyLoanOverrideState.b });
   inA.gift = splitA.totalGift; inA.family = splitA.familyLoan; inA.parentSplit = splitA;
   inB.gift = splitB.totalGift; inB.family = splitB.familyLoan; inB.parentSplit = splitB;
 
@@ -830,30 +835,24 @@ function recalcBudget() {
   updateLoanOut('a', R.A);
   updateLoanOut('b', R.B);
 
-  // 자금 카드에는 간략 요약만: 기본/혼인공제 적용 배지 + 무이자차용 슬라이더(공제 후 잔액과 2.17억 중 작은 값이 상한) + 한 줄 결론
-  // 슬라이더 자체는 정적 엘리먼트라 매번 새로 만들지 않고 값만 갱신한다(드래그 중 초기화 방지).
+  // 자금 카드에는 간략 요약만: 기본/혼인공제는 체크박스 자체가 상태를 보여주므로,
+  // 여기서는 무이자차용 슬라이더 값 표시 + 한 줄 결론(세금 유무)만 갱신한다.
+  // 슬라이더는 정적 엘리먼트라 매번 새로 만들지 않고 값만 갱신한다(드래그 중 초기화 방지).
   // 자세한 계산 과정(공제 분해·세율·상환방식)은 아래 renderParentDetail에서 별도로 보여준다.
   const renderParentCompact = (prefix, P) => {
-    const wrap = document.querySelector(`#${prefix}ParentBadges`)?.closest('.parent-compact');
-    const badgesEl = document.getElementById(prefix + 'ParentBadges');
     const valEl = document.getElementById(prefix + 'FamilyLoanVal');
     const conclusionEl = document.getElementById(prefix + 'ParentConclusion');
-    if (!badgesEl) return;
+    const slider = document.getElementById(prefix + 'FamilyLoanOverride');
+    if (!conclusionEl) return;
     const S = P.parentSplit;
-    if (!S || P.parentTotal <= 0) { if (wrap) wrap.style.display = 'none'; return; }
-    if (wrap) wrap.style.display = '';
+    if (!S || P.parentTotal <= 0) { conclusionEl.innerHTML = ''; if (valEl) valEl.textContent = ''; return; }
 
-    const basicOn = S.basicGift > 0;
-    const bonusOn = S.bonusGift > 0;
     const conclusion = S.extraGift > 0
       ? `그 외 증여 ${won2eok(S.extraGift)} → 세금 <b>${won2man(P.giftDetail.tax)}</b>`
       : `공제 범위 내 → 증여세 <b>0원</b>`;
 
-    badgesEl.innerHTML = `
-      <span class="pc-badge ${basicOn ? 'on' : 'off'}">${basicOn ? '✔' : '✕'} 기본공제 0.5억</span>
-      <span class="pc-badge ${bonusOn ? 'on' : 'off'}">${bonusOn ? '✔' : '✕'} 혼인·출산공제 1억</span>`;
-    if (valEl) valEl.textContent = `${won2eok(S.familyLoan)} / ${won2eok(Math.max(0, Math.round(document.getElementById(prefix + 'FamilyLoanOverride').max)))}`;
-    if (conclusionEl) conclusionEl.innerHTML = conclusion;
+    if (valEl && slider) valEl.textContent = `${won2eok(S.familyLoan)} / ${won2eok(Math.max(0, Math.round(slider.max)))}`;
+    conclusionEl.innerHTML = conclusion;
   };
   renderParentCompact('a', R.A);
   renderParentCompact('b', R.B);

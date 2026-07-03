@@ -43,13 +43,14 @@ const GIFT = {
 /**
  * 증여세 계산 (수증자 1인 기준)
  * @param {number} amount   증여받는 금액 (원)
- * @param {object} opt      { marriage:boolean, birth:boolean } 혼인/출산 공제 적용 여부
+ * @param {object} opt      { marriage:boolean, birth:boolean, useBasic:boolean } 공제 적용 여부
+ *                          (marriage/birth 중 하나라도 true면 혼인·출산공제 1억 적용, useBasic=false면 기본공제 0.5억 미적용)
  * @returns {{taxable:number, tax:number, netReceived:number, deduction:number}}
  *          taxable=과세표준, tax=실질 증여세(신고공제 반영), netReceived=세후 실수령
  */
 export function calcGiftTax(amount, opt = {}) {
   const bonusApplied = !!(opt.marriage || opt.birth);
-  const basicDeduction = GIFT.BASIC_DEDUCTION;
+  const basicDeduction = opt.useBasic === false ? 0 : GIFT.BASIC_DEDUCTION;
   const bonusDeduction = bonusApplied ? GIFT.MARRIAGE_BIRTH_CAP : 0;   // 혼인·출산 공제는 통합 1억 한도
   const deduction = basicDeduction + bonusDeduction;
 
@@ -266,7 +267,7 @@ export function calcFamilyLoan(principal, years = 10) {
 export function maxFamilyLoanFor(total, opt = {}) {
   const bonusApplied = !!(opt.marriage || opt.birth);
   let remaining = Math.max(0, total || 0);
-  remaining -= Math.min(remaining, GIFT.BASIC_DEDUCTION);
+  if (opt.useBasic !== false) remaining -= Math.min(remaining, GIFT.BASIC_DEDUCTION);
   if (bonusApplied) remaining -= Math.min(remaining, GIFT.MARRIAGE_BIRTH_CAP);
   return Math.min(remaining, FAMILY_LOAN.MAX_NO_INTEREST);
 }
@@ -278,7 +279,8 @@ export function maxFamilyLoanFor(total, opt = {}) {
  *       ④ 그래도(혹은 차용을 줄여서) 남으면 과세 증여로 처리.
  * 무이자 차용을 슬라이더로 줄이면 그만큼 "그 외 증여"가 늘어나 총액은 항상 보존된다.
  * @param {number} total 부모 지원 총액 (원)
- * @param {object} opt   { marriage, birth, familyLoanOverride }
+ * @param {object} opt   { marriage, birth, useBasic, familyLoanOverride }
+ *   useBasic: false면 기본공제 0.5억을 적용하지 않음 (기본값 true).
  *   familyLoanOverride: 사용자가 슬라이더로 지정한 무이자 차용액. null/undefined면 한도 최대치를 자동 사용.
  * @returns {{basicGift:number, bonusGift:number, familyLoan:number, extraGift:number, totalGift:number}}
  */
@@ -286,7 +288,7 @@ export function splitParentSupport(total, opt = {}) {
   const bonusApplied = !!(opt.marriage || opt.birth);
   let remaining = Math.max(0, total || 0);
 
-  const basicGift = Math.min(remaining, GIFT.BASIC_DEDUCTION);
+  const basicGift = opt.useBasic === false ? 0 : Math.min(remaining, GIFT.BASIC_DEDUCTION);
   remaining -= basicGift;
 
   const bonusGift = bonusApplied ? Math.min(remaining, GIFT.MARRIAGE_BIRTH_CAP) : 0;
@@ -574,8 +576,8 @@ export function personDsrLoan(p) {
 }
 
 function analyzePerson(p, common) {
-  const { marriage, birth } = common;
-  const gift = calcGiftTax(p.gift || 0, { marriage, birth });
+  // 기본공제/혼인공제 여부는 각자(p) 설정, 출산공제는 공통(common) 설정
+  const gift = calcGiftTax(p.gift || 0, { marriage: p.marriage, birth: common.birth, useBasic: p.useBasic });
   const fam = calcFamilyLoan(p.family || 0, p.familyYears || 10);
   const equity = (p.cash || 0) + gift.netReceived;   // 현금 + 세후증여
   const stressRate = (p.rate || 0.041) + REGULATION.STRESS_DSR_ADDON;
