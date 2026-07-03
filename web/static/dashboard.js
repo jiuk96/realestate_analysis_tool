@@ -237,6 +237,9 @@ function renderScoring() {
     { key: '가격방어력', weight: 25, color: '#34d399',
       desc: '전체 수집 기간 중 겪었던 가장 큰 하락(MDD)이 얼마나 작았는지와, 그 저점 이후 얼마나 회복했는지를 함께 봅니다. 신고가를 갱신한 단지는 가점을 받습니다. 단, 2022~23년 하락장을 데이터로 겪지 않은 신축 등은 "MDD 0%"가 방어력 근거가 될 수 없어 중립(50점) 처리합니다.',
       metric: 'MDD(60%) + 회복률(40%) · 하락장 미경험 단지는 중립', example: 'MDD -12% & 전고점 회복 → 최상위 방어력' },
+    { key: '전세가율', weight: 10, color: '#4ade80',
+      desc: '전세가가 매매가에 얼마나 가까운지(전세가율 = 전세÷매매)를 봅니다. 전세가율이 높으면 실거주 수요가 매매가를 아래에서 떠받쳐, 시세가 급락할 때 "이 아래로는 잘 안 떨어지는" 지지선 역할을 합니다. 전용 59㎡ 순수 전세 실거래로 계산하며, 전월세 데이터가 수집된 단지에만 적용됩니다.',
+      metric: '전세 중앙값 ÷ 매매 중앙값 (최근 18개월, 전용 59㎡)', example: '전세가율 80% → 강한 하방 지지력' },
     { key: '거래유동성', weight: 20, color: '#38bdf8',
       desc: '전 기간에 걸쳐 거래가 꾸준했는지, 하락장에서도 거래가 유지됐는지, 그리고 규모 대비 얼마나 활발히 거래되는지(회전율)를 함께 봅니다. 팔고 싶을 때 팔리는 단지가 진짜 우량 단지입니다.',
       metric: '거래 공백률 + 하락기 유지율 + 변동계수 + 회전율(거래건수÷세대수)', example: '하락장에도 매달 거래 + 높은 회전율 → 높은 점수' },
@@ -386,14 +389,15 @@ async function renderDistrictRankings() {
 // 8개 채점 축 → 레이더/막대에 쓸 공통 배열 (전체 1위·동네별 추천 상세 모달 공용)
 function buildApartmentAxes(apt) {
   return [
-    { name: '가격방어력', val: apt.defense_score, w: 25, color: '#34d399' },
-    { name: '거래유동성', val: apt.liquidity_score, w: 20, color: '#38bdf8' },
-    { name: '상승참여도', val: apt.upside_score, w: 15, color: '#fbbf24' },
-    { name: '회복모멘텀', val: apt.momentum_score, w: 15, color: '#a78bfa' },
-    { name: '입지프리미엄', val: apt.premium_score, w: 13, color: '#fb923c' },
-    { name: '규모', val: apt.scale_score, w: 7, color: '#f472b6' },
-    { name: '교통', val: apt.transit_score, w: 10, color: '#f87171' },
-    { name: '재건축잠재력', val: apt.redevelop_score, w: 8, color: '#22d3ee' },
+    { name: '가격방어력', val: apt.defense_score, color: '#34d399' },
+    { name: '전세가율', val: apt.jeonse_score, color: '#4ade80' },
+    { name: '거래유동성', val: apt.liquidity_score, color: '#38bdf8' },
+    { name: '상승참여도', val: apt.upside_score, color: '#fbbf24' },
+    { name: '회복모멘텀', val: apt.momentum_score, color: '#a78bfa' },
+    { name: '입지프리미엄', val: apt.premium_score, color: '#fb923c' },
+    { name: '교통', val: apt.transit_score, color: '#f87171' },
+    { name: '규모', val: apt.scale_score, color: '#f472b6' },
+    { name: '재건축잠재력', val: apt.redevelop_score, color: '#22d3ee' },
   ].filter(a => a.val != null);
 }
 
@@ -422,6 +426,15 @@ function buildAxisReasons(apt) {
           ? `역대 최대 낙폭 ${mdd.toFixed(1)}%, ${recPhraseMid}로 준수한 방어력입니다.`
           : `역대 최대 낙폭이 ${mdd.toFixed(1)}%로 컸고 회복률도 ${recPct}%에 그쳐 방어력이 약한 편입니다.`;
     }
+  }
+
+  if (apt.jeonse_score != null && apt.jeonse_ratio != null) {
+    const jr = Math.round(apt.jeonse_ratio * 100);
+    reasons['전세가율'] = apt.jeonse_score >= 70
+      ? `전세가율 ${jr}%로 높아, 실거주 전세 수요가 매매가를 강하게 떠받쳐 하락기 하방 지지력이 좋습니다.`
+      : apt.jeonse_score >= 45
+        ? `전세가율 ${jr}%로 무난한 수준의 하방 지지력입니다.`
+        : `전세가율 ${jr}%로 낮은 편이라 갭이 크고, 시세 하락 시 지지선이 약할 수 있습니다.`;
   }
 
   if (apt.liquidity_score != null && apt.gap_ratio != null) {

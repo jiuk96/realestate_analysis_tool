@@ -60,12 +60,60 @@ for dist, cnt in mdd_df['district_name'].value_counts().items():
 print('=== 4. 시계열 구성 ===')
 monthly = build_monthly_median(df)
 
+# ── 4b. 전세가율 (전월세 데이터 있을 때만) ────────────────────
+def compute_jeonse_ratio(monthly_df):
+    """data/rent/*.parquet(collect_rent.py 수집)에서 전용 59㎡ 전세가율 계산.
+    전세가율 = 최근 전세 중앙값 / 최근 매매 중앙값. 데이터 없으면 None."""
+    rent_dir = Path('data/rent')
+    files = sorted(rent_dir.glob('*.parquet')) if rent_dir.exists() else []
+    if not files:
+        print('  (전월세 데이터 없음 — 전세가율 축 비활성. collect_rent.py 수집 후 활성화됨)')
+        return None
+    rent = pd.concat([pd.read_parquet(f) for f in files], ignore_index=True)
+    rent['district_name'] = rent['district_code'].astype(str).map(CODE2NAME)
+    # 순수 전세(월세 0) + 전용 59㎡대만
+    import config as _cfg
+    rent = rent[(rent.get('monthly_rent', 0).fillna(0) == 0) &
+                (rent['area_exclusive'] >= _cfg.TARGET_AREA_MIN) &
+                (rent['area_exclusive'] <= _cfg.TARGET_AREA_MAX)].copy()
+    if rent.empty:
+        return None
+    # 최근 18개월만 (전세가율은 최신 시세가 중요)
+    rent['ym'] = rent['deal_year'].astype(str) + rent['deal_month'].astype(str).str.zfill(2)
+    recent_cut = sorted(rent['ym'].unique())[-18:] if rent['ym'].nunique() > 18 else rent['ym'].unique()
+    rent = rent[rent['ym'].isin(recent_cut)]
+    jeonse_med = (rent.groupby(['district_name', 'apt_name'], observed=True)['deposit']
+                  .median().rename('jeonse_median').reset_index())
+    jeonse_cnt = (rent.groupby(['district_name', 'apt_name'], observed=True)['deposit']
+                  .count().rename('jeonse_count').reset_index())
+
+    # 매매 최근 18개월 중앙값 (monthly는 이미 59㎡ 대표값)
+    m = monthly_df.copy()
+    m['ym'] = m['deal_date'].astype(str).str.replace('-', '')
+    recent_m = sorted(m['ym'].unique())[-18:]
+    m = m[m['ym'].isin(recent_m)]
+    sale_med = (m.groupby(['district_name', 'apt_name'], observed=True)['median_price']
+                .median().rename('sale_median').reset_index())
+
+    j = jeonse_med.merge(jeonse_cnt, on=['district_name', 'apt_name']) \
+                  .merge(sale_med, on=['district_name', 'apt_name'], how='inner')
+    j = j[(j['sale_median'] > 0) & (j['jeonse_count'] >= 2)]   # 전세 2건 이상만 신뢰
+    if j.empty:
+        return None
+    j['jeonse_ratio'] = j['jeonse_median'] / j['sale_median']
+    print(f'  전세가율 계산: {len(j)}개 단지 (중앙값 {j["jeonse_ratio"].median():.1%})')
+    return j[['district_name', 'apt_name', 'jeonse_ratio', 'jeonse_median', 'jeonse_count']]
+
+print('=== 4b. 전세가율 ===')
+jeonse = compute_jeonse_ratio(monthly)
+
 # ── 5. 종합 점수 ──────────────────────────────────────────────
 print('=== 5. 종합 점수 계산 ===')
 # 유동성 축의 '회전율' 계산에 쓸 추정세대수 (전 평형 거래 기준, preprocessor와 동일 로직)
 from src.preprocessor import _estimate_households
 households = _estimate_households(df)
-score_df = compute_composite_score(mdd_df, monthly, households)
+score_df = compute_composite_score(mdd_df, monthly, households, jeonse)
+weights_used = dict(score_df.attrs.get('weights_used', {}))   # rename 전에 보존
 score_df = score_df.rename(columns={'district_name': 'district'})
 # mdd 컬럼 추가 (dashboard.js에서 a.mdd 참조)
 if 'mdd_pct' in score_df.columns and 'mdd' not in score_df.columns:
@@ -117,11 +165,9 @@ mdd_out['total_trades'] = mdd_out.apply(
 save('mdd_ranking.json', {'ranking': mdd_out.sort_values('mdd', ascending=False).to_dict('records')})
 
 # composite_score.json
-_KR = {'defense': '가격방어력', 'liquidity': '거래유동성', 'upside': '상승참여도',
-       'momentum': '회복모멘텀', 'premium': '입지프리미엄', 'scale': '규모',
-       'transit': '교통', 'redevelop': '재건축잠재력'}
-_w = WEIGHTS_TRANSIT if 'transit_score' in score_df.columns else WEIGHTS
-weights = {_KR[k]: v for k, v in _w.items()}
+# 실제로 사용된(재정규화된) 가중치를 그대로 반영 — 축 활성 여부에 따라 달라진다.
+from src.scorer import AXIS_KR
+weights = {AXIS_KR.get(k, k): round(v, 4) for k, v in weights_used.items()}
 # 네이버 검색 정확도용 법정동(洞) 병합 (apt_locations 캐시가 있으면)
 _locpath = Path('data/static/apt_locations.json')
 if _locpath.exists():

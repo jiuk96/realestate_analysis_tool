@@ -25,19 +25,25 @@ jobs:
       - name: 패키지 설치
         run: pip install -r requirements.txt
 
-      - name: 데이터 수집
+      - name: 데이터 수집 (매매)
         env:
           MOLIT_API_KEY: ${{ secrets.MOLIT_API_KEY }}
         run: |
           python src/collector.py
-          echo "수집 완료"
+          echo "매매 수집 완료"
+
+      - name: 데이터 수집 (전월세 — 전세가율용)
+        env:
+          MOLIT_API_KEY: ${{ secrets.MOLIT_API_KEY }}
+          PYTHONUNBUFFERED: "1"
+        run: |
+          python collect_rent.py || echo "전월세 수집 일부 실패 — 전세가율 축은 다음 실행에서 보강"
 
       - name: 수집 결과 확인
         run: |
-          echo "=== 수집된 파일 목록 ==="
-          ls data/raw/*.parquet 2>/dev/null | wc -l
-          echo "개 파일 수집됨"
-          du -sh data/raw/ 2>/dev/null || echo "데이터 없음"
+          echo "=== 매매 파일 ==="; ls data/raw/*.parquet 2>/dev/null | wc -l
+          echo "=== 전월세 파일 ==="; ls data/rent/*.parquet 2>/dev/null | wc -l
+          du -sh data/raw/ data/rent/ 2>/dev/null || echo "데이터 없음"
 
       - name: 분석 파이프라인 실행 (1차 — 대상 단지 확정)
         run: python build_data.py

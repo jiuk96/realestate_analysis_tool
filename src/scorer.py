@@ -28,27 +28,39 @@ import config
 
 log = logging.getLogger(__name__)
 
-WEIGHTS = {
-    "defense":   0.24,   # 가격 방어력
-    "liquidity": 0.19,   # 거래 유동성
-    "upside":    0.14,   # 상승 참여도
-    "momentum":  0.14,   # 회복 모멘텀
-    "premium":   0.13,   # 입지 프리미엄
-    "scale":     0.08,   # 규모(거래량)
-    "redevelop": 0.08,   # 재건축 잠재력 (준공연도 기반)
+# ── 축별 기본 가중치(상대적 중요도) ──────────────────────────
+# 데이터가 있어야만 활성화되는 축(교통·전세가율)이 있으므로, 실제 계산 시에는
+# "있는 축만" 남겨 합이 1이 되도록 재정규화한다(compute_composite_score).
+# 이렇게 하면 축을 추가/제거해도 나머지 비중이 자동으로 맞춰진다.
+AXIS_WEIGHTS = {
+    "defense":   0.22,   # 가격 방어력 (하락장 MDD + 회복)
+    "jeonse":    0.10,   # 전세가율 (하방 지지력 — 전세 데이터 있을 때만)
+    "liquidity": 0.15,   # 거래 유동성 (꾸준함 + 회전율)
+    "upside":    0.12,   # 상승 참여도
+    "momentum":  0.11,   # 회복 모멘텀
+    "premium":   0.09,   # 입지 프리미엄 (평단가)
+    "transit":   0.09,   # 교통 접근성 (실측 좌표 있을 때만)
+    "scale":     0.06,   # 규모(거래량)
+    "redevelop": 0.06,   # 재건축 잠재력 (준공연도 기반)
 }
 
-# 실측 교통 데이터(geocode_apts.py 캐시)가 있을 때의 8축 가중치
-WEIGHTS_TRANSIT = {
-    "defense":   0.22,
-    "liquidity": 0.18,
-    "upside":    0.13,
-    "momentum":  0.12,
-    "premium":   0.10,
-    "scale":     0.07,   # 규모(거래량)
-    "transit":   0.10,   # 교통 접근성 (최근접역 도보거리 + 역세권 밀도)
-    "redevelop": 0.08,   # 재건축 잠재력 (준공연도 기반)
+# 각 축 점수 컬럼명 (fillna 기본값과 함께 사용)
+AXIS_SCORE_COL = {
+    "defense": "defense_score", "jeonse": "jeonse_score", "liquidity": "liquidity_score",
+    "upside": "upside_score", "momentum": "momentum_score", "premium": "premium_score",
+    "transit": "transit_score", "scale": "scale_score", "redevelop": "redevelop_score",
 }
+
+# 한글 라벨 (composite_score.json weights 표시용)
+AXIS_KR = {
+    "defense": "가격방어력", "jeonse": "전세가율", "liquidity": "거래유동성",
+    "upside": "상승참여도", "momentum": "회복모멘텀", "premium": "입지프리미엄",
+    "transit": "교통", "scale": "규모", "redevelop": "재건축잠재력",
+}
+
+# 하위호환용(기존 build_data가 import) — 전세·교통 없는 기본 구성
+WEIGHTS = {k: v for k, v in AXIS_WEIGHTS.items() if k not in ("transit", "jeonse")}
+WEIGHTS_TRANSIT = {k: v for k, v in AXIS_WEIGHTS.items() if k != "jeonse"}
 
 TRANSIT_CACHE = Path(__file__).parent.parent / "data" / "static" / "apt_locations.json"
 WALK_M_PER_MIN = 67   # 성인 평균 보속 약 4km/h
@@ -192,6 +204,28 @@ def _liquidity(monthly: pd.DataFrame, households: pd.DataFrame | None = None) ->
         # 회전율을 전혀 못 구하면(세대수 정보 없음) 3개 축을 100%로 재정규화
         lq["liquidity_score"] = base / 0.75
     return lq[["district_name", "apt_name", "liquidity_score", "gap_ratio", "retention", "cv", "turnover", "active_months"]]
+
+
+# ── ②b 전세가율 (하방 지지력) ─────────────────────────────────
+
+def _jeonse_support(jeonse: pd.DataFrame | None) -> pd.DataFrame | None:
+    """
+    전세가율 = 전세 중앙값 / 매매 중앙값 (전용 59㎡ 기준).
+    전세가율이 높을수록 실거주 수요가 시세를 떠받쳐 하락기 방어력이 강하다
+    (전세가가 매매가에 가까우면 그 아래로 잘 안 떨어짐 — '하방 지지선').
+    build_data에서 전월세 실거래로 계산한 df를 받는다. 없으면 None(축 비활성).
+
+    입력 컬럼: district_name, apt_name, jeonse_ratio (0~1),
+              jeonse_median(만원), jeonse_count
+    """
+    if jeonse is None or jeonse.empty:
+        return None
+    df = jeonse.copy()
+    # 전세가율은 보통 0.4~0.9. 이상치(1.0 초과 등 데이터 오류)는 상한 클립.
+    df["jeonse_ratio"] = df["jeonse_ratio"].clip(0, 1.0)
+    df["jeonse_score"] = _pct_rank(df["jeonse_ratio"])
+    log.info(f"전세가율 축 활성: {len(df)}개 단지")
+    return df[["district_name", "apt_name", "jeonse_score", "jeonse_ratio", "jeonse_median", "jeonse_count"]]
 
 
 # ── ③ 상승 참여도 ─────────────────────────────────────────────
@@ -369,16 +403,12 @@ def compute_composite_score(
     mdd_df: pd.DataFrame,
     monthly: pd.DataFrame,
     households: pd.DataFrame | None = None,
+    jeonse: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     """
     종합 입지 점수 계산 (0~100).
-    반환 컬럼:
-        apt_name, district_name, build_year, area_exclusive,
-        composite_score, rank,
-        defense_score, liquidity_score, upside_score,
-        momentum_score, premium_score, scale_score,
-        mdd_pct, recovery_rate, upside_pct, momentum_pct,
-        price_per_m2, total_trades, gap_ratio, retention, active_months
+    데이터가 있어야만 활성화되는 축(교통·전세가율)은 있을 때만 포함되고,
+    포함된 축들의 가중치는 합이 1이 되도록 자동 재정규화된다.
     """
     dfn = _price_defense(mdd_df, monthly)
     lq  = _liquidity(monthly, households)
@@ -388,31 +418,37 @@ def compute_composite_score(
     sc  = _scale(mdd_df, monthly)
     rd  = _redevelopment(mdd_df)
     tr  = _transit_access(mdd_df)
+    je  = _jeonse_support(jeonse)
 
     base_cols = ["apt_name", "district_name", "build_year", "area_exclusive"]
     if "downturn_experienced" in mdd_df.columns:
         base_cols.append("downturn_experienced")
     df = mdd_df[base_cols].copy()
-    parts = [dfn, lq, ups, mo, pr, sc, rd] + ([tr] if tr is not None else [])
+    parts = [dfn, lq, ups, mo, pr, sc, rd]
+    if tr is not None:
+        parts.append(tr)
+    if je is not None:
+        parts.append(je)
     for part in parts:
         df = df.merge(part, on=["district_name", "apt_name"], how="left")
 
-    weights = WEIGHTS_TRANSIT if tr is not None else WEIGHTS
-    df["composite_score"] = (
-        df["defense_score"].fillna(50)   * weights["defense"]   +
-        df["liquidity_score"].fillna(50) * weights["liquidity"] +
-        df["upside_score"].fillna(50)    * weights["upside"]    +
-        df["momentum_score"].fillna(50)  * weights["momentum"]  +
-        df["premium_score"].fillna(50)   * weights["premium"]   +
-        df["scale_score"].fillna(50)     * weights["scale"]     +
-        df["redevelop_score"].fillna(20) * weights["redevelop"]
-    )
-    if tr is not None:
-        df["composite_score"] += df["transit_score"].fillna(50) * weights["transit"]
+    # 실제 계산에 쓸 축 = 점수 컬럼이 존재하는 축만. 가중치를 그 축들로 재정규화.
+    active_axes = [ax for ax, col in AXIS_SCORE_COL.items() if col in df.columns]
+    wsum = sum(AXIS_WEIGHTS[ax] for ax in active_axes)
+    weights = {ax: AXIS_WEIGHTS[ax] / wsum for ax in active_axes}
+
+    # 재건축은 데이터가 항상 있으나 결측 시 20(신축 취급), 나머지는 결측 시 50(중립)
+    fill_default = {ax: (20.0 if ax == "redevelop" else 50.0) for ax in active_axes}
+
+    df["composite_score"] = 0.0
+    for ax in active_axes:
+        col = AXIS_SCORE_COL[ax]
+        df["composite_score"] += df[col].fillna(fill_default[ax]) * weights[ax]
+
     df.attrs["weights_used"] = weights
 
     df = df.sort_values("composite_score", ascending=False).reset_index(drop=True)
     df["rank"] = df.index + 1
 
-    log.info(f"종합 점수 계산 완료: {len(df)}개 단지")
+    log.info(f"종합 점수 계산 완료: {len(df)}개 단지 (활성 축 {len(active_axes)}개: {active_axes})")
     return df
