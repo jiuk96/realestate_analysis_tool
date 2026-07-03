@@ -1262,6 +1262,32 @@ const PRICE_TIERS = [
   { cls: 'bubble-p4', label: '16억 이상',  test: () => true },
 ];
 
+function priceTierOf(a) {
+  const eok = a.latest_price != null ? a.latest_price / 10000 : null;
+  if (eok == null) return null;
+  return PRICE_TIERS.find(t => t.test(eok)) || PRICE_TIERS[PRICE_TIERS.length - 1];
+}
+
+// 가격대 모드에서 "그 가격대 안에서의 순위"를 밝기로 표시하기 위한 percentile 계산.
+// 필터와 무관하게 전체 단지(explorerApts) 기준으로 매겨야 필터를 바꿔도 밝기 의미가
+// 안 변한다. key: apt_name+district → 0(그 가격대 1위)~1(그 가격대 꼴찌).
+function priceTierRankPercentiles() {
+  const groups = {};
+  explorerApts.forEach(a => {
+    const tier = priceTierOf(a);
+    if (!tier) return;
+    (groups[tier.cls] = groups[tier.cls] || []).push(a);
+  });
+  const pct = new Map();
+  Object.values(groups).forEach(list => {
+    list.sort((x, y) => (y.composite_score ?? 0) - (x.composite_score ?? 0));
+    list.forEach((a, i) => {
+      pct.set(`${a.district}|${a.apt_name}`, list.length > 1 ? i / (list.length - 1) : 0);
+    });
+  });
+  return pct;
+}
+
 function bubbleClass(a) {
   if (bubbleColorMode === 'price') {
     const eok = a.latest_price != null ? a.latest_price / 10000 : null;
@@ -1272,9 +1298,23 @@ function bubbleClass(a) {
   return (SCORE_TIERS.find(t => t.test(v)) || SCORE_TIERS[SCORE_TIERS.length - 1]).cls;
 }
 
+// 가격대 모드일 때만 쓰는 밝기값 — 같은 가격대 내 1위에 가까울수록 밝고(진하고),
+// 꼴찌에 가까울수록 흐려진다. 점수 모드에서는 밝기 보정 없음(1).
+function bubbleBrightness(a, pctMap) {
+  if (bubbleColorMode !== 'price') return 1;
+  const pct = pctMap.get(`${a.district}|${a.apt_name}`);
+  if (pct == null) return 1;
+  return 1.35 - 0.7 * pct;   // 1위 근처 1.35(밝음) → 꼴찌 근처 0.65(어두움)
+}
+
 function renderExplorerLegend() {
-  const tiers = bubbleColorMode === 'price' ? PRICE_TIERS : SCORE_TIERS;
-  document.getElementById('explorerLegend').innerHTML = tiers.map(t =>
+  if (bubbleColorMode === 'price') {
+    document.getElementById('explorerLegend').innerHTML =
+      PRICE_TIERS.map(t => `<span class="legend-chip"><span class="legend-dot ${t.cls}"></span>${t.label}</span>`).join('')
+      + `<span class="legend-chip legend-hint">💡 같은 색 중에서도 <b>밝을수록</b> 그 가격대 내 종합점수 순위가 높습니다</span>`;
+    return;
+  }
+  document.getElementById('explorerLegend').innerHTML = SCORE_TIERS.map(t =>
     `<span class="legend-chip"><span class="legend-dot ${t.cls}"></span>${t.label}</span>`
   ).join('');
 }
@@ -1290,12 +1330,14 @@ function applyPriceFilter(minEok, maxEok) {
   }));
 
   renderExplorerLegend();
+  const pctMap = bubbleColorMode === 'price' ? priceTierRankPercentiles() : null;
 
   explorerVisible.forEach(a => {
     const cls = bubbleClass(a);
+    const brightness = bubbleBrightness(a, pctMap);
     const icon = L.divIcon({
       className: '',
-      html: `<div class="apt-bubble ${cls}">
+      html: `<div class="apt-bubble ${cls}" style="filter:brightness(${brightness.toFixed(2)})">
                <span class="apt-bubble-name">${shortName(a.apt_name)}</span>
                <span class="apt-bubble-price">${eokFmt(a.latest_price)}</span>
              </div>`,
