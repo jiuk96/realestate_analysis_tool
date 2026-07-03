@@ -825,12 +825,20 @@ function recalcBudget() {
   lastAnalysis = R;
 
   // 대출 슬라이더 하단 읽기값: 실제 반영된 대출액·월 원리금·총이자
-  // (LTV 등으로 인해 슬라이더로 요청한 금액보다 실제 대출액이 낮아질 수 있음)
+  // (LTV·규제지역 6억 캡 등으로 슬라이더에서 요청한 금액보다 실제 대출액이 낮아질 수 있어
+  //  그 차이가 있을 때는 이유를 바로 아래에 표시한다)
   const updateLoanOut = (prefix, P) => {
     const out = document.getElementById(prefix + 'LoanOut');
     if (!out) return;
     const pm = calcMonthlyPayment(P.loan, P.rate || 0.041, P.years || 40, common.repay);
-    out.innerHTML = `대출액 <b>${won2eok(P.loan)}</b> <span class="ls-sep">·</span> 월 원리금 <b>${won2man(pm.first)}</b> <span class="ls-sep">·</span> 총이자 ${won2eok(pm.totalInterest)}`;
+    let html = `대출액 <b>${won2eok(P.loan)}</b> <span class="ls-sep">·</span> 월 원리금 <b>${won2man(pm.first)}</b> <span class="ls-sep">·</span> 총이자 ${won2eok(pm.totalInterest)}`;
+    const requested = loanOverrideState[prefix];
+    if (requested != null && requested - P.loan > 1000000) {   // 100만원 넘게 깎였으면 이유 표시
+      html += `<div class="ls-limit-note">⚠️ 요청한 ${won2eok(requested)}보다 적게 실행됩니다 — 대출은 소득(DSR)뿐 아니라
+        "주택가 × LTV"도 함께 넘을 수 없는데, 현재 한도가 ${R.loanBind} 기준이라 주택가 쪽에서 막혔습니다.
+        ${R.regulated ? '규제지역 체크로 LTV가 낮아져(70%→40%) 실행 가능한 대출액이 줄어든 것입니다.' : ''}</div>`;
+    }
+    out.innerHTML = html;
   };
   updateLoanOut('a', R.A);
   updateLoanOut('b', R.B);

@@ -12,6 +12,7 @@
   --text:   #e2e8f0;
   --text2:  #94a3b8;
   --r:      12px;
+  --content-width: 1040px;  /* 히어로/네비/섹션 공통 폭 — 여기 값만 바꾸면 전체 정렬이 맞춰짐 */
 }
 html { scroll-behavior: smooth; }
 body {
@@ -29,7 +30,7 @@ body {
   text-align: center;
   border-bottom: 1px solid var(--bg3);
 }
-.hero-inner { max-width: 800px; margin: 0 auto; }
+.hero-inner { max-width: var(--content-width); margin: 0 auto; }
 .hero-badge {
   display: inline-block;
   background: rgba(56,189,248,.12);
@@ -81,7 +82,7 @@ body {
   border-bottom: 1px solid var(--bg3);
 }
 .nav-inner {
-  max-width: 900px;
+  max-width: var(--content-width);
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -105,7 +106,7 @@ body {
 /* ── 섹션 ───────────────────────────────────────────────── */
 .section { padding: 5rem 1.5rem; }
 .section-alt { background: var(--bg2); }
-.section-inner { max-width: 1000px; margin: 0 auto; }
+.section-inner { max-width: var(--content-width); margin: 0 auto; }
 .section-label {
   font-size: .75rem;
   letter-spacing: .12em;
@@ -971,6 +972,10 @@ body { font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSy
 .ls-loanval b { color: #38bdf8; }
 .ls-sep { color: #475569; }
 .ls-note { margin-top: .2rem; }
+.ls-limit-note {
+  width: 100%; margin-top: .5rem; padding-top: .5rem; border-top: 1px dashed #334155;
+  color: #fbbf24; font-size: .74rem; line-height: 1.6; font-variant-numeric: tabular-nums;
+}
 
 /* 2인 예산 카드 안에 들어간 대출 슬라이더: 카드 형태 필드로 표시 */
 .ls-field { background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: .7rem .8rem; margin-bottom: .85rem; }
