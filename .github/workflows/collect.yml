@@ -51,10 +51,29 @@ jobs:
       - name: 분석 파이프라인 재실행 (2차 — 교통 축 반영)
         run: python build_data.py
 
+      - name: 커밋 서명 설정 (SSH)
+        env:
+          SSH_SIGNING_KEY: ${{ secrets.SSH_SIGNING_KEY }}
+        run: |
+          if [ -z "$SSH_SIGNING_KEY" ]; then
+            echo "SSH_SIGNING_KEY 시크릿이 없어 서명 설정을 건너뜁니다."
+            exit 0
+          fi
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_SIGNING_KEY" > ~/.ssh/commit_signing_key
+          chmod 600 ~/.ssh/commit_signing_key
+          git config gpg.format ssh
+          git config user.signingkey ~/.ssh/commit_signing_key
+          git config commit.gpgsign true
+
       - name: GitHub에 데이터 커밋·푸시
+        env:
+          GIT_AUTHOR_EMAIL: ${{ secrets.GIT_AUTHOR_EMAIL }}
         run: |
           git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # 서명이 GitHub에서 "Verified"로 뜨려면 SSH_SIGNING_KEY를 등록한 GitHub 계정의
+          # 인증된 이메일이어야 함. GIT_AUTHOR_EMAIL이 없으면 서명은 되지만 미검증으로 남을 수 있음.
+          git config user.email "${GIT_AUTHOR_EMAIL:-github-actions[bot]@users.noreply.github.com}"
           git add data/
           if git diff --staged --quiet; then
             echo "변경된 데이터 없음 — 스킵"
