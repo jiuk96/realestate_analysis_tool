@@ -496,6 +496,7 @@ function analyzePerson(p, common) {
   const fam = calcFamilyLoan(p.family || 0, p.familyYears || 10);
   const equity = (p.cash || 0) + gift.netReceived;   // 현금 + 세후증여
   const stressRate = (p.rate || 0.041) + REGULATION.STRESS_DSR_ADDON;
+  // 대출 한도(DSR)는 세전 연소득 기준으로 산정
   const dsrLoan = Math.min(
     maxLoanByDSR(p.income || 0, stressRate, p.years || 40),
     (p.product && p.product.maxLoan) || Infinity
@@ -503,8 +504,10 @@ function analyzePerson(p, common) {
   return {
     cash: p.cash || 0, giftGross: p.gift || 0, netGift: gift.netReceived, giftTax: gift.tax,
     family: p.family || 0, familyMonthly: fam.monthly, familyOverLimit: fam.overLimit,
-    equity, dsrLoan, income: p.income || 0, product: p.product,
-    rate: p.rate, years: p.years,
+    equity, dsrLoan, income: p.income || 0,
+    // 실제 상환 여력은 사용자가 입력한 세후 실수령 월급 기준
+    netMonthly: p.netMonthly || 0,
+    product: p.product, rate: p.rate, years: p.years,
   };
 }
 
@@ -557,14 +560,14 @@ export function analyzeCouple(inA, inB, common) {
 
   const person = (P, ln, mth) => {
     const bankMonthly = mth - P.familyMonthly;   // 은행 상환분
-    const incomeMonthly = P.income / 12;
     return {
       cash: P.cash, netGift: P.netGift, giftGross: P.giftGross, giftTax: P.giftTax,
       family: P.family, parentTotal: P.giftGross + P.family,   // 부모 지원 총액
       loan: ln, monthly: mth,
       bankMonthly, familyMonthly: P.familyMonthly,
-      income: P.income, incomeMonthly,
-      burdenPct: P.income > 0 ? (mth * 12 / P.income) : 0,       // 연 상환/연소득
+      income: P.income, netMonthly: P.netMonthly,
+      // 상환 여력: 실제 세후 월급 대비 월 상환액 비중
+      burdenPct: P.netMonthly > 0 ? (mth / P.netMonthly) : 0,
       contrib: P.equity + P.family + ln,     // 각자 총 기여 가용자금
       dsrLoan: P.dsrLoan, familyOverLimit: P.familyOverLimit,
     };
@@ -612,6 +615,32 @@ export const REFERENCES = [
   { name: '실거래가 공개시스템 (분석 데이터 원천)', org: '국토교통부',
     url: 'https://rt.molit.go.kr' },
 ];
+
+/* ============================================================
+ * 증여세 계산 근거 (수식 + 세율표, UI 표시용)
+ * ============================================================ */
+export const GIFT_TAX_TABLE = {
+  formula: [
+    '① 과세표준 = 증여재산가액 − 증여재산공제',
+    '② 산출세액 = 과세표준 × 세율 − 누진공제액',
+    '③ 납부세액 = 산출세액 × (1 − 신고세액공제 3%)',
+  ],
+  deductions: [
+    { name: '직계존속 → 성년 자녀 (10년 합산)', amount: '5,000만원' },
+    { name: '혼인 증여공제 (혼인신고 전후 2년)', amount: '1억원' },
+    { name: '출산 증여공제 (자녀 출생 2년 내)', amount: '1억원 (혼인공제와 통합 1억 한도)' },
+  ],
+  // 상속세 및 증여세법 제26조 세율 (과세표준 구간별)
+  brackets: [
+    { base: '1억원 이하', rate: '10%', deduct: '—' },
+    { base: '1억원 초과 ~ 5억원 이하', rate: '20%', deduct: '1,000만원' },
+    { base: '5억원 초과 ~ 10억원 이하', rate: '30%', deduct: '6,000만원' },
+    { base: '10억원 초과 ~ 30억원 이하', rate: '40%', deduct: '1억 6,000만원' },
+    { base: '30억원 초과', rate: '50%', deduct: '4억 6,000만원' },
+  ],
+  example: '예) 성년 자녀가 부모에게 3억 증여 + 혼인공제 → 과세표준 3억 − (5,000만 + 1억) = 1.5억, ' +
+           '산출세액 1.5억 × 20% − 1,000만 = 2,000만원, 신고공제 3% 적용 → 약 1,940만원.',
+};
 
 /* 실제 대출 금리를 직접 확인할 수 있는 사이트 (금리 입력란에 반영용) */
 export const LOAN_RATE_SOURCES = [

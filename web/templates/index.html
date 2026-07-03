@@ -131,7 +131,10 @@
           <div class="budget-field"><label>그중 증여 (나머지 차용)</label><div class="bf-input"><input type="number" id="aGiftPortion" value="1.5" step="0.1" min="0"><span>억</span></div></div>
         </div>
         <div id="aParentSplit" class="parent-split"></div>
-        <div class="budget-field"><label>연소득</label><div class="bf-input"><input type="number" id="aIncome" value="5500" step="500" min="0"><span>만원</span></div></div>
+        <div class="budget-field-row">
+          <div class="budget-field"><label>연소득(세전)</label><div class="bf-input"><input type="number" id="aIncome" value="5500" step="500" min="0"><span>만원</span></div></div>
+          <div class="budget-field"><label>실수령 월급(세후)</label><div class="bf-input"><input type="number" id="aNetMonthly" value="380" step="10" min="0"><span>만원</span></div></div>
+        </div>
         <div class="budget-field"><label>대출 상품</label>
           <select id="aProduct" class="explorer-sort" style="width:100%"></select>
         </div>
@@ -151,7 +154,10 @@
           <div class="budget-field"><label>그중 증여 (나머지 차용)</label><div class="bf-input"><input type="number" id="bGiftPortion" value="1.5" step="0.1" min="0"><span>억</span></div></div>
         </div>
         <div id="bParentSplit" class="parent-split"></div>
-        <div class="budget-field"><label>연소득</label><div class="bf-input"><input type="number" id="bIncome" value="3500" step="500" min="0"><span>만원</span></div></div>
+        <div class="budget-field-row">
+          <div class="budget-field"><label>연소득(세전)</label><div class="bf-input"><input type="number" id="bIncome" value="3500" step="500" min="0"><span>만원</span></div></div>
+          <div class="budget-field"><label>실수령 월급(세후)</label><div class="bf-input"><input type="number" id="bNetMonthly" value="250" step="10" min="0"><span>만원</span></div></div>
+        </div>
         <div class="budget-field"><label>대출 상품</label>
           <select id="bProduct" class="explorer-sort" style="width:100%"></select>
         </div>
@@ -211,6 +217,12 @@
     <div class="budget-card" style="margin-top:1rem">
       <div class="budget-card-title">🔀 자금 흐름 한눈에 보기</div>
       <div id="fundFlow" class="fund-flow"></div>
+    </div>
+
+    <!-- 증여세 계산 수식 + 세율표 -->
+    <div class="legal-section">
+      <div class="legal-section-title">🧮 증여세는 이렇게 계산됩니다 <span class="legal-hint">상속세 및 증여세법 §26·§53</span></div>
+      <div id="giftTaxTable"></div>
     </div>
 
     <!-- 세법·규제 근거 (클릭 아코디언) -->

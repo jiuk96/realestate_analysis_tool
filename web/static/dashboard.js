@@ -1,6 +1,6 @@
 import {
   LOAN_PRODUCTS, analyzeCouple, won2eok, won2man,
-  LEGAL_BASIS, FAMILY_LOAN, REFERENCES, LOAN_RATE_SOURCES,
+  LEGAL_BASIS, FAMILY_LOAN, REFERENCES, LOAN_RATE_SOURCES, GIFT_TAX_TABLE,
 } from './financeCalculator.js';
 
 /* ── 유틸 ──────────────────────────────────────────────── */
@@ -633,8 +633,8 @@ function initBudgetPlanner() {
   initProductSelect('b');
 
   // 모든 입력에 반응형 바인딩 (입력 즉시 재계산)
-  ['aCash','aParent','aGiftPortion','aIncome','aRate','aYears',
-   'bCash','bParent','bGiftPortion','bIncome','bRate','bYears',
+  ['aCash','aParent','aGiftPortion','aIncome','aNetMonthly','aRate','aYears',
+   'bCash','bParent','bGiftPortion','bIncome','bNetMonthly','bRate','bYears',
    'repayType','familyYears','optMarriage','optBirth','optFirstHome','optRegulated'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', recalcBudget);
@@ -644,7 +644,34 @@ function initBudgetPlanner() {
   renderLegalAccordion();
   renderReferences();
   renderRateSources();
+  renderGiftTaxTable();
   recalcBudget();
+}
+
+function renderGiftTaxTable() {
+  const el = document.getElementById('giftTaxTable');
+  if (!el) return;
+  const T = GIFT_TAX_TABLE;
+  el.innerHTML = `
+    <div class="gt-formula">
+      ${T.formula.map(f => `<div class="gt-f">${f}</div>`).join('')}
+    </div>
+    <div class="gt-two">
+      <div class="gt-block">
+        <div class="gt-sub">증여재산공제</div>
+        <table class="gt-table">
+          <tbody>${T.deductions.map(d => `<tr><td>${d.name}</td><td class="gt-amt">${d.amount}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>
+      <div class="gt-block">
+        <div class="gt-sub">세율표 (과세표준 구간별 · 상증세법 §26)</div>
+        <table class="gt-table">
+          <thead><tr><th>과세표준</th><th>세율</th><th>누진공제</th></tr></thead>
+          <tbody>${T.brackets.map(b => `<tr><td>${b.base}</td><td class="gt-rate">${b.rate}</td><td>${b.deduct}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>
+    </div>
+    <div class="gt-example">${T.example}</div>`;
 }
 
 function renderRateSources() {
@@ -701,6 +728,7 @@ function personInput(prefix) {
     cash: num(prefix + 'Cash') * 억,
     gift, family,
     income: num(prefix + 'Income') * 만,
+    netMonthly: num(prefix + 'NetMonthly') * 만,   // 실수령 월급(세후)
     product,
     rate: (num(prefix + 'Rate') / 100) || product.rate,
     years: parseInt(document.getElementById(prefix + 'Years').value) || product.years,
@@ -747,7 +775,7 @@ function recalcBudget() {
       <span>부모차용 ${won2eok(P.family)}</span><span>대출 ${won2eok(P.loan)}</span>
     </div>
     <div class="ps-month">월 상환 <b>${won2man(P.monthly)}</b> = 은행 ${won2man(P.bankMonthly)} + 부모 ${won2man(P.familyMonthly)}
-      · 월급 ${won2man(P.incomeMonthly)}의 <b style="color:${bc}">${burden}%</b></div>`;
+      · 세후월급 ${won2man(P.netMonthly)}의 <b style="color:${bc}">${burden}%</b></div>`;
   };
   document.getElementById('aSummary').innerHTML = personSummary(R.A, '💼 내');
   document.getElementById('bSummary').innerHTML = personSummary(R.B, '💗 여자친구');
@@ -801,11 +829,11 @@ function renderRepayDetail(R) {
         </div>
         <div class="rp-burden">
           <div class="rp-bar"><div class="rp-fill" style="width:${barW}%;background:${bc}"></div></div>
-          <div class="rp-burden-txt">내 월급 ${won2man(P.incomeMonthly)} 중 <b style="color:${bc}">${burden}%</b>가 상환에 쓰입니다</div>
+          <div class="rp-burden-txt">실수령 월급 ${won2man(P.netMonthly)} 중 <b style="color:${bc}">${burden}%</b>가 상환에 쓰입니다</div>
         </div>
       </div>`;
   };
-  const totalIncome = R.A.incomeMonthly + R.B.incomeMonthly;
+  const totalIncome = R.A.netMonthly + R.B.netMonthly;
   const totalBurden = totalIncome > 0 ? (R.totalMonthly / totalIncome * 100).toFixed(0) : 0;
   el.innerHTML = `
     <div class="rp-grid">
@@ -813,8 +841,8 @@ function renderRepayDetail(R) {
       ${row(R.B, '💗 여자친구', '#f472b6')}
     </div>
     <div class="rp-summary">
-      합산 월 상환 <b>${won2man(R.totalMonthly)}</b> · 두 사람 월소득 합 ${won2man(totalIncome)}의 <b>${totalBurden}%</b>
-      <span class="rp-note">(통상 소득의 40% 이내 권장 — DSR 규제선)</span>
+      합산 월 상환 <b>${won2man(R.totalMonthly)}</b> · 두 사람 실수령 월급 합 ${won2man(totalIncome)}의 <b>${totalBurden}%</b>
+      <span class="rp-note">실제 세후 월급 대비 상환 부담률입니다 (대출한도 DSR은 별도로 세전 연소득 기준으로 계산됨)</span>
     </div>`;
 }
 
