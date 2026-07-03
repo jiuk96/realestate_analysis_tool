@@ -11,14 +11,8 @@ from pathlib import Path
 from src.preprocessor import run as preprocess_run
 from src.analyzer import run as analyzer_run, build_monthly_median
 from src.scorer import compute_composite_score, WEIGHTS, WEIGHTS_TRANSIT
+from config import DISTRICTS
 
-DISTRICTS = {
-    '마포구': '11440', '용산구': '11170', '성동구': '11200',
-    '광진구': '11215', '동대문구': '11230', '은평구': '11380',
-    '서대문구': '11410', '양천구': '11470', '강서구': '11500',
-    '영등포구': '11560', '동작구': '11590', '관악구': '11620',
-    '강동구': '11740', '종로구': '11110',
-}
 CODE2NAME = {v: k for k, v in DISTRICTS.items()}
 OUT = Path('data/processed')
 
