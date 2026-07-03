@@ -40,6 +40,12 @@ RENT_DIR.mkdir(parents=True, exist_ok=True)
 RENT_API_URL = "http://apis.data.go.kr/1613000/RTMSDataSvcAptRent/getRTMSDataSvcAptRent"
 
 
+class RentApiForbidden(Exception):
+    """403 Forbidden — 활용신청/승인 문제로 재시도해도 풀리지 않는 오류.
+    네트워크 일시 오류와 달리 즉시 전파해 호출부에서 전체 수집을 중단시킨다."""
+    pass
+
+
 def _fetch_rent_page(api_key: str, district_code: str, ym: str, page: int) -> dict:
     url = (
         f"{RENT_API_URL}?serviceKey={api_key}"
@@ -49,8 +55,17 @@ def _fetch_rent_page(api_key: str, district_code: str, ym: str, page: int) -> di
     for attempt in range(config.API_RETRY_COUNT):
         try:
             resp = requests.get(url, timeout=30)
+            if resp.status_code == 403:
+                # 권한 문제(활용신청 미승인/미반영)는 재시도해도 절대 안 풀린다 —
+                # 1950개 구×월 조합마다 5번씩 재시도하며 몇 시간을 낭비하지 않도록
+                # 여기서 즉시 예외를 던져 상위에서 전체 수집을 멈추게 한다.
+                raise RentApiForbidden(
+                    f"403 Forbidden: {district_code} {ym} — 활용신청이 아직 반영되지 않았을 수 있습니다."
+                )
             resp.raise_for_status()
             return _xml_response_to_dict(resp.content)
+        except RentApiForbidden:
+            raise
         except Exception as e:
             wait = config.API_RETRY_BACKOFF ** attempt
             log.warning(f"재시도 {attempt+1}/{config.API_RETRY_COUNT} ({wait:.0f}s): {e}")
@@ -108,28 +123,44 @@ def _collect_rent_month(api_key: str, code: str, ym: str) -> pd.DataFrame:
     return df
 
 
-def _diagnose(api_key: str):
+def _diagnose(api_key: str) -> bool:
     """전월세 API가 이 키로 호출 가능한지 첫 요청으로 확인해 로그에 남긴다.
-    data.go.kr에서 '아파트 전월세' API를 활용신청하지 않았으면, 매매 키로도
-    호출이 거부되는데(HTTP 200 + XML 에러 본문) 조용히 0건으로 넘어가기 쉽다.
-    그 경우를 명확히 드러내기 위함."""
+    True(정상)/False(막힘) 반환 — 막혔으면 호출부가 전체 수집을 건너뛰어
+    1950개 조합 × 5회 재시도로 몇 시간을 낭비하지 않게 한다."""
     code = next(iter(config.DISTRICTS.values()))
     url = (f"{RENT_API_URL}?serviceKey={api_key}&LAWD_CD={code}"
            f"&DEAL_YMD={config.END_YEAR_MONTH}&pageNo=1&numOfRows=1")
     try:
-        txt = requests.get(url, timeout=30).text
+        resp = requests.get(url, timeout=30)
     except Exception as e:
         log.warning(f"[진단] 전월세 API 연결 실패: {e}")
-        return
-    head = txt[:400].replace("\n", " ")
-    log.info(f"[진단] 전월세 API 응답 head: {head}")
-    low = txt.upper()
-    if "NOT_REGISTERED" in low or "SERVICE_KEY" in low and "ERROR" in low:
+        return False
+
+    head = resp.text[:400].replace("\n", " ")
+    log.info(f"[진단] 전월세 API 응답: HTTP {resp.status_code} / {head}")
+
+    if resp.status_code == 403:
+        log.error(
+            "[진단] ⚠️ HTTP 403 Forbidden — 활용신청이 승인은 됐지만 아직 반영 전이거나,\n"
+            "        신청한 API가 '아파트 전월세'가 맞는지(매매와 이름이 비슷해 헷갈리기 쉬움)\n"
+            "        다시 확인이 필요합니다. data.go.kr 마이페이지 > 활용신청 현황에서\n"
+            "        '국토교통부_아파트 전월세 실거래가' 승인 상태를 확인해주세요.\n"
+            "        보통 승인 후 반영까지 짧게는 수 분, 길게는 몇 시간 걸릴 수 있습니다."
+        )
+        return False
+    if resp.status_code != 200:
+        log.error(f"[진단] ⚠️ 예상치 못한 응답(HTTP {resp.status_code}) — 원인 파악 필요.")
+        return False
+    low = resp.text.upper()
+    if ("NOT_REGISTERED" in low) or ("SERVICE_KEY" in low and "ERROR" in low):
         log.error("[진단] ⚠️ 이 인증키로 '아파트 전월세' API가 활용신청되어 있지 않은 것 같습니다.\n"
-                  "        data.go.kr → '국토교통부_아파트 전월세 실거래가' 검색 → 활용신청 후 재실행하세요.\n"
-                  "        (매매와 별개 API라 매매 키만으로는 호출이 거부됩니다.)")
-    elif "<item>" in txt or "totalCount" in txt:
+                  "        data.go.kr → '국토교통부_아파트 전월세 실거래가' 검색 → 활용신청 후 재실행하세요.")
+        return False
+    if "<item>" in resp.text or "totalCount" in resp.text:
         log.info("[진단] ✅ 전월세 API 정상 호출 가능 — 수집을 시작합니다.")
+        return True
+    log.warning("[진단] 응답 형태를 알 수 없습니다 — 위 head를 참고해 원인 파악이 필요합니다.")
+    return False
 
 
 def main():
@@ -137,7 +168,10 @@ def main():
     if not api_key:
         raise EnvironmentError("MOLIT_API_KEY 환경변수가 없습니다 (매매 수집과 동일 키).")
 
-    _diagnose(api_key)
+    if not _diagnose(api_key):
+        log.error("전월세 API 호출이 막혀 있어 수집을 건너뜁니다. 위 진단 메시지를 확인해주세요. "
+                   "(전세가율 축은 다음 실행에서 다시 시도됩니다)")
+        return
 
     months = _month_range(config.START_YEAR_MONTH, config.END_YEAR_MONTH)
     tasks = [(name, code, ym) for name, code in config.DISTRICTS.items() for ym in months]
@@ -148,6 +182,9 @@ def main():
         try:
             df = _collect_rent_month(api_key, code, ym)
             n += len(df)
+        except RentApiForbidden as e:
+            log.error(f"[중단] {e}\n권한 문제는 재시도해도 풀리지 않아 남은 조합은 건너뛰고 종료합니다.")
+            break
         except Exception as e:
             log.error(f"{name} {ym} 실패: {e}")
     log.info(f"전월세 수집 완료 (누적 {n:,}건, data/rent/)")
