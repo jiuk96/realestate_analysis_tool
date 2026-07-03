@@ -4042,5 +4042,95 @@
     "nearest_station": "월계역",
     "nearest_station_m": 559,
     "stations_within_1km": 2
+  },
+  "양천구|목동신시가지11": {
+    "apt_name": "목동신시가지11",
+    "district": "양천구",
+    "address": "서울 양천구 신정동 325",
+    "lat": 37.5162407,
+    "lng": 126.8521196,
+    "nearest_station": "신정네거리역",
+    "nearest_station_m": 431,
+    "stations_within_1km": 1
+  },
+  "송파구|올림픽선수기자촌1단지": {
+    "apt_name": "올림픽선수기자촌1단지",
+    "district": "송파구",
+    "address": "서울 송파구 방이동 89",
+    "lat": 37.5141564,
+    "lng": 127.1195472,
+    "nearest_station": "몽촌토성역",
+    "nearest_station_m": 729,
+    "stations_within_1km": 2
+  },
+  "양천구|목동신시가지10": {
+    "apt_name": "목동신시가지10",
+    "district": "양천구",
+    "address": "서울 양천구 신정동 311",
+    "lat": 37.5162407,
+    "lng": 126.8521196,
+    "nearest_station": "신정네거리역",
+    "nearest_station_m": 431,
+    "stations_within_1km": 1
+  },
+  "송파구|올림픽선수기자촌2단지": {
+    "apt_name": "올림픽선수기자촌2단지",
+    "district": "송파구",
+    "address": "서울 송파구 방이동 89",
+    "lat": 37.5141564,
+    "lng": 127.1195472,
+    "nearest_station": "몽촌토성역",
+    "nearest_station_m": 729,
+    "stations_within_1km": 2
+  },
+  "강남구|래미안대치팰리스": {
+    "apt_name": "래미안대치팰리스",
+    "district": "강남구",
+    "address": "서울 강남구 대치동 1027",
+    "lat": 37.49882,
+    "lng": 127.06566,
+    "nearest_station": "학여울역",
+    "nearest_station_m": 496,
+    "stations_within_1km": 2
+  },
+  "종로구|인왕산아이파크": {
+    "apt_name": "인왕산아이파크",
+    "district": "종로구",
+    "address": "서울 종로구 무악동 60",
+    "lat": 37.5769703,
+    "lng": 126.957666,
+    "nearest_station": "독립문역",
+    "nearest_station_m": 266,
+    "stations_within_1km": 2
+  },
+  "강북구|주공1단지": {
+    "apt_name": "주공1단지",
+    "district": "강북구",
+    "address": "서울 강북구 번동 242",
+    "lat": 37.62929,
+    "lng": 127.03684,
+    "nearest_station": "미아역",
+    "nearest_station_m": 999,
+    "stations_within_1km": 1
+  },
+  "강서구|부영": {
+    "apt_name": "부영",
+    "district": "강서구",
+    "address": "서울 강서구 등촌동 691-3",
+    "lat": 37.552056,
+    "lng": 126.8615649,
+    "nearest_station": "등촌역",
+    "nearest_station_m": 396,
+    "stations_within_1km": 2
+  },
+  "노원구|건영": {
+    "apt_name": "건영",
+    "district": "노원구",
+    "address": "서울 노원구 하계동 271-3",
+    "lat": 37.6488051,
+    "lng": 127.0739961,
+    "nearest_station": "노원역",
+    "nearest_station_m": 1315,
+    "stations_within_1km": 0
   }
 }
