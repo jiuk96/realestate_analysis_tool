@@ -256,6 +256,36 @@ export function calcFamilyLoan(principal, years = 10) {
   return { monthly, overLimit, deemedInterest, giftRisk };
 }
 
+/**
+ * 부모 지원 총액을 "세금·이자 부담이 없는 항목부터" 자동으로 채워 분해한다.
+ * 순서: ① 직계존속 기본공제(0.5억, 항상 가능) → ② 혼인·출산공제(1억, 옵션 체크 시) →
+ *       ③ 무이자 차용 한도(≈2.17억, 상증세법 §41-4) → ④ 그래도 남으면 과세 증여로 처리.
+ * 사용자는 "부모 지원 총액"만 입력하면 되고, 증여/차용 비율은 이 함수가 정한다.
+ * @param {number} total 부모 지원 총액 (원)
+ * @param {object} opt   { marriage, birth } 혼인·출산공제 적용 여부
+ * @returns {{basicGift:number, bonusGift:number, familyLoan:number, extraGift:number, totalGift:number}}
+ */
+export function splitParentSupport(total, opt = {}) {
+  const bonusApplied = !!(opt.marriage || opt.birth);
+  let remaining = Math.max(0, total || 0);
+
+  const basicGift = Math.min(remaining, GIFT.BASIC_DEDUCTION);
+  remaining -= basicGift;
+
+  const bonusGift = bonusApplied ? Math.min(remaining, GIFT.MARRIAGE_BIRTH_CAP) : 0;
+  remaining -= bonusGift;
+
+  const familyLoan = Math.min(remaining, FAMILY_LOAN.MAX_NO_INTEREST);
+  remaining -= familyLoan;
+
+  const extraGift = remaining;   // 무이자 차용 한도까지 넘으면 나머지는 과세 증여로 처리
+
+  return {
+    basicGift, bonusGift, familyLoan, extraGift,
+    totalGift: basicGift + bonusGift + extraGift,
+  };
+}
+
 /* ============================================================
  * 세법·규제 근거 텍스트 (UI '근거 보기'용)
  * ============================================================ */
@@ -537,6 +567,7 @@ function analyzePerson(p, common) {
   return {
     cash: p.cash || 0, giftGross: p.gift || 0, netGift: gift.netReceived, giftTax: gift.tax,
     giftDetail: gift,   // 증여공제 내역(기본/혼인·출산 공제, 과세표준, 세율 등) 표시용
+    parentSplit: p.parentSplit,   // 부모지원 총액 분해 내역(기본공제/혼인공제/무이자차용/그외증여)
     family: p.family || 0, familyMonthly: fam.monthly, familyOverLimit: fam.overLimit,
     equity, dsrLoan, income: p.income || 0,
     // 실제 상환 여력은 사용자가 입력한 세후 실수령 월급 기준
@@ -603,6 +634,7 @@ export function analyzeCouple(inA, inB, common) {
     return {
       cash: P.cash, netGift: P.netGift, giftGross: P.giftGross, giftTax: P.giftTax,
       giftDetail: P.giftDetail,   // 증여공제 분해 내역 (기본/혼인·출산 공제, 과세표준, 세율)
+      parentSplit: P.parentSplit, // 부모지원 총액 분해 내역 (기본공제/혼인공제/무이자차용/그외증여)
       family: P.family, parentTotal: P.giftGross + P.family,   // 부모 지원 총액
       loan: ln, monthly: mth,
       bankMonthly, familyMonthly: P.familyMonthly,
