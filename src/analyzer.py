@@ -196,9 +196,17 @@ def detect_peak_trough(monthly: pd.DataFrame) -> pd.DataFrame:
     후보에서 제외한다.
 
     반환: [apt_name, peak_date, peak_price, trough_date, trough_price,
-           mdd_pct, district_name, build_year, area_exclusive]
+           mdd_pct, district_name, build_year, area_exclusive, downturn_experienced]
     """
     results = []
+
+    # 하락장 경험 판정 기준: 시장은 2021년 말 고점 → 2022 하반기~2023 중반 저점을
+    # 겪었다. 데이터로 하락장을 "겪었다"고 보려면, 급락 전(고점기) 관측과 저점기
+    # 관측이 모두 있어야 한다. 2024년에야 첫 거래가 잡힌 신축 등은 애초에 하락을
+    # 겪을 기회가 없었으므로 MDD 0%가 방어력 근거가 될 수 없다(생존 편향).
+    predrop_cutoff = pd.Period("2022-06", freq="M")   # 이 시점 이전 관측이 있어야 '고점기 목격'
+    trough_lo = pd.Period(config.TROUGH_START, freq="M")
+    trough_hi = pd.Period("2023-12", freq="M")
 
     # ⚠️ apt_name만으로 묶으면 "현대"·"삼성"처럼 여러 구에 겹치는 단지명이
     # 서로 다른 단지인데도 하나로 합쳐진다. district_name까지 함께 묶어야 한다.
@@ -224,6 +232,12 @@ def detect_peak_trough(monthly: pd.DataFrame) -> pd.DataFrame:
 
         mdd_pct = (trough_price - peak_price) / peak_price * 100  # 음수
 
+        dates = grp["deal_date"]
+        downturn_experienced = bool(
+            (dates.min() <= predrop_cutoff) and
+            ((dates >= trough_lo) & (dates <= trough_hi)).any()
+        )
+
         results.append({
             "apt_name":      apt_name,
             "peak_date":     peak_row["deal_date"],
@@ -234,6 +248,7 @@ def detect_peak_trough(monthly: pd.DataFrame) -> pd.DataFrame:
             "district_name": district_name,
             "build_year":    peak_row["build_year"],
             "area_exclusive": round(float(peak_row["area_exclusive"]), 1),  # float32 꼬리자리 제거
+            "downturn_experienced": downturn_experienced,
         })
 
     result_df = pd.DataFrame(results)

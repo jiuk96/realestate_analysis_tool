@@ -235,11 +235,11 @@ function highlightDistrict(name) {
 function renderScoring() {
   const axes = [
     { key: '가격방어력', weight: 25, color: '#34d399',
-      desc: '전체 수집 기간 중 겪었던 가장 큰 하락(MDD)이 얼마나 작았는지와, 그 저점 이후 얼마나 회복했는지를 함께 봅니다. 신고가를 갱신한 단지는 가점을 받습니다.',
-      metric: 'MDD(60%) + 회복률(40%)', example: 'MDD -12% & 전고점 회복 → 최상위 방어력' },
+      desc: '전체 수집 기간 중 겪었던 가장 큰 하락(MDD)이 얼마나 작았는지와, 그 저점 이후 얼마나 회복했는지를 함께 봅니다. 신고가를 갱신한 단지는 가점을 받습니다. 단, 2022~23년 하락장을 데이터로 겪지 않은 신축 등은 "MDD 0%"가 방어력 근거가 될 수 없어 중립(50점) 처리합니다.',
+      metric: 'MDD(60%) + 회복률(40%) · 하락장 미경험 단지는 중립', example: 'MDD -12% & 전고점 회복 → 최상위 방어력' },
     { key: '거래유동성', weight: 20, color: '#38bdf8',
-      desc: '전 기간에 걸쳐 거래가 꾸준했는지, 특히 하락장에서도 거래가 유지됐는지 측정합니다. 팔고 싶을 때 팔리는 단지가 진짜 우량 단지입니다.',
-      metric: '거래 공백률 + 하락기 유지율 + 변동계수', example: '하락장에도 매달 거래 체결 → 높은 점수' },
+      desc: '전 기간에 걸쳐 거래가 꾸준했는지, 하락장에서도 거래가 유지됐는지, 그리고 규모 대비 얼마나 활발히 거래되는지(회전율)를 함께 봅니다. 팔고 싶을 때 팔리는 단지가 진짜 우량 단지입니다.',
+      metric: '거래 공백률 + 하락기 유지율 + 변동계수 + 회전율(거래건수÷세대수)', example: '하락장에도 매달 거래 + 높은 회전율 → 높은 점수' },
     { key: '상승참여도', weight: 15, color: '#fbbf24',
       desc: '2021년 상승장에서 얼마나 올랐는지를 측정합니다. 하락에 강하면서 상승에도 참여해야 진정한 우량 단지입니다.',
       metric: '(고점가 − 2020년 기저가) / 기저가', example: '기저 대비 +50% 상승 → 높은 참여도' },
@@ -406,7 +406,11 @@ function buildAxisReasons(apt) {
 
   if (apt.defense_score != null) {
     const mdd = apt.mdd_pct, rec = apt.recovery_rate;
-    if (mdd != null && rec != null) {
+    // 하락장 미경험 + MDD 평탄 → 중립(50) 처리된 경우: 수치 대신 그 사유를 설명한다.
+    const neutralized = apt.downturn_experienced === false && mdd != null && mdd > -5;
+    if (neutralized) {
+      reasons['가격방어력'] = `2022~23년 하락장을 데이터로 겪지 않아(비교적 최근 거래·신축 등) MDD 0%가 방어력 근거가 될 수 없어, 방어력은 중립(50점)으로 평가했습니다.`;
+    } else if (mdd != null && rec != null) {
       const recPct = Math.round(rec * 100);
       // 회복률이 100%를 넘으면 저점을 넘어 신고가를 갱신했다는 뜻 — "120% 회복"보다
       // "전고점을 넘어섰다"는 표현이 더 자연스럽다.
@@ -423,11 +427,14 @@ function buildAxisReasons(apt) {
   if (apt.liquidity_score != null && apt.gap_ratio != null) {
     const gapPct = Math.round(apt.gap_ratio * 100);
     const retPct = apt.retention != null ? Math.round(apt.retention * 100) : null;
+    // 회전율(연간 거래건수÷세대수)을 %로 환산해 근거에 함께 노출
+    const turnPct = apt.turnover != null ? (apt.turnover * 100) : null;
+    const turnPhrase = turnPct != null ? ` 연 회전율 약 ${turnPct.toFixed(1)}%로` : '';
     reasons['거래유동성'] = apt.liquidity_score >= 70
-      ? `거래 공백률 ${gapPct}%로 낮고${retPct != null ? `, 하락기에도 거래량이 상승기의 ${retPct}% 수준으로 유지돼` : ''} 환금성이 좋습니다.`
+      ? `거래 공백률 ${gapPct}%로 낮고${turnPhrase} 매물이 자주 나와 환금성이 좋습니다.`
       : apt.liquidity_score >= 45
-        ? `거래 공백률 ${gapPct}%로 무난한 수준의 유동성입니다.`
-        : `거래 공백률이 ${gapPct}%로 높아 매매 타이밍을 잡기 어려울 수 있습니다.`;
+        ? `거래 공백률 ${gapPct}%,${turnPhrase} 무난한 수준의 유동성입니다.`
+        : `거래 공백률이 ${gapPct}%로 높고${turnPhrase} 매매 타이밍을 잡기 어려울 수 있습니다.`;
   }
 
   if (apt.upside_score != null && apt.upside_pct != null) {

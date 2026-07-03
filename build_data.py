@@ -62,7 +62,10 @@ monthly = build_monthly_median(df)
 
 # ── 5. 종합 점수 ──────────────────────────────────────────────
 print('=== 5. 종합 점수 계산 ===')
-score_df = compute_composite_score(mdd_df, monthly)
+# 유동성 축의 '회전율' 계산에 쓸 추정세대수 (전 평형 거래 기준, preprocessor와 동일 로직)
+from src.preprocessor import _estimate_households
+households = _estimate_households(df)
+score_df = compute_composite_score(mdd_df, monthly, households)
 score_df = score_df.rename(columns={'district_name': 'district'})
 # mdd 컬럼 추가 (dashboard.js에서 a.mdd 참조)
 if 'mdd_pct' in score_df.columns and 'mdd' not in score_df.columns:

@@ -73,6 +73,11 @@ def _price_defense(mdd_df: pd.DataFrame, monthly: pd.DataFrame) -> pd.DataFrame:
     MDD(60%) + 회복률(40%).
     회복률 = (최신가 - trough) / (peak - trough)
     1.0 초과(신고가 갱신)는 1.2까지 인정해 완전회복 단지에 가점.
+
+    ⚠️ 생존 편향 보정: 2022~2023 하락장을 데이터로 겪지 않은 단지(2024년 이후
+    첫 거래된 신축 등)는 MDD가 0%로 잡혀도 "방어력이 좋다"는 근거가 될 수 없다.
+    이런 단지는 방어력 점수를 중립(50)으로 처리해, 하락을 실제로 견뎌낸 단지와
+    구분한다(downturn_experienced 플래그, analyzer.detect_peak_trough에서 계산).
     """
     latest = (
         monthly.sort_values("deal_date")
@@ -94,26 +99,50 @@ def _price_defense(mdd_df: pd.DataFrame, monthly: pd.DataFrame) -> pd.DataFrame:
     df["score_recovery"] = _pct_rank(df["recovery_rate"])
 
     df["defense_score"] = df["score_mdd"] * 0.6 + df["score_recovery"] * 0.4
+
+    # 하락장 미경험 단지의 "가짜 0% MDD"만 중립(50) 처리한다.
+    # 단, 실제로 유의미한 하락(예: -5% 초과)을 데이터에서 보인 단지는 그 하락이
+    # 진짜 방어력 증거이므로 (설령 표준 하락장 창과 어긋나더라도) 점수를 유지한다.
+    # → 조건: 하락장 미경험 AND MDD가 거의 평평(> -5%)  ⇒ 검증되지 않은 것으로 보고 중립.
+    if "downturn_experienced" in df.columns:
+        untested_flat = (~df["downturn_experienced"].fillna(True).astype(bool)) & (df["mdd_pct"] > -5.0)
+        n_neutral = int(untested_flat.sum())
+        df.loc[untested_flat, "defense_score"] = 50.0
+        if n_neutral:
+            log.info(f"방어력 중립 처리(하락장 미경험 + MDD 평탄): {n_neutral}개 단지")
+
     return df[["district_name", "apt_name", "defense_score", "mdd_pct", "recovery_rate"]]
 
 
 # ── ② 거래 유동성 ─────────────────────────────────────────────
 
-def _liquidity(monthly: pd.DataFrame) -> pd.DataFrame:
+def _liquidity(monthly: pd.DataFrame, households: pd.DataFrame | None = None) -> pd.DataFrame:
     """
-    A. 거래 공백률 (40%) : 전체 기간 중 거래 없는 달 비율 → 낮을수록 좋음
-    B. 하락기 유지율 (35%): 하락기 월평균 거래 / 상승기 월평균 거래
-    C. 변동계수 (25%)     : 거래량 std/mean → 낮을수록 꾸준함
+    A. 거래 공백률 (30%) : 전체 기간 중 거래 없는 달 비율 → 낮을수록 좋음 (꾸준함)
+    B. 하락기 유지율 (25%): 하락기 월평균 거래 / 상승기 월평균 거래
+    C. 변동계수 (20%)     : 거래량 std/mean → 낮을수록 꾸준함
+    D. 회전율 (25%)       : 연간 거래건수 ÷ 추정세대수 → 규모 대비 얼마나 활발히
+                           거래되는지(거래 '강도'). 공백률·유지율·변동계수는 모두
+                           '꾸준함'만 보고 '강도'를 못 잡는다 — 매달 1건이든 10건이든
+                           공백률은 만점이라, 매물이 자주 나와 빨리 팔리는 진짜
+                           환금성이 반영되지 않았다. households가 없으면 이 축은
+                           생략하고 나머지 3개 비중을 재정규화한다.
     """
     all_periods = pd.period_range(
         start=config.START_YEAR_MONTH, end=config.END_YEAR_MONTH, freq="M"
     )
     total_months = len(all_periods)
+    span_years = total_months / 12.0
 
     rise_start = pd.Period(config.PEAK_START,   freq="M")
     rise_end   = pd.Period(config.PEAK_END,     freq="M")
     fall_start = pd.Period(config.TROUGH_START, freq="M")
     fall_end   = pd.Period(config.TROUGH_END,   freq="M")
+
+    hh_map = {}
+    if households is not None and not households.empty:
+        hh_map = {(r["district_name"], r["apt_name"]): r["est_households"]
+                  for _, r in households.iterrows()}
 
     rows = []
     for (district_name, apt_name), grp in monthly.groupby(["district_name", "apt_name"], observed=True):
@@ -131,12 +160,18 @@ def _liquidity(monthly: pd.DataFrame) -> pd.DataFrame:
         tc_std  = grp["trade_count"].std()
         cv = (tc_std / tc_mean) if tc_mean > 0 else 1.0
 
+        # 회전율: (연평균 59㎡ 거래건수) / 추정세대수.  세대수 추정치가 없으면 NaN.
+        total_trades = grp["trade_count"].sum()
+        hh = hh_map.get((district_name, apt_name))
+        turnover = (total_trades / span_years) / hh if hh and hh > 0 else np.nan
+
         rows.append({
             "district_name": district_name,
             "apt_name": apt_name,
             "gap_ratio": gap_ratio,
             "retention": retention,
             "cv": cv,
+            "turnover": turnover,
             "active_months": active_months,
         })
 
@@ -144,12 +179,19 @@ def _liquidity(monthly: pd.DataFrame) -> pd.DataFrame:
     if lq.empty:
         return lq
 
-    lq["liquidity_score"] = (
-        _pct_rank(lq["gap_ratio"], low_is_good=True) * 0.40 +
-        _pct_rank(lq["retention"])                   * 0.35 +
-        _pct_rank(lq["cv"], low_is_good=True)        * 0.25
+    base = (
+        _pct_rank(lq["gap_ratio"], low_is_good=True) * 0.30 +
+        _pct_rank(lq["retention"])                   * 0.25 +
+        _pct_rank(lq["cv"], low_is_good=True)        * 0.20
     )
-    return lq[["district_name", "apt_name", "liquidity_score", "gap_ratio", "retention", "cv", "active_months"]]
+    if lq["turnover"].notna().any():
+        # 회전율 결측 단지는 중립(50)으로 채워 다른 축만으로 불이익받지 않게 함
+        turnover_score = _pct_rank(lq["turnover"]).fillna(50.0)
+        lq["liquidity_score"] = base + turnover_score * 0.25
+    else:
+        # 회전율을 전혀 못 구하면(세대수 정보 없음) 3개 축을 100%로 재정규화
+        lq["liquidity_score"] = base / 0.75
+    return lq[["district_name", "apt_name", "liquidity_score", "gap_ratio", "retention", "cv", "turnover", "active_months"]]
 
 
 # ── ③ 상승 참여도 ─────────────────────────────────────────────
@@ -326,6 +368,7 @@ def _transit_access(mdd_df: pd.DataFrame) -> pd.DataFrame | None:
 def compute_composite_score(
     mdd_df: pd.DataFrame,
     monthly: pd.DataFrame,
+    households: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     """
     종합 입지 점수 계산 (0~100).
@@ -338,7 +381,7 @@ def compute_composite_score(
         price_per_m2, total_trades, gap_ratio, retention, active_months
     """
     dfn = _price_defense(mdd_df, monthly)
-    lq  = _liquidity(monthly)
+    lq  = _liquidity(monthly, households)
     ups = _upside_participation(mdd_df, monthly)
     mo  = _recovery_momentum(monthly)
     pr  = _location_premium(mdd_df)
@@ -346,7 +389,10 @@ def compute_composite_score(
     rd  = _redevelopment(mdd_df)
     tr  = _transit_access(mdd_df)
 
-    df = mdd_df[["apt_name", "district_name", "build_year", "area_exclusive"]].copy()
+    base_cols = ["apt_name", "district_name", "build_year", "area_exclusive"]
+    if "downturn_experienced" in mdd_df.columns:
+        base_cols.append("downturn_experienced")
+    df = mdd_df[base_cols].copy()
     parts = [dfn, lq, ups, mo, pr, sc, rd] + ([tr] if tr is not None else [])
     for part in parts:
         df = df.merge(part, on=["district_name", "apt_name"], how="left")
