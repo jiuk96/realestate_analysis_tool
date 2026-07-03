@@ -33,7 +33,7 @@ jobs:
           echo "매매 수집 완료"
 
       - name: 데이터 수집 (전월세 — 전세가율용)
-        timeout-minutes: 20
+        timeout-minutes: 60
         env:
           MOLIT_API_KEY: ${{ secrets.MOLIT_API_KEY }}
           PYTHONUNBUFFERED: "1"
