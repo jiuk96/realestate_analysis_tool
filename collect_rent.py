@@ -16,6 +16,7 @@
 import os
 import time
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed, CancelledError
 from pathlib import Path
 
 import requests
@@ -43,6 +44,14 @@ RENT_API_URL = "http://apis.data.go.kr/1613000/RTMSDataSvcAptRent/getRTMSDataSvc
 # ~5초씩 걸려 전체 2.6시간이 나왔다(실측). 국토부 API는 numOfRows 1000까지
 # 허용하므로 크게 잡아 요청 횟수를 1/10로 줄인다.
 RENT_PAGE_SIZE = 1000
+
+# 전세가율 계산은 최근 18개월만 사용 — 넉넉히 최근 30개월만 수집한다.
+# 25개 구 × 30개월 = 750회 (78개월 전체의 1950회 대비 ~40%).
+RENT_MONTHS_BACK = 30
+
+# 동시 요청 수. 국토부 API가 요청당 느려 순차로는 오래 걸린다. 과하면 429가
+# 날 수 있어 보수적으로 4로 둔다(백오프가 있어 429가 나도 실패하진 않음).
+WORKERS = 4
 
 # GitHub Actions 스텝 타임아웃(60분)에 걸리면 job이 실패해 그때까지 모은
 # 체크포인트가 커밋되지 못하고 통째로 날아간다(실제 발생). 스텝 타임아웃보다
@@ -184,28 +193,50 @@ def main():
                    "(전세가율 축은 다음 실행에서 다시 시도됩니다)")
         return
 
-    months = _month_range(config.START_YEAR_MONTH, config.END_YEAR_MONTH)
+    # 전세가율은 '최근 18개월' 전세 중앙값만 쓰므로, 2020년부터 78개월을 다 받을
+    # 필요가 없다. 넉넉히 최근 RENT_MONTHS_BACK개월만 수집해 요청 수를 1/3로 줄인다
+    # (국토부 API가 요청당 ~3~4초로 느려, 개월 수가 전체 소요시간을 좌우함).
+    all_months = _month_range(config.START_YEAR_MONTH, config.END_YEAR_MONTH)
+    months = all_months[-RENT_MONTHS_BACK:]
     tasks = [(name, code, ym) for name, code in config.DISTRICTS.items() for ym in months]
-    log.info(f"전월세 수집 대상: {len(config.DISTRICTS)}개 구 × {len(months)}개월 = {len(tasks)}회 (체크포인트 스킵 포함)")
+    log.info(f"전월세 수집 대상: {len(config.DISTRICTS)}개 구 × 최근 {len(months)}개월"
+             f"({months[0]}~{months[-1]}) = {len(tasks)}회 (체크포인트 스킵 포함)")
 
+    # 국토부 API가 요청당 ~3~4초로 느려 순차 처리는 750회에 ~50분이 걸린다.
+    # 각 (구,월)이 서로 다른 parquet 파일을 쓰므로 스레드 안전 — 소수 동시요청으로
+    # 벽시계 시간을 크게 줄인다. 429가 나면 _fetch_rent_page의 백오프가 처리한다.
     start = time.monotonic()
     n = 0
     left = 0
-    for i, (name, code, ym) in enumerate(tqdm(tasks, desc="전월세 수집", miniters=25)):
-        if time.monotonic() - start > TIME_BUDGET_SEC:
-            left = len(tasks) - i
-            log.warning(f"[시간 예산 소진] {TIME_BUDGET_SEC//60}분 경과 — 남은 {left}개 조합은 "
-                        f"다음 실행이 체크포인트에서 이어받습니다. (지금까지 수집분은 정상 커밋됨)")
-            break
-        try:
-            df = _collect_rent_month(api_key, code, ym)
-            n += len(df)
-        except RentApiForbidden as e:
-            log.error(f"[중단] {e}\n권한 문제는 재시도해도 풀리지 않아 남은 조합은 건너뛰고 종료합니다.")
-            break
-        except Exception as e:
-            log.error(f"{name} {ym} 실패: {e}")
-    log.info(f"전월세 수집 종료 (이번 실행 {n:,}건, 미처리 {left}개 조합, data/rent/)")
+    done = 0
+    stop = False
+    with ThreadPoolExecutor(max_workers=WORKERS) as ex:
+        futs = {ex.submit(_collect_rent_month, api_key, code, ym): (name, ym)
+                for name, code, ym in tasks}
+        for fut in tqdm(as_completed(futs), total=len(futs), desc="전월세 수집", miniters=25):
+            name, ym = futs[fut]
+            done += 1
+            if not stop and time.monotonic() - start > TIME_BUDGET_SEC:
+                stop = True
+                left = len(tasks) - done
+                log.warning(f"[시간 예산 소진] {TIME_BUDGET_SEC//60}분 경과 — 남은 ~{left}개는 "
+                            f"다음 실행이 체크포인트에서 이어받습니다. (지금까지 수집분은 정상 커밋됨)")
+                for f in futs:
+                    f.cancel()
+            try:
+                df = fut.result()
+                n += len(df)
+            except CancelledError:
+                pass
+            except RentApiForbidden as e:
+                if not stop:
+                    stop = True
+                    log.error(f"[중단] {e}\n권한 문제는 재시도해도 안 풀려 남은 조합을 건너뜁니다.")
+                    for f in futs:
+                        f.cancel()
+            except Exception as e:
+                log.error(f"{name} {ym} 실패: {e}")
+    log.info(f"전월세 수집 종료 (이번 실행 {n:,}건, 미처리 ~{left}개 조합, data/rent/)")
 
 
 if __name__ == "__main__":
