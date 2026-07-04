@@ -62,6 +62,10 @@ jobs:
         run: |
           python backtest_scores.py || echo "백테스트 실패 — 기존 backtest.json 유지"
 
+      - name: AI 추천 매물 순위 산출
+        run: |
+          python src/ai_ranking.py || echo "AI 순위 산출 실패 — 기존 ai_ranking.json 유지"
+
       - name: 커밋 서명 설정 (SSH, best-effort)
         env:
           SSH_SIGNING_KEY: ${{ secrets.SSH_SIGNING_KEY }}
