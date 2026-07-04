@@ -39,6 +39,17 @@ RENT_DIR.mkdir(parents=True, exist_ok=True)
 
 RENT_API_URL = "http://apis.data.go.kr/1613000/RTMSDataSvcAptRent/getRTMSDataSvcAptRent"
 
+# 전월세는 매매보다 건수가 많아 페이지가 여러 번 돈다 — 100건/페이지로는 조합당
+# ~5초씩 걸려 전체 2.6시간이 나왔다(실측). 국토부 API는 numOfRows 1000까지
+# 허용하므로 크게 잡아 요청 횟수를 1/10로 줄인다.
+RENT_PAGE_SIZE = 1000
+
+# GitHub Actions 스텝 타임아웃(60분)에 걸리면 job이 실패해 그때까지 모은
+# 체크포인트가 커밋되지 못하고 통째로 날아간다(실제 발생). 스텝 타임아웃보다
+# 먼저 스스로 정상 종료해 뒷단계(커밋·푸시)가 돌게 하고, 남은 조합은 다음
+# 실행이 체크포인트에서 이어받는다.
+TIME_BUDGET_SEC = 50 * 60
+
 
 class RentApiForbidden(Exception):
     """403 Forbidden — 활용신청/승인 문제로 재시도해도 풀리지 않는 오류.
@@ -50,7 +61,7 @@ def _fetch_rent_page(api_key: str, district_code: str, ym: str, page: int) -> di
     url = (
         f"{RENT_API_URL}?serviceKey={api_key}"
         f"&LAWD_CD={district_code}&DEAL_YMD={ym}"
-        f"&pageNo={page}&numOfRows={config.MAX_PAGE_SIZE}"
+        f"&pageNo={page}&numOfRows={RENT_PAGE_SIZE}"
     )
     for attempt in range(config.API_RETRY_COUNT):
         try:
@@ -177,8 +188,15 @@ def main():
     tasks = [(name, code, ym) for name, code in config.DISTRICTS.items() for ym in months]
     log.info(f"전월세 수집 대상: {len(config.DISTRICTS)}개 구 × {len(months)}개월 = {len(tasks)}회 (체크포인트 스킵 포함)")
 
+    start = time.monotonic()
     n = 0
-    for name, code, ym in tqdm(tasks, desc="전월세 수집"):
+    left = 0
+    for i, (name, code, ym) in enumerate(tqdm(tasks, desc="전월세 수집", miniters=25)):
+        if time.monotonic() - start > TIME_BUDGET_SEC:
+            left = len(tasks) - i
+            log.warning(f"[시간 예산 소진] {TIME_BUDGET_SEC//60}분 경과 — 남은 {left}개 조합은 "
+                        f"다음 실행이 체크포인트에서 이어받습니다. (지금까지 수집분은 정상 커밋됨)")
+            break
         try:
             df = _collect_rent_month(api_key, code, ym)
             n += len(df)
@@ -187,7 +205,7 @@ def main():
             break
         except Exception as e:
             log.error(f"{name} {ym} 실패: {e}")
-    log.info(f"전월세 수집 완료 (누적 {n:,}건, data/rent/)")
+    log.info(f"전월세 수집 종료 (이번 실행 {n:,}건, 미처리 {left}개 조합, data/rent/)")
 
 
 if __name__ == "__main__":
