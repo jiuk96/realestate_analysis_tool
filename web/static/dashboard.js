@@ -1739,7 +1739,7 @@ function initApartmentModal() {
 }
 
 function initNav() {
-  const sections = ['secExplorer','secDistrict','secTop1','secScoring','secMap','secBudget'];
+  const sections = ['secExplorer','secDistrict','secTop1','secScoring','secMap','secBudget','secAiRanking'];
   const links = document.querySelectorAll('.nav-link');
   const observer = new IntersectionObserver(entries => {
     entries.forEach(e => {
@@ -1756,6 +1756,88 @@ function initNav() {
   });
 }
 
+/* ── ⑦ AI 추천 매물 순위 ─────────────────────────────────── */
+// 5개 축 색상 (기존 사이트 팔레트 재사용)
+const AI_AXIS_META = [
+  { key: '저평가도', color: '#4ade80' },
+  { key: '유동성',   color: '#38bdf8' },
+  { key: '교통입지', color: '#f87171' },
+  { key: '모멘텀',   color: '#a78bfa' },
+  { key: '상품성',   color: '#fbbf24' },
+];
+const AI_AXIS_JSONKEY = { '저평가도':'undervalued','유동성':'liquidity','교통입지':'transit','모멘텀':'momentum','상품성':'product' };
+let _aiData = null;
+let _aiShown = 10;
+let _aiFilter = '';
+
+async function renderAiRanking() {
+  const listEl = document.getElementById('aiRankingList');
+  if (!listEl) return;
+  const data = await fetchJSON('/api/ai_ranking');
+  if (!data || !data.ranking || !data.ranking.length) {
+    listEl.innerHTML = `<div class="empty-state">AI 순위 데이터가 아직 없습니다.</div>`;
+    document.getElementById('aiRankingMore').style.display = 'none';
+    return;
+  }
+  _aiData = data;
+
+  // 메타: 몇 개 축 기반인지 + 제외 축 고지
+  const excluded = (data.excluded_axes || []).map(e => e.axis).join('·');
+  document.getElementById('aiRankingMeta').innerHTML =
+    ` 이번 버전은 <strong>${data.n_axes}개 축 기반</strong>입니다`
+    + (excluded ? ` (데이터 부재로 <em>${excluded}</em> 축 제외).` : '.')
+    + ` <span class="ai-method">방식: ${data.methodology_version}</span>`;
+
+  // 구 필터 채우기 (기존 select 스타일 재사용)
+  const sel = document.getElementById('aiDistrictFilter');
+  if (sel && sel.options.length <= 1) {
+    const dists = [...new Set(data.ranking.map(r => r.district))].sort();
+    sel.innerHTML = `<option value="">전체 구</option>` + dists.map(d => `<option value="${d}">${d}</option>`).join('');
+    sel.addEventListener('change', () => { _aiFilter = sel.value; _aiShown = 10; drawAiList(); });
+  }
+  document.getElementById('aiRankingMore').addEventListener('click', () => { _aiShown += 10; drawAiList(); });
+
+  drawAiList();
+}
+
+function drawAiList() {
+  const listEl = document.getElementById('aiRankingList');
+  const rows = _aiFilter ? _aiData.ranking.filter(r => r.district === _aiFilter) : _aiData.ranking;
+  const shown = rows.slice(0, _aiShown);
+
+  document.getElementById('aiRankingCount').textContent = `${rows.length}개 단지`;
+  listEl.innerHTML = shown.map(r => {
+    const bars = AI_AXIS_META.map(m => {
+      const v = r.axes[AI_AXIS_JSONKEY[m.key]] ?? 0;
+      return `
+        <div class="ai-ax">
+          <span class="ai-ax-name">${m.key}</span>
+          <div class="ai-ax-bar"><div class="ai-ax-fill" style="width:${Math.min(100,v)}%;background:${m.color}"></div></div>
+          <span class="ai-ax-val">${v.toFixed(0)}</span>
+        </div>`;
+    }).join('');
+    const hi = (r.highlights || []).map(h => `<li>${h}</li>`).join('');
+    const meta = [r.district, r.build_year ? r.build_year + '년' : null, r.area_exclusive ? Math.round(r.area_exclusive) + '㎡' : null]
+      .filter(Boolean).join(' · ');
+    return `
+    <div class="ai-card${r.low_confidence ? ' ai-card-low' : ''}">
+      <div class="ai-card-head">
+        <span class="ai-rank">${r.ai_rank}</span>
+        <div class="ai-card-title">
+          <div class="ai-name">${r.apt_name}${r.low_confidence ? ' <span class="conf-badge conf-low">표본 부족</span>' : ''}</div>
+          <div class="ai-meta-sub">${meta}</div>
+        </div>
+        <div class="ai-score"><span class="ai-score-num">${r.ai_score.toFixed(0)}</span><span class="ai-score-unit">점</span></div>
+      </div>
+      <div class="ai-axes">${bars}</div>
+      ${hi ? `<ul class="ai-highlights">${hi}</ul>` : ''}
+    </div>`;
+  }).join('');
+
+  const moreBtn = document.getElementById('aiRankingMore');
+  moreBtn.style.display = rows.length > _aiShown ? 'inline-flex' : 'none';
+}
+
 /* ── 초기화 ─────────────────────────────────────────────── */
 (async function init() {
   const safe = async (fn) => { try { await fn(); } catch (e) { console.error(fn.name, e); } };
@@ -1767,5 +1849,6 @@ function initNav() {
   await safe(renderMap);
   await safe(renderDistrictRankings);
   await safe(renderTop1);
+  await safe(renderAiRanking);
   initApartmentModal();
 })();

@@ -1191,3 +1191,49 @@ details.budget-fold .legal-hint { font-weight: 500; }
   .apt-modal-overlay { padding: 1rem .6rem; }
   .apt-modal { padding: 1.1rem; }
 }
+
+/* ── ⑦ AI 추천 매물 순위 (기존 토큰·카드 언어 재사용) ───── */
+.ai-meta { display: block; margin-top: .5rem; font-size: .82rem; color: var(--text3); }
+.ai-meta em { color: var(--gold); font-style: normal; }
+.ai-method { color: var(--text3); font-size: .76rem; }
+.ai-ranking-bar { display: flex; align-items: center; gap: .8rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.ai-ranking-count { font-size: .82rem; color: var(--text2); }
+.ai-ranking-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
+.ai-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r);
+  padding: 1rem 1.1rem; box-shadow: var(--shadow-sm);
+  transition: border-color .18s, transform .18s, box-shadow .18s;
+}
+.ai-card:hover { border-color: var(--border-strong); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.ai-card-low { opacity: .82; }
+.ai-card-head { display: flex; align-items: center; gap: .7rem; margin-bottom: .8rem; }
+.ai-rank {
+  flex: none; width: 30px; height: 30px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(56,189,248,.12); color: var(--accent);
+  font-weight: 800; font-size: .95rem; font-variant-numeric: tabular-nums;
+}
+.ai-card-title { flex: 1; min-width: 0; }
+.ai-name { font-weight: 700; color: var(--text); font-size: .98rem; }
+.ai-meta-sub { font-size: .76rem; color: var(--text2); margin-top: .1rem; }
+.ai-score { text-align: right; flex: none; }
+.ai-score-num { font-size: 1.5rem; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+.ai-score-unit { font-size: .78rem; color: var(--text2); margin-left: .1rem; }
+.ai-axes { display: flex; flex-direction: column; gap: .3rem; }
+.ai-ax { display: flex; align-items: center; gap: .5rem; }
+.ai-ax-name { font-size: .72rem; color: var(--text2); width: 52px; flex: none; }
+.ai-ax-bar { flex: 1; background: var(--bg3); border-radius: 99px; height: 6px; overflow: hidden; }
+.ai-ax-fill { height: 100%; border-radius: 99px; transition: width .5s; }
+.ai-ax-val { font-size: .72rem; font-weight: 600; color: var(--text2); width: 22px; text-align: right; flex: none; font-variant-numeric: tabular-nums; }
+.ai-highlights { list-style: none; margin: .8rem 0 0; padding-top: .7rem; border-top: 1px solid var(--border); }
+.ai-highlights li { font-size: .8rem; color: var(--text2); line-height: 1.5; padding-left: 1rem; position: relative; }
+.ai-highlights li::before { content: '·'; position: absolute; left: .3rem; color: var(--accent); }
+.ai-ranking-morewrap { text-align: center; margin-top: 1.4rem; }
+.ai-more-btn {
+  background: var(--bg2); border: 1px solid var(--border-strong); color: var(--text);
+  border-radius: 99px; padding: .55rem 1.4rem; font-size: .85rem; font-weight: 600; cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.ai-more-btn:hover { background: var(--bg3); border-color: var(--accent); }
+.ai-disclaimer { margin-top: 1.4rem; text-align: center; }
+@media (max-width: 560px) { .ai-ranking-list { grid-template-columns: 1fr; } }

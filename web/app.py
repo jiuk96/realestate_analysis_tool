@@ -72,6 +72,15 @@ def api_backtest():
         return jsonify({})
 
 
+@app.route("/api/ai_ranking")
+def api_ai_ranking():
+    """AI 추천 매물 순위 (src/ai_ranking.py 산출). 없으면 빈 dict."""
+    try:
+        return jsonify(_load("ai_ranking.json"))
+    except FileNotFoundError:
+        return jsonify({})
+
+
 @app.route("/api/trades")
 def api_trades():
     """단지별 최근 실거래 내역: /api/trades?district=성동구&apt=행당한진타운"""
