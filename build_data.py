@@ -95,14 +95,41 @@ def compute_jeonse_ratio(monthly_df):
     sale_med = (m.groupby(['district_name', 'apt_name'], observed=True)['median_price']
                 .median().rename('sale_median').reset_index())
 
+    # 전세 추세: 월별 전세 중앙값 시계열의 Theil-Sen 기울기(연율화 %).
+    # 전세가가 오르는 단지는 실거주 수요가 늘고 있다는 뜻으로, 매매가의
+    # 하방을 앞으로도 받쳐줄 가능성이 높다(전세는 투기 수요가 없어 순수 실수요 신호).
+    from src.scorer import _theil_sen_slope
+    import numpy as np
+    jm = (rent.groupby(['district_name', 'apt_name', 'ym'], observed=True)['deposit']
+          .median().reset_index().sort_values('ym'))
+    trend_rows = []
+    for (d, a), grp in jm.groupby(['district_name', 'apt_name'], observed=True):
+        if len(grp) < 4:      # 월 관측 4개 미만이면 추세 판단 보류
+            continue
+        x = np.arange(len(grp), dtype=float)
+        y = grp['deposit'].to_numpy(dtype=float)
+        slope = _theil_sen_slope(x, y)
+        mean_dep = y.mean()
+        if mean_dep > 0:
+            trend_rows.append({'district_name': d, 'apt_name': a,
+                               'jeonse_trend_pct': round(slope * 12 / mean_dep * 100, 2)})
+    trend = pd.DataFrame(trend_rows)
+
     j = jeonse_med.merge(jeonse_cnt, on=['district_name', 'apt_name']) \
                   .merge(sale_med, on=['district_name', 'apt_name'], how='inner')
     j = j[(j['sale_median'] > 0) & (j['jeonse_count'] >= 2)]   # 전세 2건 이상만 신뢰
     if j.empty:
         return None
+    if not trend.empty:
+        j = j.merge(trend, on=['district_name', 'apt_name'], how='left')
+    else:
+        j['jeonse_trend_pct'] = pd.NA
     j['jeonse_ratio'] = j['jeonse_median'] / j['sale_median']
-    print(f'  전세가율 계산: {len(j)}개 단지 (중앙값 {j["jeonse_ratio"].median():.1%})')
-    return j[['district_name', 'apt_name', 'jeonse_ratio', 'jeonse_median', 'jeonse_count']]
+    j['jeonse_gap'] = j['sale_median'] - j['jeonse_median']   # 갭 금액(만원) — 매매가−전세가
+    n_trend = int(j['jeonse_trend_pct'].notna().sum())
+    print(f'  전세가율 계산: {len(j)}개 단지 (중앙값 {j["jeonse_ratio"].median():.1%}, 추세 산출 {n_trend}개)')
+    return j[['district_name', 'apt_name', 'jeonse_ratio', 'jeonse_median', 'jeonse_count',
+              'jeonse_trend_pct', 'jeonse_gap']]
 
 print('=== 4b. 전세가율 ===')
 jeonse = compute_jeonse_ratio(monthly)
@@ -131,6 +158,14 @@ def _confidence(r):
     return 'mid'
 score_df['data_confidence'] = score_df.apply(_confidence, axis=1)
 print('  데이터 신뢰도:', score_df['data_confidence'].value_counts().to_dict())
+
+# 구내 상대 평단가: 서울 전체 percentile(입지프리미엄 축)은 강남권이 몰표를 받으므로,
+# "그 구 안에서 상위 몇 %인지"를 함께 보여줘 동네 안에서의 위상을 알 수 있게 한다.
+if 'price_per_m2' in score_df.columns:
+    score_df['premium_in_district_top_pct'] = (
+        score_df.groupby('district')['price_per_m2']
+        .rank(pct=True, ascending=False) * 100
+    ).round(0)
 print(f'  상위 10:')
 print(score_df[['apt_name', 'district', 'composite_score']].head(10).to_string(index=False))
 

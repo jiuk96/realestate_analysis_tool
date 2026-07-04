@@ -238,8 +238,8 @@ function renderScoring() {
       desc: '전체 수집 기간 중 겪었던 가장 큰 하락(MDD)이 얼마나 작았는지와, 그 저점 이후 얼마나 회복했는지를 함께 봅니다. 신고가를 갱신한 단지는 가점을 받습니다. 단, 2022~23년 하락장을 데이터로 겪지 않은 신축 등은 "MDD 0%"가 방어력 근거가 될 수 없어 중립(50점) 처리합니다.',
       metric: 'MDD(50%) + 회복률(30%) + 가격 안정성(20%) · 하락장 미경험 단지는 중립', example: 'MDD -12% & 전고점 회복 & 변동 작음 → 최상위 방어력' },
     { key: '전세가율', weight: 10, color: '#4ade80',
-      desc: '전세가가 매매가에 얼마나 가까운지(전세가율 = 전세÷매매)를 봅니다. 전세가율이 높으면 실거주 수요가 매매가를 아래에서 떠받쳐, 시세가 급락할 때 "이 아래로는 잘 안 떨어지는" 지지선 역할을 합니다. 전용 59㎡ 순수 전세 실거래로 계산하며, 전월세 데이터가 수집된 단지에만 적용됩니다.',
-      metric: '전세 중앙값 ÷ 매매 중앙값 (최근 18개월, 전용 59㎡)', example: '전세가율 80% → 강한 하방 지지력' },
+      desc: '전세가가 매매가에 얼마나 가까운지(수준)와 전세가가 오르는 중인지(추세)를 함께 봅니다. 전세가율이 높으면 실거주 수요가 매매가를 아래에서 떠받쳐 "이 아래로는 잘 안 떨어지는" 지지선 역할을 하고, 전세는 투기 수요가 없는 순수 실수요 가격이라 전세가 상승은 지지선이 올라가는 중이라는 선행 신호입니다. 전용 59㎡ 순수 전세 실거래로 계산합니다.',
+      metric: '전세가율 수준(70%) + 전세가 추세(30%) · 최근 18개월, 전용 59㎡', example: '전세가율 60% & 전세 연 +5% 추세 → 강한 하방 지지' },
     { key: '거래유동성', weight: 20, color: '#38bdf8',
       desc: '전 기간에 걸쳐 거래가 꾸준했는지, 하락장에서도 거래가 유지됐는지, 그리고 규모 대비 얼마나 활발히 거래되는지(회전율)를 함께 봅니다. 팔고 싶을 때 팔리는 단지가 진짜 우량 단지입니다.',
       metric: '거래 공백률 + 하락기 유지율 + 변동계수 + 회전율(거래건수÷세대수)', example: '하락장에도 매달 거래 + 높은 회전율 → 높은 점수' },
@@ -468,11 +468,19 @@ function buildAxisReasons(apt) {
 
   if (apt.jeonse_score != null && apt.jeonse_ratio != null) {
     const jr = Math.round(apt.jeonse_ratio * 100);
-    reasons['전세가율'] = apt.jeonse_score >= 70
-      ? `전세가율 ${jr}%로 높아, 실거주 전세 수요가 매매가를 강하게 떠받쳐 하락기 하방 지지력이 좋습니다.`
+    // 전세 추세: 오르는 중이면 지지선이 올라가는 중이라는 선행 신호
+    const tr = apt.jeonse_trend_pct;
+    const trendPhrase = tr != null
+      ? (tr >= 3 ? ` 최근 전세가가 연 +${tr.toFixed(1)}% 추세로 올라 지지선 자체가 상승 중입니다.`
+         : tr <= -3 ? ` 다만 최근 전세가가 연 ${tr.toFixed(1)}% 추세로 내려 지지력이 약해지는 중입니다.`
+         : '')
+      : '';
+    const gapPhrase = apt.jeonse_gap != null ? ` (갭 ${(apt.jeonse_gap/10000).toFixed(1)}억)` : '';
+    reasons['전세가율'] = (apt.jeonse_score >= 70
+      ? `전세가율 ${jr}%${gapPhrase}로 높아, 실거주 전세 수요가 매매가를 강하게 떠받칩니다.`
       : apt.jeonse_score >= 45
-        ? `전세가율 ${jr}%로 무난한 수준의 하방 지지력입니다.`
-        : `전세가율 ${jr}%로 낮은 편이라 갭이 크고, 시세 하락 시 지지선이 약할 수 있습니다.`;
+        ? `전세가율 ${jr}%${gapPhrase}로 무난한 수준의 하방 지지력입니다.`
+        : `전세가율 ${jr}%${gapPhrase}로 낮은 편이라, 시세 하락 시 지지선이 약할 수 있습니다.`) + trendPhrase;
   }
 
   if (apt.liquidity_score != null && apt.gap_ratio != null) {
@@ -504,7 +512,9 @@ function buildAxisReasons(apt) {
   }
 
   if (apt.premium_score != null && apt.price_per_m2 != null) {
-    reasons['입지프리미엄'] = `㎡당 최신 시세 ${apt.price_per_m2.toLocaleString()}만원 — 분석 대상 단지 중 상위 ${pct(apt.premium_score)}% 평단가 수준입니다 (전 단지 동일 시점 비교).`;
+    const inDist = apt.premium_in_district_top_pct != null
+      ? ` · ${apt.district} 안에서는 상위 ${Math.round(apt.premium_in_district_top_pct)}%` : '';
+    reasons['입지프리미엄'] = `㎡당 최신 시세 ${apt.price_per_m2.toLocaleString()}만원 — 서울 분석 단지 중 상위 ${pct(apt.premium_score)}%${inDist} 평단가입니다 (전 단지 동일 시점 비교).`;
   }
 
   if (apt.transit_score != null) {
@@ -601,6 +611,8 @@ function renderApartmentDetail(containerId, radarId, priceChartId, apt, mddInfo,
       <div class="top1-stat"><div class="ts-val" style="color:#34d399">${mddInfo.mdd != null ? mddInfo.mdd.toFixed(1)+'%' : '—'}</div><div class="ts-key">MDD (최대낙폭)</div></div>
       <div class="top1-stat"><div class="ts-val">${mddInfo.total_trades != null ? mddInfo.total_trades.toLocaleString()+'건' : '—'}</div><div class="ts-key">총 거래 건수</div></div>
       <div class="top1-stat"><div class="ts-val">${apt.active_months != null ? apt.active_months+'개월' : '—'}</div><div class="ts-key">활성 거래 기간</div></div>
+      ${apt.jeonse_ratio != null ? `<div class="top1-stat"><div class="ts-val" style="color:#4ade80">${Math.round(apt.jeonse_ratio*100)}%</div><div class="ts-key">전세가율 (최근 18개월)</div></div>` : ''}
+      ${apt.jeonse_gap != null ? `<div class="top1-stat"><div class="ts-val">${(apt.jeonse_gap/10000).toFixed(1)}억</div><div class="ts-key">갭 (매매−전세)</div></div>` : ''}
     </div>
 
     <div class="top1-insight">

@@ -224,22 +224,36 @@ def _liquidity(monthly: pd.DataFrame, households: pd.DataFrame | None = None) ->
 
 def _jeonse_support(jeonse: pd.DataFrame | None) -> pd.DataFrame | None:
     """
-    전세가율 = 전세 중앙값 / 매매 중앙값 (전용 59㎡ 기준).
-    전세가율이 높을수록 실거주 수요가 시세를 떠받쳐 하락기 방어력이 강하다
-    (전세가가 매매가에 가까우면 그 아래로 잘 안 떨어짐 — '하방 지지선').
+    전세가율 수준(70%) + 전세가 추세(30%).
+    - 수준: 전세 중앙값 / 매매 중앙값 (전용 59㎡). 높을수록 실거주 수요가
+      시세를 떠받쳐 하락기 방어력이 강하다('하방 지지선').
+    - 추세: 월별 전세 중앙값의 Theil-Sen 연율화 기울기(%). 전세는 투기 수요가
+      없는 순수 실수요 가격이라, 전세가 오르는 단지는 지지선 자체가 올라가는
+      중이라는 선행 신호다.
     build_data에서 전월세 실거래로 계산한 df를 받는다. 없으면 None(축 비활성).
 
-    입력 컬럼: district_name, apt_name, jeonse_ratio (0~1),
-              jeonse_median(만원), jeonse_count
+    입력 컬럼: district_name, apt_name, jeonse_ratio (0~1), jeonse_median(만원),
+              jeonse_count, jeonse_trend_pct(연율 %, 결측 가능), jeonse_gap(만원)
     """
     if jeonse is None or jeonse.empty:
         return None
     df = jeonse.copy()
     # 전세가율은 보통 0.4~0.9. 이상치(1.0 초과 등 데이터 오류)는 상한 클립.
     df["jeonse_ratio"] = df["jeonse_ratio"].clip(0, 1.0)
-    df["jeonse_score"] = _pct_rank(df["jeonse_ratio"])
+    level_score = _pct_rank(df["jeonse_ratio"])
+    if "jeonse_trend_pct" in df.columns and df["jeonse_trend_pct"].notna().any():
+        trend = pd.to_numeric(df["jeonse_trend_pct"], errors="coerce")
+        # 추세 결측(관측 부족)은 중립 50 — 수준 점수만으로 평가되게 함
+        trend_score = _pct_rank(trend).fillna(50.0)
+        df["jeonse_score"] = level_score * 0.7 + trend_score * 0.3
+    else:
+        df["jeonse_score"] = level_score
     log.info(f"전세가율 축 활성: {len(df)}개 단지")
-    return df[["district_name", "apt_name", "jeonse_score", "jeonse_ratio", "jeonse_median", "jeonse_count"]]
+    cols = ["district_name", "apt_name", "jeonse_score", "jeonse_ratio", "jeonse_median", "jeonse_count"]
+    for extra in ("jeonse_trend_pct", "jeonse_gap"):
+        if extra in df.columns:
+            cols.append(extra)
+    return df[cols]
 
 
 # ── ③ 상승 참여도 ─────────────────────────────────────────────
