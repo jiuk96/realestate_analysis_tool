@@ -33,6 +33,25 @@ def index():
     return render_template("index.html")
 
 
+# ── 멀티 페이지 (각 챕터를 별도 페이지로 분리) ─────────────────
+_PAGES = {
+    "rankings":  "rankings.html",   # ② 동네별 TOP
+    "top1":      "top1.html",       # ③ 전체 1위
+    "scoring":   "scoring.html",    # ④ 점수 근거
+    "districts": "districts.html",  # ⑤ 구별 소개
+    "budget":    "budget.html",     # ⑥ 예산 플래너
+    "ai":        "ai.html",         # ⑦ AI 추천
+}
+
+
+@app.route("/<page>")
+def subpage(page):
+    tpl = _PAGES.get(page)
+    if tpl is None:
+        return render_template("index.html"), 404
+    return render_template(tpl)
+
+
 @app.route("/api/quality")
 def api_quality():
     return jsonify(_load("quality.json"))

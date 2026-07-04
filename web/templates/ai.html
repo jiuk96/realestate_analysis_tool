@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% set active_page = 'ai' %}
+{% block title %}AI 추천 · 서울 부동산 분석 툴{% endblock %}
+{% block content %}
+<section class="section" id="secAiRanking">
+  <div class="section-inner">
+    <div class="section-label">STEP 7 · AI 추천</div>
+    <h2 class="section-title">🤖 AI 추천 매물 순위</h2>
+    <p class="section-desc">
+      저평가도·유동성·교통·모멘텀·상품성을 종합한 <strong>다른 렌즈</strong>의 순위입니다.
+      방어력 중심의 '동네별 추천'과 달리, <strong>저평가된 성장 매물</strong>을 찾습니다.
+      <span id="aiRankingMeta" class="ai-meta"></span>
+    </p>
+    <div class="ai-ranking-bar">
+      <select id="aiDistrictFilter" class="explorer-sort"><option value="">전체 구</option></select>
+      <div class="ai-ranking-count" id="aiRankingCount"></div>
+    </div>
+    <div id="aiRankingList" class="ai-ranking-list"><div class="skeleton" style="height:120px"></div></div>
+    <div class="ai-ranking-morewrap"><button id="aiRankingMore" class="ai-more-btn" style="display:none">더보기 ▾</button></div>
+    <p class="explorer-note ai-disclaimer">
+      ※ 본 순위는 공공데이터 기반 통계 모델의 참고 지표이며, 투자 권유가 아닙니다.
+    </p>
+  </div>
+</section>
+{% endblock %}

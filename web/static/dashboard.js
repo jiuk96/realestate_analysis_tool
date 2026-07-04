@@ -63,23 +63,68 @@ let seoulMap = null;
 let mapLayers = {};
 
 /* ── ① 지도 + 구별 카드 ──────────────────────────────────── */
-async function renderMap() {
+// districtData는 여러 페이지(동네별 TOP의 구 색상, 상세 모달 등)에서 쓰이므로
+// 지도 페이지가 아니어도 항상 로드한다.
+async function loadDistrictData() {
+  if (districtData.length) return districtData;
   const data = await fetchJSON('/api/districts');
   districtData = data.districts;
 
-  // 히어로 통계 업데이트: 서울 전체 25개 구 중 몇 개가 수집·분석 완료됐는지 표시
-  // (나머지는 GitHub Actions로 계속 수집 진행 중 — 완료되는 대로 자동으로 숫자가 올라감)
+  // 히어로 통계 (홈에만 존재 — 없으면 스킵)
   const districtsEl = document.getElementById('statDistricts');
   if (districtsEl) {
     districtsEl.textContent = `${data.districts_with_data}/${data.total_districts}`;
   }
-
   try {
     const q = await fetchJSON('/api/quality');
-    document.getElementById('statRaw').textContent  = q.total_raw.toLocaleString() + '건';
-    document.getElementById('statApts').textContent = q.total_apts != null
+    const rawEl = document.getElementById('statRaw');
+    const aptsEl = document.getElementById('statApts');
+    if (rawEl) rawEl.textContent = q.total_raw.toLocaleString() + '건';
+    if (aptsEl) aptsEl.textContent = q.total_apts != null
       ? q.total_apts + '개' : districtData.filter(d=>d.has_data).reduce((s,d)=>s+d.apt_count,0) + '개';
   } catch(e) {}
+  return districtData;
+}
+
+// ── 구별 평균가 색상 (choropleth) ─────────────────────────
+// 평균가 = (최저~최고 가격대의 중간값). 낮을수록 초록, 높을수록 붉은 계열.
+const PRICE_COLOR_TIERS = [
+  { max: 8,        color: '#34d399', label: '8억 미만' },
+  { max: 11,       color: '#38bdf8', label: '8~11억' },
+  { max: 14,       color: '#a78bfa', label: '11~14억' },
+  { max: 18,       color: '#fb923c', label: '14~18억' },
+  { max: Infinity, color: '#f87171', label: '18억 이상' },
+];
+
+function districtAvgPrice(d) {
+  if (d.price_low && d.price_high) return (d.price_low + d.price_high) / 2;
+  return d.avg_peak_price || null;
+}
+
+function districtPriceColor(d) {
+  const avg = districtAvgPrice(d);
+  if (avg == null) return '#475569';   // 데이터 없음 — 회색
+  return PRICE_COLOR_TIERS.find(t => avg < t.max).color;
+}
+
+async function renderMap() {
+  await loadDistrictData();
+  if (!document.getElementById('seoulMap')) return;   // 구별 소개 페이지가 아니면 스킵
+
+  // 구 카드 그리드를 지도보다 먼저 — 지도(CDN)가 실패해도 카드는 항상 뜬다
+  renderDistrictCards(districtData);
+
+  // 평균가 색상 범례 (지도 아래)
+  const legendEl = document.getElementById('mapPriceLegend');
+  if (legendEl) {
+    legendEl.innerHTML =
+      `<span class="legend-chip legend-hint">구 색상 = 분석 단지(전용 59㎡) 평균 가격대</span>` +
+      PRICE_COLOR_TIERS.map(t =>
+        `<span class="legend-chip"><span class="legend-dot" style="background:${t.color}"></span>${t.label}</span>`
+      ).join('') +
+      `<span class="legend-chip"><span class="legend-dot" style="background:#475569"></span>데이터 없음</span>`;
+  }
+
 
   // Leaflet 지도 초기화
   if (!seoulMap) {
@@ -118,16 +163,17 @@ async function renderMap() {
       filter: f => districtData.some(d => d.name === f.properties.name),
       style: f => {
         const d = districtData.find(x => x.name === f.properties.name);
-        const color = d.has_data ? (d.color || '#38bdf8') : '#475569';
-        return { color, weight: 2, fillColor: color, fillOpacity: d.has_data ? 0.35 : 0.12 };
+        // 구별 평균 부동산 가격대에 따라 색을 나눈다 (범례는 지도 아래)
+        const color = districtPriceColor(d);
+        return { color, weight: 2, fillColor: color, fillOpacity: d.has_data ? 0.42 : 0.12 };
       },
       onEachFeature: (f, layer) => {
         const d = districtData.find(x => x.name === f.properties.name);
         if (!d) return;
         layer.bindTooltip(popupFor(d), { sticky: true, direction: 'top', className: 'district-tooltip' });
         layer.on('click', () => scrollToDistrict(d.name));
-        layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.55 }));
-        layer.on('mouseout', () => layer.setStyle({ fillOpacity: d.has_data ? 0.35 : 0.12 }));
+        layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.62 }));
+        layer.on('mouseout', () => layer.setStyle({ fillOpacity: d.has_data ? 0.42 : 0.12 }));
         mapLayers[d.name] = mapLayers[d.name] || {};
         mapLayers[d.name].rect = layer;
       }
@@ -138,13 +184,13 @@ async function renderMap() {
   districtData.forEach(d => {
     const poly = DISTRICT_POLYGONS[d.name];
     if (!poly) return;
-    const color = d.has_data ? (d.color || '#38bdf8') : '#475569';
+    const color = districtPriceColor(d);
 
     if (!geo || !geo.features) {
       const rect = L.rectangle(
         [[Math.min(...poly.map(p=>p[0])), Math.min(...poly.map(p=>p[1]))],
          [Math.max(...poly.map(p=>p[0])), Math.max(...poly.map(p=>p[1]))]],
-        { color, weight: 2, fillColor: color, fillOpacity: d.has_data ? 0.35 : 0.12 }
+        { color, weight: 2, fillColor: color, fillOpacity: d.has_data ? 0.42 : 0.12 }
       );
       rect.bindTooltip(popupFor(d), { sticky: true, direction: 'top', className: 'district-tooltip' });
       rect.on('click', () => scrollToDistrict(d.name));
@@ -157,11 +203,13 @@ async function renderMap() {
       (Math.min(...poly.map(p=>p[0])) + Math.max(...poly.map(p=>p[0]))) / 2,
       (Math.min(...poly.map(p=>p[1])) + Math.max(...poly.map(p=>p[1]))) / 2
     ];
+    // ⚠️ 예전엔 replace('구','')로 줄였는데 "은평"처럼 어색하고, 심지어
+    // "구로구"는 첫 글자부터 지워져 "로구"가 되는 버그였다 — 풀네임으로 표기.
     const icon = L.divIcon({
       className: '',
-      html: `<div class="map-label ${d.has_data ? 'map-label-data' : ''}">${d.name.replace('구','')}</div>`,
-      iconSize: [60, 24],
-      iconAnchor: [30, 12]
+      html: `<div class="map-label ${d.has_data ? 'map-label-data' : ''}">${d.name}</div>`,
+      iconSize: [72, 24],
+      iconAnchor: [36, 12]
     });
     const marker = L.marker(center, { icon });
     marker.bindTooltip(popupFor(d), { sticky: true, direction: 'top', className: 'district-tooltip' });
@@ -171,8 +219,6 @@ async function renderMap() {
     mapLayers[d.name].marker = marker;
   });
 
-  // 구 카드 그리드
-  renderDistrictCards(districtData);
 }
 
 function scrollToDistrict(name) {
@@ -233,6 +279,7 @@ function highlightDistrict(name) {
 
 /* ── ② 점수 산출 방식 ───────────────────────────────────── */
 function renderScoring() {
+  if (!document.getElementById('formulaAxes')) return;   // 점수 근거 페이지 아님
   const axes = [
     { key: '가격방어력', weight: 25, color: '#34d399',
       desc: '전체 수집 기간 중 겪었던 가장 큰 하락(MDD)이 얼마나 작았는지와, 그 저점 이후 얼마나 회복했는지를 함께 봅니다. 신고가를 갱신한 단지는 가점을 받습니다. 단, 2022~23년 하락장을 데이터로 겪지 않은 신축 등은 "MDD 0%"가 방어력 근거가 될 수 없어 중립(50점) 처리합니다.',
@@ -340,8 +387,8 @@ async function renderBacktest() {
   }).join('');
 
   box.innerHTML = `
-    <div class="backtest-box">
-      <div class="bt-title">🔬 이 점수, 실제로 맞았나요? <span class="bt-sub">${bt.train_cutoff}까지의 데이터로 점수를 매기고, 이후 실제 하락장과 비교한 백테스트</span></div>
+    <div class="backtest-box" style="margin-top:0;border:0;box-shadow:none;padding:0 0 .3rem">
+      <div class="bt-title"><span class="bt-sub">${bt.train_cutoff}까지의 데이터로 점수를 매기고, 이후 실제 하락장과 비교한 결과입니다.</span></div>
       <div class="bt-head-row"><span></span><span></span><span class="bt-col-label">하락장 실현낙폭</span><span class="bt-col-label">현재까지 총수익</span></div>
       ${rows}
       <div class="bt-notes">
@@ -357,6 +404,8 @@ async function renderBacktest() {
 let _rankingRowMap = [];
 
 async function renderDistrictRankings() {
+  if (!document.getElementById('districtRankings')) return;   // 동네별 TOP 페이지 아님
+  await loadDistrictData();   // 구 색상·아이콘용
   const { comp: data } = await loadScoreData();
   const ranking = data.ranking || [];
   _rankingRowMap = [];
@@ -661,6 +710,8 @@ function renderApartmentDetail(containerId, radarId, priceChartId, apt, mddInfo,
 }
 
 async function renderTop1() {
+  if (!document.getElementById('top1Detail')) return;   // 전체 1위 페이지 아님
+  await loadDistrictData();
   const { comp, mdd, ts } = await loadScoreData();
 
   const top = comp.ranking?.[0];
@@ -935,6 +986,7 @@ function initProductSelect(prefix) {
 }
 
 function initBudgetPlanner() {
+  if (!document.getElementById('aCash')) return;   // 예산 플래너 페이지 아님
   initProductSelect('a');
   initProductSelect('b');
 
@@ -1207,12 +1259,9 @@ function recalcBudget() {
     ${R.warnings.length ? `<div class="br-warns">${R.warnings.map(w => `<div class="budget-warn">⚠️ ${w}</div>`).join('')}</div>` : ''}
   `;
   document.getElementById('budgetApply').addEventListener('click', () => {
+    // 멀티 페이지 구조: 예산 결과를 URL 파라미터로 넘겨 지도 탐색 페이지에서 필터 적용
     const eok = R.maxPrice / 억;
-    document.querySelectorAll('.price-chip').forEach(b => b.classList.remove('active'));
-    document.getElementById('priceMin').value = '';
-    document.getElementById('priceMax').value = eok.toFixed(1);
-    applyPriceFilter(0, eok);
-    document.getElementById('secExplorer').scrollIntoView({ behavior: 'smooth' });
+    window.location.href = `/?pmax=${eok.toFixed(1)}`;
   });
 
   renderBudgetBreakdown(R);
@@ -1403,6 +1452,7 @@ function drawCommuteMarker(key) {
 const eokFmt = v => v == null ? '—' : (v/10000 >= 10 ? (v/10000).toFixed(1) : (v/10000).toFixed(2)).replace(/\.?0+$/,'') + '억';
 
 async function renderExplorer() {
+  if (!document.getElementById('explorerMap')) return;   // 지도 탐색 페이지 아님
   const data = await fetchJSON('/api/apartments');
   explorerApts = (data.apartments || []).filter(a => a.lat && a.lng);
 
@@ -1439,7 +1489,16 @@ async function renderExplorer() {
   });
 
   initCoupleTools();
-  applyPriceFilter(0, 9999);
+  // 예산 플래너에서 넘어온 URL 파라미터(?pmax=12.5) 적용
+  const usp = new URLSearchParams(location.search);
+  const pmin = parseFloat(usp.get('pmin')) || 0;
+  const pmax = parseFloat(usp.get('pmax')) || 9999;
+  if (usp.has('pmax') || usp.has('pmin')) {
+    document.querySelectorAll('.price-chip').forEach(b => b.classList.remove('active'));
+    if (usp.has('pmin')) document.getElementById('priceMin').value = pmin;
+    if (usp.has('pmax')) document.getElementById('priceMax').value = pmax;
+  }
+  applyPriceFilter(pmin, pmax);
 }
 
 function sortApts(list) {
@@ -1739,6 +1798,8 @@ function initApartmentModal() {
 }
 
 function initNav() {
+  // 멀티 페이지: active는 서버(base.html)가 지정. 앵커 링크가 없으면 스킵.
+  if (!document.querySelector('.nav-link[href^="#"]')) return;
   const sections = ['secExplorer','secDistrict','secTop1','secScoring','secMap','secBudget','secAiRanking'];
   const links = document.querySelectorAll('.nav-link');
   const observer = new IntersectionObserver(entries => {

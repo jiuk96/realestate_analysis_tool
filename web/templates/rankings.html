@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% set active_page = 'rankings' %}
+{% block title %}동네별 TOP · 서울 부동산 분석 툴{% endblock %}
+{% block content %}
+<section class="section section-alt" id="secDistrict">
+  <div class="section-inner">
+    <div class="section-label">STEP 2 · 추천</div>
+    <h2 class="section-title">동네별 추천 단지</h2>
+    <p class="section-desc">
+      구별 종합 점수 상위 3개 단지입니다. 단지명을 클릭하면 네이버부동산으로 연결됩니다.
+    </p>
+    <div id="districtRankings" class="district-rankings-simple">
+      <div class="skeleton" style="height:300px"></div>
+    </div>
+  </div>
+</section>
+{% endblock %}

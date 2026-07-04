@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% set active_page = 'scoring' %}
+{% block title %}점수 근거 · 서울 부동산 분석 툴{% endblock %}
+{% block content %}
+<section class="section section-alt" id="secScoring">
+  <div class="section-inner">
+    <div class="section-label">STEP 4 · 점수 근거</div>
+    <h2 class="section-title">점수를 어떻게 계산하나요?</h2>
+    <p class="section-desc">
+      단순 가격 하락폭(MDD)만 보지 않고 <strong>여러 축</strong>을 가중 합산합니다.
+      하락장을 버티고, 상승장에 참여하며, 꾸준히 거래되는 단지가 진정한 우량 단지입니다.
+    </p>
+
+    <!-- 점수 공식 시각화 (가중치 스트립은 항상 노출) -->
+    <div class="formula-visual">
+      <div class="formula-title">종합 점수 = Σ (각 축 점수 × 가중치)</div>
+      <div class="formula-axes" id="formulaAxes"></div>
+    </div>
+
+    <!-- 상세 근거들은 + 접이식 — 궁금할 때만 펼쳐보기 -->
+    <details class="budget-card budget-fold" style="margin-top:1.2rem">
+      <summary class="budget-card-title">📐 각 축 상세 설명 — 무엇을, 왜, 어떻게 재나요?</summary>
+      <div class="axes-detail" id="axesDetail"></div>
+    </details>
+
+    <details class="budget-card budget-fold" style="margin-top:1rem">
+      <summary class="budget-card-title">📉 MDD (최대낙폭)란?</summary>
+      <div class="mdd-explainer-box" style="margin-top:0">
+        <div class="mdd-ex-left">
+          <div class="mdd-formula-row">
+            MDD(%) = <span class="frac"><span class="fn">최저점 − 최고점</span><span class="fd">최고점</span></span> × 100
+          </div>
+          <p class="mdd-ex-desc">10억짜리 아파트가 7억까지 떨어지면 MDD = <strong>–30%</strong>.<br>
+          0에 가까울수록 방어력이 뛰어난 단지입니다.</p>
+        </div>
+        <div class="mdd-ex-steps">
+          <div class="mdd-step"><span class="step-n">1</span><span><strong>전체 수집 기간(2020~2026)</strong>에서 고점 대비 낙폭이 가장 컸던 구간을 탐색 (특정 연도로 고정하지 않음)</span></div>
+          <div class="mdd-step"><span class="step-n">2</span><span>다운계약·특수관계 거래 등 <strong>이상 저가 의심 거래</strong>는 주변 9개월 시세와 비교해 제외</span></div>
+          <div class="mdd-step"><span class="step-n">3</span><span><strong>3개월 이동 중앙값</strong>으로 노이즈 제거</span></div>
+          <div class="mdd-step"><span class="step-n">4</span><span>(최저 − 최고) ÷ 최고 × 100 = <strong>MDD(%)</strong></span></div>
+        </div>
+      </div>
+    </details>
+
+    <details class="budget-card budget-fold" style="margin-top:1rem">
+      <summary class="budget-card-title">🧹 데이터를 어떻게 걸렀나요? — 필터 요약</summary>
+      <div class="filter-summary" id="filterSummary" style="margin-top:0">
+        <div class="skeleton" style="height:80px"></div>
+      </div>
+    </details>
+
+    <details class="budget-card budget-fold" style="margin-top:1rem">
+      <summary class="budget-card-title">🔬 이 점수, 실제로 맞았나요? — 백테스트</summary>
+      <div id="backtestBox"></div>
+    </details>
+  </div>
+</section>
+{% endblock %}

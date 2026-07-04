@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% set active_page = 'budget' %}
+{% block title %}예산 플래너 · 서울 부동산 분석 툴{% endblock %}
+{% block content %}
+<section class="section section-alt" id="secBudget">
+  <div class="section-inner">
+    <div class="section-label">STEP 6 · 예산</div>
+    <h2 class="section-title">우리 예산 플래너</h2>
+    <p class="section-desc">
+      <strong>각자</strong>의 자금·소득·대출을 따로 입력해 각자의 가용자금을 구하고,
+      합산해서 <strong>어떤 가격대의 집을 볼 수 있는지</strong> 결론을 도출합니다.
+    </p>
+
+    <div class="budget-grid">
+      <!-- 💼 나 -->
+      <div class="person-col person-a">
+        <div class="budget-card">
+          <div class="budget-card-title">💼 나의 현금 및 자금</div>
+          <div class="budget-field"><label>현금</label><div class="bf-input"><input type="number" id="aCash" value="2.0" step="0.1" min="0"><span>억</span></div></div>
+          <div class="budget-field-row">
+            <div class="budget-field"><label>연소득(세전)</label><div class="bf-input"><input type="number" id="aIncome" value="5500" step="500" min="0"><span>만원</span></div></div>
+            <div class="budget-field"><label>실수령 월급(세후)</label><div class="bf-input"><input type="number" id="aNetMonthly" value="380" step="10" min="0"><span>만원</span></div></div>
+          </div>
+        </div>
+
+        <div class="budget-card">
+          <div class="budget-card-title">👪 부모님 지원</div>
+          <div class="budget-field"><label>부모 지원 총액 <button class="legal-link" data-legal="family">?</button></label><div class="bf-input"><input type="number" id="aParent" value="3.67" step="0.1" min="0"><span>억</span></div></div>
+          <div class="pc-checks">
+            <label class="bc"><input type="checkbox" id="aBasicOn" checked> 기본공제 (직계존속, 0.5억)</label>
+            <label class="bc"><input type="checkbox" id="aMarriageOn" checked> 혼인·출산공제 (1억)</label>
+          </div>
+          <div class="pc-loanbar-row">
+            <span class="pc-loanbar-label">무이자 차용</span>
+            <input type="range" class="pc-loan-slider" id="aFamilyLoanOverride" min="0" max="0" step="1000000" value="0">
+            <span class="pc-loanbar-val" id="aFamilyLoanVal"></span>
+          </div>
+          <div class="pc-conclusion" id="aParentConclusion"></div>
+        </div>
+
+        <div class="budget-card">
+          <div class="budget-card-title">🏦 대출</div>
+          <div class="budget-field"><label>대출 상품</label>
+            <select id="aProduct" class="explorer-sort" style="width:100%"></select>
+          </div>
+          <div class="budget-field-row">
+            <div class="budget-field"><label>금리 (%) <button class="legal-link" data-legal="rate">?</button></label><div class="bf-input"><input type="number" id="aRate" step="0.05" min="0"></div></div>
+            <div class="budget-field"><label>만기 (년)</label><div class="bf-input"><input type="number" id="aYears" step="5" min="5" max="50"></div></div>
+          </div>
+          <div class="budget-field ls-field">
+            <label>실제 사용할 대출액 <span class="ls-max" id="aLoanMax"></span></label>
+            <input type="range" class="ls-slider" id="aLoanOverride" min="0" max="0" step="1000000" value="0">
+            <div class="ls-out" id="aLoanOut"></div>
+          </div>
+        </div>
+
+        <div id="aSummary" class="person-summary"></div>
+      </div>
+
+      <!-- 💗 여자친구 -->
+      <div class="person-col person-b">
+        <div class="budget-card">
+          <div class="budget-card-title">💗 여자친구의 현금 및 자금</div>
+          <div class="budget-field"><label>현금</label><div class="bf-input"><input type="number" id="bCash" value="1.5" step="0.1" min="0"><span>억</span></div></div>
+          <div class="budget-field-row">
+            <div class="budget-field"><label>연소득(세전)</label><div class="bf-input"><input type="number" id="bIncome" value="3500" step="500" min="0"><span>만원</span></div></div>
+            <div class="budget-field"><label>실수령 월급(세후)</label><div class="bf-input"><input type="number" id="bNetMonthly" value="250" step="10" min="0"><span>만원</span></div></div>
+          </div>
+        </div>
+
+        <div class="budget-card">
+          <div class="budget-card-title">👪 부모님 지원</div>
+          <div class="budget-field"><label>부모 지원 총액 <button class="legal-link" data-legal="family">?</button></label><div class="bf-input"><input type="number" id="bParent" value="1.5" step="0.1" min="0"><span>억</span></div></div>
+          <div class="pc-checks">
+            <label class="bc"><input type="checkbox" id="bBasicOn" checked> 기본공제 (직계존속, 0.5억)</label>
+            <label class="bc"><input type="checkbox" id="bMarriageOn" checked> 혼인·출산공제 (1억)</label>
+          </div>
+          <div class="pc-loanbar-row">
+            <span class="pc-loanbar-label">무이자 차용</span>
+            <input type="range" class="pc-loan-slider" id="bFamilyLoanOverride" min="0" max="0" step="1000000" value="0">
+            <span class="pc-loanbar-val" id="bFamilyLoanVal"></span>
+          </div>
+          <div class="pc-conclusion" id="bParentConclusion"></div>
+        </div>
+
+        <div class="budget-card">
+          <div class="budget-card-title">🏦 대출</div>
+          <div class="budget-field"><label>대출 상품</label>
+            <select id="bProduct" class="explorer-sort" style="width:100%"></select>
+          </div>
+          <div class="budget-field-row">
+            <div class="budget-field"><label>금리 (%) <button class="legal-link" data-legal="rate">?</button></label><div class="bf-input"><input type="number" id="bRate" step="0.05" min="0"></div></div>
+            <div class="budget-field"><label>만기 (년)</label><div class="bf-input"><input type="number" id="bYears" step="5" min="5" max="50"></div></div>
+          </div>
+          <div class="budget-field ls-field">
+            <label>실제 사용할 대출액 <span class="ls-max" id="bLoanMax"></span></label>
+            <input type="range" class="ls-slider" id="bLoanOverride" min="0" max="0" step="1000000" value="0">
+            <div class="ls-out" id="bLoanOut"></div>
+          </div>
+        </div>
+
+        <div id="bSummary" class="person-summary"></div>
+      </div>
+    </div>
+
+    <!-- ⚙️ 공통 조건 (전체 폭, 가로 배치) -->
+    <div class="budget-card common-card">
+      <div class="budget-card-title">⚙️ 공통 조건</div>
+      <div class="common-grid">
+        <div class="common-checks">
+          <label class="bc"><input type="checkbox" id="optBirth"> 출산 예정/신생아 특례 대상</label>
+          <label class="bc"><input type="checkbox" id="optFirstHome" checked> 생애최초 (취득세 감면)</label>
+          <label class="bc"><input type="checkbox" id="optRegulated"> 토지거래허가구역/규제지역 <button class="legal-link" data-legal="toho">?</button></label>
+        </div>
+        <div class="budget-field"><label>상환 방식</label>
+          <select id="repayType" class="explorer-sort" style="width:100%">
+            <option value="annuity">원리금균등 (매달 동일)</option>
+            <option value="linear">원금균등 (초기 부담 큼, 총이자 적음)</option>
+          </select>
+        </div>
+        <div class="budget-field"><label>부모 차용 상환기간 (공통)</label>
+          <div class="bf-input"><input type="number" id="familyYears" value="10" step="1" min="1" max="30"><span>년</span></div>
+        </div>
+      </div>
+      <p class="lp-note" style="margin-top:.7rem">혼인·출산공제는 각자 "부모님 지원" 카드에서 체크합니다. 대출 한도는 각자 소득의 DSR 40%(스트레스 +1.5%p)로 계산 후 합산되고, 주택 전체에 LTV·6억 캡이 적용됩니다.</p>
+    </div>
+
+    <!-- 결과 (전체 폭) -->
+    <div class="budget-card budget-card-result" id="budgetOutput"></div>
+
+    <!-- 월 상환 상세 (누구에게 얼마가 나가는지 + 월급 대비 비중) -->
+    <details class="budget-card budget-fold" style="margin-top:1rem">
+      <summary class="budget-card-title">💸 매달 얼마가, 누구에게 나가나요?</summary>
+      <div id="repayDetail" class="repay-detail"></div>
+    </details>
+
+    <!-- 부모님 지원 상세: 기본공제/혼인공제/무이자차용/과세증여 분해 + 세금 계산식 -->
+    <details class="budget-card budget-fold" style="margin-top:1rem">
+      <summary class="budget-card-title">👪 부모님 지원, 어떻게 나뉘나요?</summary>
+      <div id="parentDetail" class="parent-detail"></div>
+    </details>
+
+    <!-- 자금 구성 차트 + 부대비용 상세 -->
+    <div class="budget-detail-grid">
+      <div class="budget-card">
+        <div class="budget-card-title">💠 자금 구성</div>
+        <div id="budgetChart" style="height:230px"></div>
+      </div>
+      <div class="budget-card">
+        <div class="budget-card-title">🧾 부대비용 & 세금 상세 <button class="legal-link" data-legal="acq">?</button></div>
+        <div id="budgetBreakdown" class="budget-breakdown"></div>
+      </div>
+    </div>
+
+    <!-- 자금 흐름 (전체 자금 → 세금·부대비용 → 자기자본/대출 → 매수가) -->
+    <details class="budget-card budget-fold" style="margin-top:1rem">
+      <summary class="budget-card-title">🔀 자금 흐름 한눈에 보기</summary>
+      <div id="fundFlow" class="fund-flow"></div>
+    </details>
+
+    <!-- 증여세 계산 수식 + 세율표 -->
+    <details class="legal-section budget-fold">
+      <summary class="legal-section-title">🧮 증여세는 이렇게 계산됩니다 <span class="legal-hint">상속세 및 증여세법 §26·§53</span></summary>
+      <div id="giftTaxTable"></div>
+    </details>
+
+    <!-- 세법·규제 근거 (클릭 아코디언) -->
+    <details class="legal-section budget-fold">
+      <summary class="legal-section-title">📖 계산 근거 · 세법/규제 설명 <span class="legal-hint">항목을 눌러 펼쳐보세요</span></summary>
+      <div id="legalAccordion" class="legal-accordion"></div>
+    </details>
+
+    <!-- 실제 금리 확인 사이트 -->
+    <details class="legal-section budget-fold">
+      <summary class="legal-section-title">🏦 실제 대출 금리 확인하기 <span class="legal-hint">직접 확인 후 위 금리(%) 칸에 입력하세요</span></summary>
+      <ul id="rateSourceList" class="reference-list"></ul>
+      <p class="lp-note">일반 주택담보대출 금리(기본 4.10%)는 은행·시점·개인 신용에 따라 매일 달라집니다. 아래 공식 비교 사이트에서 실제 금리를 확인해 각자 금리 칸에 넣으면 정확한 상환액이 계산됩니다.</p>
+    </details>
+
+    <!-- 참고문헌 · 법령 출처 -->
+    <details class="legal-section budget-fold">
+      <summary class="legal-section-title">📚 참고문헌 · 법령 출처</summary>
+      <ul id="referenceList" class="reference-list"></ul>
+    </details>
+
+    <p class="explorer-note">
+      ※ 대출 한도·금리·세율은 2025~2026년 기준 대표값입니다. 실제 조건은 소득·주택가·규제지역·개별 심사에 따라 달라지므로 반드시 은행/기금e든든/세무사에서 확인하세요.
+    </p>
+  </div>
+</section>
+{% endblock %}

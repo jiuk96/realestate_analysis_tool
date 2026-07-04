@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% set active_page = 'top1' %}
+{% block title %}전체 1위 · 서울 부동산 분석 툴{% endblock %}
+{% block content %}
+<section class="section" id="secTop1">
+  <div class="section-inner">
+    <div class="section-label">STEP 3 · 최상위</div>
+    <h2 class="section-title">전체 종합 1위 단지</h2>
+    <p class="section-desc">
+      전 분석 축에서 가장 높은 종합 점수를 받은 단지의 상세 분석입니다.
+    </p>
+    <div id="top1Detail">
+      <div class="skeleton" style="height:400px"></div>
+    </div>
+  </div>
+</section>
+{% endblock %}

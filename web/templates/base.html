@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}서울 부동산 분석 툴{% endblock %}</title>
+
+  <!-- Pretendard (한글 가독성) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"/>
+
+  <!-- Leaflet (지도) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Plotly (차트) -->
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v={{ asset_v }}">
+</head>
+<body>
+
+{% block hero %}{% endblock %}
+
+<!-- ── 네비게이션 (페이지 링크) ───────────────────────── -->
+<nav class="sticky-nav">
+  <div class="nav-inner">
+    <a href="/"          class="nav-link {{ 'active' if active_page=='explore'  }}">① 지도 탐색</a>
+    <a href="/rankings"  class="nav-link {{ 'active' if active_page=='rankings' }}">② 동네별 TOP</a>
+    <a href="/top1"      class="nav-link {{ 'active' if active_page=='top1'     }}">③ 전체 1위</a>
+    <a href="/scoring"   class="nav-link {{ 'active' if active_page=='scoring'  }}">④ 점수 근거</a>
+    <a href="/districts" class="nav-link {{ 'active' if active_page=='districts'}}">⑤ 구별 소개</a>
+    <a href="/budget"    class="nav-link {{ 'active' if active_page=='budget'   }}">⑥ 예산 플래너</a>
+    <a href="/ai"        class="nav-link {{ 'active' if active_page=='ai'       }}">⑦ AI 추천</a>
+  </div>
+</nav>
+
+{% block content %}{% endblock %}
+
+<!-- 단지 상세 점수 모달 (동네별 추천 단지 클릭 시) -->
+<div id="aptModalOverlay" class="apt-modal-overlay" style="display:none">
+  <div class="apt-modal">
+    <button id="aptModalClose" class="apt-modal-close" aria-label="닫기">✕</button>
+    <div id="aptModalBody"></div>
+  </div>
+</div>
+
+<!-- ── 푸터 ──────────────────────────────────────────── -->
+<footer class="footer">
+  <p>데이터 출처: 국토교통부 실거래가 공개시스템 (공공데이터포털) · 분석 대상: 서울 25개 구 300세대 이상 아파트 + 일부 대장아파트 (구별 수집 순차 진행 중)</p>
+  <p style="margin-top:.4rem;color:#6b7280;font-size:.8rem">
+    ※ 본 분석은 투자 참고용이며 실제 투자 결정의 근거로 사용 시 책임은 이용자에게 있습니다.
+  </p>
+</footer>
+
+<script type="module" src="{{ url_for('static', filename='dashboard.js') }}?v={{ asset_v }}"></script>
+</body>
+</html>
