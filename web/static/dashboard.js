@@ -302,6 +302,12 @@ function renderScoring() {
     { key: '교통', weight: 10, color: '#f87171',
       desc: '단지 좌표에서 가장 가까운 지하철역까지의 도보거리(직선거리 기반)와 반경 1km 내 역 수(더블역세권)를 평가합니다.',
       metric: '최근접역 도보 분(80%) + 1km 내 역 수(20%)', example: '도보 5분 역세권 + 더블역세권 → 최고점' },
+    { key: '직주근접', weight: 7, color: '#f472b6',
+      desc: '서울 3대 업무지구(강남권 GBD·도심 CBD·여의도 YBD) 중 가장 가까운 곳까지의 직선거리를 평가합니다. 직주근접은 실제 서울 집값을 가장 크게 가르는 축이라, 가격에 이미 녹아든 입지프리미엄과 별개로 물리적 근접성을 명시적으로 반영합니다. (지하철 소요시간이 이상적이나 경로 데이터가 없어 직선거리로 근사)',
+      metric: '3대 업무지구 최단 직선거리 percentile (가까울수록 높음)', example: '강남·여의도·도심 어느 한 곳과 3km 이내 → 최상위' },
+    { key: '학군', weight: 5, color: '#c084fc',
+      desc: '공개 데이터로 얻을 수 있는 두 프록시로 학군 매력을 근사합니다: 가장 가까운 초등학교까지의 거리(초품아)와 반경 1km 내 학원 수(학원가 밀집도). 학업성취도·명문중 배정 같은 핵심 데이터는 비공개라 반영할 수 없어, 학군의 우열을 단정하지 않는 참고 지표입니다.',
+      metric: '초품아 최근접 초등학교 거리(50%) + 반경 1km 학원 수(50%)', example: '초등학교 도보권 + 학원가 밀집 → 높은 점수' },
     { key: '재건축잠재력', weight: 8, color: '#22d3ee',
       desc: '준공 후 경과 연수를 기준으로 재건축·리모델링 가능성을 평가합니다. 재건축 안전진단 연한(준공 30년)에 가까울수록 미래가치 상승 잠재력이 큽니다.',
       metric: '준공연도 기준 재건축 연한(30년) 근접도', example: '준공 30년 경과 → 재건축 추진 가능 구간' },
@@ -480,6 +486,8 @@ function buildApartmentAxes(apt) {
     { name: '회복모멘텀', val: apt.momentum_score, color: '#a78bfa' },
     { name: '입지프리미엄', val: apt.premium_score, color: '#fb923c' },
     { name: '교통', val: apt.transit_score, color: '#f87171' },
+    { name: '직주근접', val: apt.hub_score, color: '#f472b6' },
+    { name: '학군', val: apt.school_score, color: '#c084fc' },
     { name: '재건축잠재력', val: apt.redevelop_score, color: '#22d3ee' },
   ].filter(a => a.val != null);
 }
@@ -570,6 +578,30 @@ function buildAxisReasons(apt) {
     reasons['교통'] = apt.nearest_station
       ? `${apt.nearest_station} 도보 ${Math.round(apt.walk_min)}분${apt.stations_within_1km > 1 ? `, 반경 1km 내 역 ${apt.stations_within_1km}개(더블역세권)` : ''} — 교통 상위 ${pct(apt.transit_score)}% 입지입니다.`
       : `반경 1.5km 내 지하철역이 없어 도보 접근성이 낮은 편입니다.`;
+  }
+
+  if (apt.hub_score != null && apt.hub_min_km != null) {
+    const km = apt.hub_min_km;
+    const hub = apt.hub_nearest_name || '3대 업무지구';
+    reasons['직주근접'] = apt.hub_score >= 70
+      ? `가장 가까운 업무지구인 ${hub}까지 직선 ${km}km — 3대 업무지구 접근성 상위 ${pct(apt.hub_score)}%의 직주근접 입지입니다.`
+      : apt.hub_score >= 45
+        ? `가장 가까운 업무지구는 ${hub}(직선 ${km}km)로, 무난한 직주근접 수준입니다.`
+        : `가장 가까운 업무지구(${hub})까지 직선 ${km}km로 3대 업무지구와 다소 떨어져 있습니다.`;
+  }
+
+  if (apt.school_score != null) {
+    const elem = apt.nearest_elem_m != null
+      ? (apt.nearest_elem_m <= 300 ? `초등학교가 직선 ${apt.nearest_elem_m}m로 사실상 초품아` : `가장 가까운 초등학교 직선 ${apt.nearest_elem_m}m`)
+      : null;
+    const aca = apt.academy_within_1km != null ? `반경 1km 내 학원 ${apt.academy_within_1km}곳` : null;
+    const bits = [elem, aca].filter(Boolean).join(', ');
+    reasons['학군'] = (apt.school_score >= 70
+      ? `${bits} — 초등학교 근접·학원가 밀집도 상위 ${pct(apt.school_score)}%의 학군 프록시 점수입니다.`
+      : apt.school_score >= 45
+        ? `${bits} — 무난한 초등학교 접근성·학원 밀집도입니다.`
+        : `${bits} — 초등학교·학원가 밀집도가 낮은 편입니다.`)
+      + ` (학업성취도 등 공식 학군 데이터는 비공개라 초품아·학원가 밀집도만 반영한 참고 지표입니다.)`;
   }
 
   if (apt.redevelop_score != null && apt.apt_age != null) {
@@ -1824,9 +1856,10 @@ const AI_AXIS_META = [
   { key: '유동성',   color: '#38bdf8' },
   { key: '교통입지', color: '#f87171' },
   { key: '모멘텀',   color: '#a78bfa' },
+  { key: '학군·생활', color: '#c084fc' },
   { key: '상품성',   color: '#fbbf24' },
 ];
-const AI_AXIS_JSONKEY = { '저평가도':'undervalued','유동성':'liquidity','교통입지':'transit','모멘텀':'momentum','상품성':'product' };
+const AI_AXIS_JSONKEY = { '저평가도':'undervalued','유동성':'liquidity','교통입지':'transit','모멘텀':'momentum','학군·생활':'school','상품성':'product' };
 let _aiData = null;
 let _aiShown = 10;
 let _aiFilter = '';

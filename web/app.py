@@ -160,6 +160,12 @@ def api_apartments():
             "jeonse_score": r.get("jeonse_score"),
             "jeonse_ratio": r.get("jeonse_ratio"),
             "data_confidence": r.get("data_confidence"),
+            "hub_score": r.get("hub_score"),
+            "hub_min_km": r.get("hub_min_km"),
+            "hub_nearest_name": r.get("hub_nearest_name"),
+            "school_score": r.get("school_score"),
+            "nearest_elem_m": r.get("nearest_elem_m"),
+            "academy_within_1km": r.get("academy_within_1km"),
         })
     return jsonify({"apartments": out})
 

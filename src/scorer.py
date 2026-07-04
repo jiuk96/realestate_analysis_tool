@@ -33,14 +33,16 @@ log = logging.getLogger(__name__)
 # "있는 축만" 남겨 합이 1이 되도록 재정규화한다(compute_composite_score).
 # 이렇게 하면 축을 추가/제거해도 나머지 비중이 자동으로 맞춰진다.
 AXIS_WEIGHTS = {
-    "defense":   0.22,   # 가격 방어력 (하락장 MDD + 회복 + 안정성)
-    "jeonse":    0.10,   # 전세가율 (하방 지지력 — 전세 데이터 있을 때만)
-    "liquidity": 0.18,   # 거래 유동성 (꾸준함 + 회전율) — 규모 축 통합분 반영
-    "upside":    0.12,   # 상승 참여도
-    "momentum":  0.11,   # 회복 모멘텀
-    "premium":   0.10,   # 입지 프리미엄 (최신가 기준 평단가)
-    "transit":   0.10,   # 교통 접근성 (실측 좌표 있을 때만)
-    "redevelop": 0.07,   # 재건축 잠재력 (준공연도 기반)
+    "defense":   0.20,   # 가격 방어력 (하락장 MDD + 회복 + 안정성)
+    "jeonse":    0.09,   # 전세가율 (하방 지지력 — 전세 데이터 있을 때만)
+    "liquidity": 0.16,   # 거래 유동성 (꾸준함 + 회전율) — 규모 축 통합분 반영
+    "upside":    0.10,   # 상승 참여도
+    "momentum":  0.10,   # 회복 모멘텀
+    "premium":   0.09,   # 입지 프리미엄 (최신가 기준 평단가)
+    "transit":   0.08,   # 교통 접근성 (지하철 실측 좌표 있을 때만)
+    "hub":       0.07,   # 직주근접 (3대 업무지구 최단거리 — 좌표 있을 때만)
+    "school":    0.05,   # 학군 (초품아+학원가 프록시 — 학교 데이터 있을 때만)
+    "redevelop": 0.06,   # 재건축 잠재력 (준공연도 기반)
 }
 # ⚠️ '규모' 축은 제거됨 — 유동성 축과 스피어만 +0.79로 같은 신호(거래건수)에
 # 이중 가중을 주고 있었다. 규모 정보는 회전율(거래÷세대수)로 유동성에 이미 반영.
@@ -49,14 +51,16 @@ AXIS_WEIGHTS = {
 AXIS_SCORE_COL = {
     "defense": "defense_score", "jeonse": "jeonse_score", "liquidity": "liquidity_score",
     "upside": "upside_score", "momentum": "momentum_score", "premium": "premium_score",
-    "transit": "transit_score", "redevelop": "redevelop_score",
+    "transit": "transit_score", "hub": "hub_score", "school": "school_score",
+    "redevelop": "redevelop_score",
 }
 
 # 한글 라벨 (composite_score.json weights 표시용)
 AXIS_KR = {
     "defense": "가격방어력", "jeonse": "전세가율", "liquidity": "거래유동성",
     "upside": "상승참여도", "momentum": "회복모멘텀", "premium": "입지프리미엄",
-    "transit": "교통", "redevelop": "재건축잠재력",
+    "transit": "교통", "hub": "직주근접", "school": "학군",
+    "redevelop": "재건축잠재력",
 }
 
 # 하위호환용(기존 build_data가 import) — 전세·교통 없는 기본 구성
@@ -64,7 +68,18 @@ WEIGHTS = {k: v for k, v in AXIS_WEIGHTS.items() if k not in ("transit", "jeonse
 WEIGHTS_TRANSIT = {k: v for k, v in AXIS_WEIGHTS.items() if k != "jeonse"}
 
 TRANSIT_CACHE = Path(__file__).parent.parent / "data" / "static" / "apt_locations.json"
+SCHOOLS_CACHE = Path(__file__).parent.parent / "data" / "static" / "schools.json"
 WALK_M_PER_MIN = 67   # 성인 평균 보속 약 4km/h
+
+
+def _haversine_km(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
+    """두 좌표 간 직선거리(km). geocode_apts.haversine_m과 동일 공식."""
+    R = 6371.0
+    p1, p2 = np.radians(lat1), np.radians(lat2)
+    dp = np.radians(lat2 - lat1)
+    dl = np.radians(lng2 - lng1)
+    a = np.sin(dp / 2) ** 2 + np.cos(p1) * np.cos(p2) * np.sin(dl / 2) ** 2
+    return R * 2 * np.arcsin(np.sqrt(a))
 
 # 재건축 판단 기준 연도 (준공 후 30년이 재건축 안전진단 연한)
 CURRENT_YEAR = 2026
@@ -463,6 +478,110 @@ def _transit_access(mdd_df: pd.DataFrame) -> pd.DataFrame | None:
     return tr[["district_name", "apt_name", "transit_score", "walk_min", "nearest_station", "nearest_station_m", "stations_within_1km"]]
 
 
+# ── ⑧ 직주근접 (3대 업무지구 최단거리, 좌표 있을 때만) ────────
+
+def _hub_access(mdd_df: pd.DataFrame) -> pd.DataFrame | None:
+    """
+    각 단지 좌표에서 서울 3대 업무지구(GBD/CBD/YBD)까지 직선거리를 재
+    가장 가까운 업무지구까지의 거리를 직주근접 점수로 환산(가까울수록 높음).
+    좌표 캐시(apt_locations.json)가 없거나 매칭 단지가 없으면 None(축 비활성).
+
+    실제 서울 집값을 가장 크게 가르는 축이 직주근접이라, '입지프리미엄'(가격에
+    내재)과 별개로 물리적 근접성을 명시적으로 반영한다.
+    """
+    if not TRANSIT_CACHE.exists():
+        return None
+    cache = json.loads(TRANSIT_CACHE.read_text(encoding="utf-8"))
+    hubs = config.BUSINESS_HUBS
+
+    rows = []
+    for _, r in mdd_df.iterrows():
+        e = cache.get(f"{r['district_name']}|{r['apt_name']}")
+        if not (e and e.get("lat") and e.get("lng")):
+            continue
+        dists = {code: _haversine_km(e["lat"], e["lng"], h["lat"], h["lng"])
+                 for code, h in hubs.items()}
+        nearest = min(dists, key=dists.get)
+        rows.append({
+            "district_name": r["district_name"],
+            "apt_name": r["apt_name"],
+            "hub_min_km": round(dists[nearest], 1),
+            "hub_nearest": nearest,
+            "hub_nearest_name": hubs[nearest]["name"],
+            "hub_gbd_km": round(dists["GBD"], 1),
+            "hub_cbd_km": round(dists["CBD"], 1),
+            "hub_ybd_km": round(dists["YBD"], 1),
+        })
+
+    if not rows:
+        return None
+    hb = pd.DataFrame(rows)
+    hb["hub_score"] = _pct_rank(hb["hub_min_km"], low_is_good=True)
+    log.info(f"직주근접 축 활성: {len(hb)}/{len(mdd_df)}개 단지 (3대 업무지구 최단거리)")
+    return hb[["district_name", "apt_name", "hub_score", "hub_min_km", "hub_nearest",
+               "hub_nearest_name", "hub_gbd_km", "hub_cbd_km", "hub_ybd_km"]]
+
+
+# ── ⑨ 학군 (초품아 + 학원가 밀집도, 공개 데이터 프록시) ───────
+
+def _school(mdd_df: pd.DataFrame) -> pd.DataFrame | None:
+    """
+    공개 데이터로 얻을 수 있는 두 프록시로 학군 매력을 근사한다:
+      ① 초품아: 가장 가까운 초등학교 직선거리(가까울수록 좋음, 50%)
+      ② 학원가 밀집도: 반경 1km 내 학원 수(많을수록 좋음, 50%)
+    schools.json(collect_schools.py가 Overpass에서 수집)과 좌표 캐시가
+    모두 있어야 활성화된다. 없으면 None(축 비활성).
+
+    ⚠️ 학업성취도·특목고 진학률·명문중 배정 데이터는 비공개라 반영 불가.
+    "초등학교 근접 + 학원가 밀집"이라는 정량 프록시일 뿐, 학군 우열을
+    단정하지 않는다(UI에도 그대로 고지).
+    """
+    if not (SCHOOLS_CACHE.exists() and TRANSIT_CACHE.exists()):
+        return None
+    schools = json.loads(SCHOOLS_CACHE.read_text(encoding="utf-8"))
+    elem = schools.get("elementary", [])
+    academy = schools.get("academy", [])
+    if not elem:
+        return None
+    cache = json.loads(TRANSIT_CACHE.read_text(encoding="utf-8"))
+
+    elem_lat = np.array([s["lat"] for s in elem], dtype=float)
+    elem_lng = np.array([s["lng"] for s in elem], dtype=float)
+    aca_lat = np.array([s["lat"] for s in academy], dtype=float) if academy else np.array([])
+    aca_lng = np.array([s["lng"] for s in academy], dtype=float) if academy else np.array([])
+    radius_km = config.SCHOOL_ACADEMY_RADIUS_M / 1000.0
+    cap_m = config.SCHOOL_ELEM_CAP_M
+
+    rows = []
+    for _, r in mdd_df.iterrows():
+        e = cache.get(f"{r['district_name']}|{r['apt_name']}")
+        if not (e and e.get("lat") and e.get("lng")):
+            continue
+        lat, lng = e["lat"], e["lng"]
+        ed = _haversine_km(lat, lng, elem_lat, elem_lng)
+        nearest_elem_m = int(min(ed.min() * 1000, cap_m))
+        if len(aca_lat):
+            ad = _haversine_km(lat, lng, aca_lat, aca_lng)
+            academy_cnt = int((ad <= radius_km).sum())
+        else:
+            academy_cnt = 0
+        rows.append({
+            "district_name": r["district_name"],
+            "apt_name": r["apt_name"],
+            "nearest_elem_m": nearest_elem_m,
+            "academy_within_1km": academy_cnt,
+        })
+
+    if not rows:
+        return None
+    sk = pd.DataFrame(rows)
+    elem_score = _pct_rank(sk["nearest_elem_m"], low_is_good=True)        # 가까울수록 ↑
+    aca_score = _pct_rank(sk["academy_within_1km"].astype(float))         # 많을수록 ↑
+    sk["school_score"] = elem_score * 0.5 + aca_score * 0.5
+    log.info(f"학군 축 활성: {len(sk)}/{len(mdd_df)}개 단지 (초품아+학원가 프록시)")
+    return sk[["district_name", "apt_name", "school_score", "nearest_elem_m", "academy_within_1km"]]
+
+
 # ── 종합 점수 합산 ────────────────────────────────────────────
 
 def compute_composite_score(
@@ -484,6 +603,8 @@ def compute_composite_score(
     sc  = _scale(mdd_df, monthly)
     rd  = _redevelopment(mdd_df)
     tr  = _transit_access(mdd_df)
+    hb  = _hub_access(mdd_df)
+    sk  = _school(mdd_df)
     je  = _jeonse_support(jeonse)
 
     base_cols = ["apt_name", "district_name", "build_year", "area_exclusive"]
@@ -493,6 +614,10 @@ def compute_composite_score(
     parts = [dfn, lq, ups, mo, pr, sc, rd]
     if tr is not None:
         parts.append(tr)
+    if hb is not None:
+        parts.append(hb)
+    if sk is not None:
+        parts.append(sk)
     if je is not None:
         parts.append(je)
     for part in parts:

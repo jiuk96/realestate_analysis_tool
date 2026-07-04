@@ -55,7 +55,11 @@ jobs:
         run: |
           python geocode_apts.py || echo "지오코딩 일부 실패 — 캐시된 결과만 반영"
 
-      - name: 분석 파이프라인 재실행 (2차 — 교통 축 반영)
+      - name: 학군 프록시(초등학교·학원) 좌표 수집
+        run: |
+          python collect_schools.py || echo "학교 수집 실패 — 캐시된 결과만 반영(학군 축 비활성)"
+
+      - name: 분석 파이프라인 재실행 (2차 — 교통·직주근접·학군 축 반영)
         run: python build_data.py
 
       - name: 점수 백테스트 (하락장 예측력 검증)

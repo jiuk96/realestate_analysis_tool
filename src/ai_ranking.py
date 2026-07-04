@@ -1,5 +1,5 @@
 """
-AI 추천 매물 순위 — 스펙 §2 기반 (데이터 보유분에 맞춰 5축으로 축소)
+AI 추천 매물 순위 — 스펙 §2 기반 (데이터 보유분에 맞춰 6축)
 ─────────────────────────────────────────────────────
 기존 '우량 단지 점수'(방어력 중심)와 달리, 저평가·상품성·유동성 중심의 다른
 렌즈로 매물을 랭킹한다. 새 데이터를 받지 않고 이미 산출된 중간값
@@ -8,13 +8,14 @@ AI 추천 매물 순위 — 스펙 §2 기반 (데이터 보유분에 맞춰 5�
 축(원 스펙 7축 → 데이터 없는 2축 제외 후 재정규화, 가중치는 config에서만 조정):
   · 저평가도 (26.7%) : 전세가율(높을수록 저평가) + 구내 ㎡당가(낮을수록 저평가)
   · 유동성   (20.0%) : 기존 liquidity_score 재사용 (공백률+유지율+변동+회전율)
-  · 교통입지 (20.0%) : 기존 transit_score 재사용 (역 도보 + 역세권 밀도)
-  · 모멘텀   (20.0%) : 기존 momentum_score 재사용 (Theil-Sen 추세)
-  · 상품성   (13.3%) : 준공연도(신축일수록 높음)
-제외: 수요·관심도(검색 트렌드 없음), 학군·생활(단지별 학교거리 없음)
+  · 교통입지 (17.6%) : transit_score(역 도보+밀도) + hub_score(3대 업무지구 직주근접) 5:5
+  · 모멘텀   (17.6%) : 기존 momentum_score 재사용 (Theil-Sen 추세)
+  · 학군·생활 (11.8%): school_score 재사용 (초품아+학원가 밀집도 프록시)
+  · 상품성   (11.8%) : 준공연도(신축일수록 높음)
+제외: 수요·관심도(검색 트렌드 없음) — 1개 축만 데이터 부재로 제외
 
 정규화: 보유 단지 전체 대상 percentile rank(0~100).
-methodology_version = "heuristic_v1_5axis" (표본 394로 작아 ML 미사용, §2 보조지표 사용)
+methodology_version = "heuristic_v2_6axis" (표본 394로 작아 ML 미사용, §2 보조지표 사용)
 
 실행: python src/ai_ranking.py   (build_data.py로 composite_score.json 생성된 뒤)
 출력: data/processed/ai_ranking.json
@@ -36,7 +37,7 @@ PROCESSED = ROOT / "data" / "processed"
 SRC = PROCESSED / "composite_score.json"
 OUT = PROCESSED / "ai_ranking.json"
 
-METHODOLOGY = "heuristic_v1_5axis"
+METHODOLOGY = "heuristic_v2_6axis"
 
 # 축 한글 라벨 (UI 표시용)
 AXIS_KR = {
@@ -44,6 +45,7 @@ AXIS_KR = {
     "liquidity":   "유동성",
     "transit":     "교통입지",
     "momentum":    "모멘텀",
+    "school":      "학군·생활",
     "product":     "상품성",
 }
 
@@ -64,9 +66,23 @@ def _highlight_phrase(axis: str, row: pd.Series) -> str:
     if axis == "transit":
         st = row.get("nearest_station")
         wm = row.get("walk_min")
+        hubkm = row.get("hub_min_km")
+        hubname = row.get("hub_nearest_name")
+        parts = []
         if pd.notna(st) and pd.notna(wm):
-            return f"{st} 도보 {round(wm)}분의 역세권 입지"
-        return "교통 접근성 우수"
+            parts.append(f"{st} 도보 {round(wm)}분")
+        if pd.notna(hubkm) and pd.notna(hubname):
+            parts.append(f"{hubname} {hubkm}km")
+        return "교통·직주근접 — " + (", ".join(parts) if parts else "접근성 우수")
+    if axis == "school":
+        elem = row.get("nearest_elem_m")
+        aca = row.get("academy_within_1km")
+        bits = []
+        if pd.notna(elem):
+            bits.append("초품아" if elem <= 300 else f"초등학교 {int(elem)}m")
+        if pd.notna(aca):
+            bits.append(f"학원 {int(aca)}곳")
+        return "학군·생활 — " + (", ".join(bits) if bits else "초품아·학원가 프록시 기준 양호")
     if axis == "momentum":
         m = row.get("momentum_pct")
         if pd.notna(m):
@@ -100,10 +116,23 @@ def build() -> dict:
         indist_cheap = pd.Series([50.0] * n)
     df["score_undervalued"] = (jr_score * 0.6 + indist_cheap * 0.4).clip(0, 100)
 
-    # 유동성·교통·모멘텀: 기존 percentile 점수 그대로 재사용 (결측은 중립 50)
+    # 유동성·모멘텀: 기존 percentile 점수 그대로 재사용 (결측은 중립 50)
     df["score_liquidity"] = pd.to_numeric(df.get("liquidity_score"), errors="coerce").fillna(50.0).clip(0, 100)
-    df["score_transit"]   = pd.to_numeric(df.get("transit_score"),   errors="coerce").fillna(50.0).clip(0, 100)
     df["score_momentum"]  = pd.to_numeric(df.get("momentum_score"),  errors="coerce").fillna(50.0).clip(0, 100)
+
+    # 교통입지: 지하철 접근성(transit_score) + 3대 업무지구 직주근접(hub_score) 5:5.
+    #  hub_score가 없으면(좌표 미수집) 지하철 점수만 사용.
+    tr = pd.to_numeric(df.get("transit_score"), errors="coerce")
+    hub = pd.to_numeric(df.get("hub_score"), errors="coerce") if "hub_score" in df else pd.Series([pd.NA] * n)
+    combined = tr.copy()
+    both = tr.notna() & hub.notna()
+    combined[both] = tr[both] * 0.5 + hub[both] * 0.5
+    combined[tr.isna() & hub.notna()] = hub[tr.isna() & hub.notna()]
+    df["score_transit"] = combined.fillna(50.0).clip(0, 100)
+
+    # 학군·생활: 초품아+학원가 프록시(school_score). 없으면(학교 미수집) 중립 50.
+    school_raw = df["school_score"] if "school_score" in df else pd.Series([pd.NA] * n)
+    df["score_school"] = pd.to_numeric(school_raw, errors="coerce").fillna(50.0).clip(0, 100)
 
     # 상품성: 준공연도(신축일수록 높음)
     df["score_product"] = _pct_rank(pd.to_numeric(df["build_year"], errors="coerce")).fillna(50.0).clip(0, 100)
@@ -115,6 +144,7 @@ def build() -> dict:
         df["score_liquidity"]   * w["liquidity"] +
         df["score_transit"]     * w["transit"] +
         df["score_momentum"]    * w["momentum"] +
+        df["score_school"]      * w["school"] +
         df["score_product"]     * w["product"]
     ).clip(0, 100).round(1)
 
@@ -123,7 +153,7 @@ def build() -> dict:
     df = df.sort_values("ai_score", ascending=False).reset_index(drop=True)
     df["ai_rank"] = df.index + 1
 
-    axis_keys = ["undervalued", "liquidity", "transit", "momentum", "product"]
+    axis_keys = ["undervalued", "liquidity", "transit", "momentum", "school", "product"]
     ranking = []
     for _, r in df.iterrows():
         axes = {ax: round(float(r[f"score_{ax}"]), 1) for ax in axis_keys}
@@ -162,10 +192,10 @@ if __name__ == "__main__":
     print(f"AI 순위 저장: {OUT}  ({res['total_apts']}개 단지, {res['n_axes']}축, {res['methodology_version']})")
     print(f"가중치: {res['weights']} (합 {round(sum(config.AI_RANKING_WEIGHTS.values()),4)})")
     print("\n상위 10개 (상식 점검):")
-    hdr = f"{'순':>2} {'구':<6} {'단지':<16} {'AI':>5} | {'저평가':>5} {'유동':>5} {'교통':>5} {'모멘':>5} {'상품':>5}  conf"
+    hdr = f"{'순':>2} {'구':<6} {'단지':<16} {'AI':>5} | {'저평가':>5} {'유동':>5} {'교통':>5} {'모멘':>5} {'학군':>5} {'상품':>5}  conf"
     print(hdr)
     for r in res["ranking"][:10]:
         a = r["axes"]
         conf = "표본부족" if r["low_confidence"] else ""
         print(f"{r['ai_rank']:>2} {r['district']:<6} {r['apt_name'][:15]:<16} {r['ai_score']:>5} | "
-              f"{a['undervalued']:>5} {a['liquidity']:>5} {a['transit']:>5} {a['momentum']:>5} {a['product']:>5}  {conf}")
+              f"{a['undervalued']:>5} {a['liquidity']:>5} {a['transit']:>5} {a['momentum']:>5} {a['school']:>5} {a['product']:>5}  {conf}")
