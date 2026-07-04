@@ -409,70 +409,154 @@ async function renderBacktest() {
 // 동네별 추천 목록 행 클릭 시 (구, 단지명)을 조회하기 위한 인덱스 (renderDistrictRankings에서 채움)
 let _rankingRowMap = [];
 
+// 동네별 추천 = 구별 지도 탐색. 구를 고르면 그 구의 분석 단지 전체를 지도에
+// 뿌리고, 옆 패널에 구 소개 + 단지 목록(강점 근거 포함)을 보여준다. 단지를
+// 클릭하면 전체 1위와 같은 상세 점수 모달(openApartmentModal)이 열린다.
+let rankMap = null, rankMarkers = [], rankByDistrict = {}, rankSelected = null;
+
+// 종합점수 색 구간(지도 탐색기 SCORE_TIERS와 동일 기준)
+function rankBubbleClass(v) {
+  if (v >= 60) return 'bubble-hot';
+  if (v >= 55) return 'bubble-mid';
+  return 'bubble-cool';
+}
+
+// 단지 한 곳의 대표 강점 2개 (축 점수 최상위)
+function aptTopAxes(a, n = 2) {
+  const axes = [
+    ['가격방어', a.defense_score], ['전세가율', a.jeonse_score], ['유동성', a.liquidity_score],
+    ['상승참여', a.upside_score], ['모멘텀', a.momentum_score], ['프리미엄', a.premium_score],
+    ['교통', a.transit_score], ['직주근접', a.hub_score], ['학군', a.school_score],
+    ['재건축', a.redevelop_score],
+  ].filter(x => x[1] != null);
+  return axes.sort((p, c) => c[1] - p[1]).slice(0, n);
+}
+
 async function renderDistrictRankings() {
-  if (!document.getElementById('districtRankings')) return;   // 동네별 TOP 페이지 아님
-  await loadDistrictData();   // 구 색상·아이콘용
-  const { comp: data } = await loadScoreData();
-  const ranking = data.ranking || [];
-  _rankingRowMap = [];
+  if (!document.getElementById('rankMap')) return;   // 동네별 페이지 아님
+  await loadDistrictData();
+  const data = await fetchJSON('/api/apartments');
+  const apts = (data.apartments || []);
 
-  // 구별 그룹핑
-  const byDistrict = {};
-  ranking.forEach(r => {
-    if (!byDistrict[r.district]) byDistrict[r.district] = [];
-    byDistrict[r.district].push(r);
-  });
+  rankByDistrict = {};
+  apts.forEach(a => { (rankByDistrict[a.district] = rankByDistrict[a.district] || []).push(a); });
+  Object.values(rankByDistrict).forEach(list =>
+    list.sort((x, y) => (y.composite_score ?? 0) - (x.composite_score ?? 0)));
 
-  const districts = Object.keys(byDistrict).sort();
-  const container = document.getElementById('districtRankings');
+  // 구 순서: 분석 단지 수 많은 순 → 이름순
+  const districts = Object.keys(rankByDistrict)
+    .sort((a, b) => rankByDistrict[b].length - rankByDistrict[a].length || a.localeCompare(b, 'ko'));
 
-  if (districts.length === 0) {
-    container.innerHTML = `<div class="empty-state">분석 데이터가 없습니다. 데이터 수집 후 다시 시도해주세요.</div>`;
+  const chipEl = document.getElementById('rankDistrictChips');
+  if (!districts.length) {
+    chipEl.innerHTML = `<div class="empty-state">분석 데이터가 없습니다.</div>`;
     return;
   }
+  chipEl.innerHTML = districts.map(d => {
+    const info = districtData.find(x => x.name === d) || {};
+    return `<button class="rank-chip" data-d="${d}">
+      <span class="rank-chip-ic">${info.icon || '🏙️'}</span>${d}
+      <span class="rank-chip-n">${rankByDistrict[d].length}</span>
+    </button>`;
+  }).join('');
+  chipEl.querySelectorAll('.rank-chip').forEach(btn =>
+    btn.addEventListener('click', () => selectRankDistrict(btn.dataset.d)));
 
-  container.innerHTML = districts.map(district => {
-    const apts = byDistrict[district].slice(0, 3);
-    const distInfo = districtData.find(d => d.name === district) || {};
-    const color = distInfo.color || '#38bdf8';
+  // 지도 초기화 (한 번만)
+  rankMap = L.map('rankMap', { center: [37.545, 126.99], zoom: 11 });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors', maxZoom: 18
+  }).addTo(rankMap);
 
-    const rows = apts.map((a, i) => {
-      const axes = [
-        ['가격방어', a.defense_score], ['전세가율', a.jeonse_score], ['유동성', a.liquidity_score],
-        ['상승참여', a.upside_score], ['모멘텀', a.momentum_score], ['프리미엄', a.premium_score],
-        ['교통', a.transit_score], ['재건축', a.redevelop_score],
-      ].filter(x => x[1] != null);
-      const best = axes.reduce((p,c) => c[1] > p[1] ? c : p, ['', -1]);
+  document.getElementById('rankLegend').innerHTML = [
+    ['bubble-hot', '60점 이상'], ['bubble-mid', '55~60점'], ['bubble-cool', '55점 미만'],
+  ].map(([c, l]) => `<span class="legend-chip"><span class="legend-dot ${c}"></span>${l}</span>`).join('');
 
-      // apt_name에 특수문자가 있어도 안전하도록, 클릭 시 조회할 (구, 단지명)은
-      // 인덱스로 저장해두고 클릭 핸들러에서 _rankingRowMap을 통해 꺼내 쓴다.
-      const ridx = _rankingRowMap.push({ district: a.district, apt_name: a.apt_name }) - 1;
+  // 첫 구 자동 선택 (URL ?d=구 있으면 그 구)
+  const want = new URLSearchParams(location.search).get('d');
+  selectRankDistrict(districts.includes(want) ? want : districts[0]);
+}
 
-      return `
-      <div class="drs-row" data-ridx="${ridx}" title="클릭하면 상세 점수를 볼 수 있습니다">
-        <span class="drs-rank" style="${i===0?`color:${color}`:''}">${i+1}</span>
-        <div class="drs-mid">
-          <div class="drs-name">${a.apt_name}</div>
-          <div class="drs-meta">${a.mdd != null ? 'MDD ' + a.mdd.toFixed(1) + '%' : ''} · ${best[0]} 강점</div>
-        </div>
-        <span class="drs-score" style="${i===0?`color:${color}`:''}">${fmtScore(a.composite_score)}</span>
-        <span class="drs-links">
-          <a href="${naverMapUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener" class="drs-lk drs-lk-m" title="네이버 지도">지</a>
-          <a href="${naverLandUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener" class="drs-lk drs-lk-n" title="네이버 부동산">부</a>
-          <a href="${hogangnonoUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener" class="drs-lk drs-lk-h" title="호갱노노">호</a>
-        </span>
-      </div>`;
-    }).join('');
+function selectRankDistrict(district) {
+  rankSelected = district;
+  const list = rankByDistrict[district] || [];
+  const info = districtData.find(x => x.name === district) || {};
+  const color = info.color || '#38bdf8';
 
+  document.querySelectorAll('.rank-chip').forEach(b =>
+    b.classList.toggle('active', b.dataset.d === district));
+
+  // 지도 마커 교체
+  rankMarkers.forEach(m => rankMap.removeLayer(m));
+  rankMarkers = [];
+  const coordApts = list.filter(a => a.lat && a.lng);
+  coordApts.forEach((a, i) => {
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="apt-bubble ${rankBubbleClass(a.composite_score ?? 0)}">
+               <span class="apt-bubble-name">${shortName(a.apt_name)}</span>
+               <span class="apt-bubble-price">${eokFmt(a.latest_price)}</span>
+             </div>`,
+      iconSize: [72, 40], iconAnchor: [36, 40],
+    });
+    const m = L.marker([a.lat, a.lng], { icon });
+    m.on('click', () => openApartmentModal(a.district, a.apt_name));
+    m.addTo(rankMap);
+    rankMarkers.push(m);
+  });
+  if (coordApts.length) {
+    rankMap.fitBounds(L.latLngBounds(coordApts.map(a => [a.lat, a.lng])).pad(0.2));
+  } else if (info.center) {
+    rankMap.setView(info.center, 13);
+  }
+  setTimeout(() => rankMap.invalidateSize(), 60);
+
+  document.getElementById('rankCount').textContent = `${district} · ${list.length}개 분석`;
+
+  // 구 소개 + 단지 목록 (옆 패널)
+  const avgP = info.avg_peak_price != null ? `평균 전고점 ${info.avg_peak_price}억` : '';
+  const priceRange = (info.price_low && info.price_high) ? `현재가 ${info.price_low}~${info.price_high}억대` : '';
+  const strengths = (info.strengths || []).map(s => `<span class="aptag">${s}</span>`).join('');
+  const famous = (info.famous || []).slice(0, 4).join(' · ');
+
+  const rows = list.map((a, i) => {
+    const best = aptTopAxes(a, 2).map(([n, v]) => `${n} ${Math.round(v)}`).join(' · ');
+    const mdd = a.mdd != null ? `MDD ${a.mdd.toFixed(1)}%` : '';
     return `
-    <div class="drs-block">
-      <div class="drs-head" style="border-left:3px solid ${color}">
-        <span>${distInfo.icon||'🏙️'} <b>${district}</b></span>
-        <span class="drs-count">${byDistrict[district].length}개 분석</span>
+    <div class="rank-apt-row" data-i="${i}">
+      <div class="rank-apt-rank" style="${i === 0 ? `color:${color}` : ''}">${i + 1}</div>
+      <div class="rank-apt-main">
+        <div class="rank-apt-name">${a.apt_name}</div>
+        <div class="rank-apt-sub">${a.build_year || '—'}년 · ${Math.round(a.area_exclusive || 0)}㎡ ${mdd ? '· ' + mdd : ''}</div>
+        <div class="rank-apt-why">💡 ${best || '분석 중'} 강점</div>
       </div>
-      ${rows}
+      <div class="rank-apt-right">
+        <div class="rank-apt-price">${eokFmt(a.latest_price)}</div>
+        <div class="rank-apt-score" style="${i === 0 ? `color:${color}` : ''}">${fmtScore(a.composite_score)}점</div>
+      </div>
     </div>`;
   }).join('');
+
+  document.getElementById('rankPanel').innerHTML = `
+    <div class="rank-dist-head" style="border-left:3px solid ${color}">
+      <div class="rank-dist-title">${info.icon || '🏙️'} <b>${district}</b>
+        <span class="rank-dist-tag">${info.character || ''}</span></div>
+      <div class="rank-dist-meta">${[famous, avgP, priceRange].filter(Boolean).join(' · ')}</div>
+      ${info.description ? `<p class="rank-dist-desc">${info.description}</p>` : ''}
+      ${strengths ? `<div class="rank-dist-strengths">${strengths}</div>` : ''}
+    </div>
+    <div class="ep-list-head">단지 목록 <span class="ep-list-cnt">${list.length}</span>
+      <span class="rank-list-hint">클릭 → 상세 점수</span></div>
+    <div class="rank-apt-list">${rows || '<div class="explorer-panel-empty">분석 단지가 없습니다</div>'}</div>
+  `;
+
+  document.querySelectorAll('.rank-apt-row').forEach(el => {
+    el.addEventListener('click', () => {
+      const a = list[+el.dataset.i];
+      if (a.lat && a.lng) rankMap.setView([a.lat, a.lng], 15, { animate: true });
+      openApartmentModal(a.district, a.apt_name);
+    });
+  });
 }
 
 /* ── ④ 전체 1위 단지 상세 ──────────────────────────────────── */

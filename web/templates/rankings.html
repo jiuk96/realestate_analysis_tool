@@ -1,17 +1,35 @@
 {% extends 'base.html' %}
 {% set active_page = 'rankings' %}
-{% block title %}동네별 TOP · 서울 부동산 분석 툴{% endblock %}
+{% block title %}동네별 추천 · 서울 부동산 분석 툴{% endblock %}
 {% block content %}
 <section class="section section-alt" id="secDistrict">
   <div class="section-inner">
-    <div class="section-label">STEP 2 · 추천</div>
+    <div class="section-label">STEP 2 · 동네별</div>
     <h2 class="section-title">동네별 추천 단지</h2>
     <p class="section-desc">
-      구별 종합 점수 상위 3개 단지입니다. 단지명을 클릭하면 네이버부동산으로 연결됩니다.
+      구를 선택하면 그 구의 <strong>분석 단지 전체</strong>가 지도에 표시됩니다.
+      지도의 단지나 오른쪽 목록을 클릭하면 상세 점수·근거를 볼 수 있어요.
     </p>
-    <div id="districtRankings" class="district-rankings-simple">
-      <div class="skeleton" style="height:300px"></div>
+
+    <!-- 구 선택 칩 -->
+    <div class="rank-district-chips" id="rankDistrictChips">
+      <div class="skeleton" style="height:44px"></div>
     </div>
+
+    <div class="explorer-legend-bar">
+      <div class="explorer-count" id="rankCount"></div>
+      <div class="explorer-legend" id="rankLegend"></div>
+    </div>
+
+    <!-- 지도 + 설명/목록 패널 -->
+    <div class="explorer-layout">
+      <div id="rankMap" class="explorer-map"></div>
+      <div id="rankPanel" class="explorer-panel"></div>
+    </div>
+    <p class="explorer-note">
+      ※ <strong>전용 59㎡(18평)</strong> 동일 평형 기준 · 가격은 최근 실거래 중앙값(3개월 스무딩).
+      단지 위치는 지번 기반이며 일부 오차가 있을 수 있습니다.
+    </p>
   </div>
 </section>
 {% endblock %}
