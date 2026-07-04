@@ -2,8 +2,8 @@
   "train_cutoff": "2022-06",
   "crash_window_end": "2023-12",
   "n_apts": 321,
-  "spearman_score_vs_dd": -0.24,
-  "spearman_score_vs_ret": 0.161,
+  "spearman_score_vs_dd": -0.228,
+  "spearman_score_vs_ret": 0.196,
   "axis_corr": {
     "defense": {
       "vs_dd": -0.292,
@@ -27,42 +27,42 @@
       "quintile": 5,
       "label": "상위 20%",
       "n": 64,
-      "avg_realized_dd": -22.03,
-      "avg_total_ret": 25.92
+      "avg_realized_dd": -21.31,
+      "avg_total_ret": 27.91
     },
     {
       "quintile": 4,
       "label": "상위 20~40%",
       "n": 64,
-      "avg_realized_dd": -20.12,
-      "avg_total_ret": 20.88
+      "avg_realized_dd": -21.22,
+      "avg_total_ret": 20.17
     },
     {
       "quintile": 3,
       "label": "중위",
       "n": 64,
-      "avg_realized_dd": -21.23,
-      "avg_total_ret": 22.69
+      "avg_realized_dd": -20.5,
+      "avg_total_ret": 22.97
     },
     {
       "quintile": 2,
       "label": "하위 20~40%",
       "n": 64,
-      "avg_realized_dd": -18.27,
-      "avg_total_ret": 15.23
+      "avg_realized_dd": -18.67,
+      "avg_total_ret": 14.36
     },
     {
       "quintile": 1,
       "label": "하위 20%",
       "n": 65,
-      "avg_realized_dd": -16.95,
-      "avg_total_ret": 18.17
+      "avg_realized_dd": -16.91,
+      "avg_total_ret": 17.49
     }
   ],
   "headline": {
-    "top20_dd": -22.03,
-    "bottom20_dd": -16.95,
-    "top20_ret": 25.92,
-    "bottom20_ret": 18.17
+    "top20_dd": -21.31,
+    "bottom20_dd": -16.91,
+    "top20_ret": 27.91,
+    "bottom20_ret": 17.49
   }
 }
