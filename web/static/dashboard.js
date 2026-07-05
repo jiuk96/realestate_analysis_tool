@@ -2495,6 +2495,136 @@ function selectJeonseDistrict(district) {
   });
 }
 
+/* ── 전세 · 구별 순위 (매매 '동네별'의 전세 대칭 페이지) ───── */
+let _jrMode = 'fit', _jrData = null;
+
+async function renderJeonseRankings() {
+  const el = document.getElementById('jeonseRankList');
+  if (!el) return;   // 전세 구별 순위 페이지 아님
+  await loadDistrictData();
+  const data = await fetchJSON('/api/jeonse');
+  const ranking = (data && data.ranking) || [];
+  if (!ranking.length) { el.innerHTML = '<div class="empty-state">전세 데이터가 아직 없습니다.</div>'; return; }
+  computeJeonseLifestyle(ranking);   // 통근·인프라·약속장소 → fit_total
+  _jrData = ranking;
+
+  document.querySelectorAll('#jrModeToggle .legend-mode-btn').forEach(btn =>
+    btn.addEventListener('click', () => {
+      _jrMode = btn.dataset.mode;
+      document.querySelectorAll('#jrModeToggle .legend-mode-btn').forEach(b => b.classList.toggle('active', b === btn));
+      drawJeonseRankList();
+    }));
+  drawJeonseRankList();
+}
+
+function drawJeonseRankList() {
+  const el = document.getElementById('jeonseRankList');
+  const score = a => _jrMode === 'fit' ? a.fit_total : a.jeonse_total;
+  const by = {};
+  _jrData.forEach(r => { (by[r.district] = by[r.district] || []).push(r); });
+  const groups = Object.keys(by).map(d => {
+    const list = [...by[d]].sort((x, y) => score(y) - score(x));
+    return {
+      d, list,
+      avg: list.reduce((s, r) => s + score(r), 0) / list.length,
+      avgPrice: list.reduce((s, r) => s + (r.jeonse_median || 0), 0) / list.length,
+    };
+  }).sort((a, b) => b.avg - a.avg);
+
+  el.innerHTML = groups.map((g, i) => {
+    const info = districtData.find(x => x.name === g.d) || {};
+    const top3 = g.list.slice(0, 3).map((a, j) => `
+      <div class="jr-apt" data-d="${g.d}" data-a="${encodeURIComponent(a.apt_name)}" title="클릭하면 상세 점수">
+        <span class="jr-apt-rank">${j + 1}</span>
+        <span class="jr-apt-name">${a.apt_name}</span>
+        <span class="jr-apt-price">${eokFmt(a.jeonse_median)}</span>
+        <span class="jr-apt-score">${Math.round(score(a))}점</span>
+      </div>`).join('');
+    return `
+    <div class="jr-card">
+      <div class="jr-head">
+        <span class="jr-rank">${i + 1}</span>
+        <span class="jr-name">${info.icon || '🏙️'} ${g.d}</span>
+        <span class="jr-meta">전세 평균 ${eokFmt(g.avgPrice)} · ${g.list.length}개</span>
+        <span class="jr-score">${Math.round(g.avg)}<small>점</small></span>
+      </div>
+      ${top3}
+      <a class="jr-maplink" href="/jeonse?d=${encodeURIComponent(g.d)}">지도에서 보기 →</a>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.jr-apt').forEach(x =>
+    x.addEventListener('click', () => openApartmentModal(x.dataset.d, decodeURIComponent(x.dataset.a))));
+}
+
+/* ── 전세 · 우리 맞춤 1위 (매매 '전체 1위'의 전세 대칭 페이지) ── */
+async function renderJeonseTop1() {
+  const el = document.getElementById('jeonseTop1Detail');
+  if (!el) return;   // 우리 맞춤 전세 1위 페이지 아님
+  await loadDistrictData();
+  const data = await fetchJSON('/api/jeonse');
+  const ranking = (data && data.ranking) || [];
+  if (!ranking.length) { el.innerHTML = '<div class="empty-state">전세 데이터가 아직 없습니다.</div>'; return; }
+  computeJeonseLifestyle(ranking);
+  const sorted = [...ranking].sort((a, b) => b.fit_total - a.fit_total);
+  const w = sorted[0];
+  const R = buildJeonseReasons(w);
+
+  const axesHtml = FIT_AXIS_META.map(m => {
+    const v = m.get(w) ?? 0;
+    return `
+    <div class="top1-ax-group">
+      <div class="top1-axis-row">
+        <span class="top1-ax-dot" style="background:${m.color}"></span>
+        <span class="top1-ax-name">${m.key} <small style="color:var(--text3)">${m.w}%</small></span>
+        <div class="top1-ax-bar"><div class="top1-ax-fill" style="width:${Math.min(100, v)}%;background:${m.color}"></div></div>
+        <span class="top1-ax-val">${v.toFixed(0)}</span>
+      </div>
+      <div class="top1-ax-reason">${R[m.key] || ''}</div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="top1-hero">
+      <div class="top1-badge">🔑 우리 맞춤 전세 1위</div>
+      <h3 class="top1-name">${w.apt_name}</h3>
+      <div class="top1-loc">${w.district} · ${w.build_year || '—'}년 준공 · 전용 ${Math.round(w.area_exclusive || 0)}㎡</div>
+      <div class="top1-score-big">${w.fit_total.toFixed(1)}<span class="top1-score-unit">점</span></div>
+      <div class="ep-links" style="justify-content:center;margin-top:.8rem">
+        <a class="ep-map" href="${naverMapUrl(w.district, w.apt_name, w.dong, w.lat, w.lng)}" target="_blank" rel="noopener">네이버 지도 ↗</a>
+        <a class="ep-naver" href="${naverLandUrl(w.district, w.apt_name, w.dong, w.lat, w.lng)}" target="_blank" rel="noopener">네이버 부동산 ↗</a>
+        <a class="ep-hogang" href="${hogangnonoUrl(w.district, w.apt_name, w.dong, w.lat, w.lng)}" target="_blank" rel="noopener">호갱노노 ↗</a>
+      </div>
+    </div>
+    <div class="top1-stats-grid">
+      <div class="top1-stat"><div class="ts-val">${eokFmt(w.jeonse_median)}</div><div class="ts-key">전세 중앙값</div></div>
+      <div class="top1-stat"><div class="ts-val">${w.jeonse_ratio != null ? Math.round(w.jeonse_ratio * 100) + '%' : '—'}</div><div class="ts-key">전세가율</div></div>
+      <div class="top1-stat"><div class="ts-val">${w.jeonse_ppm != null ? Math.round(w.jeonse_ppm) + '만' : '—'}</div><div class="ts-key">㎡당 전세금</div></div>
+      <div class="top1-stat"><div class="ts-val">${w._commute_km != null ? w._commute_km.toFixed(1) + 'km' : '—'}</div><div class="ts-key">두 직장 통근 합</div></div>
+    </div>
+    <div class="top1-axes" style="margin-top:1.2rem">${axesHtml}</div>
+    <div id="jeonseTop1Transit"></div>`;
+  fillCommuteTransit('jeonseTop1Transit', w);   // 🚇 우리 회사 가는 길
+
+  // 2~5위 후보
+  const run = document.getElementById('jeonseTop1Runners');
+  if (run) {
+    run.innerHTML = sorted.slice(1, 5).map((a, i) => {
+      const info = districtData.find(x => x.name === a.district) || {};
+      return `
+      <div class="jr-card jr-runner" data-d="${a.district}" data-a="${encodeURIComponent(a.apt_name)}" title="클릭하면 상세 점수">
+        <div class="jr-head">
+          <span class="jr-rank">${i + 2}</span>
+          <span class="jr-name">${a.apt_name}</span>
+          <span class="jr-score">${a.fit_total.toFixed(0)}<small>점</small></span>
+        </div>
+        <div class="jr-meta">${info.icon || ''} ${a.district} · 전세 ${eokFmt(a.jeonse_median)} · 통근합 ${a._commute_km != null ? a._commute_km.toFixed(1) + 'km' : '—'}</div>
+      </div>`;
+    }).join('');
+    run.querySelectorAll('.jr-runner').forEach(x =>
+      x.addEventListener('click', () => openApartmentModal(x.dataset.d, decodeURIComponent(x.dataset.a))));
+  }
+}
+
 /* ── 초기화 ─────────────────────────────────────────────── */
 (async function init() {
   const safe = async (fn) => { try { await fn(); } catch (e) { console.error(fn.name, e); } };
@@ -2508,5 +2638,7 @@ function selectJeonseDistrict(district) {
   await safe(renderTop1);
   await safe(renderAiRanking);
   await safe(renderJeonseExplorer);
+  await safe(renderJeonseRankings);
+  await safe(renderJeonseTop1);
   initApartmentModal();
 })();

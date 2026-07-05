@@ -33,15 +33,20 @@ def index():
     return render_template("index.html")
 
 
-# ── 멀티 페이지 (각 챕터를 별도 페이지로 분리) ─────────────────
+# ── 멀티 페이지: 매매/전세 두 축 + 공통 도구 ──────────────────
 _PAGES = {
-    "rankings":  "rankings.html",   # ② 동네별 TOP
-    "top1":      "top1.html",       # ③ 전체 1위
-    "scoring":   "scoring.html",    # ④ 점수 근거
-    "districts": "districts.html",  # ⑤ 구별 소개
-    "budget":    "budget.html",     # ⑥ 예산 플래너
-    "jeonse":    "jeonse.html",     # ⑦ 전세 합리성
-    "ai":        "ai.html",         # ⑧ AI 추천
+    # 매매 축
+    "rankings":        "rankings.html",         # 매매 · 동네별 순위
+    "top1":            "top1.html",             # 매매 · 전체 1위
+    # 전세 축
+    "jeonse":          "jeonse.html",           # 전세 · 지도 탐색
+    "jeonse-rankings": "jeonse_rankings.html",  # 전세 · 구별 순위
+    "jeonse-top1":     "jeonse_top1.html",      # 전세 · 우리 맞춤 1위
+    # 공통 도구
+    "scoring":         "scoring.html",          # 점수 근거
+    "districts":       "districts.html",        # 구별 소개
+    "budget":          "budget.html",           # 예산 플래너
+    "ai":              "ai.html",               # AI 추천
 }
 
 

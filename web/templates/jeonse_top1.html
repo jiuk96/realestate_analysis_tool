@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% set active_page = 'jeonse-top1' %}
+{% block title %}우리 맞춤 전세 1위 · 서울 부동산 분석 툴{% endblock %}
+{% block content %}
+<section class="section" id="secJeonseTop1">
+  <div class="section-inner">
+    <div class="section-label">🔑 전세 · 우리 맞춤 1위</div>
+    <h2 class="section-title">우리가 구하면 좋을 전세집은?</h2>
+    <p class="section-desc">
+      <strong>두 직장 통근(30%) + 가격 합리성(30%) + 인프라(22%) + 약속장소 접근성(18%)</strong>을
+      종합해 우리 둘에게 가장 맞는 전세 단지를 뽑았습니다.
+      직장 위치를 바꾸면(<a href="/">매매 지도 탐색</a>) 순위도 다시 계산됩니다.
+    </p>
+
+    <div id="jeonseTop1Detail">
+      <div class="skeleton" style="height:420px"></div>
+    </div>
+
+    <h3 class="jr-sub-title">아깝게 놓친 후보들 (2~5위)</h3>
+    <div id="jeonseTop1Runners" class="jr-grid"></div>
+    <p class="explorer-note">
+      ※ 전용 59㎡ 순수 전세 실거래(최근 18개월) 기준 · 통근·약속장소는 직선거리 기반이라
+      실제 대중교통 소요시간과 다를 수 있습니다.
+    </p>
+  </div>
+</section>
+{% endblock %}

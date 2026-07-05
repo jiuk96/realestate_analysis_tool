@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% set active_page = 'jeonse-rankings' %}
+{% block title %}전세 구별 순위 · 서울 부동산 분석 툴{% endblock %}
+{% block content %}
+<section class="section" id="secJeonseRank">
+  <div class="section-inner">
+    <div class="section-label">🔑 전세 · 구별 순위</div>
+    <h2 class="section-title">전세, 어느 구가 우리에게 좋을까요?</h2>
+    <p class="section-desc">
+      25개 구를 <strong>우리 맞춤 적합도</strong>(두 직장 통근 · 인프라 · 약속장소 + 가격 합리성) 평균으로
+      줄 세웠습니다. 구 카드를 펼치면 그 구의 추천 전세 단지가 나옵니다.
+      직장 위치는 <a href="/">매매 지도 탐색</a>에서 바꾸면 반영됩니다.
+    </p>
+
+    <!-- 정렬 기준 토글 -->
+    <div class="legend-mode-toggle" id="jrModeToggle" style="margin-bottom:1.2rem">
+      <button class="legend-mode-btn active" data-mode="fit">🏠 우리 맞춤 순</button>
+      <button class="legend-mode-btn" data-mode="price">💰 가격 합리성 순</button>
+    </div>
+
+    <div id="jeonseRankList" class="jr-grid">
+      <div class="skeleton" style="height:120px"></div>
+      <div class="skeleton" style="height:120px"></div>
+      <div class="skeleton" style="height:120px"></div>
+    </div>
+    <p class="explorer-note">
+      ※ 전용 59㎡ 순수 전세 실거래(최근 18개월) 기준. 단지명을 클릭하면 상세 점수를 볼 수 있습니다.
+    </p>
+  </div>
+</section>
+{% endblock %}

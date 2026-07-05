@@ -120,6 +120,14 @@ body {
   transition: color .2s, background .2s;
 }
 .nav-link:hover { color: var(--text); background: rgba(20,40,70,.05); }
+.nav-group {
+  flex: none; font-size: .74rem; font-weight: 800; letter-spacing: .02em;
+  padding: .22rem .6rem; border-radius: 999px; margin: 0 .1rem 0 .4rem;
+}
+.nav-g-buy  { color: #c2410c; background: rgba(255,116,38,.10); }
+.nav-g-rent { color: #067647; background: rgba(3,165,82,.10); }
+.nav-sep { flex: none; width: 1px; height: 18px; background: var(--border-strong); margin: 0 .5rem; }
+@media (max-width: 720px) { .nav-inner { gap: .25rem; } .nav-group { margin-left: .2rem; } }
 .nav-link.active { color: #c2410c; background: rgba(255,116,38,.16); font-weight: 700; }
 
 /* ── 섹션 ───────────────────────────────────────────────── */
@@ -1416,3 +1424,31 @@ details.budget-fold .legal-hint { font-weight: 500; }
 .ai-more-btn:hover { background: var(--bg3); border-color: var(--accent); }
 .ai-disclaimer { margin-top: 1.4rem; text-align: center; }
 @media (max-width: 560px) { .ai-ranking-list { grid-template-columns: 1fr; } }
+
+
+/* ── 전세 구별 순위 / 우리 맞춤 1위 카드 ────────────────── */
+.jr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
+.jr-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r);
+  padding: 1rem 1.1rem; box-shadow: var(--shadow-sm);
+}
+.jr-head { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; margin-bottom: .4rem; }
+.jr-rank { font-weight: 800; color: var(--accent); font-size: 1.05rem; min-width: 1.4rem; text-align: center; }
+.jr-name { font-weight: 800; color: var(--text); font-size: .98rem; }
+.jr-meta { font-size: .76rem; color: var(--text3); }
+.jr-score { margin-left: auto; font-weight: 800; color: var(--accent); font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+.jr-score small { font-size: .7rem; color: var(--text3); font-weight: 600; margin-left: .1rem; }
+.jr-apt {
+  display: flex; align-items: center; gap: .5rem; padding: .42rem .2rem;
+  border-top: 1px solid var(--border); cursor: pointer; font-size: .86rem;
+}
+.jr-apt:hover { background: rgba(255,116,38,.05); }
+.jr-apt-rank { color: var(--text3); font-weight: 700; width: 1.1rem; text-align: center; }
+.jr-apt-name { color: var(--text); font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.jr-apt-price { color: var(--text2); font-variant-numeric: tabular-nums; }
+.jr-apt-score { color: var(--green); font-weight: 700; font-variant-numeric: tabular-nums; }
+.jr-maplink { display: inline-block; margin-top: .5rem; font-size: .78rem; color: var(--acc2); text-decoration: none; font-weight: 600; }
+.jr-maplink:hover { text-decoration: underline; }
+.jr-sub-title { margin: 1.8rem 0 .8rem; font-size: 1.05rem; color: var(--text); }
+.jr-runner { cursor: pointer; transition: border-color .15s; }
+.jr-runner:hover { border-color: var(--border-strong); }

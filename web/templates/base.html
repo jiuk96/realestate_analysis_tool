@@ -23,14 +23,19 @@
 <!-- ── 네비게이션 (페이지 링크) ───────────────────────── -->
 <nav class="sticky-nav">
   <div class="nav-inner">
-    <a href="/"          class="nav-link {{ 'active' if active_page=='explore'  }}">① 지도 탐색</a>
-    <a href="/rankings"  class="nav-link {{ 'active' if active_page=='rankings' }}">② 동네별 TOP</a>
-    <a href="/top1"      class="nav-link {{ 'active' if active_page=='top1'     }}">③ 전체 1위</a>
-    <a href="/scoring"   class="nav-link {{ 'active' if active_page=='scoring'  }}">④ 점수 근거</a>
-    <a href="/districts" class="nav-link {{ 'active' if active_page=='districts'}}">⑤ 구별 소개</a>
-    <a href="/budget"    class="nav-link {{ 'active' if active_page=='budget'   }}">⑥ 예산 플래너</a>
-    <a href="/jeonse"    class="nav-link {{ 'active' if active_page=='jeonse'   }}">⑦ 전세 합리성</a>
-    <a href="/ai"        class="nav-link {{ 'active' if active_page=='ai'       }}">⑧ AI 추천</a>
+    <span class="nav-group nav-g-buy">🏠 매매</span>
+    <a href="/"          class="nav-link {{ 'active' if active_page=='explore'  }}">지도 탐색</a>
+    <a href="/rankings"  class="nav-link {{ 'active' if active_page=='rankings' }}">구별 순위</a>
+    <a href="/top1"      class="nav-link {{ 'active' if active_page=='top1'     }}">전체 1위</a>
+    <span class="nav-group nav-g-rent">🔑 전세</span>
+    <a href="/jeonse"          class="nav-link {{ 'active' if active_page=='jeonse'          }}">지도 탐색</a>
+    <a href="/jeonse-rankings" class="nav-link {{ 'active' if active_page=='jeonse-rankings' }}">구별 순위</a>
+    <a href="/jeonse-top1"     class="nav-link {{ 'active' if active_page=='jeonse-top1'     }}">우리 맞춤 1위</a>
+    <span class="nav-sep"></span>
+    <a href="/districts" class="nav-link {{ 'active' if active_page=='districts'}}">구별 소개</a>
+    <a href="/scoring"   class="nav-link {{ 'active' if active_page=='scoring'  }}">점수 근거</a>
+    <a href="/budget"    class="nav-link {{ 'active' if active_page=='budget'   }}">예산</a>
+    <a href="/ai"        class="nav-link {{ 'active' if active_page=='ai'       }}">AI 추천</a>
   </div>
 </nav>
 
