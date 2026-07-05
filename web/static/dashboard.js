@@ -2181,22 +2181,27 @@ function drawAiList() {
   moreBtn.style.display = rows.length > _aiShown ? 'inline-flex' : 'none';
 }
 
-/* ── ⑦ 전세 합리성 (구별 지도 탐색) ───────────────────────── */
+/* ── ⑦ 전세 합리성 (구별 지도 탐색) — v2 5축 ─────────────── */
+// v1 감사에서 매매 종합점수(재건축·모멘텀 등 투자축)를 '품질'로 쓰는 바람에
+// 40년차 재건축 후보가 상위를 휩쓸던 결함을 교정: 세입자 관점 거주가치로 교체.
 const JEONSE_AXIS_META = [
-  { key: '가성비',     w: 40, color: '#34d399',
-    desc: '입지·품질(매매 종합점수) 대비 전세 ㎡당 가격이 쌀수록 높습니다. "이 정도 입지를 이 전세금에?" — 같은 값이면 더 좋은 집.',
-    metric: '매매 종합점수 ÷ 전세 평단가 percentile' },
-  { key: '전세평단가', w: 20, color: '#818cf8',
-    desc: '㎡당 전세금이 절대적으로 낮을수록(같은 크기를 싸게 사는 관점).',
-    metric: '㎡당 전세금 낮은 순 percentile' },
-  { key: '보증금안전', w: 20, color: '#a78bfa',
-    desc: '전세가율(전세÷매매)이 낮을수록 매매가가 전세금을 넉넉히 받쳐줘 깡통전세 위험이 작습니다. (전세가율 높은 "적은 돈으로 상급지"와는 반대 관점)',
-    metric: '전세가율 낮은 순 percentile' },
+  { key: '가성비',     w: 30, color: '#34d399',
+    desc: '세입자 관점 거주가치(교통 25% + 직주근접 25% + 학군 20% + 연식·신축 30%) 대비 전세 ㎡당 가격이 쌀수록 높습니다. 재건축 잠재력 같은 투자 요소는 거주 품질이 아니므로 뺐습니다 — "이 거주 품질을 이 전세금에?"',
+    metric: '거주가치(교통+직주+학군+연식) ÷ 전세 평단가 percentile' },
+  { key: '전세저렴도', w: 15, color: '#818cf8',
+    desc: '㎡당 전세금을 서울 전체(60%)와 같은 구 안(40%)에서 함께 비교합니다. 구 안에서 싼 전세인지도 반영해 "그 동네 기준 가성비"를 잡습니다.',
+    metric: '㎡당 전세금 — 서울 percentile 60% + 구내 percentile 40%' },
+  { key: '보증금안전', w: 25, color: '#a78bfa',
+    desc: '깡통전세 위험은 "전세가율이 높은데 매매가까지 잘 빠지는 집"에서 커집니다. 전세가율 낮음(55%)에 더해, 그 집 매매가의 하락 방어력(25%)과 가격 변동성(20%)까지 함께 봅니다.',
+    metric: '전세가율↓(55%) + 매매 방어력(25%) + 매매가 변동성↓(20%)' },
+  { key: '시세안정',   w: 10, color: '#f472b6',
+    desc: '최근 전세가 추세(연율 %)의 진폭이 작을수록 좋습니다. 급등은 2년 뒤 재계약 부담, 급락은 역전세(보증금 미반환) 신호 — 양쪽 다 세입자에게 리스크입니다.',
+    metric: '전세가 Theil-Sen 추세 |연율%| 작은 순 percentile' },
   { key: '전세유동성', w: 20, color: '#fbbf24',
-    desc: '전세 거래가 많을수록 매물을 구하기 쉽고 시세가 투명합니다.',
-    metric: '최근 18개월 전세 거래건수 percentile' },
+    desc: '단지 규모 대비 전세 거래가 활발한지(회전율)를 중심으로 봅니다. 거래건수만 보면 대단지가 무조건 유리해지는 편향이 있어, 연환산 거래 ÷ 추정 세대수로 보정했습니다.',
+    metric: '회전율(연환산 전세거래÷세대수) 60% + 거래건수 40%' },
 ];
-const JEONSE_AX_KEY = { '가성비':'axis_value','전세평단가':'axis_cheap','보증금안전':'axis_safety','전세유동성':'axis_liquidity' };
+const JEONSE_AX_KEY = { '가성비':'axis_value','전세저렴도':'axis_cheap','보증금안전':'axis_safety','시세안정':'axis_stability','전세유동성':'axis_liquidity' };
 
 let jeonseMap = null, jeonseMarkers = [], jeonseByDistrict = {};
 let jeonseMode = 'fit';   // 'fit'=우리 맞춤(통근·인프라·약속장소 포함) / 'price'=가격 합리성만
@@ -2220,7 +2225,7 @@ const FIT_AXIS_META = [
   { key: '회사통근',   w: 30, color: '#f472b6', get: a => a.axis_commute,
     desc: '우리 두 직장(내 직장·여자친구 직장)까지의 직선거리 합이 가까울수록 높습니다. 직장 위치는 ①지도 탐색 페이지에서 바꿀 수 있고, 그 값이 여기에도 반영됩니다.' },
   { key: '가격합리성', w: 30, color: '#34d399', get: a => a.jeonse_total,
-    desc: '앞의 4개 전세 지표(가성비·전세평단가·보증금안전·전세유동성) 종합 점수입니다.' },
+    desc: '앞의 5개 전세 지표(가성비·전세저렴도·보증금안전·시세안정·전세유동성) 종합 점수입니다.' },
   { key: '인프라',     w: 22, color: '#818cf8', get: a => a.axis_infra,
     desc: '교통(지하철 접근성·역세권)과 학군·생활편의를 합산한 인프라 점수입니다.' },
   { key: '약속장소',   w: 18, color: '#fbbf24', get: a => a.axis_spot,
@@ -2288,24 +2293,55 @@ function buildJeonseReasons(r) {
   const jr = r.jeonse_ratio != null ? Math.round(r.jeonse_ratio * 100) : null;
   const inDist = r.jeonse_ppm_district_top_pct != null ? Math.round(r.jeonse_ppm_district_top_pct) : null;
   const R = {};
-  R['가성비'] = `매매 종합 ${Math.round(r.composite_score)}점 입지를 전세 ${eok(r.jeonse_median)}(㎡당 ${ppm}만원)에`
-    + `${inDist != null ? ` — 이 구 전세 평단가 하위 ${inDist}%` : ''}. 가성비 상위 ${pct(r.axis_value)}%.`;
-  R['전세평단가'] = `㎡당 전세금 ${ppm}만원 — 서울 분석 단지 중 전세 저렴도 상위 ${pct(r.axis_cheap)}%.`;
-  R['보증금안전'] = jr != null
-    ? (r.axis_safety >= 60
-        ? `전세가율 ${jr}%로 낮아 매매가가 보증금을 넉넉히 받쳐줍니다(깡통전세 위험 낮음).`
-        : r.axis_safety >= 40
-          ? `전세가율 ${jr}%로 보통 수준의 보증금 안전성입니다.`
-          : `전세가율 ${jr}%로 높은 편 — 보증금 대비 매매가 여유가 적어 주의가 필요합니다.`)
-    : '전세가율 정보가 부족합니다.';
-  R['전세유동성'] = `최근 18개월 전세 ${r.jeonse_count != null ? Math.round(r.jeonse_count) : '—'}건 거래로 `
-    + (r.axis_liquidity >= 60 ? '매물·시세가 투명합니다.' : '거래가 많지 않아 시세 확인에 유의하세요.');
+
+  // ① 가성비 — 거주가치(교통·직주·학군·연식) 서브지표를 실수치로 인용
+  const age = r.build_year ? (2026 - Math.round(r.build_year)) : null;
+  const lq = r.living_quality != null ? Math.round(r.living_quality) : null;
+  const lqBits = [
+    r.nearest_station ? `${r.nearest_station} 도보 ${Math.round(r.walk_min ?? 0)}분` : null,
+    r.hub_min_km != null ? `${r.hub_nearest_name || '업무지구'} ${r.hub_min_km}km` : null,
+    r.academy_within_1km != null ? `학원 ${r.academy_within_1km}곳` : null,
+    age != null ? `${r.build_year}년식(${age}년차)` : null,
+  ].filter(Boolean).join(' · ');
+  R['가성비'] = `거주가치 ${lq ?? '—'}점(${lqBits})을 전세 ${eok(r.jeonse_median)}(㎡당 ${ppm}만원)에 — 가성비 상위 ${pct(r.axis_value)}%. 재건축 같은 투자 요소는 뺀 세입자 기준입니다.`;
+
+  // ② 전세 저렴도 — 서울 + 구내 이중 비교
+  R['전세저렴도'] = `㎡당 전세금 ${ppm}만원 — 서울 전체 상위 ${pct(r.axis_cheap)}%${inDist != null ? `, ${r.district} 안에서는 싼 순으로 ${inDist <= 50 ? '상위' : '하위'} ${inDist <= 50 ? inDist : 100 - inDist}%` : ''}.`;
+
+  // ③ 보증금 안전 — 전세가율 + 매매 방어력 + 변동성
+  const dfn = r.defense_score != null ? Math.round(r.defense_score) : null;
+  const vol = r.price_vol_annual != null ? (r.price_vol_annual * 100).toFixed(1) : null;
+  const safetyBits = [
+    jr != null ? `전세가율 ${jr}%` : null,
+    dfn != null ? `매매가 방어력 ${dfn}점` : null,
+    vol != null ? `연 변동성 ${vol}%` : null,
+  ].filter(Boolean).join(' · ');
+  R['보증금안전'] = r.axis_safety >= 60
+    ? `${safetyBits} — 매매가가 보증금을 넉넉히, 안정적으로 받쳐줍니다(깡통전세 위험 낮음).`
+    : r.axis_safety >= 40
+      ? `${safetyBits} — 보통 수준의 보증금 안전성입니다.`
+      : `${safetyBits} — 보증금 대비 매매가 여유가 적거나 매매가가 출렁이는 편이라 보증보험 가입을 권합니다.`;
+
+  // ④ 시세 안정 — 전세가 추세 진폭
+  const tr = r.jeonse_trend_pct;
+  R['시세안정'] = tr != null
+    ? (Math.abs(tr) < 4
+        ? `최근 전세가 추세 연 ${tr >= 0 ? '+' : ''}${tr.toFixed(1)}%로 안정적 — 재계약·역전세 리스크가 작습니다.`
+        : tr >= 4
+          ? `최근 전세가가 연 +${tr.toFixed(1)}% 추세로 올라, 2년 뒤 재계약 때 인상 부담이 있을 수 있습니다.`
+          : `최근 전세가가 연 ${tr.toFixed(1)}% 추세로 내려, 역전세(보증금 반환 지연) 가능성을 확인하세요.`)
+    : '전세가 추세를 판단할 관측이 부족합니다(중립 처리).';
+
+  // ⑤ 전세 유동성 — 회전율 중심 (대단지 편향 보정)
+  const jturn = r.jeonse_turnover != null ? (r.jeonse_turnover * 100).toFixed(1) : null;
+  R['전세유동성'] = `최근 18개월 전세 ${r.jeonse_count != null ? Math.round(r.jeonse_count) : '—'}건${jturn ? ` · 연 회전율 약 ${jturn}%` : ''} — `
+    + (r.axis_liquidity >= 60 ? '규모 대비로도 매물이 꾸준히 돌아 구하기 쉽습니다.' : '거래가 잦지 않아 매물 대기가 필요할 수 있습니다.');
 
   // ── 우리 맞춤 생활 지표 ──
   R['회사통근'] = r._commute_label
     ? `우리 두 직장까지 ${r._commute_label} (합계 ${r._commute_km.toFixed(1)}km) — 통근 적합도 상위 ${pct(r.axis_commute)}%.`
     : '좌표 정보가 없어 통근 거리를 계산하지 못했습니다.';
-  R['가격합리성'] = `가성비·전세평단가·보증금안전·전세유동성 종합 ${Math.round(r.jeonse_total)}점.`;
+  R['가격합리성'] = `가성비·저렴도·보증금안전·시세안정·유동성 5개 지표 종합 ${Math.round(r.jeonse_total)}점.`;
   const stn = r.nearest_station ? `${r.nearest_station} 도보 ${r.walk_min != null ? Math.round(r.walk_min) : '?'}분` : '역 정보 없음';
   R['인프라'] = `${stn} · 교통 ${r.transit_score != null ? Math.round(r.transit_score) : '—'}점 / 학군·생활 ${r.school_score != null ? Math.round(r.school_score) : '—'}점 (인프라 종합 ${r.axis_infra}점).`;
   R['약속장소'] = r._spot_min_km != null
@@ -2339,7 +2375,7 @@ async function renderJeonseExplorer() {
         <span class="axis-name">${a.key}</span><span class="axis-weight-badge">${a.w}%</span></div>
       <p class="axis-desc">${a.desc}</p>
     </div>`).join('')
-    + `<div class="jz-axis-group-t">💰 가격 합리성 세부 4지표</div>`
+    + `<div class="jz-axis-group-t">💰 가격 합리성 세부 5지표</div>`
     + JEONSE_AXIS_META.map(a => `
     <div class="axis-card">
       <div class="axis-card-header"><span class="axis-dot" style="background:${a.color}"></span>
@@ -2414,7 +2450,7 @@ function selectJeonseDistrict(district) {
   const info = districtData.find(x => x.name === district) || {};
   const color = info.color || '#34d399';
   const lbl = jeonseModeLabel();
-  // 모드별 표시 축: fit=맞춤 4축(통근·합리성·인프라·약속장소), price=가격 4지표
+  // 모드별 표시 축: fit=맞춤 4축(통근·합리성·인프라·약속장소), price=가격 5지표
   const axisSet = jeonseMode === 'fit'
     ? FIT_AXIS_META.map(m => ({ key: m.key, color: m.color, val: a => m.get(a) }))
     : JEONSE_AXIS_META.map(m => ({ key: m.key, color: m.color, val: a => a[JEONSE_AX_KEY[m.key]] }));
