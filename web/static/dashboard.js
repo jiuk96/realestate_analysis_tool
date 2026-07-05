@@ -845,13 +845,13 @@ function renderApartmentDetail(containerId, radarId, priceChartId, apt, mddInfo,
     name: apt.apt_name
   }], {
     polar: {
-      radialaxis: { visible: true, range: [0, 100], color: '#475569', gridcolor: '#334155' },
-      angularaxis: { color: '#94a3b8' },
+      radialaxis: { visible: true, range: [0, 100], color: '#8f97a3', gridcolor: '#dfe5ec' },
+      angularaxis: { color: '#6b7684' },
       bgcolor: 'transparent'
     },
     paper_bgcolor: 'transparent',
     plot_bgcolor: 'transparent',
-    font: { color: '#e2e8f0', family: 'sans-serif', size: 12 },
+    font: { color: '#333d4b', family: 'sans-serif', size: 12 },
     margin: { t: 20, b: 20, l: 40, r: 40 },
     showlegend: false
   }, { responsive: true, displayModeBar: false });
@@ -941,25 +941,25 @@ function renderPriceChart(chartId, aptTs, mddInfo = {}) {
     traces.push({
       x: markX, y: markY, type: 'scatter', mode: 'markers+text',
       marker: { symbol: markSym, size: markSize, color: markColor,
-                line: { color: '#0f172a', width: 1.5 } },
+                line: { color: '#ffffff', width: 1.5 } },
       text: markText, textposition: markPos,
-      textfont: { size: 11, color: '#e2e8f0' },
+      textfont: { size: 11, color: '#ffffff' },
       yaxis: 'y', hoverinfo: 'skip', showlegend: false,
     });
   }
 
   Plotly.newPlot(chartId, traces, {
     // 상단 70% = 가격, 하단 18% = 거래량 (주식창 레이아웃)
-    xaxis: { color: '#94a3b8', gridcolor: 'rgba(148,163,184,.08)', anchor: 'y2',
-             showspikes: true, spikecolor: '#475569', spikethickness: 1, spikemode: 'across' },
-    yaxis: { domain: [0.30, 1], color: '#94a3b8', gridcolor: 'rgba(148,163,184,.08)',
+    xaxis: { color: '#6b7684', gridcolor: 'rgba(20,40,70,.07)', anchor: 'y2',
+             showspikes: true, spikecolor: '#8f97a3', spikethickness: 1, spikemode: 'across' },
+    yaxis: { domain: [0.30, 1], color: '#6b7684', gridcolor: 'rgba(20,40,70,.07)',
              ticksuffix: '억', fixedrange: true },
-    yaxis2: { domain: [0, 0.18], color: '#64748b', gridcolor: 'rgba(148,163,184,.05)',
-              title: { text: '거래량', font: { size: 10, color: '#64748b' } },
+    yaxis2: { domain: [0, 0.18], color: '#8f97a3', gridcolor: 'rgba(20,40,70,.05)',
+              title: { text: '거래량', font: { size: 10, color: '#8f97a3' } },
               fixedrange: true, rangemode: 'tozero' },
     paper_bgcolor: 'transparent',
-    plot_bgcolor: '#0f172a',
-    font: { color: '#e2e8f0' },
+    plot_bgcolor: '#ffffff',
+    font: { color: '#333d4b' },
     margin: { t: 24, b: 40, l: 52, r: 16 },
     showlegend: false,
     bargap: 0.35,
@@ -1588,11 +1588,11 @@ function renderBudgetChart(R) {
     values: [c.cashGift, c.family, c.loan],
     marker: { colors: ['#818cf8', '#a78bfa', '#fbbf24'] },
     textinfo: 'label+percent', textposition: 'inside', insidetextorientation: 'horizontal',
-    textfont: { color: '#0f172a', size: 11 },
+    textfont: { color: '#334155', size: 11 },
     hovertemplate: '%{customdata}: %{value:,.0f}원<extra></extra>',
   }], {
     paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
-    font: { color: '#e2e8f0' }, showlegend: false,
+    font: { color: '#333d4b' }, showlegend: false,
     margin: { t: 10, b: 10, l: 10, r: 10 },
     annotations: [{ text: `${won2eok(R.maxPrice)}`, showarrow: false, font: { size: 16, color: '#f1f5f9' } }],
   }, { responsive: true, displayModeBar: false });
@@ -2465,7 +2465,7 @@ function selectJeonseDistrict(district) {
         <details class="jz-fold"><summary>왜 이 점수인가요?</summary>${reasonList}</details>
       </div>
       <div class="rank-apt-right">
-        <div class="rank-apt-score" style="color:${sc>=70?color:'#94a3b8'}">${sc.toFixed(0)}</div>
+        <div class="rank-apt-score" style="color:${sc>=70?color:'#6b7684'}">${sc.toFixed(0)}</div>
         <div class="rank-apt-sub" style="margin-top:.1rem">${lbl}</div>
       </div>
     </div>`;
