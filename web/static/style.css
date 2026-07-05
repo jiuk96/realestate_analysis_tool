@@ -79,7 +79,8 @@ body {
   align-items: center;
   gap: 0;
   flex-wrap: wrap;
-  background: rgba(255,255,255,.04);
+  background: var(--bg-soft);
+  box-shadow: var(--shadow-sm);
   border: 1px solid var(--border);
   border-radius: var(--r);
   padding: 1.2rem 2rem;
@@ -847,9 +848,9 @@ body {
   padding: .22rem .5rem; border-radius: 8px; white-space: nowrap; text-align: center;
   box-shadow: 0 2px 8px rgba(0,0,0,.45); border: 2px solid rgba(255,255,255,.85);
 }
-.bubble-hot  { background: #f59e0b; }
-.bubble-mid  { background: var(--accent); }
-.bubble-cool { background: #64748b; color: #1f2733; }
+.bubble-hot  { background: #03a552; }
+.bubble-mid  { background: #f59e0b; }
+.bubble-cool { background: #94a3b8; color: #fff; }
 /* 가격대 색상 모드 (저가→고가 순 그라데이션) */
 .bubble-p1 { background: #34d399; }
 .bubble-p2 { background: #818cf8; }
@@ -928,9 +929,9 @@ body {
   content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);
   border: 6px solid transparent; border-bottom: 0;
 }
-.bubble-hot::after  { border-top-color: #f59e0b; }
-.bubble-mid::after  { border-top-color: var(--accent); }
-.bubble-cool::after { border-top-color: #64748b; }
+.bubble-hot::after  { border-top-color: #03a552; }
+.bubble-mid::after  { border-top-color: #f59e0b; }
+.bubble-cool::after { border-top-color: #94a3b8; }
 .bubble-p1::after { border-top-color: #34d399; }
 .bubble-p2::after { border-top-color: #818cf8; }
 .bubble-p3::after { border-top-color: #a78bfa; }

@@ -3,7 +3,7 @@
   "crash_window_end": "2023-12",
   "n_apts": 321,
   "spearman_score_vs_dd": -0.237,
-  "spearman_score_vs_ret": 0.21,
+  "spearman_score_vs_ret": 0.211,
   "axis_corr": {
     "defense": {
       "vs_dd": -0.292,
@@ -41,15 +41,15 @@
       "quintile": 3,
       "label": "중위",
       "n": 64,
-      "avg_realized_dd": -20.33,
-      "avg_total_ret": 23.62
+      "avg_realized_dd": -20.25,
+      "avg_total_ret": 24.33
     },
     {
       "quintile": 2,
       "label": "하위 20~40%",
       "n": 64,
-      "avg_realized_dd": -19.35,
-      "avg_total_ret": 13.32
+      "avg_realized_dd": -19.43,
+      "avg_total_ret": 12.61
     },
     {
       "quintile": 1,

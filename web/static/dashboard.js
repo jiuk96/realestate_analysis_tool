@@ -318,6 +318,7 @@ function renderScoring() {
   fetchJSON('/api/composite_score').then(cs => {
     const w = cs.weights || {};
     const active = axes.filter(a => w[a.key] != null).map(a => ({ ...a, weight: Math.round(w[a.key] * 100) }));
+    active.sort((a, b) => b.weight - a.weight);   // 가중치 큰 축부터 (읽는 순서 = 중요도)
     renderAxes(active.length ? active : axes.filter(a => a.key !== '교통'));
   }).catch(() => renderAxes(axes.filter(a => a.key !== '교통')));
 

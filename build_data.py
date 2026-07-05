@@ -60,6 +60,19 @@ for dist, cnt in mdd_df['district_name'].value_counts().items():
 print('=== 4. 시계열 구성 ===')
 monthly = build_monthly_median(df)
 
+# 극소표본 제외: 대표평형(59㎡) 거래가 6년간 5건 미만이면 사실상 모든 축이
+# 중립(50) 채움으로 만들어진 '유령 점수'가 된다(예: 대치팰리스 59㎡ 1건).
+# 신뢰도 배지로 가려질 수준이 아니므로 분석 대상에서 아예 제외한다.
+_MIN_REP_TRADES = 5
+_cnt = monthly.groupby(['district_name', 'apt_name'], observed=True)['trade_count'].sum()
+_ok = set(_cnt[_cnt >= _MIN_REP_TRADES].index)
+_before = len(mdd_df)
+mdd_df = mdd_df[mdd_df.apply(lambda r: (r['district_name'], r['apt_name']) in _ok, axis=1)].copy()
+monthly = monthly[monthly.apply(lambda r: (r['district_name'], r['apt_name']) in _ok, axis=1)].copy()
+_dropped = _before - len(mdd_df)
+if _dropped:
+    print(f'  대표평형 거래 {_MIN_REP_TRADES}건 미만 제외: {_dropped}개 단지 → {len(mdd_df)}개')
+
 # ── 4b. 전세가율 (전월세 데이터 있을 때만) ────────────────────
 def compute_jeonse_ratio(monthly_df):
     """data/rent/*.parquet(collect_rent.py 수집, 2020~ 전체)에서 전용 59㎡ 전세 통계.
@@ -89,8 +102,25 @@ def compute_jeonse_ratio(monthly_df):
         n0 = len(rent)
         rent = rent[rent['contractType'].fillna('') != '갱신']
         print(f'  갱신계약 제외: {n0:,} → {len(rent):,}건 (신규+미표기만 시세로 사용)')
+    # 보증금 이상치 제거: 0원(오기재)·3천만원 미만은 서울 59㎡ 전세로 비현실적 —
+    # 월 중앙값에 섞이면 전세 MDD가 -100% 같은 가짜 낙폭을 만든다.
+    n0 = len(rent)
+    rent = rent[pd.to_numeric(rent['deposit'], errors='coerce').fillna(0) >= 3000]
+    if n0 - len(rent):
+        print(f'  보증금 이상치(<3천만원) 제외: {n0 - len(rent):,}건')
     if rent.empty:
         return None
+    # 단지별 특수계약 제거: 그 단지 전체 중앙값의 절반 미만 보증금은 시장 전세가
+    # 아니라 공공지원 민간임대·보증부 특수계약이다(감사에서 7억대 단지에 9,599만원
+    # 동일가 5건 발견 — 가짜 전세 MDD -79%의 원인). 단지 자체 기준이라 진짜
+    # 하락장 낙폭(-30~40%)은 걸러지지 않는다.
+    rent['deposit'] = pd.to_numeric(rent['deposit'], errors='coerce')
+    apt_med = rent.groupby(['district_name', 'apt_name'], observed=True)['deposit'].transform('median')
+    n0 = len(rent)
+    rent = rent[rent['deposit'] >= apt_med * 0.5]
+    if n0 - len(rent):
+        print(f'  특수계약 의심(단지 중앙값 절반 미만) 제외: {n0 - len(rent):,}건')
+
     rent['ym'] = rent['deal_year'].astype(str) + rent['deal_month'].astype(str).str.zfill(2)
     all_yms = sorted(rent['ym'].unique())
 
