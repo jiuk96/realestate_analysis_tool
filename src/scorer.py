@@ -69,6 +69,7 @@ WEIGHTS_TRANSIT = {k: v for k, v in AXIS_WEIGHTS.items() if k != "jeonse"}
 
 TRANSIT_CACHE = Path(__file__).parent.parent / "data" / "static" / "apt_locations.json"
 SCHOOLS_CACHE = Path(__file__).parent.parent / "data" / "static" / "schools.json"
+ACADEMIES_CACHE = Path(__file__).parent.parent / "data" / "static" / "academies.json"
 WALK_M_PER_MIN = 67   # 성인 평균 보속 약 4km/h
 
 
@@ -540,9 +541,16 @@ def _school(mdd_df: pd.DataFrame) -> pd.DataFrame | None:
         return None
     schools = json.loads(SCHOOLS_CACHE.read_text(encoding="utf-8"))
     elem = schools.get("elementary", [])
-    academy = schools.get("academy", [])
     if not elem:
         return None
+    # 학원: 공공데이터포털 상가정보(academies.json)가 있으면 그걸 우선 사용하고
+    # (전수·좌표 정확), 없으면 OSM(schools.json academy, 커버리지 얇음)로 대체.
+    academy_src = "osm"
+    academy = schools.get("academy", [])
+    if ACADEMIES_CACHE.exists():
+        gov = json.loads(ACADEMIES_CACHE.read_text(encoding="utf-8")).get("academy", [])
+        if gov:
+            academy, academy_src = gov, "gov"
     cache = json.loads(TRANSIT_CACHE.read_text(encoding="utf-8"))
 
     elem_lat = np.array([s["lat"] for s in elem], dtype=float)
@@ -578,7 +586,8 @@ def _school(mdd_df: pd.DataFrame) -> pd.DataFrame | None:
     elem_score = _pct_rank(sk["nearest_elem_m"], low_is_good=True)        # 가까울수록 ↑
     aca_score = _pct_rank(sk["academy_within_1km"].astype(float))         # 많을수록 ↑
     sk["school_score"] = elem_score * 0.5 + aca_score * 0.5
-    log.info(f"학군 축 활성: {len(sk)}/{len(mdd_df)}개 단지 (초품아+학원가 프록시)")
+    log.info(f"학군 축 활성: {len(sk)}/{len(mdd_df)}개 단지 "
+             f"(초품아 {len(elem)}곳 + 학원 {len(academy)}곳[{academy_src}])")
     return sk[["district_name", "apt_name", "school_score", "nearest_elem_m", "academy_within_1km"]]
 
 
