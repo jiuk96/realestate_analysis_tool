@@ -740,6 +740,31 @@ body {
 .jz-axis-group-t { font-size: .8rem; font-weight: 700; color: #cbd5e1; margin: .8rem 0 .5rem; }
 .jz-axis-group-t:first-child { margin-top: 0; }
 
+/* ── 🚇 우리 회사 가는 길 (매물 상세 대중교통 안내) ────────── */
+.ct-box {
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-sm);
+  padding: .9rem 1rem; margin: .9rem 0; text-align: left;
+}
+.ct-title { font-size: .88rem; font-weight: 700; color: var(--text); margin-bottom: .6rem; }
+.ct-note { font-size: .72rem; font-weight: 500; color: var(--text3); margin-left: .4rem; }
+.ct-row { padding: .55rem 0; border-top: 1px solid var(--border); }
+.ct-row:first-of-type { border-top: none; }
+.ct-head { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+.ct-who { font-size: .84rem; font-weight: 700; color: var(--text); }
+.ct-dist { font-size: .75rem; color: var(--text3); font-variant-numeric: tabular-nums; }
+.ct-link {
+  margin-left: auto; font-size: .75rem; font-weight: 700; color: #0f172a;
+  background: var(--green); border-radius: 999px; padding: .18rem .7rem; text-decoration: none;
+}
+.ct-link:hover { filter: brightness(1.1); }
+.ct-steps { display: flex; align-items: center; flex-wrap: wrap; gap: .3rem .35rem; margin-top: .45rem; }
+.ct-step {
+  background: var(--bg-soft); border: 1px solid var(--border); border-radius: 999px;
+  padding: .16rem .6rem; font-size: .76rem; color: var(--text); white-space: nowrap;
+}
+.ct-stn { border-color: rgba(79,195,247,.4); color: #bfe9ff; }
+.ct-arrow { font-size: .7rem; color: var(--text3); white-space: nowrap; }
+
 .apt-bubble {
   background: var(--accent); color: #0f172a; font-weight: 800; font-size: .78rem;
   padding: .22rem .5rem; border-radius: 8px; white-space: nowrap; text-align: center;

@@ -133,6 +133,7 @@ async function renderMap() {
       attribution: '© OpenStreetMap contributors',
       maxZoom: 18
     }).addTo(seoulMap);
+    addWorkMarkers(seoulMap);   // 💼/💗 두 직장 항상 표시
   }
 
   const popupFor = d => {
@@ -490,6 +491,7 @@ async function renderDistrictRankings() {
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors', maxZoom: 18
   }).addTo(rankMap);
+  addWorkMarkers(rankMap);   // 💼/💗 두 직장 항상 표시
 
   document.getElementById('rankLegend').innerHTML = [
     ['bubble-hot', '60점 이상'], ['bubble-mid', '55~60점'], ['bubble-cool', '55점 미만'],
@@ -813,6 +815,8 @@ function renderApartmentDetail(containerId, radarId, priceChartId, apt, mddInfo,
       ${apt.jeonse_gap != null ? `<div class="top1-stat"><div class="ts-val">${(apt.jeonse_gap/10000).toFixed(1)}억</div><div class="ts-key">갭 (매매−전세)</div></div>` : ''}
     </div>
 
+    <div id="${containerId}Transit"></div>
+
     <div class="top1-insight">
       <div class="insight-title">왜 이 점수인가요?</div>
       <ul class="insight-list">${buildApartmentInsights(apt, comp, extraInsight)}</ul>
@@ -830,7 +834,7 @@ function renderApartmentDetail(containerId, radarId, priceChartId, apt, mddInfo,
   // 레이더 차트 렌더링
   const radarFull = [...radarVals, radarVals[0]];
   const radarFull2 = [...radarLabels, radarLabels[0]];
-  Plotly.newPlot(radarId, [{
+  try { Plotly.newPlot(radarId, [{
     type: 'scatterpolar',
     r: radarFull,
     theta: radarFull2,
@@ -851,11 +855,18 @@ function renderApartmentDetail(containerId, radarId, priceChartId, apt, mddInfo,
     margin: { t: 20, b: 20, l: 40, r: 40 },
     showlegend: false
   }, { responsive: true, displayModeBar: false });
+  } catch (e) { console.error('radar', e); }
 
   // 가격 추이 차트 (있는 경우) — 주식 차트 스타일(가격 라인 + 최고가/저점 마커 + 거래량 바)
-  if (aptTs && aptTs.monthly) {
-    renderPriceChart(priceChartId, aptTs, mddInfo);
-  }
+  // Plotly 로드 실패(CDN 장애 등)가 뒤 섹션(교통 안내)까지 막지 않도록 격리
+  try {
+    if (aptTs && aptTs.monthly) {
+      renderPriceChart(priceChartId, aptTs, mddInfo);
+    }
+  } catch (e) { console.error('price chart', e); }
+
+  // 🚇 우리 회사 가는 길 (비동기 — 지하철역 데이터 로드 후 채움)
+  fillCommuteTransit(`${containerId}Transit`, apt);
 }
 
 async function renderTop1() {
@@ -1598,6 +1609,117 @@ function drawCommuteMarker(key) {
   });
   commuteMarkers[key] = L.marker(pt, { icon }).addTo(explorerMap);
 }
+
+// 모든 지도 공용: 두 직장(💼 나 / 💗 여친) 위치를 항상 보이게 표시.
+// 탐색 지도는 위치 재지정 기능이 있어 drawCommuteMarker를 그대로 쓰고,
+// 나머지 지도(동네별·전세·구별)는 이 함수로 읽기 전용 마커만 얹는다.
+function addWorkMarkers(map) {
+  if (!map) return;
+  ['A', 'B'].forEach(key => {
+    const pt = commutePoints[key];
+    if (!pt) return;
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="work-pin">${key === 'A' ? '💼 나' : '💗 여친'}</div>`,
+      iconSize: [64, 26], iconAnchor: [32, 13],
+    });
+    L.marker(pt, { icon, interactive: false, zIndexOffset: 900 }).addTo(map);
+  });
+}
+
+/* ── 커플 대중교통 안내 (지하철역 좌표 기반) ─────────────── */
+let _stationsCache = null;
+async function loadStations() {
+  if (_stationsCache === null) {
+    try { _stationsCache = (await fetchJSON('/api/stations')).stations || []; }
+    catch { _stationsCache = []; }
+  }
+  return _stationsCache;
+}
+
+function nearestStationTo(lat, lng, stations) {
+  let best = null, bd = Infinity;
+  stations.forEach(s => {
+    const d = haversineKm(lat, lng, s.lat, s.lng);
+    if (d < bd) { bd = d; best = s; }
+  });
+  return best ? { ...best, km: bd } : null;
+}
+
+// 같은 이름 역의 모든 노선 (환승역이면 여러 개) — '01호선' → '1호선' 정리
+function stationLines(stations, name) {
+  return [...new Set(stations.filter(s => s.name === name && s.line)
+    .map(s => s.line.replace(/^0/, '')))];
+}
+
+// 네이버 지도 대중교통 길찾기 딥링크 (pathType=1 = 대중교통)
+function naverTransitUrl(fromName, fromLat, fromLng, toName, toLat, toLng) {
+  return `https://map.naver.com/index.nhn?menu=route&pathType=1`
+    + `&sname=${encodeURIComponent(fromName)}&sx=${fromLng}&sy=${fromLat}`
+    + `&ename=${encodeURIComponent(toName)}&ex=${toLng}&ey=${toLat}`;
+}
+
+// 매물 → 각자 직장 대중교통 안내 HTML을 (비동기로) 채워 넣는다.
+// 실제 노선 탐색 API 없이도: 단지 최근접역 → 직장 최근접역 + 공통 노선 여부로
+// "어느 역에서 타서 어디서 내리는지"의 뼈대를 보여주고, 정확한 경로는
+// 네이버 대중교통 길찾기 딥링크로 연결한다.
+async function fillCommuteTransit(elId, apt) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (apt.lat == null || apt.lng == null) { el.innerHTML = ''; return; }
+  const stations = await loadStations();
+  if (!stations.length) { el.innerHTML = ''; return; }
+
+  const fromSt = apt.nearest_station
+    ? { name: apt.nearest_station, walkMin: apt.walk_min != null ? Math.round(apt.walk_min) : null }
+    : (() => { const s = nearestStationTo(apt.lat, apt.lng, stations);
+               return s ? { name: s.name, walkMin: Math.round(s.km * 1000 / 67) } : null; })();
+
+  const WORKS = [
+    { key: 'A', emoji: '💼', label: '내 직장' },
+    { key: 'B', emoji: '💗', label: '여자친구 직장' },
+  ];
+  const rows = WORKS.map(w => {
+    const pt = commutePoints[w.key];
+    if (!pt) return '';
+    const toSt = nearestStationTo(pt[0], pt[1], stations);
+    const directKm = haversineKm(apt.lat, apt.lng, pt[0], pt[1]);
+    const link = naverTransitUrl(apt.apt_name, apt.lat, apt.lng, w.label, pt[0], pt[1]);
+
+    let steps;
+    if (fromSt && toSt) {
+      const fromLines = stationLines(stations, fromSt.name);
+      const toLines = stationLines(stations, toSt.name);
+      const common = fromLines.filter(l => toLines.includes(l));
+      const rideNote = fromSt.name === toSt.name
+        ? '같은 역 생활권'
+        : common.length ? `${common.join('·')} 한 번에` : '환승 1회 이상 예상';
+      const toWalk = Math.round(toSt.km * 1000 / 67);
+      steps = `
+        <span class="ct-step">🏠 단지</span><span class="ct-arrow">도보 ${fromSt.walkMin ?? '?'}분</span>
+        <span class="ct-step ct-stn">🚇 ${fromSt.name}</span><span class="ct-arrow">${rideNote}</span>
+        <span class="ct-step ct-stn">🚇 ${toSt.name}</span><span class="ct-arrow">도보 ${toWalk}분</span>
+        <span class="ct-step">${w.emoji} 직장</span>`;
+    } else {
+      steps = `<span class="ct-step">🏠 단지</span><span class="ct-arrow">직선 ${directKm.toFixed(1)}km</span><span class="ct-step">${w.emoji} 직장</span>`;
+    }
+    return `
+    <div class="ct-row">
+      <div class="ct-head">
+        <span class="ct-who">${w.emoji} ${w.label}</span>
+        <span class="ct-dist">직선 ${directKm.toFixed(1)}km</span>
+        <a class="ct-link" href="${link}" target="_blank" rel="noopener">네이버 길찾기 ↗</a>
+      </div>
+      <div class="ct-steps">${steps}</div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="ct-box">
+      <div class="ct-title">🚇 우리 회사 가는 길 <span class="ct-note">역 기준 안내 · 정확한 경로는 길찾기에서</span></div>
+      ${rows}
+    </div>`;
+}
 const eokFmt = v => v == null ? '—' : (v/10000 >= 10 ? (v/10000).toFixed(1) : (v/10000).toFixed(2)).replace(/\.?0+$/,'') + '억';
 
 async function renderExplorer() {
@@ -1844,6 +1966,7 @@ function showAptDetail(a) {
       <a class="ep-naver" href="${naverLandUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener">네이버 부동산 ↗</a>
       <a class="ep-hogang" href="${hogangnonoUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener">호갱노노 ↗</a>
     </div>
+    <div id="epTransit"></div>
     <div class="ep-trades">
       <div class="ep-trades-head">
         📋 실거래 내역 <span class="ep-trades-note">국토부 raw data</span>
@@ -1852,6 +1975,7 @@ function showAptDetail(a) {
     </div>
   `;
 
+  fillCommuteTransit('epTransit', a);   // 🚇 우리 회사 가는 길 (비동기)
   document.getElementById('epBack').addEventListener('click', showAptList);
   document.getElementById('epAskSave').addEventListener('click', () => {
     const v = document.getElementById('epAskInput').value;
@@ -2223,6 +2347,7 @@ async function renderJeonseExplorer() {
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors', maxZoom: 18
   }).addTo(jeonseMap);
+  addWorkMarkers(jeonseMap);   // 💼/💗 두 직장 항상 표시
 
   // 모드 토글 (우리 맞춤 / 가격 합리성만)
   const toggle = document.getElementById('jeonseModeToggle');

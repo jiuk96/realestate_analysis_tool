@@ -92,6 +92,16 @@ def api_backtest():
         return jsonify({})
 
 
+@app.route("/api/stations")
+def api_stations():
+    """지하철역 좌표 목록 (커플 통근 대중교통 안내용). 없으면 빈 목록."""
+    path = DATA_DIR.parent / "static" / "subway_stations.json"
+    try:
+        return jsonify({"stations": json.loads(path.read_text(encoding="utf-8"))})
+    except (FileNotFoundError, json.JSONDecodeError):
+        return jsonify({"stations": []})
+
+
 @app.route("/api/jeonse")
 def api_jeonse():
     """전세 합리성 점수 (src.jeonse_scorer 산출). 없으면 빈 dict."""
