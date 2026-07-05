@@ -115,10 +115,11 @@ def _parse_items(raw_json: dict) -> tuple[list[dict], int]:
         return [], 0
 
 
-def _collect_district_month(api_key: str, district_code: str, ym: str) -> pd.DataFrame:
-    """한 구 × 한 달치 전체 페이지 수집 후 DataFrame 반환"""
+def _collect_district_month(api_key: str, district_code: str, ym: str, force: bool = False) -> pd.DataFrame:
+    """한 구 × 한 달치 전체 페이지 수집 후 DataFrame 반환.
+    force=True면 체크포인트가 있어도 다시 받는다(최근 월의 늦은 신고 반영)."""
     save_path = _checkpoint_path(district_code, ym)
-    if save_path.exists():
+    if save_path.exists() and not force:
         return pd.read_parquet(save_path)
 
     all_items = []
@@ -205,13 +206,21 @@ def collect_all(districts: Optional[dict] = None) -> pd.DataFrame:
     districts = districts or config.DISTRICTS
     months    = _month_range(config.START_YEAR_MONTH, config.END_YEAR_MONTH)
 
+    # 실거래 신고는 계약 후 30일 이내 — 직전 2개월은 수집 시점에 미완성이라,
+    # 체크포인트가 있어도 강제로 다시 받아 늦은 신고를 반영한다.
+    from datetime import date
+    today_ym = f"{date.today().year}{date.today().month:02d}"
+    past = [m for m in months if m <= today_ym]
+    refresh = set(past[-2:])
+
     tasks = [(name, code, ym) for name, code in districts.items() for ym in months]
-    log.info(f"수집 대상: {len(districts)}개 구 × {len(months)}개월 = {len(tasks)}회 API 호출 (체크포인트 스킵 포함)")
+    log.info(f"수집 대상: {len(districts)}개 구 × {len(months)}개월 = {len(tasks)}회 API 호출 "
+             f"(체크포인트 스킵, 최근 {sorted(refresh)} 재수집 포함)")
 
     frames = []
     for name, code, ym in tqdm(tasks, desc="데이터 수집"):
         try:
-            df = _collect_district_month(api_key, code, ym)
+            df = _collect_district_month(api_key, code, ym, force=(ym in refresh))
             if not df.empty:
                 df["district_name"] = name
                 frames.append(df)

@@ -45,9 +45,16 @@ RENT_API_URL = "http://apis.data.go.kr/1613000/RTMSDataSvcAptRent/getRTMSDataSvc
 # 허용하므로 크게 잡아 요청 횟수를 1/10로 줄인다.
 RENT_PAGE_SIZE = 1000
 
-# 전세가율 계산은 최근 18개월만 사용 — 넉넉히 최근 30개월만 수집한다.
-# 25개 구 × 30개월 = 750회 (78개월 전체의 1950회 대비 ~40%).
-RENT_MONTHS_BACK = 30
+# 수집 범위: 처음엔 전세가율(최근 18개월)용으로 30개월만 받았지만, 전세 추세·
+# 변동성 분석(시세안정 축)의 창을 넓히기 위해 매매와 동일하게 2020년부터 전체를
+# 소급 수집한다. 체크포인트가 있어 이미 받은 구×월은 스킵되고, 남은 조합은
+# 시간예산 안에서 여러 실행에 나눠 채워진다(한 번에 다 못 받아도 안전).
+RENT_MONTHS_BACK = None   # None = config.START_YEAR_MONTH부터 전체
+
+# 실거래 신고는 계약 후 30일 이내라 '직전 N개월'은 수집 시점에 미완성이다.
+# 체크포인트가 "파일 있으면 스킵"이라 한 번 받은 달이 영영 안 갱신되는 구멍을
+# 막기 위해, 최근 N개월은 파일이 있어도 강제로 다시 받는다(늦은 신고 반영).
+REFRESH_RECENT_MONTHS = 2
 
 # 동시 요청 수. 국토부 API가 요청당 느려 순차로는 오래 걸린다. 과하면 429가
 # 날 수 있어 보수적으로 4로 둔다(백오프가 있어 429가 나도 실패하진 않음).
@@ -118,9 +125,9 @@ def _normalize_rent(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def _collect_rent_month(api_key: str, code: str, ym: str) -> pd.DataFrame:
+def _collect_rent_month(api_key: str, code: str, ym: str, force: bool = False) -> pd.DataFrame:
     path = RENT_DIR / f"{code}_{ym}.parquet"
-    if path.exists():
+    if path.exists() and not force:
         return pd.read_parquet(path)
 
     items, page = [], 1
@@ -193,14 +200,23 @@ def main():
                    "(전세가율 축은 다음 실행에서 다시 시도됩니다)")
         return
 
-    # 전세가율은 '최근 18개월' 전세 중앙값만 쓰므로, 2020년부터 78개월을 다 받을
-    # 필요가 없다. 넉넉히 최근 RENT_MONTHS_BACK개월만 수집해 요청 수를 1/3로 줄인다
-    # (국토부 API가 요청당 ~3~4초로 느려, 개월 수가 전체 소요시간을 좌우함).
     all_months = _month_range(config.START_YEAR_MONTH, config.END_YEAR_MONTH)
-    months = all_months[-RENT_MONTHS_BACK:]
+    months = all_months if RENT_MONTHS_BACK is None else all_months[-RENT_MONTHS_BACK:]
+
+    # 최근 N개월은 늦은 신고 반영을 위해 강제 재수집. 단, 아직 데이터가 없는 미래
+    # 월(END_YEAR_MONTH가 미래로 잡혀 있음)까지 매번 다시 두드리지 않도록,
+    # "오늘 기준 직전 N개월"만 refresh 대상으로 삼는다.
+    from datetime import date
+    today_ym = f"{date.today().year}{date.today().month:02d}"
+    past_months = [m for m in months if m <= today_ym]
+    refresh = set(past_months[-REFRESH_RECENT_MONTHS:])
+
     tasks = [(name, code, ym) for name, code in config.DISTRICTS.items() for ym in months]
-    log.info(f"전월세 수집 대상: {len(config.DISTRICTS)}개 구 × 최근 {len(months)}개월"
-             f"({months[0]}~{months[-1]}) = {len(tasks)}회 (체크포인트 스킵 포함)")
+    n_new = sum(1 for _, code, ym in tasks
+                if not (RENT_DIR / f"{code}_{ym}.parquet").exists() or ym in refresh)
+    log.info(f"전월세 수집 대상: {len(config.DISTRICTS)}개 구 × {len(months)}개월"
+             f"({months[0]}~{months[-1]}) = {len(tasks)}회 "
+             f"(이번에 받을 것 ~{n_new}회, 최근 {sorted(refresh)} 재수집 포함)")
 
     # 국토부 API가 요청당 ~3~4초로 느려 순차 처리는 750회에 ~50분이 걸린다.
     # 각 (구,월)이 서로 다른 parquet 파일을 쓰므로 스레드 안전 — 소수 동시요청으로
@@ -211,7 +227,7 @@ def main():
     done = 0
     stop = False
     with ThreadPoolExecutor(max_workers=WORKERS) as ex:
-        futs = {ex.submit(_collect_rent_month, api_key, code, ym): (name, ym)
+        futs = {ex.submit(_collect_rent_month, api_key, code, ym, ym in refresh): (name, ym)
                 for name, code, ym in tasks}
         for fut in tqdm(as_completed(futs), total=len(futs), desc="전월세 수집", miniters=25):
             name, ym = futs[fut]
