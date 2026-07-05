@@ -1452,3 +1452,81 @@ details.budget-fold .legal-hint { font-weight: 500; }
 .jr-sub-title { margin: 1.8rem 0 .8rem; font-size: 1.05rem; color: var(--text); }
 .jr-runner { cursor: pointer; transition: border-color .15s; }
 .jr-runner:hover { border-color: var(--border-strong); }
+
+
+/* ═══════════ 📱 모바일 최적화 (핸드폰 가독성) ═══════════ */
+@media (max-width: 720px) {
+  /* 내비: 더 촘촘하게 — 한 화면에 더 많은 탭이 보이게 */
+  .nav-inner { padding: 0 .8rem; }
+  .nav-link { padding: .42rem .68rem; font-size: .82rem; }
+  .nav-group { font-size: .68rem; padding: .18rem .5rem; }
+
+  /* 히어로: 통계 4개를 2×2 그리드로 (어색한 줄바꿈 제거) */
+  .hero { padding: 3rem 1.2rem 2.4rem; }
+  .hero h1 { font-size: 1.75rem; }
+  .hero-sub { font-size: .92rem; }
+  .hero-badge { font-size: .72rem; padding: .28rem .8rem; }
+  .hero-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem .4rem; padding: 1rem .8rem; }
+  .hero-stat { padding: 0; }
+  .hero-stat-val { font-size: 1.3rem; }
+  .hero-stat-div { display: none; }
+
+  /* 구 선택 칩: 세로 13줄 → 한 줄 가로 스크롤 (네이버 카테고리 패턴) */
+  .rank-district-chips {
+    flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch;
+    padding-bottom: .45rem; margin-left: -.2rem; padding-left: .2rem;
+    scrollbar-width: thin;
+  }
+  .rank-district-chips .rank-chip { flex: none; }
+
+  /* 가격 칩도 한 줄 스크롤 */
+  .price-chips { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: .3rem; }
+  .price-chips .price-chip { flex: none; }
+  .explorer-bar { padding: .7rem .8rem; }
+  .filter-bar-soft { padding: .7rem .8rem; }
+
+  /* 모드 토글(우리 맞춤/합리성 등): 줄바꿈 허용 + 살짝 축소 */
+  .legend-mode-toggle { flex-wrap: wrap; gap: .4rem; }
+  .legend-mode-btn { font-size: .78rem; padding: .34rem .7rem; }
+  .explorer-legend-bar { gap: .5rem; }
+
+  /* 커플 통근 모드 버튼들 */
+  .couple-commute-row { gap: .4rem; }
+  .commute-preset, .commute-btn { font-size: .74rem; padding: .34rem .55rem; }
+
+  /* 섹션 여백·타이틀 */
+  .section { padding: 2.4rem 0; }
+  .section-inner { padding: 0 1rem; }
+  .section-title { font-size: 1.35rem; }
+  .section-desc { font-size: .9rem; }
+
+  /* 1위 페이지: 스탯 2열, 점수 크기 조정 */
+  .top1-stats-grid { grid-template-columns: 1fr 1fr; gap: .6rem; }
+  .top1-score-big { font-size: 2.6rem; }
+  .top1-hero { padding: 1.6rem 1rem; }
+  .top1-axis-row { gap: .45rem; }
+  .top1-ax-name { font-size: .8rem; }
+
+  /* 상세 모달: 화면에 꽉 차되 여백 확보 */
+  .apt-modal-overlay { padding: .8rem .5rem; overflow-y: auto; }
+  .apt-modal { max-width: none; padding: 1rem .9rem; }
+
+  /* 지도 위 패널: 모바일에선 이미 스택 — 높이만 살짝 압축 */
+  .explorer-map { height: 340px; }
+  .explorer-panel { max-height: 440px; padding: .9rem .85rem; }
+
+  /* 목록 행 터치 타깃 확보 */
+  .rank-apt-row, .ep-list-row, .jr-apt { padding-top: .55rem; padding-bottom: .55rem; }
+
+  /* 표(실거래 내역)는 자체 가로 스크롤 */
+  .ep-trades-body { overflow-x: auto; }
+
+  /* 전세 축 미니바: 2열 정렬로 읽기 쉽게 */
+  .jz-axes { display: grid; grid-template-columns: 1fr 1fr; gap: .25rem .5rem; }
+}
+
+@media (max-width: 420px) {
+  .hero h1 { font-size: 1.55rem; }
+  .top1-stats-grid { gap: .5rem; }
+  .nav-link { font-size: .8rem; padding: .4rem .6rem; }
+}
