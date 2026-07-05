@@ -724,6 +724,8 @@ body {
 .jz-reason { font-size: .76rem; line-height: 1.55; color: #a9b6c8; margin-top: .35rem; }
 .jz-reason b { font-weight: 700; }
 .rank-apt-name { cursor: pointer; }
+.jz-axis-group-t { font-size: .8rem; font-weight: 700; color: #cbd5e1; margin: .8rem 0 .5rem; }
+.jz-axis-group-t:first-child { margin-top: 0; }
 
 .apt-bubble {
   background: #38bdf8; color: #0f172a; font-weight: 800; font-size: .78rem;

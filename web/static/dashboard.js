@@ -2034,11 +2034,85 @@ const JEONSE_AXIS_META = [
 const JEONSE_AX_KEY = { '가성비':'axis_value','전세평단가':'axis_cheap','보증금안전':'axis_safety','전세유동성':'axis_liquidity' };
 
 let jeonseMap = null, jeonseMarkers = [], jeonseByDistrict = {};
+let jeonseMode = 'fit';   // 'fit'=우리 맞춤(통근·인프라·약속장소 포함) / 'price'=가격 합리성만
+
+// 서울 주요 약속장소 (친구·데이트 자주 모이는 거점) — 접근성 축 계산용 고정 좌표
+const SEOUL_MEETING_SPOTS = [
+  { name: '강남역',   lat: 37.4979, lng: 127.0276 },
+  { name: '홍대입구', lat: 37.5572, lng: 126.9245 },
+  { name: '여의도',   lat: 37.5219, lng: 126.9245 },
+  { name: '성수',     lat: 37.5445, lng: 127.0559 },
+  { name: '잠실',     lat: 37.5133, lng: 127.1028 },
+  { name: '광화문',   lat: 37.5709, lng: 126.9788 },
+  { name: '용산·이태원', lat: 37.5349, lng: 126.9946 },
+  { name: '건대입구', lat: 37.5405, lng: 127.0700 },
+];
+
+// 우리 맞춤 적합도 축 (가중치 합 100) — 사용자 우선순위: 회사 직주근접 > 인프라 > 약속장소,
+// 가격 합리성은 전세 페이지의 기본 축이라 함께 유지.
+const FIT_AXIS_META = [
+  { key: '회사통근',   w: 30, color: '#f472b6', get: a => a.axis_commute,
+    desc: '우리 두 직장(내 직장·여자친구 직장)까지의 직선거리 합이 가까울수록 높습니다. 직장 위치는 ①지도 탐색 페이지에서 바꿀 수 있고, 그 값이 여기에도 반영됩니다.' },
+  { key: '가격합리성', w: 30, color: '#34d399', get: a => a.jeonse_total,
+    desc: '앞의 4개 전세 지표(가성비·전세평단가·보증금안전·전세유동성) 종합 점수입니다.' },
+  { key: '인프라',     w: 22, color: '#38bdf8', get: a => a.axis_infra,
+    desc: '교통(지하철 접근성·역세권)과 학군·생활편의를 합산한 인프라 점수입니다.' },
+  { key: '약속장소',   w: 18, color: '#fbbf24', get: a => a.axis_spot,
+    desc: '강남·홍대·여의도·성수·잠실·광화문·이태원·건대 등 주요 약속장소까지 평균 거리가 가까울수록(도심 접근성) 높습니다.' },
+];
+
+function jeonseScoreOf(a) { return jeonseMode === 'fit' ? (a.fit_total ?? a.jeonse_total) : a.jeonse_total; }
+function jeonseModeLabel() { return jeonseMode === 'fit' ? '적합도' : '합리성'; }
 
 function jeonseBubbleClass(v) {
-  if (v >= 70) return 'bubble-hot';   // 합리적 (초록)
+  if (v >= 70) return 'bubble-hot';   // 합리적/적합 (초록)
   if (v >= 55) return 'bubble-mid';
   return 'bubble-cool';
+}
+
+// 클라이언트 percentile-rank (0~100). lowIsGood면 낮은 값이 높은 점수.
+function pctRankClient(vals, lowIsGood) {
+  const idx = vals.map((v, i) => [v, i]).filter(x => x[0] != null && !Number.isNaN(x[0]));
+  idx.sort((a, b) => a[0] - b[0]);
+  const out = new Array(vals.length).fill(50);
+  const n = idx.length;
+  idx.forEach(([, i], rank) => {
+    let p = n > 1 ? (rank / (n - 1)) * 100 : 50;
+    out[i] = lowIsGood ? 100 - p : p;
+  });
+  return out;
+}
+
+// 생활 지표(회사 통근·인프라·약속장소)를 랭킹 전체에 계산해 각 레코드에 부여
+function computeJeonseLifestyle(ranking) {
+  const commuteKm = [], spotMeanKm = [];
+  ranking.forEach(a => {
+    const ci = (a.lat && a.lng) ? commuteInfo(a) : null;
+    a._commute_km = ci ? ci.total : null;
+    a._commute_label = ci ? ci.label : null;
+    if (a.lat && a.lng) {
+      let sum = 0, best = Infinity, bestName = '';
+      SEOUL_MEETING_SPOTS.forEach(s => {
+        const km = haversineKm(a.lat, a.lng, s.lat, s.lng);
+        sum += km;
+        if (km < best) { best = km; bestName = s.name; }
+      });
+      a._spot_mean_km = sum / SEOUL_MEETING_SPOTS.length;
+      a._spot_min_km = best; a._spot_min_name = bestName;
+    } else { a._spot_mean_km = null; a._spot_min_km = null; }
+    commuteKm.push(a._commute_km);
+    spotMeanKm.push(a._spot_mean_km);
+    // 인프라 = 교통 60% + 학군·생활 40% (이미 0~100 percentile). 결측은 중립 50.
+    const tr = a.transit_score, sc = a.school_score;
+    a.axis_infra = Math.round(((tr != null ? tr : 50) * 0.6 + (sc != null ? sc : 50) * 0.4));
+  });
+  const cScore = pctRankClient(commuteKm, true);
+  const sScore = pctRankClient(spotMeanKm, true);
+  ranking.forEach((a, i) => {
+    a.axis_commute = Math.round(cScore[i]);
+    a.axis_spot = Math.round(sScore[i]);
+    a.fit_total = +FIT_AXIS_META.reduce((s, m) => s + m.get(a) * m.w / 100, 0).toFixed(1);
+  });
 }
 
 function buildJeonseReasons(r) {
@@ -2060,6 +2134,17 @@ function buildJeonseReasons(r) {
     : '전세가율 정보가 부족합니다.';
   R['전세유동성'] = `최근 18개월 전세 ${r.jeonse_count != null ? Math.round(r.jeonse_count) : '—'}건 거래로 `
     + (r.axis_liquidity >= 60 ? '매물·시세가 투명합니다.' : '거래가 많지 않아 시세 확인에 유의하세요.');
+
+  // ── 우리 맞춤 생활 지표 ──
+  R['회사통근'] = r._commute_label
+    ? `우리 두 직장까지 ${r._commute_label} (합계 ${r._commute_km.toFixed(1)}km) — 통근 적합도 상위 ${pct(r.axis_commute)}%.`
+    : '좌표 정보가 없어 통근 거리를 계산하지 못했습니다.';
+  R['가격합리성'] = `가성비·전세평단가·보증금안전·전세유동성 종합 ${Math.round(r.jeonse_total)}점.`;
+  const stn = r.nearest_station ? `${r.nearest_station} 도보 ${r.walk_min != null ? Math.round(r.walk_min) : '?'}분` : '역 정보 없음';
+  R['인프라'] = `${stn} · 교통 ${r.transit_score != null ? Math.round(r.transit_score) : '—'}점 / 학군·생활 ${r.school_score != null ? Math.round(r.school_score) : '—'}점 (인프라 종합 ${r.axis_infra}점).`;
+  R['약속장소'] = r._spot_min_km != null
+    ? `주요 약속장소까지 평균 ${r._spot_mean_km.toFixed(1)}km, 가장 가까운 ${r._spot_min_name} ${r._spot_min_km.toFixed(1)}km — 접근성 상위 ${pct(r.axis_spot)}%.`
+    : '좌표 정보가 없어 약속장소 접근성을 계산하지 못했습니다.';
   return R;
 }
 
@@ -2069,61 +2154,94 @@ async function renderJeonseExplorer() {
   const data = await fetchJSON('/api/jeonse');
   const ranking = (data && data.ranking) || [];
 
-  // 지표 설명 렌더
-  const detail = document.getElementById('jeonseAxesDetail');
-  if (detail) detail.innerHTML = JEONSE_AXIS_META.map(a => `
-    <div class="axis-card">
-      <div class="axis-card-header">
-        <span class="axis-dot" style="background:${a.color}"></span>
-        <span class="axis-name">${a.key}</span>
-        <span class="axis-weight-badge">${a.w}%</span>
-      </div>
-      <p class="axis-desc">${a.desc}</p>
-      <div class="axis-meta"><div class="axis-metric"><b>측정 방법:</b> ${a.metric}</div></div>
-    </div>`).join('');
-
   if (!ranking.length) {
     document.getElementById('jeonseDistrictChips').innerHTML =
       `<div class="empty-state">전세 데이터가 아직 없습니다. 전월세 수집 후 표시됩니다.</div>`;
     return;
   }
 
+  // 생활 지표(회사 통근·인프라·약속장소) 계산 → 각 레코드에 fit_total 부여
+  computeJeonseLifestyle(ranking);
+
+  // 지표 설명 렌더 — 맞춤 4축(통근·합리성·인프라·약속장소) + 가격 합리성 4축
+  const detail = document.getElementById('jeonseAxesDetail');
+  if (detail) detail.innerHTML =
+    `<div class="jz-axis-group-t">🏠 우리 맞춤 적합도 (통근·인프라·약속장소 포함)</div>`
+    + FIT_AXIS_META.map(a => `
+    <div class="axis-card">
+      <div class="axis-card-header"><span class="axis-dot" style="background:${a.color}"></span>
+        <span class="axis-name">${a.key}</span><span class="axis-weight-badge">${a.w}%</span></div>
+      <p class="axis-desc">${a.desc}</p>
+    </div>`).join('')
+    + `<div class="jz-axis-group-t">💰 가격 합리성 세부 4지표</div>`
+    + JEONSE_AXIS_META.map(a => `
+    <div class="axis-card">
+      <div class="axis-card-header"><span class="axis-dot" style="background:${a.color}"></span>
+        <span class="axis-name">${a.key}</span><span class="axis-weight-badge">${a.w}%</span></div>
+      <p class="axis-desc">${a.desc}</p>
+      <div class="axis-meta"><div class="axis-metric"><b>측정 방법:</b> ${a.metric}</div></div>
+    </div>`).join('');
+
   jeonseByDistrict = {};
   ranking.forEach(r => { (jeonseByDistrict[r.district] = jeonseByDistrict[r.district] || []).push(r); });
-  Object.values(jeonseByDistrict).forEach(l => l.sort((a, b) => b.jeonse_total - a.jeonse_total));
-
-  // 구 순서: 전세 합리성 평균 높은 구 먼저 ("어디 구가 합리적인가")
-  const avg = d => jeonseByDistrict[d].reduce((s, r) => s + r.jeonse_total, 0) / jeonseByDistrict[d].length;
-  const districts = Object.keys(jeonseByDistrict).sort((a, b) => avg(b) - avg(a));
-
-  document.getElementById('jeonseDistrictChips').innerHTML = districts.map(d => {
-    const info = districtData.find(x => x.name === d) || {};
-    return `<button class="rank-chip" data-d="${d}">
-      <span class="rank-chip-ic">${info.icon || '🏙️'}</span>${d}
-      <span class="rank-chip-n">합리성 ${Math.round(avg(d))}</span>
-    </button>`;
-  }).join('');
-  document.querySelectorAll('#jeonseDistrictChips .rank-chip').forEach(btn =>
-    btn.addEventListener('click', () => selectJeonseDistrict(btn.dataset.d)));
 
   jeonseMap = L.map('jeonseMap', { center: [37.545, 126.99], zoom: 11 });
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors', maxZoom: 18
   }).addTo(jeonseMap);
 
-  document.getElementById('jeonseLegend').innerHTML = [
-    ['bubble-hot', '합리성 70+'], ['bubble-mid', '55~70'], ['bubble-cool', '55 미만'],
-  ].map(([c, l]) => `<span class="legend-chip"><span class="legend-dot ${c}"></span>${l}</span>`).join('')
-    + `<span class="legend-chip legend-hint">💡 버블 = 전세 중앙값 · 색 = 합리성 점수</span>`;
+  // 모드 토글 (우리 맞춤 / 가격 합리성만)
+  const toggle = document.getElementById('jeonseModeToggle');
+  if (toggle) toggle.querySelectorAll('.legend-mode-btn').forEach(btn =>
+    btn.addEventListener('click', () => {
+      jeonseMode = btn.dataset.mode;
+      toggle.querySelectorAll('.legend-mode-btn').forEach(b => b.classList.toggle('active', b === btn));
+      renderJeonseChips();
+      selectJeonseDistrict(jeonseCurrentDistrict);
+    }));
 
+  renderJeonseChips();
   const want = new URLSearchParams(location.search).get('d');
-  selectJeonseDistrict(districts.includes(want) ? want : districts[0]);
+  const first = jeonseChipOrder.includes(want) ? want : jeonseChipOrder[0];
+  selectJeonseDistrict(first);
+}
+
+let jeonseChipOrder = [], jeonseCurrentDistrict = null;
+
+function jeonseDistAvg(d) {
+  const l = jeonseByDistrict[d];
+  return l.reduce((s, r) => s + jeonseScoreOf(r), 0) / l.length;
+}
+
+function renderJeonseChips() {
+  jeonseChipOrder = Object.keys(jeonseByDistrict).sort((a, b) => jeonseDistAvg(b) - jeonseDistAvg(a));
+  const lbl = jeonseModeLabel();
+  document.getElementById('jeonseDistrictChips').innerHTML = jeonseChipOrder.map(d => {
+    const info = districtData.find(x => x.name === d) || {};
+    return `<button class="rank-chip${d === jeonseCurrentDistrict ? ' active' : ''}" data-d="${d}">
+      <span class="rank-chip-ic">${info.icon || '🏙️'}</span>${d}
+      <span class="rank-chip-n">${lbl} ${Math.round(jeonseDistAvg(d))}</span>
+    </button>`;
+  }).join('');
+  document.querySelectorAll('#jeonseDistrictChips .rank-chip').forEach(btn =>
+    btn.addEventListener('click', () => selectJeonseDistrict(btn.dataset.d)));
+
+  document.getElementById('jeonseLegend').innerHTML = [
+    ['bubble-hot', `${lbl} 70+`], ['bubble-mid', '55~70'], ['bubble-cool', '55 미만'],
+  ].map(([c, l]) => `<span class="legend-chip"><span class="legend-dot ${c}"></span>${l}</span>`).join('')
+    + `<span class="legend-chip legend-hint">💡 버블 = 전세 중앙값 · 색 = ${lbl} 점수</span>`;
 }
 
 function selectJeonseDistrict(district) {
-  const list = jeonseByDistrict[district] || [];
+  jeonseCurrentDistrict = district;
+  const list = [...(jeonseByDistrict[district] || [])].sort((a, b) => jeonseScoreOf(b) - jeonseScoreOf(a));
   const info = districtData.find(x => x.name === district) || {};
   const color = info.color || '#34d399';
+  const lbl = jeonseModeLabel();
+  // 모드별 표시 축: fit=맞춤 4축(통근·합리성·인프라·약속장소), price=가격 4지표
+  const axisSet = jeonseMode === 'fit'
+    ? FIT_AXIS_META.map(m => ({ key: m.key, color: m.color, val: a => m.get(a) }))
+    : JEONSE_AXIS_META.map(m => ({ key: m.key, color: m.color, val: a => a[JEONSE_AX_KEY[m.key]] }));
 
   document.querySelectorAll('#jeonseDistrictChips .rank-chip').forEach(b =>
     b.classList.toggle('active', b.dataset.d === district));
@@ -2134,7 +2252,7 @@ function selectJeonseDistrict(district) {
   coordApts.forEach(a => {
     const icon = L.divIcon({
       className: '',
-      html: `<div class="apt-bubble ${jeonseBubbleClass(a.jeonse_total)}">
+      html: `<div class="apt-bubble ${jeonseBubbleClass(jeonseScoreOf(a))}">
                <span class="apt-bubble-name">${shortName(a.apt_name)}</span>
                <span class="apt-bubble-price">${eokFmt(a.jeonse_median)}</span>
              </div>`,
@@ -2149,38 +2267,42 @@ function selectJeonseDistrict(district) {
   else if (info.center) jeonseMap.setView(info.center, 13);
   setTimeout(() => jeonseMap.invalidateSize(), 60);
 
-  const avgJ = Math.round(list.reduce((s, r) => s + r.jeonse_total, 0) / list.length);
+  const avgJ = Math.round(list.reduce((s, r) => s + jeonseScoreOf(r), 0) / list.length);
   const avgP = list.reduce((s, r) => s + (r.jeonse_median || 0), 0) / list.length;
-  document.getElementById('jeonseCount').textContent = `${district} · 전세 ${list.length}개 · 합리성 평균 ${avgJ}`;
+  document.getElementById('jeonseCount').textContent = `${district} · 전세 ${list.length}개 · ${lbl} 평균 ${avgJ}`;
 
   const rows = list.map((a, i) => {
     const R = buildJeonseReasons(a);
-    const axes = JEONSE_AXIS_META.map(m =>
-      `<span class="jz-ax"><i style="background:${m.color}"></i>${m.key} ${Math.round(a[JEONSE_AX_KEY[m.key]])}</span>`).join('');
-    const reasonList = JEONSE_AXIS_META.map(m => `<div class="jz-reason"><b style="color:${m.color}">${m.key}</b> ${R[m.key]}</div>`).join('');
+    const axes = axisSet.map(m =>
+      `<span class="jz-ax"><i style="background:${m.color}"></i>${m.key} ${Math.round(m.val(a))}</span>`).join('');
+    const reasonList = axisSet.map(m => `<div class="jz-reason"><b style="color:${m.color}">${m.key}</b> ${R[m.key]}</div>`).join('');
+    const sc = jeonseScoreOf(a);
     return `
     <div class="rank-apt-row jz-row" data-i="${i}">
       <div class="rank-apt-rank" style="${i === 0 ? `color:${color}` : ''}">${i + 1}</div>
       <div class="rank-apt-main">
         <div class="rank-apt-name">${a.apt_name}</div>
-        <div class="rank-apt-sub">전세 ${eokFmt(a.jeonse_median)} · ㎡당 ${Math.round(a.jeonse_ppm)}만 · 전세가율 ${Math.round(a.jeonse_ratio*100)}%</div>
+        <div class="rank-apt-sub">전세 ${eokFmt(a.jeonse_median)} · ㎡당 ${Math.round(a.jeonse_ppm)}만 · 전세가율 ${Math.round(a.jeonse_ratio*100)}%${a._commute_km != null ? ` · 통근합 ${a._commute_km.toFixed(1)}km` : ''}</div>
         <div class="jz-axes">${axes}</div>
         <details class="jz-fold"><summary>왜 이 점수인가요?</summary>${reasonList}</details>
       </div>
       <div class="rank-apt-right">
-        <div class="rank-apt-score" style="color:${a.jeonse_total>=70?color:'#94a3b8'}">${a.jeonse_total.toFixed(0)}</div>
-        <div class="rank-apt-sub" style="margin-top:.1rem">합리성</div>
+        <div class="rank-apt-score" style="color:${sc>=70?color:'#94a3b8'}">${sc.toFixed(0)}</div>
+        <div class="rank-apt-sub" style="margin-top:.1rem">${lbl}</div>
       </div>
     </div>`;
   }).join('');
 
+  const modeNote = jeonseMode === 'fit'
+    ? `우리 직장 통근·인프라·약속장소 접근성 + 가격 합리성 종합`
+    : `가격 합리성(가성비·전세평단가·보증금안전·전세유동성)만`;
   document.getElementById('jeonsePanel').innerHTML = `
     <div class="rank-dist-head" style="border-left:3px solid ${color}">
       <div class="rank-dist-title">${info.icon || '🏙️'} <b>${district}</b>
-        <span class="rank-dist-tag">전세 합리성 평균 ${avgJ}점</span></div>
-      <div class="rank-dist-meta">전세 중앙값 평균 ${eokFmt(avgP)} · ${list.length}개 단지</div>
+        <span class="rank-dist-tag">${lbl} 평균 ${avgJ}점</span></div>
+      <div class="rank-dist-meta">전세 중앙값 평균 ${eokFmt(avgP)} · ${list.length}개 단지 · ${modeNote}</div>
     </div>
-    <div class="ep-list-head">합리적 전세 순위 <span class="ep-list-cnt">${list.length}</span>
+    <div class="ep-list-head">${jeonseMode === 'fit' ? '우리에게 맞는 전세' : '합리적 전세'} 순위 <span class="ep-list-cnt">${list.length}</span>
       <span class="rank-list-hint">펼치면 근거 · 이름 클릭 → 상세</span></div>
     <div class="rank-apt-list">${rows}</div>
   `;

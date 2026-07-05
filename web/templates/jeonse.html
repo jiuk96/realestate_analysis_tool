@@ -7,13 +7,20 @@
     <div class="section-label">STEP 7 · 전세</div>
     <h2 class="section-title">어디 전세가 가장 합리적일까요?</h2>
     <p class="section-desc">
-      매매 종합점수처럼, 전세도 <strong>세입자 관점의 4개 지표</strong>로 "합리적인 전세"를 채점합니다.
-      구를 선택하면 그 구의 전세 단지가 <strong>합리성 점수 색상</strong>으로 지도에 표시됩니다.
+      매매 종합점수처럼 전세도 지표로 채점합니다. <strong>우리 맞춤 모드</strong>는 가격 합리성에
+      <strong>우리 두 직장까지의 통근 · 인프라 · 서울 주요 약속장소 접근성</strong>을 더해 "우리에게 맞는 전세"를 찾아줍니다.
+      직장 위치는 <a href="/">①지도 탐색</a>에서 바꾸면 여기에도 반영됩니다.
     </p>
+
+    <!-- 모드 토글: 우리 맞춤 / 가격 합리성 -->
+    <div class="legend-mode-toggle" id="jeonseModeToggle" style="margin-bottom:1rem">
+      <button class="legend-mode-btn active" data-mode="fit">🏠 우리 맞춤 (통근·인프라·약속장소)</button>
+      <button class="legend-mode-btn" data-mode="price">💰 가격 합리성만</button>
+    </div>
 
     <!-- 지표 설명 (접이식) -->
     <details class="budget-card budget-fold" style="margin-bottom:1.2rem">
-      <summary class="budget-card-title">📐 '합리적인 전세'를 어떻게 판단하나요? — 4개 지표</summary>
+      <summary class="budget-card-title">📐 어떻게 판단하나요? — 맞춤 4축 + 가격 합리성 4지표</summary>
       <div class="axes-detail" id="jeonseAxesDetail"></div>
     </details>
 

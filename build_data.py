@@ -240,7 +240,10 @@ if not jscore_df.empty:
             'axis_value', 'axis_cheap', 'axis_safety', 'axis_liquidity',
             'jeonse_median', 'jeonse_ppm', 'jeonse_ratio', 'jeonse_gap', 'jeonse_count',
             'jeonse_trend_pct', 'jeonse_ppm_district_top_pct', 'area_exclusive',
-            'build_year', 'lat', 'lng', 'dong', 'data_confidence']
+            'build_year', 'lat', 'lng', 'dong', 'data_confidence',
+            # 생활 인프라 지표(전세 맞춤 적합도 계산용) — 교통·학군·역세권
+            'transit_score', 'school_score', 'academy_within_1km', 'stations_within_1km',
+            'nearest_station', 'walk_min', 'hub_score', 'hub_min_km']
     keep = [c for c in keep if c in jscore_df.columns]
     jweights_kr = {JEONSE_AXIS_KR.get(k, k): round(v, 3) for k, v in jweights.items()}
     save('jeonse.json', {
