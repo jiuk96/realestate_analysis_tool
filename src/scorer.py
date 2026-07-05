@@ -266,7 +266,7 @@ def _jeonse_support(jeonse: pd.DataFrame | None) -> pd.DataFrame | None:
         df["jeonse_score"] = level_score
     log.info(f"전세가율 축 활성: {len(df)}개 단지")
     cols = ["district_name", "apt_name", "jeonse_score", "jeonse_ratio", "jeonse_median", "jeonse_count"]
-    for extra in ("jeonse_trend_pct", "jeonse_gap"):
+    for extra in ("jeonse_trend_pct", "jeonse_gap", "jeonse_mdd_pct", "jeonse_ratio_now_pctile"):
         if extra in df.columns:
             cols.append(extra)
     return df[cols]

@@ -45,16 +45,17 @@ log = logging.getLogger(__name__)
 
 # 지표 가중치 (합 1.0) — 하드코딩 금지 원칙에 따라 여기서만 조정
 JEONSE_WEIGHTS = {
-    "value":     0.30,   # 가성비 (거주가치 대비 전세 저렴)
-    "cheap":     0.15,   # 전세 저렴도 (서울+구내 상대가)
-    "safety":    0.25,   # 보증금 안전 (전세가율+매매 방어력+변동성)
-    "stability": 0.10,   # 시세 안정 (전세가 추세 절대값)
-    "liquidity": 0.20,   # 전세 유동성 (회전율+건수)
+    "value":     0.28,   # 가성비 (거주가치 대비 전세 저렴)
+    "cheap":     0.12,   # 전세 저렴도 (서울+구내 상대가)
+    "safety":    0.25,   # 보증금 안전 (전세가율+매매 방어력·변동성+전세 MDD)
+    "stability": 0.10,   # 시세 안정 (36개월 전세가 추세 진폭)
+    "timing":    0.10,   # 진입 타이밍 (전세가율의 역사 밴드 내 위치)
+    "liquidity": 0.15,   # 전세 유동성 (회전율+건수)
 }
 
 JEONSE_AXIS_KR = {
     "value": "가성비", "cheap": "전세저렴도", "safety": "보증금안전",
-    "stability": "시세안정", "liquidity": "전세유동성",
+    "stability": "시세안정", "timing": "진입타이밍", "liquidity": "전세유동성",
 }
 
 # 전세 데이터는 최근 18개월치 → 연환산 계수 (회전율 계산용)
@@ -108,19 +109,32 @@ def compute_jeonse_score(df: pd.DataFrame, households: pd.DataFrame | None = Non
     d["jeonse_ppm_district_top_pct"] = indist_rank.round(0)
     d["axis_cheap"] = (seoul_cheap * 0.6 + (100 - indist_rank) * 0.4).clip(0, 100)
 
-    # ── ③ 보증금 안전: 전세가율(55) + 매매 방어력(25) + 변동성(20) ─
+    # ── ③ 보증금 안전: 전세가율(45) + 매매 방어력(20) + 변동성(15)
+    #      + 전세 MDD(20, 6년간 전세가가 실제로 크게 빠진 적 있는지 — 역전세 실증) ─
     ratio_score = _pct_rank(d["jeonse_ratio"].clip(0, 1.0), low_is_good=True)
     defense = pd.to_numeric(d.get("defense_score"), errors="coerce")
     vol = pd.to_numeric(d.get("price_vol_annual"), errors="coerce")
+    # 컬럼이 아예 없으면(구버전 데이터) 결측 시리즈로 대체해 중립 처리
+    _col = lambda name: (pd.to_numeric(d[name], errors="coerce") if name in d
+                         else pd.Series(np.nan, index=d.index))
+    jmdd = _col("jeonse_mdd_pct")
+    # jeonse_mdd_pct는 음수(낙폭) — 절대값이 작을수록(전세가가 안 빠졌을수록) 안전
+    jmdd_score = _pct_rank(jmdd.abs(), low_is_good=True).fillna(50.0)
     if defense is not None and defense.notna().any():
         vol_score = _pct_rank(vol, low_is_good=True).fillna(50.0)
-        d["axis_safety"] = (ratio_score * 0.55 + defense.fillna(50.0) * 0.25 + vol_score * 0.20).clip(0, 100)
+        d["axis_safety"] = (ratio_score * 0.45 + defense.fillna(50.0) * 0.20
+                            + vol_score * 0.15 + jmdd_score * 0.20).clip(0, 100)
     else:
-        d["axis_safety"] = ratio_score
+        d["axis_safety"] = (ratio_score * 0.8 + jmdd_score * 0.2).clip(0, 100)
 
-    # ── ④ 시세 안정: 전세가 추세 |연율%| 작을수록 ─────────────
+    # ── ④ 시세 안정: 전세가 추세(최근 36개월) |연율%| 작을수록 ──
     trend = pd.to_numeric(d.get("jeonse_trend_pct"), errors="coerce")
     d["axis_stability"] = _pct_rank(trend.abs(), low_is_good=True).fillna(50.0)
+
+    # ── ④b 진입 타이밍: 현 전세가율이 그 단지 6년 역사 밴드에서 낮은
+    #      percentile일수록(역사적으로 싼 전세) 지금 들어가기 유리 ────
+    cyc = _col("jeonse_ratio_now_pctile")
+    d["axis_timing"] = _pct_rank(cyc, low_is_good=True).fillna(50.0)
 
     # ── ⑤ 전세 유동성: 회전율(60) + 건수(40) ─────────────────
     cnt = pd.to_numeric(d["jeonse_count"], errors="coerce").fillna(0)
@@ -148,6 +162,7 @@ def compute_jeonse_score(df: pd.DataFrame, households: pd.DataFrame | None = Non
         d["axis_cheap"]     * w["cheap"] +
         d["axis_safety"]    * w["safety"] +
         d["axis_stability"] * w["stability"] +
+        d["axis_timing"]    * w["timing"] +
         d["axis_liquidity"] * w["liquidity"]
     ).round(1)
 

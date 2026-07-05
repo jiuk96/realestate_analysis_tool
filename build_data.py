@@ -62,8 +62,13 @@ monthly = build_monthly_median(df)
 
 # ── 4b. 전세가율 (전월세 데이터 있을 때만) ────────────────────
 def compute_jeonse_ratio(monthly_df):
-    """data/rent/*.parquet(collect_rent.py 수집)에서 전용 59㎡ 전세가율 계산.
-    전세가율 = 최근 전세 중앙값 / 최근 매매 중앙값. 데이터 없으면 None."""
+    """data/rent/*.parquet(collect_rent.py 수집, 2020~ 전체)에서 전용 59㎡ 전세 통계.
+    - 전세가율·중앙값·건수: 최근 18개월 (최신 시세)
+    - 전세 추세: 최근 36개월 Theil-Sen (창 확대로 노이즈 축소)
+    - 전세 MDD: 전 기간(78개월) 월별 전세 중앙값의 최대 낙폭 — 역전세 실증 이력
+    - 전세가율 사이클: 현 전세가율이 그 단지 역사 밴드에서 몇 percentile인지
+      (낮을수록 역사적으로 싼 전세 = 진입 타이밍 유리)
+    데이터 없으면 None."""
     rent_dir = Path('data/rent')
     files = sorted(rent_dir.glob('*.parquet')) if rent_dir.exists() else []
     if not files:
@@ -76,60 +81,95 @@ def compute_jeonse_ratio(monthly_df):
     rent = rent[(rent.get('monthly_rent', 0).fillna(0) == 0) &
                 (rent['area_exclusive'] >= _cfg.TARGET_AREA_MIN) &
                 (rent['area_exclusive'] <= _cfg.TARGET_AREA_MAX)].copy()
+    # 갱신 계약 제외: 계약갱신(청구권)은 인상 5% 상한에 묶여 시장가를 반영하지
+    # 못한다 — 신규가와 섞이면 월 중앙값이 이중분포가 되어 전세 시세·추세·MDD가
+    # 통째로 왜곡된다(감사에서 -78% 가짜 MDD 발견). 명시적 '갱신'만 제외하고,
+    # 표기 공란(제도 도입 전 2020~21 데이터)은 유지한다.
+    if 'contractType' in rent.columns:
+        n0 = len(rent)
+        rent = rent[rent['contractType'].fillna('') != '갱신']
+        print(f'  갱신계약 제외: {n0:,} → {len(rent):,}건 (신규+미표기만 시세로 사용)')
     if rent.empty:
         return None
-    # 최근 18개월만 (전세가율은 최신 시세가 중요)
     rent['ym'] = rent['deal_year'].astype(str) + rent['deal_month'].astype(str).str.zfill(2)
-    recent_cut = sorted(rent['ym'].unique())[-18:] if rent['ym'].nunique() > 18 else rent['ym'].unique()
-    rent = rent[rent['ym'].isin(recent_cut)]
-    jeonse_med = (rent.groupby(['district_name', 'apt_name'], observed=True)['deposit']
+    all_yms = sorted(rent['ym'].unique())
+
+    # ── 최신 시세 (최근 18개월): 전세 중앙값·건수·전세가율 ──────
+    recent18 = set(all_yms[-18:])
+    recent = rent[rent['ym'].isin(recent18)]
+    jeonse_med = (recent.groupby(['district_name', 'apt_name'], observed=True)['deposit']
                   .median().rename('jeonse_median').reset_index())
-    jeonse_cnt = (rent.groupby(['district_name', 'apt_name'], observed=True)['deposit']
+    jeonse_cnt = (recent.groupby(['district_name', 'apt_name'], observed=True)['deposit']
                   .count().rename('jeonse_count').reset_index())
 
-    # 매매 최근 18개월 중앙값 (monthly는 이미 59㎡ 대표값)
     m = monthly_df.copy()
     m['ym'] = m['deal_date'].astype(str).str.replace('-', '')
     recent_m = sorted(m['ym'].unique())[-18:]
-    m = m[m['ym'].isin(recent_m)]
-    sale_med = (m.groupby(['district_name', 'apt_name'], observed=True)['median_price']
+    sale_med = (m[m['ym'].isin(recent_m)]
+                .groupby(['district_name', 'apt_name'], observed=True)['median_price']
                 .median().rename('sale_median').reset_index())
 
-    # 전세 추세: 월별 전세 중앙값 시계열의 Theil-Sen 기울기(연율화 %).
-    # 전세가가 오르는 단지는 실거주 수요가 늘고 있다는 뜻으로, 매매가의
-    # 하방을 앞으로도 받쳐줄 가능성이 높다(전세는 투기 수요가 없어 순수 실수요 신호).
+    # ── 장기 시계열 (전 기간): 월별 전세 중앙값 ────────────────
     from src.scorer import _theil_sen_slope
     import numpy as np
     jm = (rent.groupby(['district_name', 'apt_name', 'ym'], observed=True)['deposit']
           .median().reset_index().sort_values('ym'))
-    trend_rows = []
+    # 매매 월별 스무딩가 맵 (전세가율 사이클용)
+    sale_map = {(r['district_name'], r['apt_name'], r['ym']): r['smoothed_price']
+                for _, r in m.iterrows()}
+
+    trend36_cut = all_yms[-36] if len(all_yms) >= 36 else all_yms[0]
+    long_rows = []
     for (d, a), grp in jm.groupby(['district_name', 'apt_name'], observed=True):
-        if len(grp) < 4:      # 월 관측 4개 미만이면 추세 판단 보류
-            continue
-        x = np.arange(len(grp), dtype=float)
-        y = grp['deposit'].to_numpy(dtype=float)
-        slope = _theil_sen_slope(x, y)
-        mean_dep = y.mean()
-        if mean_dep > 0:
-            trend_rows.append({'district_name': d, 'apt_name': a,
-                               'jeonse_trend_pct': round(slope * 12 / mean_dep * 100, 2)})
-    trend = pd.DataFrame(trend_rows)
+        grp = grp.sort_values('ym')
+        row = {'district_name': d, 'apt_name': a,
+               'jeonse_trend_pct': np.nan, 'jeonse_mdd_pct': np.nan,
+               'jeonse_ratio_now_pctile': np.nan}
+
+        # ① 추세: 최근 36개월 창 (관측 5개월 이상)
+        w = grp[grp['ym'] >= trend36_cut]
+        if len(w) >= 5:
+            x = np.arange(len(w), dtype=float)
+            y = w['deposit'].to_numpy(dtype=float)
+            slope = _theil_sen_slope(x, y)
+            if y.mean() > 0:
+                row['jeonse_trend_pct'] = round(slope * 12 / y.mean() * 100, 2)
+
+        # ② 전세 MDD: 전 기간, 3개월 이동중앙값 스무딩 후 고점 대비 최대 낙폭.
+        #    실제로 전세가가 크게 빠진 이력 = 역전세(보증금 반환 압박)의 실증 증거.
+        if len(grp) >= 12:
+            s = grp['deposit'].rolling(3, min_periods=1).median()
+            dd = (s - s.cummax()) / s.cummax() * 100
+            row['jeonse_mdd_pct'] = round(float(dd.min()), 1)
+
+        # ③ 전세가율 사이클: 월별 (전세 중앙값 ÷ 매매 스무딩가) 시계열에서
+        #    현(최근 6개월 평균) 비율이 역사적으로 몇 percentile인지.
+        ratios = [(ym, dep / sale_map[(d, a, ym)])
+                  for ym, dep in zip(grp['ym'], grp['deposit'])
+                  if sale_map.get((d, a, ym), 0) and sale_map[(d, a, ym)] > 0]
+        if len(ratios) >= 12:
+            vals = np.array([r for _, r in ratios])
+            cur = np.mean([r for ym, r in ratios[-6:]])
+            row['jeonse_ratio_now_pctile'] = round(float((vals <= cur).mean() * 100), 0)
+
+        long_rows.append(row)
+    longstats = pd.DataFrame(long_rows)
 
     j = jeonse_med.merge(jeonse_cnt, on=['district_name', 'apt_name']) \
                   .merge(sale_med, on=['district_name', 'apt_name'], how='inner')
     j = j[(j['sale_median'] > 0) & (j['jeonse_count'] >= 2)]   # 전세 2건 이상만 신뢰
     if j.empty:
         return None
-    if not trend.empty:
-        j = j.merge(trend, on=['district_name', 'apt_name'], how='left')
-    else:
-        j['jeonse_trend_pct'] = pd.NA
+    j = j.merge(longstats, on=['district_name', 'apt_name'], how='left')
     j['jeonse_ratio'] = j['jeonse_median'] / j['sale_median']
     j['jeonse_gap'] = j['sale_median'] - j['jeonse_median']   # 갭 금액(만원) — 매매가−전세가
     n_trend = int(j['jeonse_trend_pct'].notna().sum())
-    print(f'  전세가율 계산: {len(j)}개 단지 (중앙값 {j["jeonse_ratio"].median():.1%}, 추세 산출 {n_trend}개)')
+    n_mdd = int(j['jeonse_mdd_pct'].notna().sum())
+    n_cyc = int(j['jeonse_ratio_now_pctile'].notna().sum())
+    print(f'  전세가율 계산: {len(j)}개 단지 (중앙값 {j["jeonse_ratio"].median():.1%}, '
+          f'추세36M {n_trend} · 전세MDD {n_mdd} · 사이클 {n_cyc}개)')
     return j[['district_name', 'apt_name', 'jeonse_ratio', 'jeonse_median', 'jeonse_count',
-              'jeonse_trend_pct', 'jeonse_gap']]
+              'jeonse_trend_pct', 'jeonse_gap', 'jeonse_mdd_pct', 'jeonse_ratio_now_pctile']]
 
 print('=== 4b. 전세가율 ===')
 jeonse = compute_jeonse_ratio(monthly)
@@ -237,8 +277,8 @@ if not jscore_df.empty:
         jscore_df['lng'] = jscore_df.apply(lambda r: _locget(r, 'lng'), axis=1)
         jscore_df['dong'] = jscore_df.apply(lambda r: _locget(r, 'dong'), axis=1)
     keep = ['jeonse_rank', 'district', 'apt_name', 'jeonse_total', 'composite_score',
-            'axis_value', 'axis_cheap', 'axis_safety', 'axis_stability', 'axis_liquidity',
-            'living_quality', 'jeonse_turnover',
+            'axis_value', 'axis_cheap', 'axis_safety', 'axis_stability', 'axis_timing', 'axis_liquidity',
+            'living_quality', 'jeonse_turnover', 'jeonse_mdd_pct', 'jeonse_ratio_now_pctile',
             'jeonse_median', 'jeonse_ppm', 'jeonse_ratio', 'jeonse_gap', 'jeonse_count',
             'jeonse_trend_pct', 'jeonse_ppm_district_top_pct', 'area_exclusive',
             'build_year', 'lat', 'lng', 'dong', 'data_confidence',
