@@ -40,7 +40,8 @@ _PAGES = {
     "scoring":   "scoring.html",    # ④ 점수 근거
     "districts": "districts.html",  # ⑤ 구별 소개
     "budget":    "budget.html",     # ⑥ 예산 플래너
-    "ai":        "ai.html",         # ⑦ AI 추천
+    "jeonse":    "jeonse.html",     # ⑦ 전세 합리성
+    "ai":        "ai.html",         # ⑧ AI 추천
 }
 
 
@@ -87,6 +88,15 @@ def api_backtest():
     """점수 백테스트 결과 (backtest_scores.py 산출). 없으면 빈 dict."""
     try:
         return jsonify(_load("backtest.json"))
+    except FileNotFoundError:
+        return jsonify({})
+
+
+@app.route("/api/jeonse")
+def api_jeonse():
+    """전세 합리성 점수 (src.jeonse_scorer 산출). 없으면 빈 dict."""
+    try:
+        return jsonify(_load("jeonse.json"))
     except FileNotFoundError:
         return jsonify({})
 

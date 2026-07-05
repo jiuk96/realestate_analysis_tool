@@ -2016,6 +2016,185 @@ function drawAiList() {
   moreBtn.style.display = rows.length > _aiShown ? 'inline-flex' : 'none';
 }
 
+/* ── ⑦ 전세 합리성 (구별 지도 탐색) ───────────────────────── */
+const JEONSE_AXIS_META = [
+  { key: '가성비',     w: 40, color: '#34d399',
+    desc: '입지·품질(매매 종합점수) 대비 전세 ㎡당 가격이 쌀수록 높습니다. "이 정도 입지를 이 전세금에?" — 같은 값이면 더 좋은 집.',
+    metric: '매매 종합점수 ÷ 전세 평단가 percentile' },
+  { key: '전세평단가', w: 20, color: '#38bdf8',
+    desc: '㎡당 전세금이 절대적으로 낮을수록(같은 크기를 싸게 사는 관점).',
+    metric: '㎡당 전세금 낮은 순 percentile' },
+  { key: '보증금안전', w: 20, color: '#a78bfa',
+    desc: '전세가율(전세÷매매)이 낮을수록 매매가가 전세금을 넉넉히 받쳐줘 깡통전세 위험이 작습니다. (전세가율 높은 "적은 돈으로 상급지"와는 반대 관점)',
+    metric: '전세가율 낮은 순 percentile' },
+  { key: '전세유동성', w: 20, color: '#fbbf24',
+    desc: '전세 거래가 많을수록 매물을 구하기 쉽고 시세가 투명합니다.',
+    metric: '최근 18개월 전세 거래건수 percentile' },
+];
+const JEONSE_AX_KEY = { '가성비':'axis_value','전세평단가':'axis_cheap','보증금안전':'axis_safety','전세유동성':'axis_liquidity' };
+
+let jeonseMap = null, jeonseMarkers = [], jeonseByDistrict = {};
+
+function jeonseBubbleClass(v) {
+  if (v >= 70) return 'bubble-hot';   // 합리적 (초록)
+  if (v >= 55) return 'bubble-mid';
+  return 'bubble-cool';
+}
+
+function buildJeonseReasons(r) {
+  const pct = v => v != null ? Math.round(v) : null;   // axis는 이미 "높을수록 좋음" percentile
+  const eok = v => v != null ? (v / 10000).toFixed(1) + '억' : '—';
+  const ppm = r.jeonse_ppm != null ? Math.round(r.jeonse_ppm) : null;
+  const jr = r.jeonse_ratio != null ? Math.round(r.jeonse_ratio * 100) : null;
+  const inDist = r.jeonse_ppm_district_top_pct != null ? Math.round(r.jeonse_ppm_district_top_pct) : null;
+  const R = {};
+  R['가성비'] = `매매 종합 ${Math.round(r.composite_score)}점 입지를 전세 ${eok(r.jeonse_median)}(㎡당 ${ppm}만원)에`
+    + `${inDist != null ? ` — 이 구 전세 평단가 하위 ${inDist}%` : ''}. 가성비 상위 ${pct(r.axis_value)}%.`;
+  R['전세평단가'] = `㎡당 전세금 ${ppm}만원 — 서울 분석 단지 중 전세 저렴도 상위 ${pct(r.axis_cheap)}%.`;
+  R['보증금안전'] = jr != null
+    ? (r.axis_safety >= 60
+        ? `전세가율 ${jr}%로 낮아 매매가가 보증금을 넉넉히 받쳐줍니다(깡통전세 위험 낮음).`
+        : r.axis_safety >= 40
+          ? `전세가율 ${jr}%로 보통 수준의 보증금 안전성입니다.`
+          : `전세가율 ${jr}%로 높은 편 — 보증금 대비 매매가 여유가 적어 주의가 필요합니다.`)
+    : '전세가율 정보가 부족합니다.';
+  R['전세유동성'] = `최근 18개월 전세 ${r.jeonse_count != null ? Math.round(r.jeonse_count) : '—'}건 거래로 `
+    + (r.axis_liquidity >= 60 ? '매물·시세가 투명합니다.' : '거래가 많지 않아 시세 확인에 유의하세요.');
+  return R;
+}
+
+async function renderJeonseExplorer() {
+  if (!document.getElementById('jeonseMap')) return;   // 전세 페이지 아님
+  await loadDistrictData();
+  const data = await fetchJSON('/api/jeonse');
+  const ranking = (data && data.ranking) || [];
+
+  // 지표 설명 렌더
+  const detail = document.getElementById('jeonseAxesDetail');
+  if (detail) detail.innerHTML = JEONSE_AXIS_META.map(a => `
+    <div class="axis-card">
+      <div class="axis-card-header">
+        <span class="axis-dot" style="background:${a.color}"></span>
+        <span class="axis-name">${a.key}</span>
+        <span class="axis-weight-badge">${a.w}%</span>
+      </div>
+      <p class="axis-desc">${a.desc}</p>
+      <div class="axis-meta"><div class="axis-metric"><b>측정 방법:</b> ${a.metric}</div></div>
+    </div>`).join('');
+
+  if (!ranking.length) {
+    document.getElementById('jeonseDistrictChips').innerHTML =
+      `<div class="empty-state">전세 데이터가 아직 없습니다. 전월세 수집 후 표시됩니다.</div>`;
+    return;
+  }
+
+  jeonseByDistrict = {};
+  ranking.forEach(r => { (jeonseByDistrict[r.district] = jeonseByDistrict[r.district] || []).push(r); });
+  Object.values(jeonseByDistrict).forEach(l => l.sort((a, b) => b.jeonse_total - a.jeonse_total));
+
+  // 구 순서: 전세 합리성 평균 높은 구 먼저 ("어디 구가 합리적인가")
+  const avg = d => jeonseByDistrict[d].reduce((s, r) => s + r.jeonse_total, 0) / jeonseByDistrict[d].length;
+  const districts = Object.keys(jeonseByDistrict).sort((a, b) => avg(b) - avg(a));
+
+  document.getElementById('jeonseDistrictChips').innerHTML = districts.map(d => {
+    const info = districtData.find(x => x.name === d) || {};
+    return `<button class="rank-chip" data-d="${d}">
+      <span class="rank-chip-ic">${info.icon || '🏙️'}</span>${d}
+      <span class="rank-chip-n">합리성 ${Math.round(avg(d))}</span>
+    </button>`;
+  }).join('');
+  document.querySelectorAll('#jeonseDistrictChips .rank-chip').forEach(btn =>
+    btn.addEventListener('click', () => selectJeonseDistrict(btn.dataset.d)));
+
+  jeonseMap = L.map('jeonseMap', { center: [37.545, 126.99], zoom: 11 });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors', maxZoom: 18
+  }).addTo(jeonseMap);
+
+  document.getElementById('jeonseLegend').innerHTML = [
+    ['bubble-hot', '합리성 70+'], ['bubble-mid', '55~70'], ['bubble-cool', '55 미만'],
+  ].map(([c, l]) => `<span class="legend-chip"><span class="legend-dot ${c}"></span>${l}</span>`).join('')
+    + `<span class="legend-chip legend-hint">💡 버블 = 전세 중앙값 · 색 = 합리성 점수</span>`;
+
+  const want = new URLSearchParams(location.search).get('d');
+  selectJeonseDistrict(districts.includes(want) ? want : districts[0]);
+}
+
+function selectJeonseDistrict(district) {
+  const list = jeonseByDistrict[district] || [];
+  const info = districtData.find(x => x.name === district) || {};
+  const color = info.color || '#34d399';
+
+  document.querySelectorAll('#jeonseDistrictChips .rank-chip').forEach(b =>
+    b.classList.toggle('active', b.dataset.d === district));
+
+  jeonseMarkers.forEach(m => jeonseMap.removeLayer(m));
+  jeonseMarkers = [];
+  const coordApts = list.filter(a => a.lat && a.lng);
+  coordApts.forEach(a => {
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="apt-bubble ${jeonseBubbleClass(a.jeonse_total)}">
+               <span class="apt-bubble-name">${shortName(a.apt_name)}</span>
+               <span class="apt-bubble-price">${eokFmt(a.jeonse_median)}</span>
+             </div>`,
+      iconSize: [72, 40], iconAnchor: [36, 40],
+    });
+    const m = L.marker([a.lat, a.lng], { icon });
+    m.on('click', () => openApartmentModal(a.district, a.apt_name));
+    m.addTo(jeonseMap);
+    jeonseMarkers.push(m);
+  });
+  if (coordApts.length) jeonseMap.fitBounds(L.latLngBounds(coordApts.map(a => [a.lat, a.lng])).pad(0.2));
+  else if (info.center) jeonseMap.setView(info.center, 13);
+  setTimeout(() => jeonseMap.invalidateSize(), 60);
+
+  const avgJ = Math.round(list.reduce((s, r) => s + r.jeonse_total, 0) / list.length);
+  const avgP = list.reduce((s, r) => s + (r.jeonse_median || 0), 0) / list.length;
+  document.getElementById('jeonseCount').textContent = `${district} · 전세 ${list.length}개 · 합리성 평균 ${avgJ}`;
+
+  const rows = list.map((a, i) => {
+    const R = buildJeonseReasons(a);
+    const axes = JEONSE_AXIS_META.map(m =>
+      `<span class="jz-ax"><i style="background:${m.color}"></i>${m.key} ${Math.round(a[JEONSE_AX_KEY[m.key]])}</span>`).join('');
+    const reasonList = JEONSE_AXIS_META.map(m => `<div class="jz-reason"><b style="color:${m.color}">${m.key}</b> ${R[m.key]}</div>`).join('');
+    return `
+    <div class="rank-apt-row jz-row" data-i="${i}">
+      <div class="rank-apt-rank" style="${i === 0 ? `color:${color}` : ''}">${i + 1}</div>
+      <div class="rank-apt-main">
+        <div class="rank-apt-name">${a.apt_name}</div>
+        <div class="rank-apt-sub">전세 ${eokFmt(a.jeonse_median)} · ㎡당 ${Math.round(a.jeonse_ppm)}만 · 전세가율 ${Math.round(a.jeonse_ratio*100)}%</div>
+        <div class="jz-axes">${axes}</div>
+        <details class="jz-fold"><summary>왜 이 점수인가요?</summary>${reasonList}</details>
+      </div>
+      <div class="rank-apt-right">
+        <div class="rank-apt-score" style="color:${a.jeonse_total>=70?color:'#94a3b8'}">${a.jeonse_total.toFixed(0)}</div>
+        <div class="rank-apt-sub" style="margin-top:.1rem">합리성</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('jeonsePanel').innerHTML = `
+    <div class="rank-dist-head" style="border-left:3px solid ${color}">
+      <div class="rank-dist-title">${info.icon || '🏙️'} <b>${district}</b>
+        <span class="rank-dist-tag">전세 합리성 평균 ${avgJ}점</span></div>
+      <div class="rank-dist-meta">전세 중앙값 평균 ${eokFmt(avgP)} · ${list.length}개 단지</div>
+    </div>
+    <div class="ep-list-head">합리적 전세 순위 <span class="ep-list-cnt">${list.length}</span>
+      <span class="rank-list-hint">펼치면 근거 · 이름 클릭 → 상세</span></div>
+    <div class="rank-apt-list">${rows}</div>
+  `;
+
+  document.querySelectorAll('#jeonsePanel .jz-row').forEach(el => {
+    el.querySelector('.rank-apt-name').addEventListener('click', (e) => {
+      e.stopPropagation();
+      const a = list[+el.dataset.i];
+      if (a.lat && a.lng) jeonseMap.setView([a.lat, a.lng], 15, { animate: true });
+      openApartmentModal(a.district, a.apt_name);
+    });
+  });
+}
+
 /* ── 초기화 ─────────────────────────────────────────────── */
 (async function init() {
   const safe = async (fn) => { try { await fn(); } catch (e) { console.error(fn.name, e); } };
@@ -2028,5 +2207,6 @@ function drawAiList() {
   await safe(renderDistrictRankings);
   await safe(renderTop1);
   await safe(renderAiRanking);
+  await safe(renderJeonseExplorer);
   initApartmentModal();
 })();

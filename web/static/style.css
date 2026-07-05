@@ -712,6 +712,19 @@ body {
   .rank-apt-why { white-space: normal; }
 }
 
+/* ── 전세 합리성: 축 미니바 + 근거 접이식 ─────────────────── */
+.jz-axes { display: flex; flex-wrap: wrap; gap: .3rem .6rem; margin-top: .25rem; }
+.jz-ax { display: inline-flex; align-items: center; gap: .25rem; font-size: .72rem; color: #94a3b8; font-variant-numeric: tabular-nums; }
+.jz-ax i { width: .5rem; height: .5rem; border-radius: 2px; display: inline-block; }
+.jz-fold { margin-top: .3rem; }
+.jz-fold > summary { font-size: .74rem; color: #7dd3fc; cursor: pointer; list-style: none; }
+.jz-fold > summary::-webkit-details-marker { display: none; }
+.jz-fold > summary::before { content: '＋ '; }
+.jz-fold[open] > summary::before { content: '－ '; }
+.jz-reason { font-size: .76rem; line-height: 1.55; color: #a9b6c8; margin-top: .35rem; }
+.jz-reason b { font-weight: 700; }
+.rank-apt-name { cursor: pointer; }
+
 .apt-bubble {
   background: #38bdf8; color: #0f172a; font-weight: 800; font-size: .78rem;
   padding: .22rem .5rem; border-radius: 8px; white-space: nowrap; text-align: center;

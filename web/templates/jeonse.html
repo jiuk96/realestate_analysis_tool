@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% set active_page = 'jeonse' %}
+{% block title %}전세 합리성 · 서울 부동산 분석 툴{% endblock %}
+{% block content %}
+<section class="section" id="secJeonse">
+  <div class="section-inner">
+    <div class="section-label">STEP 7 · 전세</div>
+    <h2 class="section-title">어디 전세가 가장 합리적일까요?</h2>
+    <p class="section-desc">
+      매매 종합점수처럼, 전세도 <strong>세입자 관점의 4개 지표</strong>로 "합리적인 전세"를 채점합니다.
+      구를 선택하면 그 구의 전세 단지가 <strong>합리성 점수 색상</strong>으로 지도에 표시됩니다.
+    </p>
+
+    <!-- 지표 설명 (접이식) -->
+    <details class="budget-card budget-fold" style="margin-bottom:1.2rem">
+      <summary class="budget-card-title">📐 '합리적인 전세'를 어떻게 판단하나요? — 4개 지표</summary>
+      <div class="axes-detail" id="jeonseAxesDetail"></div>
+    </details>
+
+    <!-- 구 선택 칩 (합리성 평균 높은 구 순) -->
+    <div class="rank-district-chips" id="jeonseDistrictChips">
+      <div class="skeleton" style="height:44px"></div>
+    </div>
+
+    <div class="explorer-legend-bar">
+      <div class="explorer-count" id="jeonseCount"></div>
+      <div class="explorer-legend" id="jeonseLegend"></div>
+    </div>
+
+    <div class="explorer-layout">
+      <div id="jeonseMap" class="explorer-map"></div>
+      <div id="jeonsePanel" class="explorer-panel"></div>
+    </div>
+    <p class="explorer-note">
+      ※ <strong>전용 59㎡(18평)</strong> 순수 전세 실거래 기준 · 최근 18개월 전세 중앙값(국토부).
+      ‘보증금 안전’은 낮은 전세가율(깡통전세 위험↓)에 가점하는 지표로, ‘적은 돈으로 상급지 거주’와는 반대 관점입니다.
+    </p>
+  </div>
+</section>
+{% endblock %}

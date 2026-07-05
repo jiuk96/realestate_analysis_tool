@@ -227,6 +227,30 @@ if _locpath.exists():
     score_df['lng'] = score_df.apply(lambda r: _locget(r, 'lng'), axis=1)
 save('composite_score.json', {'ranking': score_df.to_dict('records'), 'weights': weights})
 
+# jeonse.json — 전세 합리성 점수 (매매 종합점수의 전세 버전)
+from src.jeonse_scorer import compute_jeonse_score, JEONSE_AXIS_KR
+jscore_df, jweights = compute_jeonse_score(score_df)
+if not jscore_df.empty:
+    # 지도용 좌표 병합 (apt_locations 캐시)
+    if _locpath.exists():
+        jscore_df['lat'] = jscore_df.apply(lambda r: _locget(r, 'lat'), axis=1)
+        jscore_df['lng'] = jscore_df.apply(lambda r: _locget(r, 'lng'), axis=1)
+        jscore_df['dong'] = jscore_df.apply(lambda r: _locget(r, 'dong'), axis=1)
+    keep = ['jeonse_rank', 'district', 'apt_name', 'jeonse_total', 'composite_score',
+            'axis_value', 'axis_cheap', 'axis_safety', 'axis_liquidity',
+            'jeonse_median', 'jeonse_ppm', 'jeonse_ratio', 'jeonse_gap', 'jeonse_count',
+            'jeonse_trend_pct', 'jeonse_ppm_district_top_pct', 'area_exclusive',
+            'build_year', 'lat', 'lng', 'dong', 'data_confidence']
+    keep = [c for c in keep if c in jscore_df.columns]
+    jweights_kr = {JEONSE_AXIS_KR.get(k, k): round(v, 3) for k, v in jweights.items()}
+    save('jeonse.json', {
+        'ranking': jscore_df[keep].to_dict('records'),
+        'weights': jweights_kr,
+        'total_apts': len(jscore_df),
+    })
+else:
+    print('  (전세 데이터 없음 — jeonse.json 생략)')
+
 # timeseries.json
 # ⚠️ "현대"·"삼성"처럼 여러 구에 겹치는 단지명이 있어 district까지 함께 키로 써야
 # 서로 다른 단지의 시계열이 하나로 합쳐지지 않는다.
