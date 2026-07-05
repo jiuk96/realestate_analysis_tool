@@ -413,6 +413,29 @@ let _rankingRowMap = [];
 // 뿌리고, 옆 패널에 구 소개 + 단지 목록(강점 근거 포함)을 보여준다. 단지를
 // 클릭하면 전체 1위와 같은 상세 점수 모달(openApartmentModal)이 열린다.
 let rankMap = null, rankMarkers = [], rankByDistrict = {}, rankSelected = null;
+let rankPriceFilter = { min: 0, max: 9999 };   // 억 단위 (최근 실거래가 기준)
+
+// 가격 필터 바 초기화 공통 헬퍼 — 칩/직접입력을 상태에 반영하고 onChange 호출
+function initPriceFilterBar(prefix, state, onChange) {
+  const chips = document.getElementById(`${prefix}PriceChips`);
+  if (!chips) return;
+  chips.querySelectorAll('.price-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      chips.querySelectorAll('.price-chip').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(`${prefix}PriceMin`).value = '';
+      document.getElementById(`${prefix}PriceMax`).value = '';
+      state.min = +btn.dataset.min; state.max = +btn.dataset.max;
+      onChange();
+    });
+  });
+  document.getElementById(`${prefix}PriceApply`)?.addEventListener('click', () => {
+    chips.querySelectorAll('.price-chip').forEach(b => b.classList.remove('active'));
+    state.min = parseFloat(document.getElementById(`${prefix}PriceMin`).value) || 0;
+    state.max = parseFloat(document.getElementById(`${prefix}PriceMax`).value) || 9999;
+    onChange();
+  });
+}
 
 // 종합점수 색 구간(지도 탐색기 SCORE_TIERS와 동일 기준)
 function rankBubbleClass(v) {
@@ -472,6 +495,9 @@ async function renderDistrictRankings() {
     ['bubble-hot', '60점 이상'], ['bubble-mid', '55~60점'], ['bubble-cool', '55점 미만'],
   ].map(([c, l]) => `<span class="legend-chip"><span class="legend-dot ${c}"></span>${l}</span>`).join('');
 
+  // 가격 필터 (구 안에서 가격대로 좁혀보기)
+  initPriceFilterBar('rank', rankPriceFilter, () => selectRankDistrict(rankSelected));
+
   // 첫 구 자동 선택 (URL ?d=구 있으면 그 구)
   const want = new URLSearchParams(location.search).get('d');
   selectRankDistrict(districts.includes(want) ? want : districts[0]);
@@ -479,7 +505,12 @@ async function renderDistrictRankings() {
 
 function selectRankDistrict(district) {
   rankSelected = district;
-  const list = rankByDistrict[district] || [];
+  const full = rankByDistrict[district] || [];
+  const isAll = rankPriceFilter.min <= 0 && rankPriceFilter.max >= 9999;
+  const list = isAll ? full : full.filter(a => {
+    const eok = a.latest_price != null ? a.latest_price / 10000 : null;
+    return eok != null && eok >= rankPriceFilter.min && eok <= rankPriceFilter.max;
+  });
   const info = districtData.find(x => x.name === district) || {};
   const color = info.color || '#38bdf8';
 
@@ -511,7 +542,9 @@ function selectRankDistrict(district) {
   }
   setTimeout(() => rankMap.invalidateSize(), 60);
 
-  document.getElementById('rankCount').textContent = `${district} · ${list.length}개 분석`;
+  document.getElementById('rankCount').textContent = isAll
+    ? `${district} · ${list.length}개 분석`
+    : `${district} · 가격대 내 ${list.length}개 (전체 ${full.length}개)`;
 
   // 구 소개 + 단지 목록 (옆 패널)
   const avgP = info.avg_peak_price != null ? `평균 전고점 ${info.avg_peak_price}억` : '';
@@ -547,7 +580,7 @@ function selectRankDistrict(district) {
     </div>
     <div class="ep-list-head">단지 목록 <span class="ep-list-cnt">${list.length}</span>
       <span class="rank-list-hint">클릭 → 상세 점수</span></div>
-    <div class="rank-apt-list">${rows || '<div class="explorer-panel-empty">분석 단지가 없습니다</div>'}</div>
+    <div class="rank-apt-list">${rows || '<div class="explorer-panel-empty">이 가격대의 단지가 없어요.<br>필터를 넓혀보세요 🙂</div>'}</div>
   `;
 
   document.querySelectorAll('.rank-apt-row').forEach(el => {
@@ -2035,6 +2068,7 @@ const JEONSE_AX_KEY = { '가성비':'axis_value','전세평단가':'axis_cheap',
 
 let jeonseMap = null, jeonseMarkers = [], jeonseByDistrict = {};
 let jeonseMode = 'fit';   // 'fit'=우리 맞춤(통근·인프라·약속장소 포함) / 'price'=가격 합리성만
+let jeonsePriceFilter = { min: 0, max: 9999 };   // 억 단위 (전세 중앙값 기준)
 
 // 서울 주요 약속장소 (친구·데이트 자주 모이는 거점) — 접근성 축 계산용 고정 좌표
 const SEOUL_MEETING_SPOTS = [
@@ -2200,6 +2234,9 @@ async function renderJeonseExplorer() {
       selectJeonseDistrict(jeonseCurrentDistrict);
     }));
 
+  // 전세가 필터 (구 안에서 전세 예산대로 좁혀보기)
+  initPriceFilterBar('jeonse', jeonsePriceFilter, () => selectJeonseDistrict(jeonseCurrentDistrict));
+
   renderJeonseChips();
   const want = new URLSearchParams(location.search).get('d');
   const first = jeonseChipOrder.includes(want) ? want : jeonseChipOrder[0];
@@ -2234,7 +2271,13 @@ function renderJeonseChips() {
 
 function selectJeonseDistrict(district) {
   jeonseCurrentDistrict = district;
-  const list = [...(jeonseByDistrict[district] || [])].sort((a, b) => jeonseScoreOf(b) - jeonseScoreOf(a));
+  const full = jeonseByDistrict[district] || [];
+  const isAll = jeonsePriceFilter.min <= 0 && jeonsePriceFilter.max >= 9999;
+  const filtered = isAll ? full : full.filter(a => {
+    const eok = a.jeonse_median != null ? a.jeonse_median / 10000 : null;
+    return eok != null && eok >= jeonsePriceFilter.min && eok <= jeonsePriceFilter.max;
+  });
+  const list = [...filtered].sort((a, b) => jeonseScoreOf(b) - jeonseScoreOf(a));
   const info = districtData.find(x => x.name === district) || {};
   const color = info.color || '#34d399';
   const lbl = jeonseModeLabel();
@@ -2267,9 +2310,11 @@ function selectJeonseDistrict(district) {
   else if (info.center) jeonseMap.setView(info.center, 13);
   setTimeout(() => jeonseMap.invalidateSize(), 60);
 
-  const avgJ = Math.round(list.reduce((s, r) => s + jeonseScoreOf(r), 0) / list.length);
-  const avgP = list.reduce((s, r) => s + (r.jeonse_median || 0), 0) / list.length;
-  document.getElementById('jeonseCount').textContent = `${district} · 전세 ${list.length}개 · ${lbl} 평균 ${avgJ}`;
+  const avgJ = list.length ? Math.round(list.reduce((s, r) => s + jeonseScoreOf(r), 0) / list.length) : 0;
+  const avgP = list.length ? list.reduce((s, r) => s + (r.jeonse_median || 0), 0) / list.length : null;
+  document.getElementById('jeonseCount').textContent = isAll
+    ? `${district} · 전세 ${list.length}개 · ${lbl} 평균 ${avgJ}`
+    : `${district} · 전세가대 내 ${list.length}개 (전체 ${full.length}개)`;
 
   const rows = list.map((a, i) => {
     const R = buildJeonseReasons(a);
@@ -2304,7 +2349,7 @@ function selectJeonseDistrict(district) {
     </div>
     <div class="ep-list-head">${jeonseMode === 'fit' ? '우리에게 맞는 전세' : '합리적 전세'} 순위 <span class="ep-list-cnt">${list.length}</span>
       <span class="rank-list-hint">펼치면 근거 · 이름 클릭 → 상세</span></div>
-    <div class="rank-apt-list">${rows}</div>
+    <div class="rank-apt-list">${rows || '<div class="explorer-panel-empty">이 가격대의 전세 단지가 없어요.<br>필터를 넓혀보세요 🙂</div>'}</div>
   `;
 
   document.querySelectorAll('#jeonsePanel .jz-row').forEach(el => {

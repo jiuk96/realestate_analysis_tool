@@ -29,6 +29,24 @@
       <div class="skeleton" style="height:44px"></div>
     </div>
 
+    <!-- 구 내 전세가 필터 (전세 중앙값 기준) -->
+    <div class="explorer-bar filter-bar-soft">
+      <span class="filter-bar-label">💰 전세가</span>
+      <div class="price-chips" id="jeonsePriceChips">
+        <button class="price-chip active" data-min="0" data-max="9999">전체</button>
+        <button class="price-chip" data-min="0" data-max="3">3억 이하</button>
+        <button class="price-chip" data-min="3" data-max="5">3~5억</button>
+        <button class="price-chip" data-min="5" data-max="7">5~7억</button>
+        <button class="price-chip" data-min="7" data-max="9999">7억 이상</button>
+      </div>
+      <div class="price-custom">
+        <input type="number" id="jeonsePriceMin" placeholder="최소(억)" min="0" step="0.5">
+        <span class="price-tilde">~</span>
+        <input type="number" id="jeonsePriceMax" placeholder="최대(억)" min="0" step="0.5">
+        <button id="jeonsePriceApply" class="price-apply">적용</button>
+      </div>
+    </div>
+
     <div class="explorer-legend-bar">
       <div class="explorer-count" id="jeonseCount"></div>
       <div class="explorer-legend" id="jeonseLegend"></div>
