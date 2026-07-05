@@ -1531,3 +1531,22 @@ details.budget-fold .legal-hint { font-weight: 500; }
   .top1-stats-grid { gap: .5rem; }
   .nav-link { font-size: .8rem; padding: .4rem .6rem; }
 }
+
+/* ── 🎛️ 전세 맞춤 1위: 예산·가중치 설정 카드 ─────────────── */
+.jt-controls { margin-bottom: 1.4rem; }
+.jt-budget-row {
+  display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+  padding: .6rem 0 .9rem; border-bottom: 1px solid var(--border); margin-bottom: .8rem;
+}
+.jt-budget-row input[type=number] {
+  width: 92px; background: var(--bg); border: 1px solid var(--border-strong);
+  color: var(--text); border-radius: var(--r-sm); padding: .42rem .6rem; font-size: .88rem;
+}
+.jt-lbl { font-size: .86rem; font-weight: 700; color: var(--text); min-width: 6.2rem; }
+.jt-hint { font-size: .76rem; color: var(--text3); }
+.jt-sliders { display: flex; flex-direction: column; gap: .55rem; }
+.jt-slider-row { display: flex; align-items: center; gap: .7rem; }
+.jt-slider-row input[type=range] { flex: 1; accent-color: var(--accent); height: 22px; }
+.jt-pct { width: 3rem; text-align: right; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; font-size: .9rem; }
+.jt-ctrl-foot { display: flex; align-items: center; justify-content: space-between; gap: .8rem; margin-top: .9rem; flex-wrap: wrap; }
+@media (max-width: 540px) { .jt-lbl { min-width: 5.2rem; font-size: .8rem; } }

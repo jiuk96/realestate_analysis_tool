@@ -7,10 +7,43 @@
     <div class="section-label">🔑 전세 · 우리 맞춤 1위</div>
     <h2 class="section-title">우리가 구하면 좋을 전세집은?</h2>
     <p class="section-desc">
-      <strong>두 직장 통근(30%) + 가격 합리성(30%) + 인프라(22%) + 약속장소 접근성(18%)</strong>을
-      종합해 우리 둘에게 가장 맞는 전세 단지를 뽑았습니다.
-      직장 위치를 바꾸면(<a href="/">매매 지도 탐색</a>) 순위도 다시 계산됩니다.
+      <strong>예산</strong>과 <strong>지표별 가중치</strong>를 직접 설정하면, 조건에 맞춰
+      우리 둘에게 가장 맞는 전세 단지를 실시간으로 다시 뽑아줍니다.
+      직장 위치를 바꾸면(<a href="/">매매 지도 탐색</a>) 통근 점수도 다시 계산됩니다.
+      설정은 이 브라우저에 저장됩니다.
     </p>
+
+    <!-- 🎛️ 우리 조건 설정: 예산 + 가중치 -->
+    <div class="budget-card jt-controls">
+      <div class="budget-card-title">🎛️ 우리 조건 설정</div>
+
+      <div class="jt-budget-row">
+        <span class="jt-lbl">💰 전세 예산</span>
+        <input type="number" id="jtBudgetMin" placeholder="최소(억)" min="0" step="0.5">
+        <span class="price-tilde">~</span>
+        <input type="number" id="jtBudgetMax" placeholder="최대(억)" min="0" step="0.5">
+        <span class="jt-hint" id="jtBudgetHint">비워두면 전체 매물에서 추천</span>
+      </div>
+
+      <div class="jt-sliders">
+        <div class="jt-slider-row"><span class="jt-lbl">💼 회사 통근</span>
+          <input type="range" id="jtwCommute" min="0" max="50" step="5" value="30">
+          <span class="jt-pct" id="jtwCommutePct">30%</span></div>
+        <div class="jt-slider-row"><span class="jt-lbl">💰 가격 합리성</span>
+          <input type="range" id="jtwPrice" min="0" max="50" step="5" value="30">
+          <span class="jt-pct" id="jtwPricePct">30%</span></div>
+        <div class="jt-slider-row"><span class="jt-lbl">🏙️ 인프라</span>
+          <input type="range" id="jtwInfra" min="0" max="50" step="5" value="22">
+          <span class="jt-pct" id="jtwInfraPct">22%</span></div>
+        <div class="jt-slider-row"><span class="jt-lbl">🍻 약속장소</span>
+          <input type="range" id="jtwSpot" min="0" max="50" step="5" value="18">
+          <span class="jt-pct" id="jtwSpotPct">18%</span></div>
+      </div>
+      <div class="jt-ctrl-foot">
+        <span class="jt-hint">가중치는 자동으로 합 100%가 되게 비례 조정됩니다.</span>
+        <button class="commute-btn" id="jtReset">기본값 복원</button>
+      </div>
+    </div>
 
     <div id="jeonseTop1Detail">
       <div class="skeleton" style="height:420px"></div>

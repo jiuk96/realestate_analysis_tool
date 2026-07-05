@@ -2706,30 +2706,140 @@ async function renderJeonseTop1() {
   if (!ranking.length) { el.innerHTML = '<div class="empty-state">전세 데이터가 아직 없습니다.</div>'; return; }
   computeJeonseLifestyle(ranking);
   _jeonseAll = ranking;   // 전세 상세 모달 공용 캐시
-  const sorted = [...ranking].sort((a, b) => b.fit_total - a.fit_total);
+  _jtRanking = ranking;
+  initJtControls();
+  drawJeonseTop1();
+}
+
+/* 사용자 설정: 예산 + 가중치 (브라우저에 저장) */
+const JT_DEFAULT_W = { commute: 30, price: 30, infra: 22, spot: 18 };
+const JT_AXIS = [   // 슬라이더 key ↔ FIT 축 매핑
+  { k: 'commute', label: '회사통근',   color: '#f472b6', get: a => a.axis_commute },
+  { k: 'price',   label: '가격합리성', color: '#34d399', get: a => a.jeonse_total },
+  { k: 'infra',   label: '인프라',     color: '#818cf8', get: a => a.axis_infra },
+  { k: 'spot',    label: '약속장소',   color: '#fbbf24', get: a => a.axis_spot },
+];
+let _jtRanking = null;
+let jtW = { ...JT_DEFAULT_W, ...JSON.parse(localStorage.getItem('jeonseFitW_v1') || '{}') };
+let jtBudget = JSON.parse(localStorage.getItem('jeonseBudget_v1') || '{"min":null,"max":null}');
+
+function jtNormW() {   // 합 100%로 비례 정규화 (전부 0이면 기본값)
+  const sum = JT_AXIS.reduce((s, m) => s + (jtW[m.k] || 0), 0);
+  const base = sum > 0 ? jtW : JT_DEFAULT_W;
+  const bs = JT_AXIS.reduce((s, m) => s + base[m.k], 0);
+  const out = {};
+  JT_AXIS.forEach(m => out[m.k] = base[m.k] / bs);
+  return out;
+}
+
+function jtFitTotal(a, nw) {
+  return JT_AXIS.reduce((s, m) => s + (m.get(a) ?? 50) * nw[m.k], 0);
+}
+
+function initJtControls() {
+  // 저장된 값 복원
+  JT_AXIS.forEach(m => {
+    const sl = document.getElementById('jtw' + m.k[0].toUpperCase() + m.k.slice(1));
+    if (sl) sl.value = jtW[m.k];
+  });
+  if (jtBudget.min != null) document.getElementById('jtBudgetMin').value = jtBudget.min;
+  if (jtBudget.max != null) document.getElementById('jtBudgetMax').value = jtBudget.max;
+
+  const onW = () => {
+    JT_AXIS.forEach(m => {
+      const sl = document.getElementById('jtw' + m.k[0].toUpperCase() + m.k.slice(1));
+      if (sl) jtW[m.k] = +sl.value;
+    });
+    localStorage.setItem('jeonseFitW_v1', JSON.stringify(jtW));
+    drawJeonseTop1();
+  };
+  JT_AXIS.forEach(m => {
+    document.getElementById('jtw' + m.k[0].toUpperCase() + m.k.slice(1))
+      ?.addEventListener('input', onW);
+  });
+  const onB = () => {
+    const mn = parseFloat(document.getElementById('jtBudgetMin').value);
+    const mx = parseFloat(document.getElementById('jtBudgetMax').value);
+    jtBudget = { min: isNaN(mn) ? null : mn, max: isNaN(mx) ? null : mx };
+    localStorage.setItem('jeonseBudget_v1', JSON.stringify(jtBudget));
+    drawJeonseTop1();
+  };
+  document.getElementById('jtBudgetMin')?.addEventListener('change', onB);
+  document.getElementById('jtBudgetMax')?.addEventListener('change', onB);
+  document.getElementById('jtReset')?.addEventListener('click', () => {
+    jtW = { ...JT_DEFAULT_W };
+    jtBudget = { min: null, max: null };
+    localStorage.removeItem('jeonseFitW_v1');
+    localStorage.removeItem('jeonseBudget_v1');
+    document.getElementById('jtBudgetMin').value = '';
+    document.getElementById('jtBudgetMax').value = '';
+    JT_AXIS.forEach(m => {
+      const sl = document.getElementById('jtw' + m.k[0].toUpperCase() + m.k.slice(1));
+      if (sl) sl.value = JT_DEFAULT_W[m.k];
+    });
+    drawJeonseTop1();
+  });
+}
+
+function drawJeonseTop1() {
+  const el = document.getElementById('jeonseTop1Detail');
+  if (!el || !_jtRanking) return;
+  const nw = jtNormW();
+
+  // 슬라이더 옆 정규화 % 표시 갱신
+  JT_AXIS.forEach(m => {
+    const pctEl = document.getElementById('jtw' + m.k[0].toUpperCase() + m.k.slice(1) + 'Pct');
+    if (pctEl) pctEl.textContent = Math.round(nw[m.k] * 100) + '%';
+  });
+
+  // 예산 필터 (전세 중앙값 기준, 억)
+  const inBudget = a => {
+    const eok = a.jeonse_median != null ? a.jeonse_median / 10000 : null;
+    if (eok == null) return false;
+    if (jtBudget.min != null && eok < jtBudget.min) return false;
+    if (jtBudget.max != null && eok > jtBudget.max) return false;
+    return true;
+  };
+  const pool = _jtRanking.filter(inBudget);
+  const budgetLabel = (jtBudget.min != null || jtBudget.max != null)
+    ? `예산 ${jtBudget.min ?? 0}~${jtBudget.max ?? '∞'}억 내 ${pool.length}개 매물`
+    : `전체 ${pool.length}개 매물`;
+  const hintEl = document.getElementById('jtBudgetHint');
+  if (hintEl) hintEl.textContent = budgetLabel;
+
+  if (!pool.length) {
+    el.innerHTML = `<div class="empty-state">이 예산 범위의 전세 매물이 없어요.<br>범위를 넓혀보세요 🙂</div>`;
+    const run0 = document.getElementById('jeonseTop1Runners');
+    if (run0) run0.innerHTML = '';
+    return;
+  }
+
+  const sorted = [...pool].sort((a, b) => jtFitTotal(b, nw) - jtFitTotal(a, nw));
   const w = sorted[0];
+  const wScore = jtFitTotal(w, nw);
   const R = buildJeonseReasons(w);
 
-  const axesHtml = FIT_AXIS_META.map(m => {
+  const axesHtml = JT_AXIS.map(m => {
+    const meta = FIT_AXIS_META.find(x => x.key === m.label) || {};
     const v = m.get(w) ?? 0;
     return `
     <div class="top1-ax-group">
       <div class="top1-axis-row">
         <span class="top1-ax-dot" style="background:${m.color}"></span>
-        <span class="top1-ax-name">${m.key} <small style="color:var(--text3)">${m.w}%</small></span>
+        <span class="top1-ax-name">${m.label} <small style="color:var(--text3)">${Math.round(nw[m.k] * 100)}%</small></span>
         <div class="top1-ax-bar"><div class="top1-ax-fill" style="width:${Math.min(100, v)}%;background:${m.color}"></div></div>
         <span class="top1-ax-val">${v.toFixed(0)}</span>
       </div>
-      <div class="top1-ax-reason">${R[m.key] || ''}</div>
+      <div class="top1-ax-reason">${R[m.label] || meta.desc || ''}</div>
     </div>`;
   }).join('');
 
   el.innerHTML = `
     <div class="top1-hero">
-      <div class="top1-badge">🔑 우리 맞춤 전세 1위</div>
+      <div class="top1-badge">🔑 우리 맞춤 전세 1위 · ${budgetLabel}</div>
       <h3 class="top1-name">${w.apt_name}</h3>
       <div class="top1-loc">${w.district} · ${w.build_year || '—'}년 준공 · 전용 ${Math.round(w.area_exclusive || 0)}㎡</div>
-      <div class="top1-score-big">${w.fit_total.toFixed(1)}<span class="top1-score-unit">점</span></div>
+      <div class="top1-score-big">${wScore.toFixed(1)}<span class="top1-score-unit">점</span></div>
       <div class="ep-links" style="justify-content:center;margin-top:.8rem">
         <a class="ep-map" href="${naverMapUrl(w.district, w.apt_name, w.dong, w.lat, w.lng)}" target="_blank" rel="noopener">네이버 지도 ↗</a>
         <a class="ep-naver" href="${naverLandUrl(w.district, w.apt_name, w.dong, w.lat, w.lng)}" target="_blank" rel="noopener">네이버 부동산 ↗</a>
@@ -2746,7 +2856,7 @@ async function renderJeonseTop1() {
     <div id="jeonseTop1Transit"></div>`;
   fillCommuteTransit('jeonseTop1Transit', w);   // 🚇 우리 회사 가는 길
 
-  // 2~5위 후보
+  // 2~5위 후보 (같은 조건 기준)
   const run = document.getElementById('jeonseTop1Runners');
   if (run) {
     run.innerHTML = sorted.slice(1, 5).map((a, i) => {
@@ -2756,7 +2866,7 @@ async function renderJeonseTop1() {
         <div class="jr-head">
           <span class="jr-rank">${i + 2}</span>
           <span class="jr-name">${a.apt_name}</span>
-          <span class="jr-score">${a.fit_total.toFixed(0)}<small>점</small></span>
+          <span class="jr-score">${jtFitTotal(a, nw).toFixed(0)}<small>점</small></span>
         </div>
         <div class="jr-meta">${info.icon || ''} ${a.district} · 전세 ${eokFmt(a.jeonse_median)} · 통근합 ${a._commute_km != null ? a._commute_km.toFixed(1) + 'km' : '—'}</div>
       </div>`;
