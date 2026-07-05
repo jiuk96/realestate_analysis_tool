@@ -2022,6 +2022,92 @@ function showAptDetail(a) {
 }
 
 /* ── 네비게이션 활성화 ──────────────────────────────────── */
+/* ── 전세 전용 상세 모달 ──────────────────────────────────
+   전세는 소유가 아니라 거주다 — 재건축 잠재력·상승참여·모멘텀 같은
+   소유자(투자) 관점 축은 세입자 판단과 무관하므로 보여주지 않는다.
+   전세 6축 + 우리 맞춤 4축 + 통근 안내만 표시. */
+let _jeonseAll = null;
+
+async function ensureJeonseData() {
+  if (_jeonseAll) return _jeonseAll;
+  const data = await fetchJSON('/api/jeonse');
+  const ranking = (data && data.ranking) || [];
+  if (ranking.length) computeJeonseLifestyle(ranking);
+  _jeonseAll = ranking;
+  return ranking;
+}
+
+async function openJeonseModal(district, aptName) {
+  const overlay = document.getElementById('aptModalOverlay');
+  const body = document.getElementById('aptModalBody');
+  if (!overlay || !body) return;
+  body.innerHTML = `<div class="skeleton" style="height:400px"></div>`;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+
+  const list = await ensureJeonseData();
+  const a = list.find(r => r.district === district && r.apt_name === aptName);
+  if (!a) {   // 전세 데이터 없는 단지는 기존 매매 상세로 대체
+    openApartmentModal(district, aptName);
+    return;
+  }
+  const R = buildJeonseReasons(a);
+  const axGroup = (metaList, getVal) => metaList.map(m => {
+    const v = getVal(m) ?? 0;
+    return `
+    <div class="top1-ax-group">
+      <div class="top1-axis-row">
+        <span class="top1-ax-dot" style="background:${m.color}"></span>
+        <span class="top1-ax-name">${m.key} <small style="color:var(--text3)">${m.w}%</small></span>
+        <div class="top1-ax-bar"><div class="top1-ax-fill" style="width:${Math.min(100, v)}%;background:${m.color}"></div></div>
+        <span class="top1-ax-val">${v.toFixed(0)}</span>
+      </div>
+      ${R[m.key] ? `<div class="top1-ax-reason">${R[m.key]}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  const eokv = v => v != null ? eokFmt(v) : '—';
+  body.innerHTML = `
+    <div class="top1-hero">
+      <div class="top1-badge">🔑 전세 상세 — 세입자 관점</div>
+      <h3 class="top1-name">${a.apt_name}</h3>
+      <div class="top1-loc">${a.district} · ${a.build_year || '—'}년 준공 · 전용 ${Math.round(a.area_exclusive || 0)}㎡</div>
+      <div class="top1-score-big">${(a.fit_total ?? a.jeonse_total).toFixed(1)}<span class="top1-score-unit">점</span></div>
+      <div class="top1-loc" style="margin-top:.2rem">우리 맞춤 적합도 (가격 합리성 ${Math.round(a.jeonse_total)}점 포함)</div>
+      <div class="ep-links" style="justify-content:center;margin-top:.8rem">
+        <a class="ep-map" href="${naverMapUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener">네이버 지도 ↗</a>
+        <a class="ep-naver" href="${naverLandUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener">네이버 부동산 ↗</a>
+        <a class="ep-hogang" href="${hogangnonoUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener">호갱노노 ↗</a>
+      </div>
+    </div>
+
+    <div class="top1-stats-grid">
+      <div class="top1-stat"><div class="ts-val">${eokv(a.jeonse_median)}</div><div class="ts-key">전세 중앙값</div></div>
+      <div class="top1-stat"><div class="ts-val">${a.jeonse_ratio != null ? Math.round(a.jeonse_ratio * 100) + '%' : '—'}</div><div class="ts-key">전세가율</div></div>
+      <div class="top1-stat"><div class="ts-val">${eokv(a.jeonse_gap)}</div><div class="ts-key">갭 (매매−전세)</div></div>
+      <div class="top1-stat"><div class="ts-val">${a._commute_km != null ? a._commute_km.toFixed(1) + 'km' : '—'}</div><div class="ts-key">두 직장 통근 합</div></div>
+    </div>
+
+    <div class="jz-axis-group-t">🏠 우리 맞춤 4축 (통근·합리성·인프라·약속장소)</div>
+    <div class="top1-axes">${axGroup(FIT_AXIS_META, m => m.get(a))}</div>
+
+    <div class="jz-axis-group-t" style="margin-top:1.2rem">💰 가격 합리성 세부 6지표</div>
+    <div class="top1-axes">${axGroup(JEONSE_AXIS_META, m => a[JEONSE_AX_KEY[m.key]])}</div>
+
+    <div id="jzModalTransit"></div>
+
+    <p class="explorer-note" style="margin-top:1rem">
+      ※ 전세는 소유가 아닌 거주라, 재건축 잠재력·상승참여도 같은 <b>투자 관점 지표는 표시하지 않습니다</b>.
+      <a href="#" id="jzToBuyView" style="color:var(--acc2)">매매(투자) 관점 상세 보기 →</a>
+    </p>`;
+
+  fillCommuteTransit('jzModalTransit', a);
+  document.getElementById('jzToBuyView')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openApartmentModal(district, aptName);
+  });
+}
+
 /* ── 동네별 추천 단지 상세 모달 ────────────────────────────── */
 // "동네별 추천 단지" 목록의 아무 행이나 클릭하면 전체 1위와 같은 형식(레이더+축별
 // 점수+통계+근거)으로 그 단지의 상세 점수를 모달로 보여준다.
@@ -2379,6 +2465,7 @@ async function renderJeonseExplorer() {
 
   // 생활 지표(회사 통근·인프라·약속장소) 계산 → 각 레코드에 fit_total 부여
   computeJeonseLifestyle(ranking);
+  _jeonseAll = ranking;   // 전세 상세 모달 공용 캐시
 
   // 지표 설명 렌더 — 맞춤 4축(통근·합리성·인프라·약속장소) + 가격 합리성 4축
   const detail = document.getElementById('jeonseAxesDetail');
@@ -2486,7 +2573,7 @@ function selectJeonseDistrict(district) {
       iconSize: [72, 40], iconAnchor: [36, 40],
     });
     const m = L.marker([a.lat, a.lng], { icon });
-    m.on('click', () => openApartmentModal(a.district, a.apt_name));
+    m.on('click', () => openJeonseModal(a.district, a.apt_name));
     m.addTo(jeonseMap);
     jeonseMarkers.push(m);
   });
@@ -2541,7 +2628,7 @@ function selectJeonseDistrict(district) {
       e.stopPropagation();
       const a = list[+el.dataset.i];
       if (a.lat && a.lng) jeonseMap.setView([a.lat, a.lng], 15, { animate: true });
-      openApartmentModal(a.district, a.apt_name);
+      openJeonseModal(a.district, a.apt_name);
     });
   });
 }
@@ -2558,6 +2645,7 @@ async function renderJeonseRankings() {
   if (!ranking.length) { el.innerHTML = '<div class="empty-state">전세 데이터가 아직 없습니다.</div>'; return; }
   computeJeonseLifestyle(ranking);   // 통근·인프라·약속장소 → fit_total
   _jrData = ranking;
+  _jeonseAll = ranking;   // 전세 상세 모달 공용 캐시
 
   document.querySelectorAll('#jrModeToggle .legend-mode-btn').forEach(btn =>
     btn.addEventListener('click', () => {
@@ -2604,7 +2692,7 @@ function drawJeonseRankList() {
     </div>`;
   }).join('');
   el.querySelectorAll('.jr-apt').forEach(x =>
-    x.addEventListener('click', () => openApartmentModal(x.dataset.d, decodeURIComponent(x.dataset.a))));
+    x.addEventListener('click', () => openJeonseModal(x.dataset.d, decodeURIComponent(x.dataset.a))));
 }
 
 /* ── 전세 · 우리 맞춤 1위 (매매 '전체 1위'의 전세 대칭 페이지) ── */
@@ -2616,6 +2704,7 @@ async function renderJeonseTop1() {
   const ranking = (data && data.ranking) || [];
   if (!ranking.length) { el.innerHTML = '<div class="empty-state">전세 데이터가 아직 없습니다.</div>'; return; }
   computeJeonseLifestyle(ranking);
+  _jeonseAll = ranking;   // 전세 상세 모달 공용 캐시
   const sorted = [...ranking].sort((a, b) => b.fit_total - a.fit_total);
   const w = sorted[0];
   const R = buildJeonseReasons(w);
@@ -2672,7 +2761,7 @@ async function renderJeonseTop1() {
       </div>`;
     }).join('');
     run.querySelectorAll('.jr-runner').forEach(x =>
-      x.addEventListener('click', () => openApartmentModal(x.dataset.d, decodeURIComponent(x.dataset.a))));
+      x.addEventListener('click', () => openJeonseModal(x.dataset.d, decodeURIComponent(x.dataset.a))));
   }
 }
 
