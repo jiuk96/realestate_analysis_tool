@@ -1935,8 +1935,12 @@ function showAptDetail(a) {
   ].filter(x => x[1] != null);
   const best = [...axes].sort((x,y) => y[1]-x[1]).slice(0,2);
 
-  document.getElementById('explorerPanel').innerHTML = `
-    <button class="ep-back" id="epBack">← 목록으로</button>
+  // 네이버부동산식: 목록은 그대로 두고, 옆 플로팅 카드(explorerDetail)에 상세를 연다.
+  // (해당 요소가 없는 구버전 페이지에서는 기존처럼 목록 패널을 대체)
+  const detailPanel = document.getElementById('explorerDetail');
+  const targetEl = detailPanel || document.getElementById('explorerPanel');
+  targetEl.innerHTML = `
+    ${detailPanel ? '<button class="mpd-close" id="epBack" title="닫기">✕</button>' : '<button class="ep-back" id="epBack">← 목록으로</button>'}
     <div class="ep-head">
       <div class="ep-name">${a.apt_name}</div>
       <div class="ep-loc">${a.district} · ${a.build_year}년 준공 · 전용 ${Math.round(a.area_exclusive)}㎡ · 종합 ${a.rank}위</div>
@@ -1975,8 +1979,12 @@ function showAptDetail(a) {
     </div>
   `;
 
+  if (detailPanel) detailPanel.style.display = 'block';
   fillCommuteTransit('epTransit', a);   // 🚇 우리 회사 가는 길 (비동기)
-  document.getElementById('epBack').addEventListener('click', showAptList);
+  document.getElementById('epBack').addEventListener('click', () => {
+    if (detailPanel) detailPanel.style.display = 'none';
+    else showAptList();
+  });
   document.getElementById('epAskSave').addEventListener('click', () => {
     const v = document.getElementById('epAskInput').value;
     if (v) localStorage.setItem(askKey(a), v);

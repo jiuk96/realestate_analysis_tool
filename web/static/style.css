@@ -662,19 +662,86 @@ body {
   font-size: .85rem; font-weight: 700; color: var(--text2); white-space: nowrap;
 }
 
-.explorer-layout { display: grid; grid-template-columns: 1fr 340px; gap: 1rem; }
+/* ── 네이버부동산 스타일: 지도가 전체를 채우고 패널이 지도 위에 뜬다 ── */
+.explorer-layout { position: relative; display: block; height: 680px; }
 .explorer-map {
-  height: 560px; border-radius: 14px; border: 1px solid var(--border);
+  position: absolute; inset: 0; height: 100%;
+  border-radius: var(--r); border: 1px solid var(--border);
   background: var(--bg); z-index: 0;
 }
+/* 좌측 줌 컨트롤이 목록 패널에 가리지 않게 우측으로 이동 */
+.explorer-map .leaflet-left { left: auto; right: 12px; }
+.explorer-map .leaflet-left .leaflet-control { margin-left: 0; margin-right: 10px; }
+
+/* 목록 패널: 지도 좌측 위 플로팅 (밝은 카드 — 밝은 지도 타일과 톤 일치) */
 .explorer-panel {
-  background: var(--bg2); border: 1px solid var(--border); border-radius: 14px;
-  padding: 1.2rem; max-height: 560px; overflow-y: auto;
+  position: absolute; top: 14px; left: 14px; bottom: 14px; width: 350px;
+  z-index: 900; overflow-y: auto;
+  background: #fff; color: #333; border: none; border-radius: 14px;
+  box-shadow: 0 4px 24px rgba(0,0,0,.20);
+  padding: 1.1rem 1.15rem;
+}
+/* 상세 패널: 목록 옆 두 번째 플로팅 카드 (탐색 페이지) */
+.map-panel-detail {
+  position: absolute; top: 14px; left: 380px; bottom: 14px; width: 430px;
+  z-index: 910; overflow-y: auto; display: none;
+  background: #fff; color: #333; border-radius: 14px;
+  box-shadow: 0 6px 28px rgba(0,0,0,.25);
+  padding: 1.1rem 1.2rem;
 }
 .explorer-panel-empty {
   display: flex; align-items: center; justify-content: center; height: 100%;
-  color: #64748b; text-align: center; line-height: 1.7; font-size: .92rem;
+  color: #8a94a3; text-align: center; line-height: 1.7; font-size: .92rem;
 }
+
+/* ── 플로팅 패널 내부 라이트 스킨 (네이버 톤: 흰 배경·짙은 글씨·그린 포인트) ── */
+.explorer-panel, .map-panel-detail { font-size: .92rem; }
+.explorer-panel :is(.ep-list-head, .ep-name, .ep-list-name, .rank-apt-name, .rank-dist-title, .rank-dist-title b, .ct-title, .ct-who, .ep-trades-head, .ep-ask-label),
+.map-panel-detail :is(.ep-list-head, .ep-name, .ep-list-name, .rank-apt-name, .rank-dist-title, .rank-dist-title b, .ct-title, .ct-who, .ep-trades-head, .ep-ask-label) { color: #111; }
+.explorer-panel :is(.ep-list-sub, .ep-loc, .rank-apt-sub, .rank-dist-tag, .rank-list-hint, .ct-note, .ct-dist, .ct-arrow, .epk, .ep-trades-note),
+.map-panel-detail :is(.ep-list-sub, .ep-loc, .rank-apt-sub, .rank-dist-tag, .rank-list-hint, .ct-note, .ct-dist, .ct-arrow, .epk, .ep-trades-note) { color: #8a8a8a; }
+.explorer-panel :is(.ep-list-row, .rank-apt-row, .ct-row) ,
+.map-panel-detail :is(.ep-list-row, .rank-apt-row, .ct-row) { border-color: #f1f3f5; }
+.explorer-panel :is(.ep-list-row, .rank-apt-row):hover,
+.map-panel-detail :is(.ep-list-row, .rank-apt-row):hover { background: #f7f9fa; }
+.explorer-panel :is(.ep-list-price, .rank-apt-price, .epv),
+.map-panel-detail :is(.ep-list-price, .rank-apt-price, .epv) { color: #111; }
+.explorer-panel :is(.ep-list-score, .rank-apt-score),
+.map-panel-detail :is(.ep-list-score, .rank-apt-score) { color: #03c75a !important; }
+.explorer-panel :is(.ep-list-rank, .rank-apt-rank),
+.map-panel-detail :is(.ep-list-rank, .rank-apt-rank) { color: #b0b8c1 !important; }
+.explorer-panel :is(.ep-price, .ep-ask, .ct-box, .ct-step, .commute-preset, .ep-trades),
+.map-panel-detail :is(.ep-price, .ep-ask, .ct-box, .ct-step, .commute-preset, .ep-trades) {
+  background: #f5f7f9; border-color: #e9edf1; color: #333;
+}
+.explorer-panel .ct-stn, .map-panel-detail .ct-stn { border-color: rgba(3,199,90,.45); color: #068f43; background: #eefaf3; }
+.explorer-panel .aptag, .map-panel-detail .aptag {
+  background: #f2f4f6 !important; border-color: #e7eaee !important; color: #555 !important;
+}
+.explorer-panel .aptag-good, .map-panel-detail .aptag-good { color: #068f43 !important; background: #eefaf3 !important; }
+.explorer-panel :is(.rank-dist-desc, .jz-reason), .map-panel-detail :is(.rank-dist-desc, .jz-reason) { color: #555; }
+.explorer-panel .rank-dist-meta, .map-panel-detail .rank-dist-meta { color: #068f43; }
+.explorer-panel .rank-apt-why, .map-panel-detail .rank-apt-why { color: #0a7cc2; }
+.explorer-panel :is(.jz-ax, .ep-list-cnt), .map-panel-detail :is(.jz-ax, .ep-list-cnt) { color: #777; }
+.explorer-panel .jz-fold > summary, .map-panel-detail .jz-fold > summary { color: #0a7cc2; }
+.explorer-panel .rank-dist-head, .map-panel-detail .rank-dist-head { border-bottom-color: #f1f3f5; }
+.explorer-panel .ep-list-head, .map-panel-detail .ep-list-head { border-bottom-color: #f1f3f5; }
+.explorer-panel input, .map-panel-detail input {
+  background: #fff !important; border: 1px solid #dde3e9 !important; color: #222 !important;
+}
+.explorer-panel .ep-trades-table th, .map-panel-detail .ep-trades-table th { color: #888; border-color: #eef1f4; }
+.explorer-panel .ep-trades-table td, .map-panel-detail .ep-trades-table td { color: #333; border-color: #f3f5f7; }
+.explorer-panel .ep-tr-price, .map-panel-detail .ep-tr-price { color: #111 !important; font-weight: 700; }
+.explorer-panel .ep-back, .map-panel-detail .ep-back {
+  background: #f2f4f6; color: #444; border: none;
+}
+/* 상세 패널 닫기(✕) — 네이버처럼 우상단 고정 느낌 */
+.mpd-close {
+  position: sticky; top: 0; float: right; z-index: 5;
+  width: 30px; height: 30px; border-radius: 50%; border: none; cursor: pointer;
+  background: #f2f4f6; color: #555; font-size: 1rem; line-height: 1;
+}
+.mpd-close:hover { background: #e8ebee; }
 .explorer-note { margin-top: .8rem; color: #64748b; font-size: .78rem; }
 
 /* ── 동네별 추천: 구 선택 칩 + 지도 + 설명 패널 ─────────────── */
@@ -825,10 +892,19 @@ body {
 .aptag-naver { background: rgba(3,199,90,.14); color: #03c75a; text-decoration: none; }
 .aptag-naver:hover { background: rgba(3,199,90,.28); }
 
-@media (max-width: 860px) {
-  .explorer-layout { grid-template-columns: 1fr; }
-  .explorer-map { height: 420px; }
-  .explorer-panel { max-height: none; }
+@media (max-width: 900px) {
+  /* 좁은 화면: 플로팅 대신 지도 아래에 패널을 쌓는다 */
+  .explorer-layout { height: auto; }
+  .explorer-map { position: static; height: 400px; }
+  .explorer-panel {
+    position: static; width: auto; margin-top: .8rem;
+    max-height: 500px; box-shadow: var(--shadow-sm);
+  }
+  .map-panel-detail {
+    position: fixed; top: 6vh; left: 4vw; right: 4vw; bottom: 6vh;
+    width: auto; z-index: 1200;
+  }
+  .explorer-map .leaflet-left { left: 0; right: auto; }
   .explorer-count { margin-left: 0; width: 100%; }
 }
 
