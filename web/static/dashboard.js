@@ -90,7 +90,7 @@ async function loadDistrictData() {
 // 평균가 = (최저~최고 가격대의 중간값). 낮을수록 초록, 높을수록 붉은 계열.
 const PRICE_COLOR_TIERS = [
   { max: 8,        color: '#34d399', label: '8억 미만' },
-  { max: 11,       color: '#38bdf8', label: '8~11억' },
+  { max: 11,       color: '#818cf8', label: '8~11억' },
   { max: 14,       color: '#a78bfa', label: '11~14억' },
   { max: 18,       color: '#fb923c', label: '14~18억' },
   { max: Infinity, color: '#f87171', label: '18억 이상' },
@@ -244,13 +244,13 @@ function renderDistrictCards(districts) {
 
     const ageRows = d.age_dist
       ? Object.entries(d.age_dist).map(([k,v]) =>
-          `<div class="age-row"><span class="age-label">${k}</span><div class="age-bar"><div class="age-fill" style="width:${v}%;background:${d.color||'#38bdf8'}"></div></div><span class="age-val">${v}%</span></div>`
+          `<div class="age-row"><span class="age-label">${k}</span><div class="age-bar"><div class="age-fill" style="width:${v}%;background:${d.color||'#818cf8'}"></div></div><span class="age-val">${v}%</span></div>`
         ).join('')
       : '';
 
     return `
     <div class="district-card" id="card-${d.name}" onclick="highlightDistrict('${d.name}')">
-      <div class="card-header" style="border-left:4px solid ${d.color||'#38bdf8'}">
+      <div class="card-header" style="border-left:4px solid ${d.color||'#818cf8'}">
         <div class="card-name-row">
           <span class="card-icon">${d.icon||'🏙️'}</span>
           <span class="card-name">${d.name}</span>
@@ -288,7 +288,7 @@ function renderScoring() {
     { key: '전세가율', weight: 10, color: '#4ade80',
       desc: '전세가가 매매가에 얼마나 가까운지(수준)와 전세가가 오르는 중인지(추세)를 함께 봅니다. 전세가율이 높으면 실거주 수요가 매매가를 아래에서 떠받쳐 "이 아래로는 잘 안 떨어지는" 지지선 역할을 하고, 전세는 투기 수요가 없는 순수 실수요 가격이라 전세가 상승은 지지선이 올라가는 중이라는 선행 신호입니다. 전용 59㎡ 순수 전세 실거래로 계산합니다.',
       metric: '전세가율 수준(70%) + 전세가 추세(30%) · 최근 18개월, 전용 59㎡', example: '전세가율 60% & 전세 연 +5% 추세 → 강한 하방 지지' },
-    { key: '거래유동성', weight: 20, color: '#38bdf8',
+    { key: '거래유동성', weight: 20, color: '#818cf8',
       desc: '전 기간에 걸쳐 거래가 꾸준했는지, 하락장에서도 거래가 유지됐는지, 그리고 규모 대비 얼마나 활발히 거래되는지(회전율)를 함께 봅니다. 팔고 싶을 때 팔리는 단지가 진짜 우량 단지입니다.',
       metric: '거래 공백률 + 하락기 유지율 + 변동계수 + 회전율(거래건수÷세대수)', example: '하락장에도 매달 거래 + 높은 회전율 → 높은 점수' },
     { key: '상승참여도', weight: 15, color: '#fbbf24',
@@ -514,7 +514,7 @@ function selectRankDistrict(district) {
     return eok != null && eok >= rankPriceFilter.min && eok <= rankPriceFilter.max;
   });
   const info = districtData.find(x => x.name === district) || {};
-  const color = info.color || '#38bdf8';
+  const color = info.color || '#818cf8';
 
   document.querySelectorAll('.rank-chip').forEach(b =>
     b.classList.toggle('active', b.dataset.d === district));
@@ -600,7 +600,7 @@ function buildApartmentAxes(apt) {
   return [
     { name: '가격방어력', val: apt.defense_score, color: '#34d399' },
     { name: '전세가율', val: apt.jeonse_score, color: '#4ade80' },
-    { name: '거래유동성', val: apt.liquidity_score, color: '#38bdf8' },
+    { name: '거래유동성', val: apt.liquidity_score, color: '#818cf8' },
     { name: '상승참여도', val: apt.upside_score, color: '#fbbf24' },
     { name: '회복모멘텀', val: apt.momentum_score, color: '#a78bfa' },
     { name: '입지프리미엄', val: apt.premium_score, color: '#fb923c' },
@@ -823,7 +823,7 @@ function renderApartmentDetail(containerId, radarId, priceChartId, apt, mddInfo,
     </div>
 
     <div class="top1-chart-legend">
-      <span><span class="tcl-dot" style="background:#38bdf8"></span>가격(억)</span>
+      <span><span class="tcl-dot" style="background:#818cf8"></span>가격(억)</span>
       <span><span class="tcl-dot" style="background:#fbbf24"></span>⭐ 최고 거래가</span>
       <span><span class="tcl-dot" style="background:#f87171"></span>▽ 저점</span>
       <span><span class="tcl-bar tcl-up"></span><span class="tcl-bar tcl-down"></span>월 거래량(상승/하락)</span>
@@ -839,9 +839,9 @@ function renderApartmentDetail(containerId, radarId, priceChartId, apt, mddInfo,
     r: radarFull,
     theta: radarFull2,
     fill: 'toself',
-    fillcolor: 'rgba(56,189,248,0.2)',
-    line: { color: '#38bdf8', width: 2 },
-    marker: { color: '#38bdf8', size: 6 },
+    fillcolor: 'rgba(129,140,248,0.2)',
+    line: { color: '#818cf8', width: 2 },
+    marker: { color: '#818cf8', size: 6 },
     name: apt.apt_name
   }], {
     polar: {
@@ -911,7 +911,7 @@ function renderPriceChart(chartId, aptTs, mddInfo = {}) {
     // ① 가격 라인 (상단 subplot)
     {
       x: months, y: prices, type: 'scatter', mode: 'lines',
-      line: { color: '#38bdf8', width: 2.2, shape: 'spline', smoothing: 0.6 },
+      line: { color: '#818cf8', width: 2.2, shape: 'spline', smoothing: 0.6 },
       name: '가격(억)', yaxis: 'y', connectgaps: false,
       hovertemplate: '%{x}<br>%{y}억<extra></extra>',
     },
@@ -1470,7 +1470,7 @@ function renderParentDetail(R, familyYears) {
       </div>`;
   };
 
-  const html = block(R.A, '💼 나', '#38bdf8') + block(R.B, '💗 여자친구', '#f472b6');
+  const html = block(R.A, '💼 나', '#818cf8') + block(R.B, '💗 여자친구', '#f472b6');
   el.innerHTML = html || `<div class="empty-state" style="padding:1.2rem">부모 지원 총액을 입력하면 여기에 자세한 계산 과정이 표시됩니다.</div>`;
 }
 
@@ -1500,7 +1500,7 @@ function renderRepayDetail(R) {
   const totalBurden = totalIncome > 0 ? (R.totalMonthly / totalIncome * 100).toFixed(0) : 0;
   el.innerHTML = `
     <div class="rp-grid">
-      ${row(R.A, '💼 나', '#38bdf8')}
+      ${row(R.A, '💼 나', '#818cf8')}
       ${row(R.B, '💗 여자친구', '#f472b6')}
     </div>
     <div class="rp-summary">
@@ -1569,7 +1569,7 @@ function renderBudgetChart(R) {
   if (typeof Plotly === 'undefined') {
     const total = c.cashGift + c.family + c.loan || 1;
     const seg = [
-      ['자기자금(현금+증여)', c.cashGift, '#38bdf8'],
+      ['자기자금(현금+증여)', c.cashGift, '#818cf8'],
       ['부모 차용', c.family, '#a78bfa'], ['은행 대출', c.loan, '#fbbf24'],
     ];
     div.innerHTML = `
@@ -1586,7 +1586,7 @@ function renderBudgetChart(R) {
     labels: ['자기자금', '부모 차용', '은행 대출'],
     customdata: ['자기자금(현금+증여)', '부모 차용', '은행 대출'],
     values: [c.cashGift, c.family, c.loan],
-    marker: { colors: ['#38bdf8', '#a78bfa', '#fbbf24'] },
+    marker: { colors: ['#818cf8', '#a78bfa', '#fbbf24'] },
     textinfo: 'label+percent', textposition: 'inside', insidetextorientation: 'horizontal',
     textfont: { color: '#0f172a', size: 11 },
     hovertemplate: '%{customdata}: %{value:,.0f}원<extra></extra>',
@@ -2102,7 +2102,7 @@ function initNav() {
 // 5개 축 색상 (기존 사이트 팔레트 재사용)
 const AI_AXIS_META = [
   { key: '저평가도', color: '#4ade80' },
-  { key: '유동성',   color: '#38bdf8' },
+  { key: '유동성',   color: '#818cf8' },
   { key: '교통입지', color: '#f87171' },
   { key: '모멘텀',   color: '#a78bfa' },
   { key: '학군·생활', color: '#c084fc' },
@@ -2186,7 +2186,7 @@ const JEONSE_AXIS_META = [
   { key: '가성비',     w: 40, color: '#34d399',
     desc: '입지·품질(매매 종합점수) 대비 전세 ㎡당 가격이 쌀수록 높습니다. "이 정도 입지를 이 전세금에?" — 같은 값이면 더 좋은 집.',
     metric: '매매 종합점수 ÷ 전세 평단가 percentile' },
-  { key: '전세평단가', w: 20, color: '#38bdf8',
+  { key: '전세평단가', w: 20, color: '#818cf8',
     desc: '㎡당 전세금이 절대적으로 낮을수록(같은 크기를 싸게 사는 관점).',
     metric: '㎡당 전세금 낮은 순 percentile' },
   { key: '보증금안전', w: 20, color: '#a78bfa',
@@ -2221,7 +2221,7 @@ const FIT_AXIS_META = [
     desc: '우리 두 직장(내 직장·여자친구 직장)까지의 직선거리 합이 가까울수록 높습니다. 직장 위치는 ①지도 탐색 페이지에서 바꿀 수 있고, 그 값이 여기에도 반영됩니다.' },
   { key: '가격합리성', w: 30, color: '#34d399', get: a => a.jeonse_total,
     desc: '앞의 4개 전세 지표(가성비·전세평단가·보증금안전·전세유동성) 종합 점수입니다.' },
-  { key: '인프라',     w: 22, color: '#38bdf8', get: a => a.axis_infra,
+  { key: '인프라',     w: 22, color: '#818cf8', get: a => a.axis_infra,
     desc: '교통(지하철 접근성·역세권)과 학군·생활편의를 합산한 인프라 점수입니다.' },
   { key: '약속장소',   w: 18, color: '#fbbf24', get: a => a.axis_spot,
     desc: '강남·홍대·여의도·성수·잠실·광화문·이태원·건대 등 주요 약속장소까지 평균 거리가 가까울수록(도심 접근성) 높습니다.' },
