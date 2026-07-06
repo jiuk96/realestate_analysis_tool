@@ -79,6 +79,7 @@ jobs:
       - name: 공동주택 공시가격 수집 (HUG 지표용, best-effort)
         env:
           MOLIT_API_KEY: ${{ secrets.MOLIT_API_KEY }}
+          OFFICIAL_PRICE_API_KEY: ${{ secrets.OFFICIAL_PRICE_API_KEY }}
         run: |
           python collect_official_price.py || echo "공시가 수집 실패 — HUG 지표는 다음 실행에서 재시도"
 

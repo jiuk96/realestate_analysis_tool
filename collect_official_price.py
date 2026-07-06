@@ -101,9 +101,11 @@ def _query_price(key: str, pnu: str, year: str) -> list[dict]:
 
 
 def main():
-    key = os.getenv("MOLIT_API_KEY")
+    # NSDI 계열은 승인 방식에 따라 별도 키가 발급되기도 한다 — 전용 키가 있으면
+    # 우선 사용하고, 없으면 기존 data.go.kr 공통 키로 시도한다(코드 수정 불필요).
+    key = os.getenv("OFFICIAL_PRICE_API_KEY") or os.getenv("MOLIT_API_KEY")
     if not key:
-        raise EnvironmentError("MOLIT_API_KEY 없음 (data.go.kr 공통 인증키)")
+        raise EnvironmentError("OFFICIAL_PRICE_API_KEY 또는 MOLIT_API_KEY 필요")
     if OUT.exists():
         cached = json.loads(OUT.read_text(encoding="utf-8"))
         if cached.get("stdr_year") == STDR_YEAR and cached.get("apartments"):
