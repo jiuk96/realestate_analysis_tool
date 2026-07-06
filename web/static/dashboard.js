@@ -3096,10 +3096,47 @@ function subRow(title, state, reasons, detailHtml) {
 
 function subCheck(cond, okMsg, noMsg) { return { ok: cond, msg: cond ? `✓ ${okMsg}` : `✕ ${noMsg}` }; }
 
+/* ── 나/여자친구 프로필 분리 저장 ──
+   입력 폼은 하나를 공유하고, 사람 전환 시 현재 값을 스냅샷으로 저장한 뒤
+   상대 프로필을 복원한다. localStorage 'subProfiles_v2' = {person, A:{id:값}, B:{id:값}} */
+let subPerson = 'A';
+let subProfiles = { A: null, B: null };
+let subDefaultSnap = null;   // 최초 폼 기본값 — 아직 입력 안 한 사람에게 사용
+
+function subFormEls() {
+  return document.querySelectorAll('.sub-inputs input, .sub-inputs select');
+}
+function subSnapshot() {
+  const snap = {};
+  subFormEls().forEach(el => { if (el.id) snap[el.id] = el.type === 'checkbox' ? el.checked : el.value; });
+  return snap;
+}
+function subRestore(snap) {
+  subFormEls().forEach(el => {
+    if (!el.id || !(el.id in snap)) return;
+    if (el.type === 'checkbox') el.checked = !!snap[el.id]; else el.value = snap[el.id];
+  });
+}
+function subSave() {
+  subProfiles[subPerson] = subSnapshot();
+  localStorage.setItem('subProfiles_v2', JSON.stringify({ person: subPerson, A: subProfiles.A, B: subProfiles.B }));
+}
+function applySubPerson(person) {
+  if (person !== 'A' && person !== 'B') return;
+  if (person !== subPerson) subSave();                       // 떠나는 사람 값 보존
+  subPerson = person;
+  document.querySelectorAll('#subPersonToggle .legend-mode-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.person === subPerson));
+  subRestore(subProfiles[subPerson] || subDefaultSnap || {});
+  renderSubscription();
+}
+
 function renderSubscription() {
   const p = subReadProfile();
   document.getElementById('subMarriedYearsWrap').style.display = p.marital === 'married' ? '' : 'none';
-  localStorage.setItem('subProfile_v1', JSON.stringify(p));
+  const who = subPerson === 'A' ? '💼 나' : '💗 여자친구';
+  const whoShort = subPerson === 'A' ? '나' : '여친';
+  subSave();
 
   const isReg = p.region === 'reg';
   const [reqY, reqN] = SUB_FIRST_RANK_REQ[p.region];
@@ -3122,7 +3159,7 @@ function renderSubscription() {
   const gukRank1 = minCheck.ok && payCheck.ok && gukminReg.every(c => c.ok);
 
   document.getElementById('subRankCard').innerHTML = `
-    <div class="budget-card-title">🎯 순위 판정 — ${isReg ? '규제지역' : p.region === 'etc' ? '지방' : '수도권'} 기준</div>
+    <div class="budget-card-title">🎯 ${who} · 순위 판정 — ${isReg ? '규제지역' : p.region === 'etc' ? '지방' : '수도권'} 기준</div>
     <div class="sub-rank-badges">
       <div class="sub-rank ${gukRank1 ? 'on' : ''}"><span class="sr-k">국민주택 (공공분양)</span><span class="sr-v">${gukRank1 ? '1순위 ✓' : '2순위'}</span></div>
       <div class="sub-rank ${minRank1 ? 'on' : ''}"><span class="sr-k">민영주택 (민간분양)</span><span class="sr-v">${minRank1 ? '1순위 ✓' : '2순위'}</span></div>
@@ -3150,7 +3187,7 @@ function renderSubscription() {
       <span class="sgv">${pts}<small>/${max}</small></span>
     </div>`;
   document.getElementById('subScoreCard').innerHTML = `
-    <div class="budget-card-title">📐 청약 가점 — <b style="color:${g.total >= 60 ? 'var(--green)' : g.total >= 40 ? 'var(--gold)' : 'var(--accent)'}">${g.total}점</b> / 84점</div>
+    <div class="budget-card-title">📐 ${who} · 청약 가점 — <b style="color:${g.total >= 60 ? 'var(--green)' : g.total >= 40 ? 'var(--gold)' : 'var(--accent)'}">${g.total}점</b> / 84점</div>
     ${seg('무주택 기간', g.noHousePts, 32, 'var(--green)')}
     ${seg('부양가족', g.depPts, 35, 'var(--acc2)')}
     ${seg('통장 가입기간', g.accPts, 17, 'var(--gold)')}
@@ -3161,7 +3198,7 @@ function renderSubscription() {
         <div class="scl-zone" style="width:${40 / 84 * 100}%;background:rgba(148,163,184,.35)"></div>
         <div class="scl-zone" style="width:${20 / 84 * 100}%;background:rgba(245,158,11,.4)"></div>
         <div class="scl-zone" style="width:${24 / 84 * 100}%;background:rgba(3,165,82,.45)"></div>
-        <div class="scl-marker" style="left:${Math.min(99, g.total / 84 * 100)}%"><span>나 ${g.total}점</span></div>
+        <div class="scl-marker" style="left:${Math.min(99, g.total / 84 * 100)}%"><span>${whoShort} ${g.total}점</span></div>
       </div>
       <div class="sub-cutline-labels">
         <span style="width:${40 / 84 * 100}%">~40점 · 추첨제 위주</span>
@@ -3231,7 +3268,7 @@ function renderSubscription() {
   }
 
   document.getElementById('subSpecialCard').innerHTML = `
-    <div class="budget-card-title">⭐ 특별공급 — 일반공급과 경쟁하지 않는 별도 물량</div>
+    <div class="budget-card-title">⭐ ${who} · 특별공급 — 일반공급과 경쟁하지 않는 별도 물량</div>
     <div class="sub-note">특공은 <b>세대당 평생 1회</b>. 소득 ${pctStr} = 부부합산 ${p.income}만원 ÷ 도시근로자 ${p.familySize}인 가구 월평균소득 약 ${base100}만원 (2024 근사, 공고문 우선)</div>
     ${items.map(([t, cs, note]) => {
       const okN = cs.filter(c => c.ok).length;
@@ -3256,22 +3293,34 @@ function renderSubscription() {
 async function initSubscription() {
   if (!document.getElementById('subRankCard')) return;
 
-  // 저장된 프로필 복원
+  // 폼 기본값 스냅샷 — 아직 입력하지 않은 사람을 열 때 사용
+  subDefaultSnap = subSnapshot();
+
+  // 저장된 프로필 복원 (v2: 나/여자친구 분리, v1 구버전은 '나'로 이관)
   try {
-    const saved = JSON.parse(localStorage.getItem('subProfile_v1') || 'null');
+    let saved = JSON.parse(localStorage.getItem('subProfiles_v2') || 'null');
+    if (!saved) {
+      const v1 = JSON.parse(localStorage.getItem('subProfile_v1') || 'null');
+      if (v1) {
+        // v1 키(age 등) → 폼 id(subAge 등) 이관
+        const snap = {};
+        Object.entries(v1).forEach(([k, v]) => { snap['sub' + k.charAt(0).toUpperCase() + k.slice(1)] = v; });
+        saved = { person: 'A', A: snap, B: null };
+        localStorage.removeItem('subProfile_v1');
+      }
+    }
     if (saved) {
-      const set = (id, v) => { const el = document.getElementById(id); if (el && v != null) el[typeof v === 'boolean' ? 'checked' : 'value'] = v; };
-      set('subAge', saved.age); set('subMarital', saved.marital); set('subMarriedYears', saved.marriedYears);
-      set('subRegion', saved.region); set('subHouseholder', saved.householder);
-      set('subNoHouseYears', saved.noHouseYears); set('subEverOwned', saved.everOwned);
-      set('subHouseholdOwns', saved.householdOwns); set('subWon5y', saved.won5y); set('subTax5y', saved.tax5y);
-      set('subAccountYears', saved.accountYears); set('subPayments', saved.payments); set('subDeposit', saved.deposit);
-      set('subDependents', saved.dependents); set('subChildren', saved.children);
-      set('subFamilySize', saved.familySize); set('subIncome', saved.income);
-      set('subDual', saved.dual); set('subNewborn', saved.newborn); set('subElderly', saved.elderly);
+      subProfiles.A = saved.A || null;
+      subProfiles.B = saved.B || null;
+      subPerson = saved.person === 'B' ? 'B' : 'A';
+      subRestore(subProfiles[subPerson] || subDefaultSnap);
+      document.querySelectorAll('#subPersonToggle .legend-mode-btn').forEach(b =>
+        b.classList.toggle('active', b.dataset.person === subPerson));
     }
   } catch (e) { /* 무시 — 기본값 사용 */ }
 
+  document.querySelectorAll('#subPersonToggle .legend-mode-btn').forEach(b =>
+    b.addEventListener('click', () => applySubPerson(b.dataset.person)));
   document.querySelectorAll('#secSubscription input, #secSubscription select').forEach(el =>
     el.addEventListener('input', renderSubscription));
   renderSubscription();
