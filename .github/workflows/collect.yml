@@ -80,6 +80,7 @@ jobs:
         env:
           MOLIT_API_KEY: ${{ secrets.MOLIT_API_KEY }}
           OFFICIAL_PRICE_API_KEY: ${{ secrets.OFFICIAL_PRICE_API_KEY }}
+          OFFICIAL_PRICE_DOMAIN: ${{ secrets.OFFICIAL_PRICE_DOMAIN }}
         run: |
           python collect_official_price.py || echo "공시가 수집 실패 — HUG 지표는 다음 실행에서 재시도"
 

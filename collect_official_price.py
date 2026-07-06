@@ -89,15 +89,29 @@ def _pnu(bjd10: str, jibun: str) -> str | None:
     return f"{bjd10}{'2' if san else '1'}{bon:04d}{bu:04d}"
 
 
-def _query_price(key: str, pnu: str, year: str) -> list[dict]:
-    # V-World NED 방식: serviceKey가 아니라 key= 파라미터, domain은 발급 시 등록값
-    r = requests.get(PRICE_URL, params={
-        "key": key, "pnu": pnu, "stdrYear": year,
-        "format": "json", "numOfRows": 400, "pageNo": 1}, timeout=30)
+# V-World는 인증키 발급 시 등록한 도메인과 요청의 domain 파라미터가 일치해야
+# 하는 경우가 있다. 시크릿 OFFICIAL_PRICE_DOMAIN(발급 때 입력한 URL)이 있으면
+# 함께 보낸다. 없으면 생략(도메인 검증 없는 키도 존재).
+VWORLD_DOMAIN = os.getenv("OFFICIAL_PRICE_DOMAIN", "")
+
+
+def _query_price(key: str, pnu: str, year: str, debug: bool = False) -> list[dict]:
+    params = {"key": key, "pnu": pnu, "stdrYear": year,
+              "format": "json", "numOfRows": 400, "pageNo": 1}
+    if VWORLD_DOMAIN:
+        params["domain"] = VWORLD_DOMAIN
+    r = requests.get(PRICE_URL, params=params, timeout=30,
+                     headers={"Referer": VWORLD_DOMAIN} if VWORLD_DOMAIN else {})
     if r.status_code in (401, 403):
         raise PermissionError(f"{r.status_code} — V-World 인증키(OFFICIAL_PRICE_API_KEY) 확인 필요")
     r.raise_for_status()
-    js = r.json()
+    if debug:
+        log.info(f"[진단] 첫 응답 HTTP {r.status_code} / {r.text[:400]!r}")
+    try:
+        js = r.json()
+    except ValueError:
+        # JSON이 아니면(오류 XML/HTML 등) 원문 머리를 남겨 다음 실행 로그에서 원인 확인
+        raise RuntimeError(f"JSON 아님: {r.text[:200]!r}")
     field = js.get("apartHousingPrices") or js.get("ApartHousingPrices") or {}
     return field.get("field", []) or []
 
@@ -127,6 +141,8 @@ def main():
         return
 
     apartments, fail_pnu, fail_q = [], 0, 0
+    first_err = None          # 전수 실패 시 원인 파악용 — 첫 오류 본문을 보존
+    diagnosed = False
     stopped = None
     items = [(k, v) for k, v in locs.items() if v.get("address")]
     for i, (cache_key, v) in enumerate(items):
@@ -141,12 +157,20 @@ def main():
             fail_pnu += 1
             continue
         try:
-            rows = _query_price(key, pnu, STDR_YEAR) or _query_price(key, pnu, str(int(STDR_YEAR) - 1))
+            rows = _query_price(key, pnu, STDR_YEAR, debug=not diagnosed) \
+                   or _query_price(key, pnu, str(int(STDR_YEAR) - 1))
+            diagnosed = True
         except PermissionError as e:
             stopped = str(e)
             break   # 권한 문제는 재시도 무의미 — 전체 중단(다음 CI에서 재시도)
-        except Exception:
+        except Exception as e:
             fail_q += 1
+            if first_err is None:
+                first_err = f"{type(e).__name__}: {e}"
+            if fail_q >= 20 and not apartments:
+                # 20연속 실패 + 성공 0 = 체계적 문제 — 379번 더 두드리지 않고 중단
+                stopped = f"연속 실패로 조기 중단. 첫 오류: {first_err}"
+                break
             continue
         # 전용 55~63㎡ 세대의 공시가 중앙값 (만원 단위로 환산: API는 원 단위 pblntfPc)
         prices = []
@@ -167,7 +191,11 @@ def main():
         time.sleep(0.15)
 
     if stopped:
-        log.error(f"[중단] {stopped}\n  data.go.kr에서 '공동주택 공시가격' 활용신청 후 다음 실행에서 자동 재시도됩니다.")
+        log.error(f"[중단] {stopped}")
+        log.error("  V-World 발급 화면의 '서비스 URL/도메인'에 입력한 값을 GitHub Secret "
+                  "OFFICIAL_PRICE_DOMAIN으로 등록하면 도메인 검증 문제를 해결할 수 있습니다.")
+    if first_err and not apartments:
+        log.error(f"  전수 실패 원인 샘플: {first_err}")
         if not apartments:
             return
     OUT.write_text(json.dumps({"stdr_year": STDR_YEAR, "n": len(apartments),
