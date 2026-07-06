@@ -94,26 +94,67 @@ def _pnu(bjd10: str, jibun: str) -> str | None:
 # 함께 보낸다. 없으면 생략(도메인 검증 없는 키도 존재).
 VWORLD_DOMAIN = os.getenv("OFFICIAL_PRICE_DOMAIN", "")
 
+# 이전 실행에서 format=json&numOfRows=400 조합이 전수 502였다 — NED 게이트웨이는
+# 조합에 민감하므로, 첫 단지에서 아래 후보들을 순서대로 시험해 되는 조합을 찾는다.
+_PROBE_COMBOS = [
+    {"format": "json", "numOfRows": 100},
+    {"format": "xml",  "numOfRows": 100},
+    {"format": "json", "numOfRows": 10},
+    {"format": "xml",  "numOfRows": 10},
+]
+_working: dict | None = None   # 프로브로 확정된 조합
 
-def _query_price(key: str, pnu: str, year: str, debug: bool = False) -> list[dict]:
-    params = {"key": key, "pnu": pnu, "stdrYear": year,
-              "format": "json", "numOfRows": 400, "pageNo": 1}
+
+def _parse_rows(r: requests.Response, fmt: str) -> list[dict]:
+    if fmt == "json":
+        js = r.json()
+        field = js.get("apartHousingPrices") or js.get("ApartHousingPrices") or {}
+        return field.get("field", []) or []
+    # XML: <field> 요소들의 자식 태그를 dict로
+    import xml.etree.ElementTree as ET
+    root = ET.fromstring(r.text)
+    return [{c.tag: c.text for c in f} for f in root.iter("field")]
+
+
+def _request(key: str, pnu: str, year: str, combo: dict) -> requests.Response:
+    params = {"key": key, "pnu": pnu, "stdrYear": year, "pageNo": 1, **combo}
     if VWORLD_DOMAIN:
         params["domain"] = VWORLD_DOMAIN
-    r = requests.get(PRICE_URL, params=params, timeout=30,
-                     headers={"Referer": VWORLD_DOMAIN} if VWORLD_DOMAIN else {})
+    return requests.get(PRICE_URL, params=params, timeout=30,
+                        headers={"Referer": VWORLD_DOMAIN} if VWORLD_DOMAIN else {})
+
+
+def _probe(key: str, pnu: str, year: str) -> dict | None:
+    """되는 (format, numOfRows) 조합을 찾아 반환. 전 조합의 응답 머리를 로그로."""
+    for combo in _PROBE_COMBOS:
+        try:
+            r = _request(key, pnu, year, combo)
+            head = r.text[:200].replace("\n", " ")
+            log.info(f"[프로브] {combo} → HTTP {r.status_code} / {head!r}")
+            if r.status_code in (401, 403):
+                raise PermissionError(f"{r.status_code} — V-World 인증키 확인 필요")
+            if r.status_code != 200:
+                continue
+            rows = _parse_rows(r, combo["format"])
+            if isinstance(rows, list):      # 파싱까지 성공하면 채택 (빈 목록도 유효)
+                log.info(f"[프로브] 채택: {combo} (rows {len(rows)})")
+                return combo
+        except PermissionError:
+            raise
+        except Exception as e:
+            log.info(f"[프로브] {combo} 실패: {type(e).__name__}: {e}")
+    return None
+
+
+def _query_price(key: str, pnu: str, year: str) -> list[dict]:
+    global _working
+    if _working is None:
+        raise RuntimeError("프로브 미실행")
+    r = _request(key, pnu, year, _working)
     if r.status_code in (401, 403):
-        raise PermissionError(f"{r.status_code} — V-World 인증키(OFFICIAL_PRICE_API_KEY) 확인 필요")
+        raise PermissionError(f"{r.status_code} — V-World 인증키 확인 필요")
     r.raise_for_status()
-    if debug:
-        log.info(f"[진단] 첫 응답 HTTP {r.status_code} / {r.text[:400]!r}")
-    try:
-        js = r.json()
-    except ValueError:
-        # JSON이 아니면(오류 XML/HTML 등) 원문 머리를 남겨 다음 실행 로그에서 원인 확인
-        raise RuntimeError(f"JSON 아님: {r.text[:200]!r}")
-    field = js.get("apartHousingPrices") or js.get("ApartHousingPrices") or {}
-    return field.get("field", []) or []
+    return _parse_rows(r, _working["format"])
 
 
 def main():
@@ -142,9 +183,23 @@ def main():
 
     apartments, fail_pnu, fail_q = [], 0, 0
     first_err = None          # 전수 실패 시 원인 파악용 — 첫 오류 본문을 보존
-    diagnosed = False
     stopped = None
     items = [(k, v) for k, v in locs.items() if v.get("address")]
+
+    # 첫 유효 PNU로 요청 조합 프로브 — 되는 조합이 없으면 전체 스킵(로그로 원인 보고)
+    global _working
+    for _, v0 in items:
+        m0 = re.match(r"서울\s+(\S+)\s+(\S+)\s+(.+)$", v0["address"])
+        if not m0:
+            continue
+        b0 = bjd.get(f"{m0.group(1)} {m0.group(2)}")
+        p0 = _pnu(b0, m0.group(3)) if b0 else None
+        if p0:
+            _working = _probe(key, p0, STDR_YEAR)
+            break
+    if _working is None:
+        log.error("[중단] 모든 요청 조합이 실패 — 위 [프로브] 로그의 응답 본문으로 원인 확인 필요.")
+        return
     for i, (cache_key, v) in enumerate(items):
         district, apt = v["district"], v["apt_name"]
         m = re.match(r"서울\s+(\S+)\s+(\S+)\s+(.+)$", v["address"])
@@ -157,9 +212,8 @@ def main():
             fail_pnu += 1
             continue
         try:
-            rows = _query_price(key, pnu, STDR_YEAR, debug=not diagnosed) \
+            rows = _query_price(key, pnu, STDR_YEAR) \
                    or _query_price(key, pnu, str(int(STDR_YEAR) - 1))
-            diagnosed = True
         except PermissionError as e:
             stopped = str(e)
             break   # 권한 문제는 재시도 무의미 — 전체 중단(다음 CI에서 재시도)
