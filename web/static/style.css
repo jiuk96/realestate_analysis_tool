@@ -1215,6 +1215,15 @@ details.budget-fold .legal-hint { font-weight: 500; }
 .scl-marker span { position: absolute; top: -1.25rem; left: 50%; transform: translateX(-50%); font-size: .7rem; font-weight: 800; white-space: nowrap; background: var(--text); color: var(--bg-soft); border-radius: 6px; padding: .06rem .4rem; }
 .sub-cutline-labels { display: flex; margin-top: .3rem; }
 .sub-cutline-labels span { font-size: .66rem; color: var(--text3); text-align: center; }
+
+/* 청약 — 조건 조회 가이드 */
+.sub-lookup { display: flex; flex-direction: column; gap: .7rem; }
+.slk-item { background: var(--bg); border-radius: 10px; padding: .7rem .85rem; }
+.slk-head { display: flex; align-items: center; justify-content: space-between; gap: .6rem; font-size: .85rem; margin-bottom: .3rem; }
+.slk-link { flex-shrink: 0; font-size: .74rem; font-weight: 700; color: var(--acc2); border: 1px solid var(--acc2); border-radius: 999px; padding: .18rem .6rem; text-decoration: none; white-space: nowrap; }
+.slk-link:hover { background: var(--acc2); color: #fff; }
+.slk-inline { color: var(--acc2); font-weight: 700; text-decoration: none; font-size: .78rem; }
+.slk-body { font-size: .78rem; color: var(--text2); line-height: 1.6; }
 .couple-box-wide { margin-bottom: 1.1rem; }
 .couple-badge { background: rgba(52,211,153,.15); color: #34d399; font-size: .68rem; padding: .15rem .5rem; border-radius: 999px; margin-left: .4rem; font-weight: 600; }
 .commute-preset { color: #4a5563; font-size: .8rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: .4rem .7rem; }
