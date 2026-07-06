@@ -2089,6 +2089,8 @@ async function openJeonseModal(district, aptName) {
       <div class="top1-stat"><div class="ts-val">${a._commute_km != null ? a._commute_km.toFixed(1) + 'km' : '—'}</div><div class="ts-key">두 직장 통근 합</div></div>
     </div>
 
+    <div id="jzSafety"></div>
+
     <div class="jz-axis-group-t">🏠 우리 맞춤 4축 (통근·합리성·인프라·약속장소)</div>
     <div class="top1-axes">${axGroup(FIT_AXIS_META, m => m.get(a))}</div>
 
@@ -2103,6 +2105,7 @@ async function openJeonseModal(district, aptName) {
     </p>`;
 
   fillCommuteTransit('jzModalTransit', a);
+  window.JeonseSafety?.renderCard('jzSafety', a);   // 🛡️ 전세 안전성 (additive 모듈, 없으면 무시)
   document.getElementById('jzToBuyView')?.addEventListener('click', (e) => {
     e.preventDefault();
     openApartmentModal(district, aptName);
@@ -2599,7 +2602,7 @@ function selectJeonseDistrict(district) {
       <div class="rank-apt-rank" style="${i === 0 ? `color:${color}` : ''}">${i + 1}</div>
       <div class="rank-apt-main">
         <div class="rank-apt-name">${a.apt_name}</div>
-        <div class="rank-apt-sub">전세 ${eokFmt(a.jeonse_median)} · ㎡당 ${Math.round(a.jeonse_ppm)}만 · 전세가율 ${Math.round(a.jeonse_ratio*100)}%${a._commute_km != null ? ` · 통근합 ${a._commute_km.toFixed(1)}km` : ''}</div>
+        <div class="rank-apt-sub">전세 ${eokFmt(a.jeonse_median)} · ㎡당 ${Math.round(a.jeonse_ppm)}만 · 전세가율 ${Math.round(a.jeonse_ratio*100)}%${a._commute_km != null ? ` · 통근합 ${a._commute_km.toFixed(1)}km` : ''} ${window.JeonseSafety ? JeonseSafety.gradeBadge(a) : ''}</div>
         <div class="jz-axes">${axes}</div>
         <details class="jz-fold"><summary>왜 이 점수인가요?</summary>${reasonList}</details>
       </div>

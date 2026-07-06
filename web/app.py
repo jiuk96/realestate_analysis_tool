@@ -107,6 +107,15 @@ def api_stations():
         return jsonify({"stations": []})
 
 
+@app.route("/api/jeonse_safety")
+def api_jeonse_safety():
+    """전세 안전성 참고 지표 (src/jeonse_safety.py 산출, 점수 미반영). 없으면 빈 dict."""
+    try:
+        return jsonify(_load("jeonse_safety.json"))
+    except FileNotFoundError:
+        return jsonify({})
+
+
 @app.route("/api/jeonse")
 def api_jeonse():
     """전세 합리성 점수 (src.jeonse_scorer 산출). 없으면 빈 dict."""

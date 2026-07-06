@@ -1,0 +1,2670 @@
+{
+ "lookback_months": 24,
+ "high_ratio_cut": 0.9,
+ "hug_mult": 1.26,
+ "n_apts": 380,
+ "n_flagged": 0,
+ "n_hug": 0,
+ "apartments": {
+  "강남구|강남자곡아이파크": {
+   "high_cnt": 0,
+   "total_cnt": 8,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강남구|개포래미안포레스트": {
+   "high_cnt": 0,
+   "total_cnt": 78,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강남구|대우디오빌": {
+   "high_cnt": 0,
+   "total_cnt": 2,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강남구|도곡렉슬": {
+   "high_cnt": 0,
+   "total_cnt": 52,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강남구|동부센트레빌": {
+   "high_cnt": 0,
+   "total_cnt": 2,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강남구|디에이치아너힐즈": {
+   "high_cnt": 0,
+   "total_cnt": 7,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강남구|래미안블레스티지": {
+   "high_cnt": 0,
+   "total_cnt": 23,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강남구|삼익대청아파트": {
+   "high_cnt": 0,
+   "total_cnt": 24,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강남구|세곡푸르지오": {
+   "high_cnt": 0,
+   "total_cnt": 3,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강남구|역삼래미안": {
+   "high_cnt": 0,
+   "total_cnt": 48,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강남구|푸른마을아파트101동~111동": {
+   "high_cnt": 0,
+   "total_cnt": 27,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강동구|고덕 아이파크": {
+   "high_cnt": 0,
+   "total_cnt": 14,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강동구|고덕그라시움": {
+   "high_cnt": 0,
+   "total_cnt": 248,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강동구|고덕롯데캐슬베네루체": {
+   "high_cnt": 0,
+   "total_cnt": 29,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강동구|고덕센트럴IPARK": {
+   "high_cnt": 0,
+   "total_cnt": 38,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강동구|고덕센트럴푸르지오": {
+   "high_cnt": 0,
+   "total_cnt": 99,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강동구|고덕아르테온": {
+   "high_cnt": 0,
+   "total_cnt": 107,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강동구|고덕자이": {
+   "high_cnt": 0,
+   "total_cnt": 53,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강동구|길동우성": {
+   "high_cnt": 0,
+   "total_cnt": 11,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강동구|둔촌푸르지오": {
+   "high_cnt": 0,
+   "total_cnt": 23,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강동구|래미안강동팰리스": {
+   "high_cnt": 0,
+   "total_cnt": 29,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강동구|래미안솔베뉴": {
+   "high_cnt": 0,
+   "total_cnt": 141,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강동구|래미안힐스테이트고덕": {
+   "high_cnt": 0,
+   "total_cnt": 153,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강동구|롯데캐슬퍼스트": {
+   "high_cnt": 0,
+   "total_cnt": 74,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강동구|명일지에스아파트": {
+   "high_cnt": 0,
+   "total_cnt": 31,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강동구|삼익파크맨션": {
+   "high_cnt": 0,
+   "total_cnt": 44,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강동구|선사현대아파트": {
+   "high_cnt": 0,
+   "total_cnt": 242,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강동구|성내동삼성아파트": {
+   "high_cnt": 0,
+   "total_cnt": 13,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강동구|중앙하이츠": {
+   "high_cnt": 0,
+   "total_cnt": 18,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강동구|프라이어팰리스": {
+   "high_cnt": 0,
+   "total_cnt": 22,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강북구|경남아너스빌(1356-0)": {
+   "high_cnt": 0,
+   "total_cnt": 11,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강북구|꿈의숲해링턴플레이스": {
+   "high_cnt": 0,
+   "total_cnt": 23,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강북구|두산위브트레지움": {
+   "high_cnt": 0,
+   "total_cnt": 8,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강북구|래미안트리베라1단지": {
+   "high_cnt": 0,
+   "total_cnt": 13,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강북구|벽산라이브파크": {
+   "high_cnt": 0,
+   "total_cnt": 42,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강북구|삼각산아이원": {
+   "high_cnt": 0,
+   "total_cnt": 4,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강북구|삼성래미안트리베라2단지": {
+   "high_cnt": 0,
+   "total_cnt": 28,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강북구|에스케이북한산시티": {
+   "high_cnt": 0,
+   "total_cnt": 80,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강서구|가양6단지": {
+   "high_cnt": 0,
+   "total_cnt": 87,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강서구|가양강나루현대": {
+   "high_cnt": 0,
+   "total_cnt": 40,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강서구|강서힐스테이트": {
+   "high_cnt": 0,
+   "total_cnt": 71,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강서구|동아": {
+   "high_cnt": 0,
+   "total_cnt": 36,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강서구|마곡13단지힐스테이트마스터": {
+   "high_cnt": 0,
+   "total_cnt": 63,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강서구|마곡수명산파크4단지": {
+   "high_cnt": 0,
+   "total_cnt": 82,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강서구|마곡수명산파크5단지": {
+   "high_cnt": 0,
+   "total_cnt": 54,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강서구|마곡중앙하이츠아파트": {
+   "high_cnt": 0,
+   "total_cnt": 18,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강서구|신동아": {
+   "high_cnt": 0,
+   "total_cnt": 43,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강서구|우장산아이파크,이편한세상": {
+   "high_cnt": 0,
+   "total_cnt": 50,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강서구|우장산힐스테이트": {
+   "high_cnt": 0,
+   "total_cnt": 48,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강서구|주공10": {
+   "high_cnt": 0,
+   "total_cnt": 52,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강서구|주공3": {
+   "high_cnt": 0,
+   "total_cnt": 118,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강서구|주공5": {
+   "high_cnt": 0,
+   "total_cnt": 107,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "강서구|청솔": {
+   "high_cnt": 0,
+   "total_cnt": 13,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "관악구|LIG대학마을(건영아파트3차)": {
+   "high_cnt": 0,
+   "total_cnt": 18,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "관악구|e편한세상서울대입구1단지": {
+   "high_cnt": 0,
+   "total_cnt": 11,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "관악구|관악드림(동아)": {
+   "high_cnt": 0,
+   "total_cnt": 73,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "관악구|관악드림(삼성)": {
+   "high_cnt": 0,
+   "total_cnt": 58,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "관악구|관악산휴먼시아2단지": {
+   "high_cnt": 0,
+   "total_cnt": 56,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "관악구|관악푸르지오": {
+   "high_cnt": 0,
+   "total_cnt": 182,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "관악구|두산": {
+   "high_cnt": 0,
+   "total_cnt": 104,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "관악구|벽산블루밍": {
+   "high_cnt": 0,
+   "total_cnt": 131,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "관악구|봉천동아": {
+   "high_cnt": 0,
+   "total_cnt": 32,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "관악구|봉천우성": {
+   "high_cnt": 0,
+   "total_cnt": 40,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "관악구|삼성산주공(주공3단지)": {
+   "high_cnt": 0,
+   "total_cnt": 12,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "관악구|신림푸르지오": {
+   "high_cnt": 0,
+   "total_cnt": 1,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "관악구|신림현대": {
+   "high_cnt": 0,
+   "total_cnt": 39,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "관악구|현대(관악)": {
+   "high_cnt": 0,
+   "total_cnt": 53,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "광진구|래미안파크스위트": {
+   "high_cnt": 0,
+   "total_cnt": 32,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "광진구|청구": {
+   "high_cnt": 0,
+   "total_cnt": 27,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "광진구|현대3": {
+   "high_cnt": 0,
+   "total_cnt": 25,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "광진구|현대파크빌": {
+   "high_cnt": 0,
+   "total_cnt": 36,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "광진구|현대프라임": {
+   "high_cnt": 0,
+   "total_cnt": 115,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "구로구|개봉동현대아이파크": {
+   "high_cnt": 0,
+   "total_cnt": 6,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "구로구|개봉푸르지오": {
+   "high_cnt": 0,
+   "total_cnt": 19,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "구로구|구로두산위브": {
+   "high_cnt": 0,
+   "total_cnt": 3,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "구로구|구일우성": {
+   "high_cnt": 0,
+   "total_cnt": 38,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "구로구|대림1": {
+   "high_cnt": 0,
+   "total_cnt": 72,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "구로구|대림2": {
+   "high_cnt": 0,
+   "total_cnt": 23,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "구로구|대우": {
+   "high_cnt": 0,
+   "total_cnt": 20,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "구로구|동부골든": {
+   "high_cnt": 0,
+   "total_cnt": 3,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "구로구|동아1": {
+   "high_cnt": 0,
+   "total_cnt": 17,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "구로구|동아3": {
+   "high_cnt": 0,
+   "total_cnt": 23,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "구로구|두산": {
+   "high_cnt": 0,
+   "total_cnt": 23,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "구로구|삼성래미안": {
+   "high_cnt": 0,
+   "total_cnt": 16,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "구로구|삼환": {
+   "high_cnt": 0,
+   "total_cnt": 30,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "구로구|신도림태영타운": {
+   "high_cnt": 0,
+   "total_cnt": 41,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "구로구|온수힐스테이트": {
+   "high_cnt": 0,
+   "total_cnt": 16,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "구로구|한마을": {
+   "high_cnt": 0,
+   "total_cnt": 88,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "구로구|한신": {
+   "high_cnt": 0,
+   "total_cnt": 1,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "구로구|한진": {
+   "high_cnt": 0,
+   "total_cnt": 41,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "구로구|현대": {
+   "high_cnt": 0,
+   "total_cnt": 56,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "구로구|현대홈타운": {
+   "high_cnt": 0,
+   "total_cnt": 40,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "금천구|관악산벽산타운5": {
+   "high_cnt": 0,
+   "total_cnt": 65,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "금천구|금천롯데캐슬골드파크1차": {
+   "high_cnt": 0,
+   "total_cnt": 40,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "금천구|금천롯데캐슬골드파크3차": {
+   "high_cnt": 0,
+   "total_cnt": 70,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "금천구|금천현대": {
+   "high_cnt": 0,
+   "total_cnt": 50,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "금천구|남서울힐스테이트": {
+   "high_cnt": 0,
+   "total_cnt": 16,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "금천구|독산주공14단지": {
+   "high_cnt": 0,
+   "total_cnt": 6,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "금천구|두산": {
+   "high_cnt": 0,
+   "total_cnt": 42,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "금천구|벽산": {
+   "high_cnt": 0,
+   "total_cnt": 35,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "금천구|삼익": {
+   "high_cnt": 0,
+   "total_cnt": 10,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|극동": {
+   "high_cnt": 0,
+   "total_cnt": 17,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|미성": {
+   "high_cnt": 0,
+   "total_cnt": 8,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|벽산": {
+   "high_cnt": 0,
+   "total_cnt": 35,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|비선아파트": {
+   "high_cnt": 0,
+   "total_cnt": 3,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|삼호3": {
+   "high_cnt": 0,
+   "total_cnt": 136,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|삼호4": {
+   "high_cnt": 0,
+   "total_cnt": 12,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|상계2차중앙하이츠": {
+   "high_cnt": 0,
+   "total_cnt": 25,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|상계주공1(고층)": {
+   "high_cnt": 0,
+   "total_cnt": 63,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|상계주공10(고층)": {
+   "high_cnt": 0,
+   "total_cnt": 72,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|상계주공11(고층)": {
+   "high_cnt": 0,
+   "total_cnt": 32,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|상계주공12(고층)": {
+   "high_cnt": 0,
+   "total_cnt": 12,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|상계주공13(고층)": {
+   "high_cnt": 0,
+   "total_cnt": 12,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|상계주공14(고층)": {
+   "high_cnt": 0,
+   "total_cnt": 3,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|상계주공16(고층)": {
+   "high_cnt": 0,
+   "total_cnt": 124,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|상계주공2(고층)": {
+   "high_cnt": 0,
+   "total_cnt": 77,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|상계주공3(고층)": {
+   "high_cnt": 0,
+   "total_cnt": 76,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|상계주공4(고층)": {
+   "high_cnt": 0,
+   "total_cnt": 34,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|상계주공6(고층)": {
+   "high_cnt": 0,
+   "total_cnt": 230,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|상계주공7(고층)": {
+   "high_cnt": 0,
+   "total_cnt": 36,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|상계주공9(고층)": {
+   "high_cnt": 0,
+   "total_cnt": 14,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|성원(사슴4)": {
+   "high_cnt": 0,
+   "total_cnt": 18,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|월계센트럴아이파크": {
+   "high_cnt": 0,
+   "total_cnt": 40,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|은빛1단지": {
+   "high_cnt": 0,
+   "total_cnt": 43,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|은빛2단지": {
+   "high_cnt": 0,
+   "total_cnt": 36,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|장미(시영6)": {
+   "high_cnt": 0,
+   "total_cnt": 34,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|주공2": {
+   "high_cnt": 0,
+   "total_cnt": 13,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|주공5": {
+   "high_cnt": 0,
+   "total_cnt": 49,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|중계그린1단지": {
+   "high_cnt": 0,
+   "total_cnt": 22,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|중계무지개": {
+   "high_cnt": 0,
+   "total_cnt": 43,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|청솔(시영7)": {
+   "high_cnt": 0,
+   "total_cnt": 6,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|청암2단지": {
+   "high_cnt": 0,
+   "total_cnt": 13,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|태강아파트(아이파크)": {
+   "high_cnt": 0,
+   "total_cnt": 32,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|태릉해링턴플레이스": {
+   "high_cnt": 0,
+   "total_cnt": 46,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|포레나노원": {
+   "high_cnt": 0,
+   "total_cnt": 31,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|풍림아파트A": {
+   "high_cnt": 0,
+   "total_cnt": 22,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|학여울청구": {
+   "high_cnt": 0,
+   "total_cnt": 21,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|한진한화그랑빌": {
+   "high_cnt": 0,
+   "total_cnt": 86,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "노원구|현대": {
+   "high_cnt": 0,
+   "total_cnt": 78,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "도봉구|대상타운현대아파트": {
+   "high_cnt": 0,
+   "total_cnt": 6,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "도봉구|대우": {
+   "high_cnt": 0,
+   "total_cnt": 14,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "도봉구|동아청솔": {
+   "high_cnt": 0,
+   "total_cnt": 106,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "도봉구|삼익세라믹": {
+   "high_cnt": 0,
+   "total_cnt": 32,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "도봉구|신동아아파트1": {
+   "high_cnt": 0,
+   "total_cnt": 26,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "도봉구|쌍용": {
+   "high_cnt": 0,
+   "total_cnt": 22,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "도봉구|주공19단지(창동리버타운)": {
+   "high_cnt": 0,
+   "total_cnt": 41,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "도봉구|창동주공18단지": {
+   "high_cnt": 0,
+   "total_cnt": 8,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "도봉구|창동주공1단지": {
+   "high_cnt": 0,
+   "total_cnt": 12,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "도봉구|창동주공3단지(해등마을)": {
+   "high_cnt": 0,
+   "total_cnt": 125,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "도봉구|한양2": {
+   "high_cnt": 0,
+   "total_cnt": 10,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동대문구|답십리청솔우성": {
+   "high_cnt": 0,
+   "total_cnt": 55,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동대문구|답십리파크자이": {
+   "high_cnt": 0,
+   "total_cnt": 51,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동대문구|대림e-편한세상": {
+   "high_cnt": 0,
+   "total_cnt": 41,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동대문구|동서울한양": {
+   "high_cnt": 0,
+   "total_cnt": 17,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동대문구|동아": {
+   "high_cnt": 0,
+   "total_cnt": 37,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동대문구|두산": {
+   "high_cnt": 0,
+   "total_cnt": 16,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동대문구|래미안 허브리츠": {
+   "high_cnt": 0,
+   "total_cnt": 12,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동대문구|래미안미드카운티": {
+   "high_cnt": 0,
+   "total_cnt": 41,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동대문구|래미안위브": {
+   "high_cnt": 0,
+   "total_cnt": 70,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동대문구|래미안크레시티": {
+   "high_cnt": 0,
+   "total_cnt": 99,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동대문구|신동아": {
+   "high_cnt": 0,
+   "total_cnt": 19,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동대문구|쌍용": {
+   "high_cnt": 0,
+   "total_cnt": 52,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동대문구|장안현대홈타운(336)": {
+   "high_cnt": 0,
+   "total_cnt": 23,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동대문구|장안힐스테이트": {
+   "high_cnt": 0,
+   "total_cnt": 15,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동대문구|전농SK": {
+   "high_cnt": 0,
+   "total_cnt": 62,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동대문구|전농우성": {
+   "high_cnt": 0,
+   "total_cnt": 53,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동대문구|주공2": {
+   "high_cnt": 0,
+   "total_cnt": 8,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동대문구|청계한신휴플러스": {
+   "high_cnt": 0,
+   "total_cnt": 23,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동대문구|한신": {
+   "high_cnt": 0,
+   "total_cnt": 21,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동대문구|한신아파트": {
+   "high_cnt": 0,
+   "total_cnt": 66,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동대문구|현대": {
+   "high_cnt": 0,
+   "total_cnt": 26,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동대문구|휘경SK뷰": {
+   "high_cnt": 0,
+   "total_cnt": 34,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동대문구|힐스테이트청계": {
+   "high_cnt": 0,
+   "total_cnt": 20,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동작구|e편한세상상도노빌리티": {
+   "high_cnt": 0,
+   "total_cnt": 25,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동작구|극동(105)": {
+   "high_cnt": 0,
+   "total_cnt": 33,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동작구|대림(169-8)": {
+   "high_cnt": 0,
+   "total_cnt": 4,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동작구|대림아파트": {
+   "high_cnt": 0,
+   "total_cnt": 72,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동작구|래미안로이파크": {
+   "high_cnt": 0,
+   "total_cnt": 4,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동작구|래미안상도3차": {
+   "high_cnt": 0,
+   "total_cnt": 18,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동작구|롯데낙천대": {
+   "high_cnt": 0,
+   "total_cnt": 49,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동작구|사당롯데캐슬골든포레": {
+   "high_cnt": 0,
+   "total_cnt": 63,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동작구|사당우성2": {
+   "high_cnt": 0,
+   "total_cnt": 44,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동작구|사당우성3": {
+   "high_cnt": 0,
+   "total_cnt": 16,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동작구|사당자이": {
+   "high_cnt": 0,
+   "total_cnt": 31,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동작구|삼성래미안": {
+   "high_cnt": 0,
+   "total_cnt": 12,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동작구|상도역롯데캐슬파크엘": {
+   "high_cnt": 0,
+   "total_cnt": 81,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동작구|신동아": {
+   "high_cnt": 0,
+   "total_cnt": 10,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동작구|신동아4": {
+   "high_cnt": 0,
+   "total_cnt": 61,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동작구|신동아리버파크": {
+   "high_cnt": 0,
+   "total_cnt": 53,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동작구|아크로리버하임": {
+   "high_cnt": 0,
+   "total_cnt": 19,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동작구|우성": {
+   "high_cnt": 0,
+   "total_cnt": 32,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동작구|포스코더샵": {
+   "high_cnt": 0,
+   "total_cnt": 49,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동작구|현대": {
+   "high_cnt": 0,
+   "total_cnt": 12,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동작구|흑석한강푸르지오": {
+   "high_cnt": 0,
+   "total_cnt": 3,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "동작구|힐스테이트 상도 센트럴파크": {
+   "high_cnt": 0,
+   "total_cnt": 15,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "마포구|대흥동태영아파트": {
+   "high_cnt": 0,
+   "total_cnt": 54,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "마포구|래미안공덕4차": {
+   "high_cnt": 0,
+   "total_cnt": 50,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "마포구|래미안공덕5차": {
+   "high_cnt": 0,
+   "total_cnt": 26,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "마포구|마포그랑자이": {
+   "high_cnt": 0,
+   "total_cnt": 48,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "마포구|마포래미안푸르지오2단지": {
+   "high_cnt": 0,
+   "total_cnt": 30,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "마포구|마포래미안푸르지오3단지": {
+   "high_cnt": 0,
+   "total_cnt": 9,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "마포구|마포래미안푸르지오4단지": {
+   "high_cnt": 0,
+   "total_cnt": 58,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "마포구|마포프레스티지자이": {
+   "high_cnt": 0,
+   "total_cnt": 75,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "마포구|상암월드컵파크2단지": {
+   "high_cnt": 0,
+   "total_cnt": 103,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "마포구|성산시영(유원)": {
+   "high_cnt": 0,
+   "total_cnt": 187,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "마포구|신공덕1차삼성래미안1아파트": {
+   "high_cnt": 0,
+   "total_cnt": 29,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "마포구|신촌숲아이파크": {
+   "high_cnt": 0,
+   "total_cnt": 30,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "마포구|한화오벨리스크": {
+   "high_cnt": 0,
+   "total_cnt": 1,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "마포구|현대홈타운": {
+   "high_cnt": 0,
+   "total_cnt": 2,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서대문구|DMC래미안e편한세상": {
+   "high_cnt": 0,
+   "total_cnt": 30,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서대문구|DMC래미안클라시스": {
+   "high_cnt": 0,
+   "total_cnt": 17,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서대문구|DMC센트럴아이파크": {
+   "high_cnt": 0,
+   "total_cnt": 10,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서대문구|DMC에코자이": {
+   "high_cnt": 0,
+   "total_cnt": 44,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서대문구|DMC파크뷰자이1단지": {
+   "high_cnt": 0,
+   "total_cnt": 12,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서대문구|DMC파크뷰자이2단지": {
+   "high_cnt": 0,
+   "total_cnt": 6,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서대문구|e편한세상신촌1단지": {
+   "high_cnt": 0,
+   "total_cnt": 37,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서대문구|남가좌동현대": {
+   "high_cnt": 0,
+   "total_cnt": 57,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서대문구|독립문극동(200-0)": {
+   "high_cnt": 0,
+   "total_cnt": 39,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서대문구|두산": {
+   "high_cnt": 0,
+   "total_cnt": 141,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서대문구|문화촌현대": {
+   "high_cnt": 0,
+   "total_cnt": 23,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서대문구|성원": {
+   "high_cnt": 0,
+   "total_cnt": 17,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서대문구|신촌럭키": {
+   "high_cnt": 0,
+   "total_cnt": 32,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서대문구|신촌푸르지오": {
+   "high_cnt": 0,
+   "total_cnt": 26,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서대문구|인왕산현대": {
+   "high_cnt": 0,
+   "total_cnt": 32,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서대문구|천연뜨란채": {
+   "high_cnt": 0,
+   "total_cnt": 83,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서대문구|홍은동벽산": {
+   "high_cnt": 0,
+   "total_cnt": 10,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서대문구|홍제삼성래미안": {
+   "high_cnt": 0,
+   "total_cnt": 23,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서대문구|홍제센트럴IPARK": {
+   "high_cnt": 0,
+   "total_cnt": 8,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서대문구|홍제원현대(459-0)": {
+   "high_cnt": 0,
+   "total_cnt": 43,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서대문구|홍제한양": {
+   "high_cnt": 0,
+   "total_cnt": 82,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서대문구|힐스테이트신촌": {
+   "high_cnt": 0,
+   "total_cnt": 43,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서초구|동아": {
+   "high_cnt": 0,
+   "total_cnt": 28,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서초구|래미안 리더스원": {
+   "high_cnt": 0,
+   "total_cnt": 19,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서초구|래미안원베일리": {
+   "high_cnt": 0,
+   "total_cnt": 38,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서초구|래미안퍼스티지": {
+   "high_cnt": 0,
+   "total_cnt": 30,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서초구|반포리체": {
+   "high_cnt": 0,
+   "total_cnt": 27,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서초구|반포자이": {
+   "high_cnt": 0,
+   "total_cnt": 61,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서초구|서초더샵포레": {
+   "high_cnt": 0,
+   "total_cnt": 21,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서초구|서초힐스": {
+   "high_cnt": 0,
+   "total_cnt": 33,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서초구|아크로리버파크": {
+   "high_cnt": 0,
+   "total_cnt": 14,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "서초구|호반써밋서초파크": {
+   "high_cnt": 0,
+   "total_cnt": 6,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성동구|극동": {
+   "high_cnt": 0,
+   "total_cnt": 24,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성동구|대림e-편한세상": {
+   "high_cnt": 0,
+   "total_cnt": 137,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성동구|대림강변타운": {
+   "high_cnt": 0,
+   "total_cnt": 52,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성동구|대우": {
+   "high_cnt": 0,
+   "total_cnt": 59,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성동구|두산": {
+   "high_cnt": 0,
+   "total_cnt": 80,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성동구|래미안 옥수 리버젠": {
+   "high_cnt": 0,
+   "total_cnt": 79,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성동구|래미안하이리버": {
+   "high_cnt": 0,
+   "total_cnt": 48,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성동구|벽산": {
+   "high_cnt": 0,
+   "total_cnt": 63,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성동구|서울숲 한신 더 휴": {
+   "high_cnt": 0,
+   "total_cnt": 35,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성동구|서울숲리버뷰자이": {
+   "high_cnt": 0,
+   "total_cnt": 11,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성동구|서울숲푸르지오": {
+   "high_cnt": 0,
+   "total_cnt": 31,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성동구|센트라스": {
+   "high_cnt": 0,
+   "total_cnt": 96,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성동구|신금호파크자이": {
+   "high_cnt": 0,
+   "total_cnt": 93,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성동구|신동아": {
+   "high_cnt": 0,
+   "total_cnt": 78,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성동구|옥수삼성": {
+   "high_cnt": 0,
+   "total_cnt": 56,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성동구|옥수파크힐스101동~116동": {
+   "high_cnt": 0,
+   "total_cnt": 61,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성동구|왕십리자이": {
+   "high_cnt": 0,
+   "total_cnt": 68,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성동구|왕십리풍림아이원": {
+   "high_cnt": 0,
+   "total_cnt": 36,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성동구|이편한세상금호파크힐스": {
+   "high_cnt": 0,
+   "total_cnt": 68,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성동구|텐즈힐(1단지)": {
+   "high_cnt": 0,
+   "total_cnt": 21,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성동구|텐즈힐(2단지)": {
+   "high_cnt": 0,
+   "total_cnt": 7,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성동구|행당한진타운": {
+   "high_cnt": 0,
+   "total_cnt": 137,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성동구|현대": {
+   "high_cnt": 0,
+   "total_cnt": 48,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|길음뉴타운1단지(래미안길음1차)": {
+   "high_cnt": 0,
+   "total_cnt": 63,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|길음뉴타운2단지푸르지오": {
+   "high_cnt": 0,
+   "total_cnt": 24,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|길음뉴타운4단지(e편한세상)": {
+   "high_cnt": 0,
+   "total_cnt": 56,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|길음뉴타운6단지(래미안)": {
+   "high_cnt": 0,
+   "total_cnt": 32,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|길음뉴타운8단지(래미안)": {
+   "high_cnt": 0,
+   "total_cnt": 80,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|길음뉴타운9단지(래미안)": {
+   "high_cnt": 0,
+   "total_cnt": 22,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|길음뉴타운경남아너스빌": {
+   "high_cnt": 0,
+   "total_cnt": 19,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|길음동동부센트레빌(1278-0)": {
+   "high_cnt": 0,
+   "total_cnt": 53,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|꿈의숲아이파크": {
+   "high_cnt": 0,
+   "total_cnt": 56,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|꿈의숲푸르지오": {
+   "high_cnt": 0,
+   "total_cnt": 38,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|대우": {
+   "high_cnt": 0,
+   "total_cnt": 7,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|돈암동삼성": {
+   "high_cnt": 0,
+   "total_cnt": 24,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|동신": {
+   "high_cnt": 0,
+   "total_cnt": 22,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|동아에코빌": {
+   "high_cnt": 0,
+   "total_cnt": 43,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|두산": {
+   "high_cnt": 0,
+   "total_cnt": 38,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|래미안길음센터피스": {
+   "high_cnt": 0,
+   "total_cnt": 136,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|래미안세레니티": {
+   "high_cnt": 0,
+   "total_cnt": 19,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|래미안아트리치": {
+   "high_cnt": 0,
+   "total_cnt": 65,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|래미안월곡": {
+   "high_cnt": 0,
+   "total_cnt": 33,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|래미안장위퍼스트하이": {
+   "high_cnt": 0,
+   "total_cnt": 58,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|래미안크리시엘": {
+   "high_cnt": 0,
+   "total_cnt": 48,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|래미안포레카운티": {
+   "high_cnt": 0,
+   "total_cnt": 29,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|롯데캐슬클라시아": {
+   "high_cnt": 0,
+   "total_cnt": 81,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|보문파크뷰자이": {
+   "high_cnt": 0,
+   "total_cnt": 13,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|삼선푸르지오": {
+   "high_cnt": 0,
+   "total_cnt": 5,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|월곡두산위브": {
+   "high_cnt": 0,
+   "total_cnt": 49,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|월곡래미안루나밸리": {
+   "high_cnt": 0,
+   "total_cnt": 31,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|이수브라운스톤돈암": {
+   "high_cnt": 0,
+   "total_cnt": 54,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|정릉e-편한세상": {
+   "high_cnt": 0,
+   "total_cnt": 21,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|정릉풍림아이원": {
+   "high_cnt": 0,
+   "total_cnt": 64,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|종암에스케이": {
+   "high_cnt": 0,
+   "total_cnt": 40,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|코오롱": {
+   "high_cnt": 0,
+   "total_cnt": 29,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "성북구|한진(609-1)": {
+   "high_cnt": 0,
+   "total_cnt": 84,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "송파구|가락(1차)쌍용아파트": {
+   "high_cnt": 0,
+   "total_cnt": 101,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "송파구|가락금호아파트": {
+   "high_cnt": 0,
+   "total_cnt": 91,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "송파구|거여1단지": {
+   "high_cnt": 0,
+   "total_cnt": 12,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "송파구|거여4단지": {
+   "high_cnt": 0,
+   "total_cnt": 14,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "송파구|대림": {
+   "high_cnt": 0,
+   "total_cnt": 3,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "송파구|래미안파크팰리스": {
+   "high_cnt": 0,
+   "total_cnt": 20,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "송파구|레이크팰리스": {
+   "high_cnt": 0,
+   "total_cnt": 30,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "송파구|리센츠": {
+   "high_cnt": 0,
+   "total_cnt": 14,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "송파구|상아2차아파트": {
+   "high_cnt": 0,
+   "total_cnt": 16,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "송파구|송파더센트레": {
+   "high_cnt": 0,
+   "total_cnt": 40,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "송파구|송파시그니처롯데캐슬": {
+   "high_cnt": 0,
+   "total_cnt": 67,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "송파구|우성": {
+   "high_cnt": 0,
+   "total_cnt": 28,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "송파구|위례24단지(꿈에그린)": {
+   "high_cnt": 0,
+   "total_cnt": 37,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "송파구|잠실엘스": {
+   "high_cnt": 0,
+   "total_cnt": 113,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "송파구|트리지움": {
+   "high_cnt": 0,
+   "total_cnt": 65,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "송파구|파크리오": {
+   "high_cnt": 0,
+   "total_cnt": 142,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "송파구|헬리오시티": {
+   "high_cnt": 0,
+   "total_cnt": 85,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "양천구|래미안목동아델리체(101동~118동)": {
+   "high_cnt": 0,
+   "total_cnt": 6,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "양천구|롯데캐슬": {
+   "high_cnt": 0,
+   "total_cnt": 25,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "양천구|롯데캐슬위너": {
+   "high_cnt": 0,
+   "total_cnt": 9,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "양천구|목동센트럴아이파크위브1단지": {
+   "high_cnt": 0,
+   "total_cnt": 12,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "양천구|목동센트럴아이파크위브2단지": {
+   "high_cnt": 0,
+   "total_cnt": 27,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "양천구|목동센트럴아이파크위브3단지": {
+   "high_cnt": 0,
+   "total_cnt": 6,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "양천구|목동신시가지11": {
+   "high_cnt": 0,
+   "total_cnt": 1,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "양천구|목동신시가지12": {
+   "high_cnt": 0,
+   "total_cnt": 16,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "양천구|목동신시가지14": {
+   "high_cnt": 0,
+   "total_cnt": 71,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "양천구|목동신시가지7": {
+   "high_cnt": 0,
+   "total_cnt": 19,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "양천구|목동힐스테이트": {
+   "high_cnt": 0,
+   "total_cnt": 23,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "양천구|신월시영": {
+   "high_cnt": 0,
+   "total_cnt": 26,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "양천구|신트리1": {
+   "high_cnt": 0,
+   "total_cnt": 23,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "양천구|신트리4": {
+   "high_cnt": 0,
+   "total_cnt": 45,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "양천구|학마을1단지": {
+   "high_cnt": 0,
+   "total_cnt": 6,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "영등포구|강변래미안": {
+   "high_cnt": 0,
+   "total_cnt": 12,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "영등포구|경남아너스빌": {
+   "high_cnt": 0,
+   "total_cnt": 76,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "영등포구|당산현대5차": {
+   "high_cnt": 0,
+   "total_cnt": 55,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "영등포구|래미안에스티움": {
+   "high_cnt": 0,
+   "total_cnt": 42,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "영등포구|래미안영등포프레비뉴": {
+   "high_cnt": 0,
+   "total_cnt": 15,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "영등포구|보라매에스케이뷰": {
+   "high_cnt": 0,
+   "total_cnt": 65,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "영등포구|삼성래미안": {
+   "high_cnt": 0,
+   "total_cnt": 43,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "영등포구|삼환": {
+   "high_cnt": 0,
+   "total_cnt": 86,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "영등포구|시범": {
+   "high_cnt": 0,
+   "total_cnt": 16,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "영등포구|신길센트럴자이아파트": {
+   "high_cnt": 0,
+   "total_cnt": 61,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "영등포구|신동아": {
+   "high_cnt": 0,
+   "total_cnt": 7,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "영등포구|아크로타워스퀘어": {
+   "high_cnt": 0,
+   "total_cnt": 26,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "영등포구|양평한신": {
+   "high_cnt": 0,
+   "total_cnt": 93,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "영등포구|양평현대6차": {
+   "high_cnt": 0,
+   "total_cnt": 28,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "영등포구|영등포푸르지오": {
+   "high_cnt": 0,
+   "total_cnt": 44,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "영등포구|현대2차": {
+   "high_cnt": 0,
+   "total_cnt": 10,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "영등포구|현대3차": {
+   "high_cnt": 0,
+   "total_cnt": 28,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "영등포구|힐스테이트클래시안": {
+   "high_cnt": 0,
+   "total_cnt": 123,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "용산구|강촌": {
+   "high_cnt": 0,
+   "total_cnt": 34,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "용산구|리버힐삼성": {
+   "high_cnt": 0,
+   "total_cnt": 42,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "용산구|삼성래미안": {
+   "high_cnt": 0,
+   "total_cnt": 58,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "용산구|한가람": {
+   "high_cnt": 0,
+   "total_cnt": 115,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "용산구|한남더힐": {
+   "high_cnt": 0,
+   "total_cnt": 7,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "은평구|DMC롯데캐슬더퍼스트": {
+   "high_cnt": 0,
+   "total_cnt": 40,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "은평구|e편한세상 수색 에코포레": {
+   "high_cnt": 0,
+   "total_cnt": 33,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "은평구|녹번역e편한세상캐슬": {
+   "high_cnt": 0,
+   "total_cnt": 235,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "은평구|래미안베라힐즈": {
+   "high_cnt": 0,
+   "total_cnt": 50,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "은평구|백련산에스케이뷰아이파크": {
+   "high_cnt": 0,
+   "total_cnt": 74,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "은평구|백련산파크자이": {
+   "high_cnt": 0,
+   "total_cnt": 28,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "은평구|백련산힐스테이트1차": {
+   "high_cnt": 0,
+   "total_cnt": 30,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "은평구|백련산힐스테이트2차": {
+   "high_cnt": 0,
+   "total_cnt": 42,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "은평구|백련산힐스테이트3차": {
+   "high_cnt": 0,
+   "total_cnt": 27,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "은평구|백련산힐스테이트4차": {
+   "high_cnt": 0,
+   "total_cnt": 27,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "은평구|북한산푸르지오": {
+   "high_cnt": 0,
+   "total_cnt": 18,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "은평구|북한산현대힐스테이트3차아파트": {
+   "high_cnt": 0,
+   "total_cnt": 48,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "은평구|힐스테이트녹번": {
+   "high_cnt": 0,
+   "total_cnt": 48,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "종로구|경희궁자이(2단지)": {
+   "high_cnt": 0,
+   "total_cnt": 1,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "종로구|경희궁자이(3단지)": {
+   "high_cnt": 0,
+   "total_cnt": 14,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "종로구|현대": {
+   "high_cnt": 0,
+   "total_cnt": 20,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "중구|남산타운": {
+   "high_cnt": 0,
+   "total_cnt": 126,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "중구|래미안하이베르": {
+   "high_cnt": 0,
+   "total_cnt": 20,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "중구|롯데캐슬": {
+   "high_cnt": 0,
+   "total_cnt": 56,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "중구|삼성": {
+   "high_cnt": 0,
+   "total_cnt": 37,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "중구|서울역센트럴자이": {
+   "high_cnt": 0,
+   "total_cnt": 39,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "중구|약수하이츠": {
+   "high_cnt": 0,
+   "total_cnt": 98,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "중랑구|동성1": {
+   "high_cnt": 0,
+   "total_cnt": 16,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "중랑구|사가정센트럴아이파크": {
+   "high_cnt": 0,
+   "total_cnt": 12,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "중랑구|신내": {
+   "high_cnt": 0,
+   "total_cnt": 20,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "중랑구|신내11대명": {
+   "high_cnt": 0,
+   "total_cnt": 11,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "중랑구|신내6대주": {
+   "high_cnt": 0,
+   "total_cnt": 49,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  },
+  "중랑구|한신아파트상가동유치원동(103~109)": {
+   "high_cnt": 0,
+   "total_cnt": 73,
+   "high_share": 0.0,
+   "last_high_ym": null,
+   "flag": false
+  }
+ }
+}

@@ -76,6 +76,16 @@ jobs:
         run: |
           python src/ai_ranking.py || echo "AI 순위 산출 실패 — 기존 ai_ranking.json 유지"
 
+      - name: 공동주택 공시가격 수집 (HUG 지표용, best-effort)
+        env:
+          MOLIT_API_KEY: ${{ secrets.MOLIT_API_KEY }}
+        run: |
+          python collect_official_price.py || echo "공시가 수집 실패 — HUG 지표는 다음 실행에서 재시도"
+
+      - name: 전세 안전성 지표 산출 (additive)
+        run: |
+          python src/jeonse_safety.py || echo "안전성 산출 실패 — 기존 jeonse_safety.json 유지"
+
       - name: 커밋 서명 설정 (SSH, best-effort)
         env:
           SSH_SIGNING_KEY: ${{ secrets.SSH_SIGNING_KEY }}
