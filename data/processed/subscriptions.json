@@ -1,0 +1,41 @@
+{
+  "updated": "2026-07-06",
+  "items": [
+    {
+      "name": "동작 센트럴 동문 디 이스트",
+      "addr": null,
+      "notice_date": "2026-07-02",
+      "rcept_bgn": "2026-07-13",
+      "rcept_end": "2026-07-16",
+      "winner_date": "2026-07-23",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000153&pblancNo=2026000153"
+    },
+    {
+      "name": "장위 푸르지오 마크원",
+      "addr": null,
+      "notice_date": "2026-06-19",
+      "rcept_bgn": "2026-06-29",
+      "rcept_end": "2026-07-02",
+      "winner_date": "2026-07-08",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000275&pblancNo=2026000275"
+    },
+    {
+      "name": "드파인 아르티아",
+      "addr": null,
+      "notice_date": "2026-06-19",
+      "rcept_bgn": "2026-06-29",
+      "rcept_end": "2026-07-02",
+      "winner_date": "2026-07-08",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000241&pblancNo=2026000241"
+    },
+    {
+      "name": "북서울자이 폴라리스(보류지)",
+      "addr": null,
+      "notice_date": "2026-06-12",
+      "rcept_bgn": "2026-06-22",
+      "rcept_end": "2026-06-24",
+      "winner_date": "2026-06-30",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000235&pblancNo=2026000235"
+    }
+  ]
+}
