@@ -757,3 +757,44 @@ export function won2eok(v, digits = 2) {
 export function won2man(v) {
   return Math.round(v / 만).toLocaleString() + '만원';
 }
+
+/* ═══════════ 전세 자금 계획 (매매와 분리된 비용 체계) ═══════════
+ * 전세는 취득세·등기비용이 없다. 나가는 돈: 보증금(대부분 회수), 임대차
+ * 중개보수, 이사·기타비, (선택) 전세보증금 반환보증 보험료, 대출이자. */
+
+export const JEONSE_LOAN_PRODUCTS = [
+  { id: 'butumok_newly', name: '버팀목 전세대출 (신혼부부)', rate: 0.021, cap: 3.0e8, ratio: 0.80,
+    cond: '수도권 보증금 4억 이하 · 부부합산 소득 7,500만 이하', condCapJ: 4.0e8 },
+  { id: 'hug',  name: '일반 전세대출 (HUG 보증)', rate: 0.038, cap: 4.0e8, ratio: 0.80,
+    cond: '수도권 보증금 7억 이하', condCapJ: 7.0e8 },
+  { id: 'sgi',  name: '일반 전세대출 (SGI 보증)', rate: 0.041, cap: 5.0e8, ratio: 0.80,
+    cond: '보증금 제한 없음 · 한도 최대 5억', condCapJ: Infinity },
+];
+
+// 임대차(전세) 중개보수 상한 — 서울 주택 임대차 요율 (공인중개사법 시행규칙)
+export function calcJeonseBroker(J) {
+  if (J <= 0.5e8) return Math.min(J * 0.005, 20e4);
+  if (J <  1e8)   return Math.min(J * 0.004, 30e4);
+  if (J <  6e8)   return J * 0.003;
+  if (J < 12e8)   return J * 0.004;
+  return J * 0.008;
+}
+
+export function jeonseLoanFor(J, product) {
+  if (J > (product.condCapJ ?? Infinity)) return 0;   // 상품의 보증금 요건 초과 → 대출 불가
+  return Math.min(J * product.ratio, product.cap);
+}
+
+// 자기자본+전세대출로 감당 가능한 최대 보증금 (중개보수·이사비 포함, 이분탐색)
+export function maxJeonseBudget(equity, product, moveCost = 3e6) {
+  let lo = 0, hi = 50e8;
+  for (let i = 0; i < 60; i++) {
+    const mid = (lo + hi) / 2;
+    const need = mid + calcJeonseBroker(mid) + moveCost - jeonseLoanFor(mid, product);
+    if (need <= equity) lo = mid; else hi = mid;
+  }
+  return lo;
+}
+
+// HUG 전세보증금 반환보증 보험료율 (아파트 개인 기준 연 0.115~0.128% — 상단값 사용)
+export const JEONSE_INSURE_RATE = 0.00128;

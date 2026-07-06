@@ -7,9 +7,15 @@
     <div class="section-label">STEP 6 · 예산</div>
     <h2 class="section-title">우리 예산 플래너</h2>
     <p class="section-desc">
-      <strong>각자</strong>의 자금·소득·대출을 따로 입력해 각자의 가용자금을 구하고,
-      합산해서 <strong>어떤 가격대의 집을 볼 수 있는지</strong> 결론을 도출합니다.
+      <strong>매매</strong>와 <strong>전세</strong>는 나가는 돈이 다릅니다 — 방식을 고르면 그에 맞는 자금 계산으로 바뀝니다.
+      현금·부모님 지원 입력은 두 방식이 공유합니다.
     </p>
+
+    <!-- 🏠 매매 / 🔑 전세 모드 선택 -->
+    <div class="legend-mode-toggle" id="budgetModeToggle" style="margin-bottom:1.2rem">
+      <button class="legend-mode-btn active" data-mode="buy">🏠 매매로 산다면</button>
+      <button class="legend-mode-btn" data-mode="jeonse">🔑 전세로 간다면</button>
+    </div>
 
     <div class="budget-grid">
       <!-- 💼 나 -->
@@ -38,8 +44,8 @@
           <div class="pc-conclusion" id="aParentConclusion"></div>
         </div>
 
-        <div class="budget-card">
-          <div class="budget-card-title">🏦 대출</div>
+        <div class="budget-card" data-bmode="buy">
+          <div class="budget-card-title">🏦 대출 (주택담보)</div>
           <div class="budget-field"><label>대출 상품</label>
             <select id="aProduct" class="explorer-sort" style="width:100%"></select>
           </div>
@@ -54,7 +60,7 @@
           </div>
         </div>
 
-        <div id="aSummary" class="person-summary"></div>
+        <div id="aSummary" class="person-summary" data-bmode="buy"></div>
       </div>
 
       <!-- 💗 여자친구 -->
@@ -83,8 +89,8 @@
           <div class="pc-conclusion" id="bParentConclusion"></div>
         </div>
 
-        <div class="budget-card">
-          <div class="budget-card-title">🏦 대출</div>
+        <div class="budget-card" data-bmode="buy">
+          <div class="budget-card-title">🏦 대출 (주택담보)</div>
           <div class="budget-field"><label>대출 상품</label>
             <select id="bProduct" class="explorer-sort" style="width:100%"></select>
           </div>
@@ -99,12 +105,12 @@
           </div>
         </div>
 
-        <div id="bSummary" class="person-summary"></div>
+        <div id="bSummary" class="person-summary" data-bmode="buy"></div>
       </div>
     </div>
 
     <!-- ⚙️ 공통 조건 (전체 폭, 가로 배치) -->
-    <div class="budget-card common-card">
+    <div class="budget-card common-card" data-bmode="buy">
       <div class="budget-card-title">⚙️ 공통 조건</div>
       <div class="common-grid">
         <div class="common-checks">
@@ -126,10 +132,35 @@
     </div>
 
     <!-- 결과 (전체 폭) -->
-    <div class="budget-card budget-card-result" id="budgetOutput"></div>
+    <div class="budget-card budget-card-result" id="budgetOutput" data-bmode="buy"></div>
+
+    <!-- 🔑 전세 모드: 대출·조건 + 결과 (매매와 비용 체계 분리) -->
+    <div class="budget-card" data-bmode="jeonse" style="display:none">
+      <div class="budget-card-title">🔑 전세 대출 & 조건</div>
+      <div class="common-grid">
+        <div class="budget-field"><label>전세대출 상품</label>
+          <select id="jProduct" class="explorer-sort" style="width:100%"></select>
+        </div>
+        <div class="budget-field"><label>금리 (%)</label>
+          <div class="bf-input"><input type="number" id="jRate" step="0.05" min="0"></div>
+        </div>
+        <div class="budget-field"><label>이사·기타 비용</label>
+          <div class="bf-input"><input type="number" id="jMove" value="300" step="50" min="0"><span>만원</span></div>
+        </div>
+      </div>
+      <div class="pc-checks" style="margin-top:.5rem">
+        <label class="bc"><input type="checkbox" id="jInsure" checked> 전세보증금 반환보증 가입 (HUG, 연 0.128%) — 보증금 안전장치</label>
+      </div>
+      <div class="budget-field ls-field" style="margin-top:.6rem">
+        <label>목표 전세 보증금 <span class="ls-max" id="jTargetMax"></span></label>
+        <input type="range" class="ls-slider" id="jTarget" min="0" max="0" step="10000000" value="0">
+        <div class="ls-out" id="jTargetOut"></div>
+      </div>
+    </div>
+    <div class="budget-card budget-card-result" id="jeonseOutput" data-bmode="jeonse" style="display:none"></div>
 
     <!-- 월 상환 상세 (누구에게 얼마가 나가는지 + 월급 대비 비중) -->
-    <details class="budget-card budget-fold" style="margin-top:1rem">
+    <details class="budget-card budget-fold" data-bmode="buy" style="margin-top:1rem">
       <summary class="budget-card-title">💸 매달 얼마가, 누구에게 나가나요?</summary>
       <div id="repayDetail" class="repay-detail"></div>
     </details>
@@ -141,7 +172,7 @@
     </details>
 
     <!-- 자금 구성 차트 + 부대비용 상세 -->
-    <div class="budget-detail-grid">
+    <div class="budget-detail-grid" data-bmode="buy">
       <div class="budget-card">
         <div class="budget-card-title">💠 자금 구성</div>
         <div id="budgetChart" style="height:230px"></div>
@@ -153,7 +184,7 @@
     </div>
 
     <!-- 자금 흐름 (전체 자금 → 세금·부대비용 → 자기자본/대출 → 매수가) -->
-    <details class="budget-card budget-fold" style="margin-top:1rem">
+    <details class="budget-card budget-fold" data-bmode="buy" style="margin-top:1rem">
       <summary class="budget-card-title">🔀 자금 흐름 한눈에 보기</summary>
       <div id="fundFlow" class="fund-flow"></div>
     </details>
@@ -171,7 +202,7 @@
     </details>
 
     <!-- 실제 금리 확인 사이트 -->
-    <details class="legal-section budget-fold">
+    <details class="legal-section budget-fold" data-bmode="buy">
       <summary class="legal-section-title">🏦 실제 대출 금리 확인하기 <span class="legal-hint">직접 확인 후 위 금리(%) 칸에 입력하세요</span></summary>
       <ul id="rateSourceList" class="reference-list"></ul>
       <p class="lp-note">일반 주택담보대출 금리(기본 4.10%)는 은행·시점·개인 신용에 따라 매일 달라집니다. 아래 공식 비교 사이트에서 실제 금리를 확인해 각자 금리 칸에 넣으면 정확한 상환액이 계산됩니다.</p>

@@ -2,6 +2,7 @@ import {
   LOAN_PRODUCTS, analyzeCouple, won2eok, won2man, calcMonthlyPayment, personDsrLoan,
   splitParentSupport, maxFamilyLoanFor,
   LEGAL_BASIS, FAMILY_LOAN, REFERENCES, LOAN_RATE_SOURCES, GIFT_TAX_TABLE,
+  JEONSE_LOAN_PRODUCTS, calcJeonseBroker, jeonseLoanFor, maxJeonseBudget, JEONSE_INSURE_RATE,
 } from './financeCalculator.js';
 
 /* ── 유틸 ──────────────────────────────────────────────── */
@@ -1181,11 +1182,52 @@ function initBudgetPlanner() {
     });
   });
 
+  // ── 매매/전세 모드 토글 ──
+  const jSel = document.getElementById('jProduct');
+  if (jSel) {
+    jSel.innerHTML = JEONSE_LOAN_PRODUCTS.map(pd =>
+      `<option value="${pd.id}">${pd.name} · 기본 ${(pd.rate * 100).toFixed(2)}%</option>`).join('');
+    jSel.value = 'butumok_newly';
+    const syncJRate = () => {
+      const pd = JEONSE_LOAN_PRODUCTS.find(x => x.id === jSel.value);
+      document.getElementById('jRate').value = (pd.rate * 100).toFixed(2);
+      recalcBudget();
+    };
+    jSel.addEventListener('change', syncJRate);
+    document.getElementById('jRate').value = (JEONSE_LOAN_PRODUCTS[0].rate * 100).toFixed(2);
+  }
+  ['jRate', 'jMove', 'jInsure'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.addEventListener('input', recalcBudget); el.addEventListener('change', recalcBudget); }
+  });
+  const jSlider = document.getElementById('jTarget');
+  if (jSlider) jSlider.addEventListener('input', () => {
+    jTargetState = parseFloat(jSlider.value) || 0;
+    recalcBudget();
+  });
+  document.querySelectorAll('#budgetModeToggle .legend-mode-btn').forEach(btn =>
+    btn.addEventListener('click', () => applyBudgetMode(btn.dataset.mode)));
+  applyBudgetMode(localStorage.getItem('budgetMode_v1') || 'buy', true);
+
   renderLegalAccordion();
   renderReferences();
   renderRateSources();
   renderGiftTaxTable();
   recalcBudget();
+}
+
+let budgetMode = 'buy';
+let jTargetState = null;   // 목표 전세금 슬라이더 (null=자동: 최대치의 90% 수준)
+
+function applyBudgetMode(mode, skipRecalc) {
+  budgetMode = mode === 'jeonse' ? 'jeonse' : 'buy';
+  localStorage.setItem('budgetMode_v1', budgetMode);
+  document.querySelectorAll('#budgetModeToggle .legend-mode-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.mode === budgetMode));
+  document.querySelectorAll('[data-bmode]').forEach(el => {
+    el.style.display = el.dataset.bmode === budgetMode ? '' : 'none';
+  });
+  if (!skipRecalc) recalcBudget();
 }
 
 function renderGiftTaxTable() {
@@ -1417,6 +1459,24 @@ function recalcBudget() {
       <div class="br-stat"><span class="brk">합산 은행대출</span><span class="brv">${won2eok(R.loan)}</span><span class="brs">${R.loanBind} · LTV ${(R.ltv*100).toFixed(0)}%</span></div>
       <div class="br-stat"><span class="brk">합산 월 상환액</span><span class="brv">${won2man(R.totalMonthly)}</span><span class="brs">나 ${won2man(R.A.monthly)} + 여친 ${won2man(R.B.monthly)}</span></div>
     </div>
+    ${(() => {
+      // 매수 자금 구성 시각화: 자기자본(초록) + 은행대출(파랑) 스택바 + 세금·비용 캡션
+      const tot = R.ownEquity + R.loan;
+      if (!(tot > 0)) return '';
+      const wEq = R.ownEquity / tot * 100;
+      const costPct = R.maxPrice > 0 ? ((R.acqTax + R.brokerFee) / R.maxPrice * 100).toFixed(1) : '0';
+      return `
+      <div class="fundbar-legend" style="margin-top:.9rem">
+        <span>🟢 자기자본 ${won2eok(R.ownEquity)}</span><span>🔵 은행대출 ${won2eok(R.loan)}</span>
+        <span style="margin-left:auto">= 매수가 ${won2eok(R.maxPrice)}</span>
+      </div>
+      <div class="fundbar">
+        <div style="width:${wEq}%;background:var(--green)">${wEq >= 15 ? '자기자본' : ''}</div>
+        <div style="width:${100 - wEq}%;background:var(--acc2)">${100 - wEq >= 15 ? '은행대출' : ''}</div>
+      </div>
+      <div class="fundbar-caption">이 외 별도로 나가는 돈: 취득세 ${won2man(R.acqTax)} + 중개보수 ${won2man(R.brokerFee)}
+        <b>(매수가의 ${costPct}%)</b> — 전세엔 없는 비용입니다.</div>`;
+    })()}
     ${R.warnings.length ? `<div class="br-warns">${R.warnings.map(w => `<div class="budget-warn">⚠️ ${w}</div>`).join('')}</div>` : ''}
   `;
   document.getElementById('budgetApply').addEventListener('click', () => {
@@ -1429,6 +1489,102 @@ function recalcBudget() {
   renderBudgetChart(R);
   renderFundFlow(R);
   renderRepayDetail(R);
+  renderJeonseBudget(R);   // 전세 모드 결과 (항상 계산, 모드에 따라 표시만)
+}
+
+/* ── 🔑 전세 자금 계획 — 매매와 분리된 비용 체계 ─────────────
+   취득세·등기 없음. 자기자본(현금+부모지원 세후)과 전세대출로
+   "최대 보증금"과 "목표 보증금 기준 여유자금"을 계산한다. */
+function renderJeonseBudget(R) {
+  const out = document.getElementById('jeonseOutput');
+  if (!out) return;
+  const 억 = 1e8, 만 = 1e4;
+  const num = id => parseFloat(document.getElementById(id).value) || 0;
+
+  // 자기자본 = (기여분 − 은행대출) 합 — 현금 + 부모지원(증여세 차감·차용 포함)
+  const equity = (R.A.contrib - R.A.loan) + (R.B.contrib - R.B.loan);
+  const product = JEONSE_LOAN_PRODUCTS.find(x => x.id === document.getElementById('jProduct').value) || JEONSE_LOAN_PRODUCTS[0];
+  const rate = (num('jRate') / 100) || product.rate;
+  const move = num('jMove') * 만;
+  const insureOn = document.getElementById('jInsure').checked;
+
+  const maxJ = maxJeonseBudget(equity, product, move);
+
+  // 목표 보증금 슬라이더 동기화 (기본: 최대치의 90% — 여유자금이 보이도록)
+  const slider = document.getElementById('jTarget');
+  const maxRounded = Math.round(maxJ / 1e7) * 1e7;
+  slider.max = maxRounded;
+  if (jTargetState == null || jTargetState > maxRounded) jTargetState = Math.round(maxRounded * 0.9 / 1e7) * 1e7;
+  slider.value = jTargetState;
+  document.getElementById('jTargetMax').textContent = `최대 ${won2eok(maxJ)}`;
+  const J = jTargetState;
+  document.getElementById('jTargetOut').textContent = `${won2eok(J)} 전세를 구한다면?`;
+
+  const loan = jeonseLoanFor(J, product);
+  const selfNeed = Math.max(0, J - loan);
+  const broker = calcJeonseBroker(J);
+  const spare = equity - selfNeed - broker - move;
+
+  const loanInterestM = loan * rate / 12;                       // 만기일시(이자만)
+  const familyM = (R.A.familyMonthly || 0) + (R.B.familyMonthly || 0);
+  const insureM = insureOn ? J * JEONSE_INSURE_RATE / 12 : 0;
+  const totalM = loanInterestM + familyM + insureM;
+  const netM = (R.A.netMonthly || 0) + (R.B.netMonthly || 0);
+  const burden = netM > 0 ? (totalM / netM * 100) : 0;
+
+  const wSelf = J > 0 ? (selfNeed / J * 100) : 0;
+  const capNote = loan >= product.cap - 1 ? '상품 한도 도달' : `보증금의 ${(product.ratio * 100).toFixed(0)}%`;
+  const warns = [];
+  if (J > (product.condCapJ ?? Infinity)) warns.push(`${product.name}은 보증금 ${won2eok(product.condCapJ)} 이하만 가능 — 이 보증금에선 대출이 안 나옵니다. 상품을 바꿔보세요.`);
+  if (spare < 0) warns.push(`목표 보증금이 자금을 ${won2eok(-spare)} 초과합니다 — 보증금을 낮추거나 대출 상품을 확인하세요.`);
+
+  const row = (k, v, sub) => `<div class="jb-row"><span>${k}</span><span><b>${v}</b>${sub ? ` <small style="color:var(--text3)">${sub}</small>` : ''}</span></div>`;
+
+  out.innerHTML = `
+    <div class="br-main">
+      <div class="br-headline">
+        <span class="br-label">둘이 합치면 — 최대 전세 보증금</span>
+        <span class="br-price">${won2eok(maxJ)}</span>
+      </div>
+      <button class="price-apply br-apply" id="jeonseApply">이 예산으로 전세 추천 보기 →</button>
+    </div>
+
+    <div class="fundbar-legend">
+      <span>🟢 우리 돈 ${won2eok(selfNeed)}</span><span>🔵 전세대출 ${won2eok(loan)} <small>(${capNote})</small></span>
+      <span style="margin-left:auto">= 목표 보증금 ${won2eok(J)}</span>
+    </div>
+    <div class="fundbar">
+      <div style="width:${wSelf}%;background:var(--green)">${wSelf >= 15 ? '우리 돈' : ''}</div>
+      <div style="width:${100 - wSelf}%;background:var(--acc2)">${100 - wSelf >= 15 ? '전세대출' : ''}</div>
+    </div>
+
+    <div class="br-stats" style="margin-top:.9rem">
+      <div class="br-stat"><span class="brk">💰 남는 여유자금</span>
+        <span class="brv" style="color:${spare >= 0 ? 'var(--green)' : 'var(--red)'}">${won2eok(spare)}</span>
+        <span class="brs">자기자본 ${won2eok(equity)} 중 보증금·비용 제외</span></div>
+      <div class="br-stat"><span class="brk">월 부담 합계</span><span class="brv">${won2man(totalM)}</span>
+        <span class="brs">세후월급 합의 ${burden.toFixed(1)}%</span></div>
+      <div class="br-stat"><span class="brk">전세대출 이자</span><span class="brv">${won2man(loanInterestM)}/월</span>
+        <span class="brs">${(rate * 100).toFixed(2)}% 만기일시</span></div>
+      <div class="br-stat"><span class="brk">부모 차용 상환</span><span class="brv">${won2man(familyM)}/월</span>
+        <span class="brs">무이자 원금분할</span></div>
+    </div>
+
+    <div style="margin-top:1rem">
+      <div class="budget-card-title" style="font-size:.92rem">🧾 전세에서 나가는 돈 (매매와 다릅니다)</div>
+      ${row('중개보수 (임대차 요율)', won2man(broker), '1회')}
+      ${row('이사·기타 비용', won2man(move), '1회')}
+      ${insureOn ? row('전세보증금 반환보증 보험료', won2man(J * JEONSE_INSURE_RATE) + '/년', 'HUG 연 0.128%') : ''}
+      ${row('취득세 · 등기비용', '<span class="jb-zero">0원 ✓</span>', '전세는 소유권 이전이 없어 없음')}
+      ${row('보증금 ' + won2eok(J), '계약 종료 시 회수', '반환보증 가입 시 안전')}
+    </div>
+    ${warns.length ? `<div class="br-warns" style="margin-top:.8rem">${warns.map(w => `<div class="budget-warn">⚠️ ${w}</div>`).join('')}</div>` : ''}
+  `;
+  document.getElementById('jeonseApply')?.addEventListener('click', () => {
+    // 전세 맞춤 1위 페이지의 예산 필터에 그대로 반영
+    localStorage.setItem('jeonseBudget_v1', JSON.stringify({ min: null, max: +(maxJ / 억).toFixed(1) }));
+    window.location.href = '/jeonse-top1';
+  });
 }
 
 // 부모님 지원 상세: 기본공제 → 혼인·출산공제 → 무이자 차용 → 과세 증여 순 분해 +
