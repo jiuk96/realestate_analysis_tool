@@ -73,7 +73,7 @@
    "ai_score": 69.8,
    "axes": {
     "undervalued": 80.1,
-    "liquidity": 57.0,
+    "liquidity": 57.2,
     "transit": 77.9,
     "momentum": 96.4,
     "school": 51.7,
@@ -97,7 +97,7 @@
    "ai_score": 69.6,
    "axes": {
     "undervalued": 67.7,
-    "liquidity": 75.9,
+    "liquidity": 76.0,
     "transit": 77.6,
     "momentum": 95.6,
     "school": 41.2,
@@ -121,7 +121,7 @@
    "ai_score": 69.0,
    "axes": {
     "undervalued": 80.7,
-    "liquidity": 68.7,
+    "liquidity": 68.8,
     "transit": 51.0,
     "momentum": 87.1,
     "school": 86.1,
@@ -145,7 +145,7 @@
    "ai_score": 68.9,
    "axes": {
     "undervalued": 71.1,
-    "liquidity": 71.7,
+    "liquidity": 71.8,
     "transit": 58.7,
     "momentum": 64.9,
     "school": 93.8,
@@ -169,7 +169,7 @@
    "ai_score": 68.7,
    "axes": {
     "undervalued": 66.1,
-    "liquidity": 61.5,
+    "liquidity": 61.6,
     "transit": 59.0,
     "momentum": 91.2,
     "school": 93.2,
@@ -190,10 +190,10 @@
    "ai_rank": 8,
    "district": "관악구",
    "apt_name": "봉천동아",
-   "ai_score": 68.5,
+   "ai_score": 68.6,
    "axes": {
     "undervalued": 67.3,
-    "liquidity": 50.5,
+    "liquidity": 50.6,
     "transit": 59.0,
     "momentum": 99.7,
     "school": 93.2,
@@ -332,30 +332,6 @@
   },
   {
    "ai_rank": 14,
-   "district": "서대문구",
-   "apt_name": "인왕산현대",
-   "ai_score": 66.0,
-   "axes": {
-    "undervalued": 64.1,
-    "liquidity": 63.6,
-    "transit": 77.6,
-    "momentum": 92.5,
-    "school": 41.2,
-    "product": 41.0
-   },
-   "highlights": [
-    "최근 가격이 연 +37.5% 추세로 상승 흐름",
-    "교통·직주근접 — 홍제역 도보 5분, 도심(광화문·시청) 3.3km"
-   ],
-   "low_confidence": false,
-   "build_year": 2000,
-   "area_exclusive": 59.9,
-   "dong": "홍제동",
-   "lat": 37.5871,
-   "lng": 126.94676
-  },
-  {
-   "ai_rank": 15,
    "district": "영등포구",
    "apt_name": "삼성래미안",
    "ai_score": 66.0,
@@ -379,13 +355,37 @@
    "lng": 126.9028974
   },
   {
+   "ai_rank": 15,
+   "district": "서대문구",
+   "apt_name": "인왕산현대",
+   "ai_score": 66.0,
+   "axes": {
+    "undervalued": 64.1,
+    "liquidity": 63.8,
+    "transit": 77.6,
+    "momentum": 92.5,
+    "school": 41.2,
+    "product": 41.0
+   },
+   "highlights": [
+    "최근 가격이 연 +37.5% 추세로 상승 흐름",
+    "교통·직주근접 — 홍제역 도보 5분, 도심(광화문·시청) 3.3km"
+   ],
+   "low_confidence": false,
+   "build_year": 2000,
+   "area_exclusive": 59.9,
+   "dong": "홍제동",
+   "lat": 37.5871,
+   "lng": 126.94676
+  },
+  {
    "ai_rank": 16,
    "district": "관악구",
    "apt_name": "현대(관악)",
-   "ai_score": 65.6,
+   "ai_score": 65.7,
    "axes": {
     "undervalued": 64.8,
-    "liquidity": 56.7,
+    "liquidity": 56.8,
     "transit": 59.0,
     "momentum": 98.2,
     "school": 93.2,
@@ -409,7 +409,7 @@
    "ai_score": 65.5,
    "axes": {
     "undervalued": 61.7,
-    "liquidity": 51.8,
+    "liquidity": 51.9,
     "transit": 68.9,
     "momentum": 97.0,
     "school": 66.0,
@@ -500,6 +500,30 @@
   },
   {
    "ai_rank": 21,
+   "district": "영등포구",
+   "apt_name": "삼환",
+   "ai_score": 63.5,
+   "axes": {
+    "undervalued": 64.1,
+    "liquidity": 62.6,
+    "transit": 60.8,
+    "momentum": 94.6,
+    "school": 59.9,
+    "product": 24.6
+   },
+   "highlights": [
+    "최근 가격이 연 +38.9% 추세로 상승 흐름",
+    "저평가 매력 — 전세가율 54%, 영등포구 내 평단가 하위 68%"
+   ],
+   "low_confidence": false,
+   "build_year": 1997,
+   "area_exclusive": 59.5,
+   "dong": "신길동",
+   "lat": 37.5072137,
+   "lng": 126.9200328
+  },
+  {
+   "ai_rank": 22,
    "district": "성동구",
    "apt_name": "신동아",
    "ai_score": 63.5,
@@ -521,30 +545,6 @@
    "dong": "행당동",
    "lat": 37.55783,
    "lng": 127.03571
-  },
-  {
-   "ai_rank": 22,
-   "district": "영등포구",
-   "apt_name": "삼환",
-   "ai_score": 63.5,
-   "axes": {
-    "undervalued": 64.1,
-    "liquidity": 62.5,
-    "transit": 60.8,
-    "momentum": 94.6,
-    "school": 59.9,
-    "product": 24.6
-   },
-   "highlights": [
-    "최근 가격이 연 +38.9% 추세로 상승 흐름",
-    "저평가 매력 — 전세가율 54%, 영등포구 내 평단가 하위 68%"
-   ],
-   "low_confidence": false,
-   "build_year": 1997,
-   "area_exclusive": 59.5,
-   "dong": "신길동",
-   "lat": 37.5072137,
-   "lng": 126.9200328
   },
   {
    "ai_rank": 23,
@@ -625,15 +625,15 @@
    "ai_score": 62.4,
    "axes": {
     "undervalued": 65.6,
-    "liquidity": 68.8,
+    "liquidity": 68.9,
     "transit": 51.0,
     "momentum": 68.8,
     "school": 47.4,
     "product": 68.9
    },
    "highlights": [
-    "2010년 준공(16년차)의 상품성",
-    "거래가 활발해 환금성 우수 (누적 169건)"
+    "거래가 활발해 환금성 우수 (누적 169건)",
+    "2010년 준공(16년차)의 상품성"
    ],
    "low_confidence": false,
    "build_year": 2010,
@@ -697,7 +697,7 @@
    "ai_score": 62.0,
    "axes": {
     "undervalued": 51.2,
-    "liquidity": 61.4,
+    "liquidity": 61.5,
     "transit": 61.9,
     "momentum": 65.2,
     "school": 58.4,
@@ -716,78 +716,6 @@
   },
   {
    "ai_rank": 30,
-   "district": "영등포구",
-   "apt_name": "양평한신",
-   "ai_score": 61.9,
-   "axes": {
-    "undervalued": 54.1,
-    "liquidity": 74.2,
-    "transit": 78.5,
-    "momentum": 97.0,
-    "school": 21.7,
-    "product": 21.9
-   },
-   "highlights": [
-    "최근 가격이 연 +42.5% 추세로 상승 흐름",
-    "교통·직주근접 — 선유도역 도보 4분, 여의도 3.5km"
-   ],
-   "low_confidence": false,
-   "build_year": 1996,
-   "area_exclusive": 59.9,
-   "dong": "양평동5가",
-   "lat": 37.54028,
-   "lng": 126.891746
-  },
-  {
-   "ai_rank": 31,
-   "district": "성북구",
-   "apt_name": "동아에코빌",
-   "ai_score": 61.9,
-   "axes": {
-    "undervalued": 74.8,
-    "liquidity": 74.6,
-    "transit": 59.7,
-    "momentum": 68.6,
-    "school": 18.9,
-    "product": 53.0
-   },
-   "highlights": [
-    "저평가 매력 — 전세가율 57%, 성북구 내 평단가 하위 79%",
-    "거래가 활발해 환금성 우수 (누적 236건)"
-   ],
-   "low_confidence": false,
-   "build_year": 2003,
-   "area_exclusive": 60.0,
-   "dong": "상월곡동",
-   "lat": 37.60607,
-   "lng": 127.04629
-  },
-  {
-   "ai_rank": 32,
-   "district": "관악구",
-   "apt_name": "두산",
-   "ai_score": 61.9,
-   "axes": {
-    "undervalued": 44.4,
-    "liquidity": 71.7,
-    "transit": 77.8,
-    "momentum": 79.1,
-    "school": 53.7,
-    "product": 41.0
-   },
-   "highlights": [
-    "최근 가격이 연 +31.6% 추세로 상승 흐름",
-    "교통·직주근접 — 봉천역 도보 3분, 여의도 4.5km"
-   ],
-   "low_confidence": false,
-   "build_year": 2000,
-   "area_exclusive": 59.9,
-   "dong": "봉천동",
-   "lat": 37.4829206,
-   "lng": 126.9397014
-  },
-  {
-   "ai_rank": 33,
    "district": "동작구",
    "apt_name": "상도역롯데캐슬파크엘",
    "ai_score": 61.9,
@@ -811,13 +739,61 @@
    "lng": 126.9455956
   },
   {
-   "ai_rank": 34,
+   "ai_rank": 31,
+   "district": "관악구",
+   "apt_name": "두산",
+   "ai_score": 61.9,
+   "axes": {
+    "undervalued": 44.4,
+    "liquidity": 71.7,
+    "transit": 77.8,
+    "momentum": 79.1,
+    "school": 53.7,
+    "product": 41.0
+   },
+   "highlights": [
+    "최근 가격이 연 +31.6% 추세로 상승 흐름",
+    "교통·직주근접 — 봉천역 도보 3분, 여의도 4.5km"
+   ],
+   "low_confidence": false,
+   "build_year": 2000,
+   "area_exclusive": 59.9,
+   "dong": "봉천동",
+   "lat": 37.4829206,
+   "lng": 126.9397014
+  },
+  {
+   "ai_rank": 32,
+   "district": "성북구",
+   "apt_name": "동아에코빌",
+   "ai_score": 61.9,
+   "axes": {
+    "undervalued": 74.8,
+    "liquidity": 74.6,
+    "transit": 59.7,
+    "momentum": 68.6,
+    "school": 18.9,
+    "product": 53.0
+   },
+   "highlights": [
+    "저평가 매력 — 전세가율 57%, 성북구 내 평단가 하위 79%",
+    "거래가 활발해 환금성 우수 (누적 236건)"
+   ],
+   "low_confidence": false,
+   "build_year": 2003,
+   "area_exclusive": 60.0,
+   "dong": "상월곡동",
+   "lat": 37.60607,
+   "lng": 127.04629
+  },
+  {
+   "ai_rank": 33,
    "district": "동대문구",
    "apt_name": "답십리파크자이",
    "ai_score": 61.9,
    "axes": {
     "undervalued": 31.8,
-    "liquidity": 69.6,
+    "liquidity": 69.7,
     "transit": 54.7,
     "momentum": 75.3,
     "school": 73.5,
@@ -835,13 +811,37 @@
    "lng": 127.05467
   },
   {
+   "ai_rank": 34,
+   "district": "영등포구",
+   "apt_name": "양평한신",
+   "ai_score": 61.9,
+   "axes": {
+    "undervalued": 54.1,
+    "liquidity": 74.2,
+    "transit": 78.5,
+    "momentum": 97.0,
+    "school": 21.7,
+    "product": 21.9
+   },
+   "highlights": [
+    "최근 가격이 연 +42.5% 추세로 상승 흐름",
+    "교통·직주근접 — 선유도역 도보 4분, 여의도 3.5km"
+   ],
+   "low_confidence": false,
+   "build_year": 1996,
+   "area_exclusive": 59.9,
+   "dong": "양평동5가",
+   "lat": 37.54028,
+   "lng": 126.891746
+  },
+  {
    "ai_rank": 35,
    "district": "성북구",
    "apt_name": "래미안크리시엘",
    "ai_score": 61.7,
    "axes": {
     "undervalued": 62.9,
-    "liquidity": 58.8,
+    "liquidity": 58.9,
     "transit": 42.4,
     "momentum": 83.2,
     "school": 65.6,
@@ -933,30 +933,6 @@
   {
    "ai_rank": 39,
    "district": "양천구",
-   "apt_name": "신트리4",
-   "ai_score": 61.3,
-   "axes": {
-    "undervalued": 66.2,
-    "liquidity": 40.5,
-    "transit": 51.1,
-    "momentum": 88.1,
-    "school": 77.8,
-    "product": 41.0
-   },
-   "highlights": [
-    "최근 가격이 연 +35.2% 추세로 상승 흐름",
-    "학군·생활 — 초품아, 학원 356곳"
-   ],
-   "low_confidence": false,
-   "build_year": 2000,
-   "area_exclusive": 59.7,
-   "dong": "신정동",
-   "lat": 37.5162407,
-   "lng": 126.8521196
-  },
-  {
-   "ai_rank": 40,
-   "district": "양천구",
    "apt_name": "신트리1",
    "ai_score": 61.3,
    "axes": {
@@ -979,7 +955,7 @@
    "lng": 126.8521196
   },
   {
-   "ai_rank": 41,
+   "ai_rank": 40,
    "district": "은평구",
    "apt_name": "힐스테이트녹번",
    "ai_score": 61.3,
@@ -1003,13 +979,37 @@
    "lng": 126.93437
   },
   {
+   "ai_rank": 41,
+   "district": "양천구",
+   "apt_name": "신트리4",
+   "ai_score": 61.3,
+   "axes": {
+    "undervalued": 66.2,
+    "liquidity": 40.5,
+    "transit": 51.1,
+    "momentum": 88.1,
+    "school": 77.8,
+    "product": 41.0
+   },
+   "highlights": [
+    "최근 가격이 연 +35.2% 추세로 상승 흐름",
+    "학군·생활 — 초품아, 학원 356곳"
+   ],
+   "low_confidence": false,
+   "build_year": 2000,
+   "area_exclusive": 59.7,
+   "dong": "신정동",
+   "lat": 37.5162407,
+   "lng": 126.8521196
+  },
+  {
    "ai_rank": 42,
    "district": "성북구",
    "apt_name": "길음동동부센트레빌(1278-0)",
-   "ai_score": 61.2,
+   "ai_score": 61.3,
    "axes": {
     "undervalued": 54.1,
-    "liquidity": 61.0,
+    "liquidity": 61.1,
     "transit": 41.7,
     "momentum": 84.0,
     "school": 79.4,
@@ -1028,27 +1028,27 @@
   },
   {
    "ai_rank": 43,
-   "district": "성동구",
-   "apt_name": "대림e-편한세상",
-   "ai_score": 61.1,
+   "district": "영등포구",
+   "apt_name": "영등포푸르지오",
+   "ai_score": 61.2,
    "axes": {
     "undervalued": 44.6,
-    "liquidity": 69.5,
-    "transit": 62.6,
-    "momentum": 75.8,
-    "school": 77.3,
-    "product": 41.0
+    "liquidity": 43.8,
+    "transit": 67.9,
+    "momentum": 99.0,
+    "school": 64.5,
+    "product": 50.1
    },
    "highlights": [
-    "학군·생활 — 초품아, 학원 295곳",
-    "최근 가격이 연 +30.4% 추세로 상승 흐름"
+    "최근 가격이 연 +46.0% 추세로 상승 흐름",
+    "교통·직주근접 — 영등포역 도보 8분, 여의도 2.2km"
    ],
    "low_confidence": false,
-   "build_year": 2000,
-   "area_exclusive": 60.0,
-   "dong": "행당동",
-   "lat": 37.55783,
-   "lng": 127.03571
+   "build_year": 2002,
+   "area_exclusive": 59.9,
+   "dong": "영등포동",
+   "lat": 37.5118372,
+   "lng": 126.9034273
   },
   {
    "ai_rank": 44,
@@ -1100,27 +1100,27 @@
   },
   {
    "ai_rank": 46,
-   "district": "영등포구",
-   "apt_name": "영등포푸르지오",
+   "district": "성동구",
+   "apt_name": "대림e-편한세상",
    "ai_score": 61.1,
    "axes": {
     "undervalued": 44.6,
-    "liquidity": 43.8,
-    "transit": 67.9,
-    "momentum": 99.0,
-    "school": 64.5,
-    "product": 50.1
+    "liquidity": 69.5,
+    "transit": 62.6,
+    "momentum": 75.8,
+    "school": 77.3,
+    "product": 41.0
    },
    "highlights": [
-    "최근 가격이 연 +46.0% 추세로 상승 흐름",
-    "교통·직주근접 — 영등포역 도보 8분, 여의도 2.2km"
+    "학군·생활 — 초품아, 학원 295곳",
+    "최근 가격이 연 +30.4% 추세로 상승 흐름"
    ],
    "low_confidence": false,
-   "build_year": 2002,
-   "area_exclusive": 59.9,
-   "dong": "영등포동",
-   "lat": 37.5118372,
-   "lng": 126.9034273
+   "build_year": 2000,
+   "area_exclusive": 60.0,
+   "dong": "행당동",
+   "lat": 37.55783,
+   "lng": 127.03571
   },
   {
    "ai_rank": 47,
@@ -1148,30 +1148,6 @@
   },
   {
    "ai_rank": 48,
-   "district": "구로구",
-   "apt_name": "대림1",
-   "ai_score": 60.7,
-   "axes": {
-    "undervalued": 41.8,
-    "liquidity": 73.2,
-    "transit": 62.5,
-    "momentum": 89.4,
-    "school": 60.8,
-    "product": 34.1
-   },
-   "highlights": [
-    "최근 가격이 연 +36.1% 추세로 상승 흐름",
-    "거래가 활발해 환금성 우수 (누적 121건)"
-   ],
-   "low_confidence": false,
-   "build_year": 1999,
-   "area_exclusive": 59.9,
-   "dong": "신도림동",
-   "lat": 37.5063068,
-   "lng": 126.8779707
-  },
-  {
-   "ai_rank": 49,
    "district": "동작구",
    "apt_name": "래미안상도3차",
    "ai_score": 60.7,
@@ -1193,6 +1169,30 @@
    "dong": "상도동",
    "lat": 37.4988159,
    "lng": 126.9441045
+  },
+  {
+   "ai_rank": 49,
+   "district": "구로구",
+   "apt_name": "대림1",
+   "ai_score": 60.7,
+   "axes": {
+    "undervalued": 41.8,
+    "liquidity": 73.2,
+    "transit": 62.5,
+    "momentum": 89.4,
+    "school": 60.8,
+    "product": 34.1
+   },
+   "highlights": [
+    "최근 가격이 연 +36.1% 추세로 상승 흐름",
+    "거래가 활발해 환금성 우수 (누적 121건)"
+   ],
+   "low_confidence": false,
+   "build_year": 1999,
+   "area_exclusive": 59.9,
+   "dong": "신도림동",
+   "lat": 37.5063068,
+   "lng": 126.8779707
   },
   {
    "ai_rank": 50,
@@ -1220,30 +1220,6 @@
   },
   {
    "ai_rank": 51,
-   "district": "성동구",
-   "apt_name": "래미안하이리버",
-   "ai_score": 60.5,
-   "axes": {
-    "undervalued": 28.3,
-    "liquidity": 47.1,
-    "transit": 83.6,
-    "momentum": 69.3,
-    "school": 84.0,
-    "product": 73.6
-   },
-   "highlights": [
-    "학군·생활 — 초품아, 학원 332곳",
-    "교통·직주근접 — 신금호역 도보 3분, 도심(광화문·시청) 4.3km"
-   ],
-   "low_confidence": false,
-   "build_year": 2012,
-   "area_exclusive": 60.0,
-   "dong": "금호동2가",
-   "lat": 37.55311,
-   "lng": 127.0211
-  },
-  {
-   "ai_rank": 52,
    "district": "중구",
    "apt_name": "래미안하이베르",
    "ai_score": 60.5,
@@ -1267,7 +1243,55 @@
    "lng": 127.01322
   },
   {
+   "ai_rank": 52,
+   "district": "성동구",
+   "apt_name": "래미안하이리버",
+   "ai_score": 60.5,
+   "axes": {
+    "undervalued": 28.3,
+    "liquidity": 47.2,
+    "transit": 83.6,
+    "momentum": 69.3,
+    "school": 84.0,
+    "product": 73.6
+   },
+   "highlights": [
+    "학군·생활 — 초품아, 학원 332곳",
+    "교통·직주근접 — 신금호역 도보 3분, 도심(광화문·시청) 4.3km"
+   ],
+   "low_confidence": false,
+   "build_year": 2012,
+   "area_exclusive": 60.0,
+   "dong": "금호동2가",
+   "lat": 37.55311,
+   "lng": 127.0211
+  },
+  {
    "ai_rank": 53,
+   "district": "성북구",
+   "apt_name": "길음뉴타운1단지(래미안길음1차)",
+   "ai_score": 60.5,
+   "axes": {
+    "undervalued": 47.9,
+    "liquidity": 72.5,
+    "transit": 41.7,
+    "momentum": 76.3,
+    "school": 79.4,
+    "product": 53.0
+   },
+   "highlights": [
+    "학군·생활 — 초품아, 학원 488곳",
+    "최근 가격이 연 +30.6% 추세로 상승 흐름"
+   ],
+   "low_confidence": false,
+   "build_year": 2003,
+   "area_exclusive": 60.0,
+   "dong": "길음동",
+   "lat": 37.6085308,
+   "lng": 127.0201946
+  },
+  {
+   "ai_rank": 54,
    "district": "마포구",
    "apt_name": "상암월드컵파크2단지",
    "ai_score": 60.4,
@@ -1291,31 +1315,31 @@
    "lng": 126.8914496
   },
   {
-   "ai_rank": 54,
-   "district": "성북구",
-   "apt_name": "길음뉴타운1단지(래미안길음1차)",
-   "ai_score": 60.4,
+   "ai_rank": 55,
+   "district": "서대문구",
+   "apt_name": "홍제한양",
+   "ai_score": 60.3,
    "axes": {
-    "undervalued": 47.9,
-    "liquidity": 72.4,
-    "transit": 41.7,
-    "momentum": 76.3,
-    "school": 79.4,
-    "product": 53.0
+    "undervalued": 69.9,
+    "liquidity": 68.0,
+    "transit": 77.6,
+    "momentum": 64.7,
+    "school": 41.2,
+    "product": 16.2
    },
    "highlights": [
-    "학군·생활 — 초품아, 학원 488곳",
-    "최근 가격이 연 +30.6% 추세로 상승 흐름"
+    "교통·직주근접 — 홍제역 도보 5분, 도심(광화문·시청) 3.3km",
+    "저평가 매력 — 전세가율 54%, 서대문구 내 평단가 하위 86%"
    ],
    "low_confidence": false,
-   "build_year": 2003,
-   "area_exclusive": 60.0,
-   "dong": "길음동",
-   "lat": 37.6085308,
-   "lng": 127.0201946
+   "build_year": 1993,
+   "area_exclusive": 60.1,
+   "dong": "홍제동",
+   "lat": 37.5871,
+   "lng": 126.94676
   },
   {
-   "ai_rank": 55,
+   "ai_rank": 56,
    "district": "관악구",
    "apt_name": "관악드림(동아)",
    "ai_score": 60.3,
@@ -1337,30 +1361,6 @@
    "dong": "봉천동",
    "lat": 37.484665,
    "lng": 126.9484961
-  },
-  {
-   "ai_rank": 56,
-   "district": "서대문구",
-   "apt_name": "홍제한양",
-   "ai_score": 60.3,
-   "axes": {
-    "undervalued": 69.9,
-    "liquidity": 67.9,
-    "transit": 77.6,
-    "momentum": 64.7,
-    "school": 41.2,
-    "product": 16.2
-   },
-   "highlights": [
-    "교통·직주근접 — 홍제역 도보 5분, 도심(광화문·시청) 3.3km",
-    "저평가 매력 — 전세가율 54%, 서대문구 내 평단가 하위 86%"
-   ],
-   "low_confidence": false,
-   "build_year": 1993,
-   "area_exclusive": 60.1,
-   "dong": "홍제동",
-   "lat": 37.5871,
-   "lng": 126.94676
   },
   {
    "ai_rank": 57,
@@ -1436,30 +1436,6 @@
   },
   {
    "ai_rank": 60,
-   "district": "중구",
-   "apt_name": "롯데캐슬",
-   "ai_score": 59.9,
-   "axes": {
-    "undervalued": 94.1,
-    "liquidity": 44.4,
-    "transit": 89.6,
-    "momentum": 32.2,
-    "school": 6.6,
-    "product": 65.5
-   },
-   "highlights": [
-    "저평가 매력 — 전세가율 62%, 중구 내 평단가 하위 100%",
-    "교통·직주근접 — 회현역 도보 5분, 도심(광화문·시청) 1.4km"
-   ],
-   "low_confidence": false,
-   "build_year": 2008,
-   "area_exclusive": 59.9,
-   "dong": "황학동",
-   "lat": 37.5582619,
-   "lng": 126.9820497
-  },
-  {
-   "ai_rank": 61,
    "district": "강서구",
    "apt_name": "주공10",
    "ai_score": 59.9,
@@ -1483,13 +1459,37 @@
    "lng": 126.86025
   },
   {
+   "ai_rank": 61,
+   "district": "중구",
+   "apt_name": "롯데캐슬",
+   "ai_score": 59.9,
+   "axes": {
+    "undervalued": 94.1,
+    "liquidity": 44.4,
+    "transit": 89.6,
+    "momentum": 32.2,
+    "school": 6.6,
+    "product": 65.5
+   },
+   "highlights": [
+    "저평가 매력 — 전세가율 62%, 중구 내 평단가 하위 100%",
+    "교통·직주근접 — 회현역 도보 5분, 도심(광화문·시청) 1.4km"
+   ],
+   "low_confidence": false,
+   "build_year": 2008,
+   "area_exclusive": 59.9,
+   "dong": "황학동",
+   "lat": 37.5582619,
+   "lng": 126.9820497
+  },
+  {
    "ai_rank": 62,
    "district": "영등포구",
    "apt_name": "현대3차",
    "ai_score": 59.7,
    "axes": {
     "undervalued": 59.6,
-    "liquidity": 45.1,
+    "liquidity": 45.2,
     "transit": 80.3,
     "momentum": 93.6,
     "school": 35.4,
@@ -1580,6 +1580,30 @@
   },
   {
    "ai_rank": 66,
+   "district": "강북구",
+   "apt_name": "래미안트리베라1단지",
+   "ai_score": 59.2,
+   "axes": {
+    "undervalued": 53.9,
+    "liquidity": 68.5,
+    "transit": 59.4,
+    "momentum": 77.8,
+    "school": 17.5,
+    "product": 68.9
+   },
+   "highlights": [
+    "최근 가격이 연 +31.1% 추세로 상승 흐름",
+    "2010년 준공(16년차)의 상품성"
+   ],
+   "low_confidence": false,
+   "build_year": 2010,
+   "area_exclusive": 59.6,
+   "dong": "미아동",
+   "lat": 37.628995,
+   "lng": 127.0257543
+  },
+  {
+   "ai_rank": 67,
    "district": "성북구",
    "apt_name": "길음뉴타운8단지(래미안)",
    "ai_score": 59.1,
@@ -1603,37 +1627,13 @@
    "lng": 127.0201946
   },
   {
-   "ai_rank": 67,
-   "district": "강북구",
-   "apt_name": "래미안트리베라1단지",
-   "ai_score": 59.1,
-   "axes": {
-    "undervalued": 53.9,
-    "liquidity": 68.4,
-    "transit": 59.4,
-    "momentum": 77.8,
-    "school": 17.5,
-    "product": 68.9
-   },
-   "highlights": [
-    "최근 가격이 연 +31.1% 추세로 상승 흐름",
-    "2010년 준공(16년차)의 상품성"
-   ],
-   "low_confidence": false,
-   "build_year": 2010,
-   "area_exclusive": 59.6,
-   "dong": "미아동",
-   "lat": 37.628995,
-   "lng": 127.0257543
-  },
-  {
    "ai_rank": 68,
    "district": "동대문구",
    "apt_name": "전농우성",
    "ai_score": 59.0,
    "axes": {
     "undervalued": 82.6,
-    "liquidity": 66.2,
+    "liquidity": 66.3,
     "transit": 63.0,
     "momentum": 76.5,
     "school": 13.4,
@@ -1676,30 +1676,6 @@
   },
   {
    "ai_rank": 70,
-   "district": "강서구",
-   "apt_name": "마곡수명산파크4단지",
-   "ai_score": 58.8,
-   "axes": {
-    "undervalued": 53.6,
-    "liquidity": 73.4,
-    "transit": 14.6,
-    "momentum": 76.8,
-    "school": 80.0,
-    "product": 65.5
-   },
-   "highlights": [
-    "학군·생활 — 초품아, 학원 326곳",
-    "최근 가격이 연 +30.6% 추세로 상승 흐름"
-   ],
-   "low_confidence": false,
-   "build_year": 2008,
-   "area_exclusive": 59.8,
-   "dong": "내발산동",
-   "lat": 37.5512148,
-   "lng": 126.8234279
-  },
-  {
-   "ai_rank": 71,
    "district": "동대문구",
    "apt_name": "주공2",
    "ai_score": 58.8,
@@ -1721,6 +1697,30 @@
    "dong": "휘경동",
    "lat": 37.5896299,
    "lng": 127.0594703
+  },
+  {
+   "ai_rank": 71,
+   "district": "강서구",
+   "apt_name": "마곡수명산파크4단지",
+   "ai_score": 58.8,
+   "axes": {
+    "undervalued": 53.6,
+    "liquidity": 73.4,
+    "transit": 14.6,
+    "momentum": 76.8,
+    "school": 80.0,
+    "product": 65.5
+   },
+   "highlights": [
+    "학군·생활 — 초품아, 학원 326곳",
+    "최근 가격이 연 +30.6% 추세로 상승 흐름"
+   ],
+   "low_confidence": false,
+   "build_year": 2008,
+   "area_exclusive": 59.8,
+   "dong": "내발산동",
+   "lat": 37.5512148,
+   "lng": 126.8234279
   },
   {
    "ai_rank": 72,
@@ -1772,36 +1772,12 @@
   },
   {
    "ai_rank": 74,
-   "district": "강서구",
-   "apt_name": "청솔",
-   "ai_score": 58.5,
-   "axes": {
-    "undervalued": 93.8,
-    "liquidity": 41.8,
-    "transit": 54.4,
-    "momentum": 60.3,
-    "school": 56.4,
-    "product": 18.2
-   },
-   "highlights": [
-    "저평가 매력 — 전세가율 65%, 강서구 내 평단가 하위 93%",
-    "최근 가격이 연 +23.9% 추세로 상승 흐름"
-   ],
-   "low_confidence": false,
-   "build_year": 1994,
-   "area_exclusive": 59.0,
-   "dong": "방화동",
-   "lat": 37.531251,
-   "lng": 126.850865
-  },
-  {
-   "ai_rank": 75,
    "district": "성동구",
    "apt_name": "벽산",
    "ai_score": 58.4,
    "axes": {
     "undervalued": 32.3,
-    "liquidity": 49.8,
+    "liquidity": 49.9,
     "transit": 73.5,
     "momentum": 94.3,
     "school": 58.8,
@@ -1817,6 +1793,30 @@
    "dong": "금호동1가",
    "lat": 37.55286,
    "lng": 127.02393
+  },
+  {
+   "ai_rank": 75,
+   "district": "강서구",
+   "apt_name": "청솔",
+   "ai_score": 58.4,
+   "axes": {
+    "undervalued": 93.7,
+    "liquidity": 41.9,
+    "transit": 54.4,
+    "momentum": 60.3,
+    "school": 56.4,
+    "product": 18.2
+   },
+   "highlights": [
+    "저평가 매력 — 전세가율 65%, 강서구 내 평단가 하위 93%",
+    "최근 가격이 연 +23.9% 추세로 상승 흐름"
+   ],
+   "low_confidence": false,
+   "build_year": 1994,
+   "area_exclusive": 59.0,
+   "dong": "방화동",
+   "lat": 37.531251,
+   "lng": 126.850865
   },
   {
    "ai_rank": 76,
@@ -1849,7 +1849,7 @@
    "ai_score": 58.2,
    "axes": {
     "undervalued": 75.8,
-    "liquidity": 58.2,
+    "liquidity": 58.3,
     "transit": 47.4,
     "momentum": 100.0,
     "school": 6.2,
@@ -1940,30 +1940,6 @@
   },
   {
    "ai_rank": 81,
-   "district": "관악구",
-   "apt_name": "관악산휴먼시아2단지",
-   "ai_score": 57.9,
-   "axes": {
-    "undervalued": 90.7,
-    "liquidity": 47.9,
-    "transit": 72.2,
-    "momentum": 12.6,
-    "school": 46.3,
-    "product": 65.5
-   },
-   "highlights": [
-    "저평가 매력 — 전세가율 65%, 관악구 내 평단가 하위 86%",
-    "교통·직주근접 — 신림역 도보 5분, 여의도 3.9km"
-   ],
-   "low_confidence": false,
-   "build_year": 2008,
-   "area_exclusive": 60.0,
-   "dong": "신림동",
-   "lat": 37.486897,
-   "lng": 126.928177
-  },
-  {
-   "ai_rank": 82,
    "district": "양천구",
    "apt_name": "롯데캐슬위너",
    "ai_score": 57.9,
@@ -1987,7 +1963,7 @@
    "lng": 126.87585
   },
   {
-   "ai_rank": 83,
+   "ai_rank": 82,
    "district": "동대문구",
    "apt_name": "현대",
    "ai_score": 57.8,
@@ -2011,7 +1987,7 @@
    "lng": 127.0473638
   },
   {
-   "ai_rank": 84,
+   "ai_rank": 83,
    "district": "강동구",
    "apt_name": "성내동삼성아파트",
    "ai_score": 57.7,
@@ -2033,6 +2009,30 @@
    "dong": "성내동",
    "lat": 37.52998,
    "lng": 127.12875
+  },
+  {
+   "ai_rank": 84,
+   "district": "동작구",
+   "apt_name": "포스코더샵",
+   "ai_score": 57.4,
+   "axes": {
+    "undervalued": 25.2,
+    "liquidity": 65.1,
+    "transit": 69.3,
+    "momentum": 63.7,
+    "school": 77.3,
+    "product": 63.0
+   },
+   "highlights": [
+    "학군·생활 — 초품아, 학원 310곳",
+    "교통·직주근접 — 상도역 도보 8분, 여의도 3.1km"
+   ],
+   "low_confidence": false,
+   "build_year": 2007,
+   "area_exclusive": 60.0,
+   "dong": "상도동",
+   "lat": 37.4988159,
+   "lng": 126.9441045
   },
   {
    "ai_rank": 85,
@@ -2060,27 +2060,27 @@
   },
   {
    "ai_rank": 86,
-   "district": "동작구",
-   "apt_name": "포스코더샵",
-   "ai_score": 57.4,
+   "district": "마포구",
+   "apt_name": "신공덕1차삼성래미안1아파트",
+   "ai_score": 57.3,
    "axes": {
-    "undervalued": 25.2,
-    "liquidity": 65.0,
-    "transit": 69.3,
-    "momentum": 63.7,
-    "school": 77.3,
-    "product": 63.0
+    "undervalued": 37.2,
+    "liquidity": 60.8,
+    "transit": 73.9,
+    "momentum": 62.4,
+    "school": 76.0,
+    "product": 41.0
    },
    "highlights": [
-    "학군·생활 — 초품아, 학원 310곳",
-    "교통·직주근접 — 상도역 도보 8분, 여의도 3.1km"
+    "학군·생활 — 초품아, 학원 349곳",
+    "교통·직주근접 — 공덕역 도보 6분, 도심(광화문·시청) 3.4km"
    ],
    "low_confidence": false,
-   "build_year": 2007,
-   "area_exclusive": 60.0,
-   "dong": "상도동",
-   "lat": 37.4988159,
-   "lng": 126.9441045
+   "build_year": 2000,
+   "area_exclusive": 59.8,
+   "dong": "신공덕동",
+   "lat": 37.5447,
+   "lng": 126.95606
   },
   {
    "ai_rank": 87,
@@ -2108,30 +2108,6 @@
   },
   {
    "ai_rank": 88,
-   "district": "마포구",
-   "apt_name": "신공덕1차삼성래미안1아파트",
-   "ai_score": 57.3,
-   "axes": {
-    "undervalued": 37.2,
-    "liquidity": 60.8,
-    "transit": 73.9,
-    "momentum": 62.4,
-    "school": 76.0,
-    "product": 41.0
-   },
-   "highlights": [
-    "학군·생활 — 초품아, 학원 349곳",
-    "교통·직주근접 — 공덕역 도보 6분, 도심(광화문·시청) 3.4km"
-   ],
-   "low_confidence": false,
-   "build_year": 2000,
-   "area_exclusive": 59.8,
-   "dong": "신공덕동",
-   "lat": 37.5447,
-   "lng": 126.95606
-  },
-  {
-   "ai_rank": 89,
    "district": "은평구",
    "apt_name": "백련산힐스테이트4차",
    "ai_score": 57.2,
@@ -2155,7 +2131,7 @@
    "lng": 126.9227607
   },
   {
-   "ai_rank": 90,
+   "ai_rank": 89,
    "district": "구로구",
    "apt_name": "한진",
    "ai_score": 57.2,
@@ -2179,7 +2155,7 @@
    "lng": 126.851736
   },
   {
-   "ai_rank": 91,
+   "ai_rank": 90,
    "district": "마포구",
    "apt_name": "현대홈타운",
    "ai_score": 57.1,
@@ -2201,6 +2177,30 @@
    "dong": "도화동",
    "lat": 37.5511032,
    "lng": 126.931942
+  },
+  {
+   "ai_rank": 91,
+   "district": "동대문구",
+   "apt_name": "청계한신휴플러스",
+   "ai_score": 57.0,
+   "axes": {
+    "undervalued": 34.6,
+    "liquidity": 48.2,
+    "transit": 65.7,
+    "momentum": 80.4,
+    "school": 55.2,
+    "product": 68.9
+   },
+   "highlights": [
+    "최근 가격이 연 +32.0% 추세로 상승 흐름",
+    "2010년 준공(16년차)의 상품성"
+   ],
+   "low_confidence": false,
+   "build_year": 2010,
+   "area_exclusive": 59.7,
+   "dong": "답십리동",
+   "lat": 37.5729271,
+   "lng": 127.0459143
   },
   {
    "ai_rank": 92,
@@ -2228,36 +2228,12 @@
   },
   {
    "ai_rank": 93,
-   "district": "동대문구",
-   "apt_name": "청계한신휴플러스",
-   "ai_score": 57.0,
-   "axes": {
-    "undervalued": 34.6,
-    "liquidity": 48.2,
-    "transit": 65.7,
-    "momentum": 80.4,
-    "school": 55.2,
-    "product": 68.9
-   },
-   "highlights": [
-    "최근 가격이 연 +32.0% 추세로 상승 흐름",
-    "2010년 준공(16년차)의 상품성"
-   ],
-   "low_confidence": false,
-   "build_year": 2010,
-   "area_exclusive": 59.7,
-   "dong": "답십리동",
-   "lat": 37.5729271,
-   "lng": 127.0459143
-  },
-  {
-   "ai_rank": 94,
    "district": "관악구",
    "apt_name": "삼성산주공(주공3단지)",
    "ai_score": 56.9,
    "axes": {
     "undervalued": 97.8,
-    "liquidity": 55.0,
+    "liquidity": 55.1,
     "transit": 72.2,
     "momentum": 6.7,
     "school": 46.3,
@@ -2275,7 +2251,7 @@
    "lng": 126.928177
   },
   {
-   "ai_rank": 95,
+   "ai_rank": 94,
    "district": "강동구",
    "apt_name": "프라이어팰리스",
    "ai_score": 56.8,
@@ -2299,13 +2275,13 @@
    "lng": 127.1396098
   },
   {
-   "ai_rank": 96,
+   "ai_rank": 95,
    "district": "영등포구",
    "apt_name": "당산현대5차",
    "ai_score": 56.8,
    "axes": {
     "undervalued": 28.7,
-    "liquidity": 57.2,
+    "liquidity": 57.3,
     "transit": 73.8,
     "momentum": 78.6,
     "school": 69.7,
@@ -2323,7 +2299,7 @@
    "lng": 126.89894
   },
   {
-   "ai_rank": 97,
+   "ai_rank": 96,
    "district": "강서구",
    "apt_name": "강서힐스테이트",
    "ai_score": 56.6,
@@ -2347,7 +2323,7 @@
    "lng": 126.8372165
   },
   {
-   "ai_rank": 98,
+   "ai_rank": 97,
    "district": "동작구",
    "apt_name": "현대",
    "ai_score": 56.5,
@@ -2371,7 +2347,7 @@
    "lng": 126.9195788
   },
   {
-   "ai_rank": 99,
+   "ai_rank": 98,
    "district": "동대문구",
    "apt_name": "한신",
    "ai_score": 56.4,
@@ -2395,7 +2371,7 @@
    "lng": 127.023931
   },
   {
-   "ai_rank": 100,
+   "ai_rank": 99,
    "district": "마포구",
    "apt_name": "마포래미안푸르지오4단지",
    "ai_score": 56.3,
@@ -2419,31 +2395,7 @@
    "lng": 126.9525116
   },
   {
-   "ai_rank": 101,
-   "district": "강북구",
-   "apt_name": "경남아너스빌(1356-0)",
-   "ai_score": 56.2,
-   "axes": {
-    "undervalued": 72.0,
-    "liquidity": 58.2,
-    "transit": 59.4,
-    "momentum": 57.7,
-    "school": 17.5,
-    "product": 53.0
-   },
-   "highlights": [
-    "저평가 매력 — 전세가율 59%, 강북구 내 평단가 하위 62%",
-    "교통·직주근접 — 미아역 도보 4분, 도심(광화문·시청) 7.8km"
-   ],
-   "low_confidence": false,
-   "build_year": 2003,
-   "area_exclusive": 60.0,
-   "dong": "미아동",
-   "lat": 37.628995,
-   "lng": 127.0257543
-  },
-  {
-   "ai_rank": 102,
+   "ai_rank": 100,
    "district": "송파구",
    "apt_name": "거여1단지",
    "ai_score": 56.2,
@@ -2467,7 +2419,7 @@
    "lng": 127.14667
   },
   {
-   "ai_rank": 103,
+   "ai_rank": 101,
    "district": "동작구",
    "apt_name": "래미안로이파크",
    "ai_score": 56.2,
@@ -2489,6 +2441,54 @@
    "dong": "사당동",
    "lat": 37.4856963,
    "lng": 126.9723525
+  },
+  {
+   "ai_rank": 102,
+   "district": "강북구",
+   "apt_name": "경남아너스빌(1356-0)",
+   "ai_score": 56.2,
+   "axes": {
+    "undervalued": 72.0,
+    "liquidity": 58.2,
+    "transit": 59.4,
+    "momentum": 57.7,
+    "school": 17.5,
+    "product": 53.0
+   },
+   "highlights": [
+    "저평가 매력 — 전세가율 59%, 강북구 내 평단가 하위 62%",
+    "교통·직주근접 — 미아역 도보 4분, 도심(광화문·시청) 7.8km"
+   ],
+   "low_confidence": false,
+   "build_year": 2003,
+   "area_exclusive": 60.0,
+   "dong": "미아동",
+   "lat": 37.628995,
+   "lng": 127.0257543
+  },
+  {
+   "ai_rank": 103,
+   "district": "관악구",
+   "apt_name": "관악산휴먼시아2단지",
+   "ai_score": 56.1,
+   "axes": {
+    "undervalued": 91.3,
+    "liquidity": 39.8,
+    "transit": 72.2,
+    "momentum": 9.8,
+    "school": 46.3,
+    "product": 65.5
+   },
+   "highlights": [
+    "저평가 매력 — 전세가율 66%, 관악구 내 평단가 하위 86%",
+    "교통·직주근접 — 신림역 도보 5분, 여의도 3.9km"
+   ],
+   "low_confidence": false,
+   "build_year": 2008,
+   "area_exclusive": 60.0,
+   "dong": "신림동",
+   "lat": 37.486897,
+   "lng": 126.928177
   },
   {
    "ai_rank": 104,
@@ -2564,30 +2564,6 @@
   },
   {
    "ai_rank": 107,
-   "district": "마포구",
-   "apt_name": "래미안공덕5차",
-   "ai_score": 56.0,
-   "axes": {
-    "undervalued": 29.5,
-    "liquidity": 73.8,
-    "transit": 76.3,
-    "momentum": 43.3,
-    "school": 55.9,
-    "product": 71.4
-   },
-   "highlights": [
-    "교통·직주근접 — 애오개역 도보 7분, 도심(광화문·시청) 2.7km",
-    "거래가 활발해 환금성 우수 (누적 90건)"
-   ],
-   "low_confidence": false,
-   "build_year": 2011,
-   "area_exclusive": 60.0,
-   "dong": "공덕동",
-   "lat": 37.549927,
-   "lng": 126.9592897
-  },
-  {
-   "ai_rank": 108,
    "district": "은평구",
    "apt_name": "백련산힐스테이트2차",
    "ai_score": 56.0,
@@ -2611,31 +2587,31 @@
    "lng": 126.9228812
   },
   {
-   "ai_rank": 109,
-   "district": "강남구",
-   "apt_name": "대우디오빌",
-   "ai_score": 55.9,
+   "ai_rank": 108,
+   "district": "마포구",
+   "apt_name": "래미안공덕5차",
+   "ai_score": 56.0,
    "axes": {
-    "undervalued": 98.8,
-    "liquidity": 25.5,
-    "transit": 94.2,
-    "momentum": 0.3,
-    "school": 47.9,
-    "product": 50.1
+    "undervalued": 29.5,
+    "liquidity": 73.8,
+    "transit": 76.3,
+    "momentum": 43.3,
+    "school": 55.9,
+    "product": 71.4
    },
    "highlights": [
-    "저평가 매력 — 전세가율 81%, 강남구 내 평단가 하위 100%",
-    "교통·직주근접 — 역삼역 도보 3분, 강남권(테헤란로) 1.0km"
+    "교통·직주근접 — 애오개역 도보 7분, 도심(광화문·시청) 2.7km",
+    "거래가 활발해 환금성 우수 (누적 90건)"
    ],
    "low_confidence": false,
-   "build_year": 2002,
-   "area_exclusive": 59.5,
-   "dong": "역삼동",
-   "lat": 37.49988,
-   "lng": 127.03856
+   "build_year": 2011,
+   "area_exclusive": 60.0,
+   "dong": "공덕동",
+   "lat": 37.549927,
+   "lng": 126.9592897
   },
   {
-   "ai_rank": 110,
+   "ai_rank": 109,
    "district": "관악구",
    "apt_name": "e편한세상서울대입구1단지",
    "ai_score": 55.9,
@@ -2657,6 +2633,30 @@
    "dong": "봉천동",
    "lat": 37.484665,
    "lng": 126.9484961
+  },
+  {
+   "ai_rank": 110,
+   "district": "강남구",
+   "apt_name": "대우디오빌",
+   "ai_score": 55.9,
+   "axes": {
+    "undervalued": 98.8,
+    "liquidity": 25.5,
+    "transit": 94.2,
+    "momentum": 0.3,
+    "school": 47.9,
+    "product": 50.1
+   },
+   "highlights": [
+    "저평가 매력 — 전세가율 81%, 강남구 내 평단가 하위 100%",
+    "교통·직주근접 — 역삼역 도보 3분, 강남권(테헤란로) 1.0km"
+   ],
+   "low_confidence": false,
+   "build_year": 2002,
+   "area_exclusive": 59.5,
+   "dong": "역삼동",
+   "lat": 37.49988,
+   "lng": 127.03856
   },
   {
    "ai_rank": 111,
@@ -2709,30 +2709,6 @@
   {
    "ai_rank": 113,
    "district": "동대문구",
-   "apt_name": "한신아파트",
-   "ai_score": 55.5,
-   "axes": {
-    "undervalued": 52.6,
-    "liquidity": 63.5,
-    "transit": 33.3,
-    "momentum": 77.6,
-    "school": 48.7,
-    "product": 56.3
-   },
-   "highlights": [
-    "최근 가격이 연 +30.9% 추세로 상승 흐름",
-    "거래가 활발해 환금성 우수 (누적 124건)"
-   ],
-   "low_confidence": false,
-   "build_year": 2004,
-   "area_exclusive": 59.8,
-   "dong": "제기동",
-   "lat": 37.5880052,
-   "lng": 127.0489794
-  },
-  {
-   "ai_rank": 114,
-   "district": "동대문구",
    "apt_name": "장안현대홈타운(336)",
    "ai_score": 55.5,
    "axes": {
@@ -2753,6 +2729,30 @@
    "dong": "장안동",
    "lat": 37.57105,
    "lng": 127.06806
+  },
+  {
+   "ai_rank": 114,
+   "district": "동대문구",
+   "apt_name": "한신아파트",
+   "ai_score": 55.5,
+   "axes": {
+    "undervalued": 52.6,
+    "liquidity": 63.6,
+    "transit": 33.3,
+    "momentum": 77.6,
+    "school": 48.7,
+    "product": 56.3
+   },
+   "highlights": [
+    "최근 가격이 연 +30.9% 추세로 상승 흐름",
+    "거래가 활발해 환금성 우수 (누적 124건)"
+   ],
+   "low_confidence": false,
+   "build_year": 2004,
+   "area_exclusive": 59.8,
+   "dong": "제기동",
+   "lat": 37.5880052,
+   "lng": 127.0489794
   },
   {
    "ai_rank": 115,
@@ -2804,30 +2804,6 @@
   },
   {
    "ai_rank": 117,
-   "district": "마포구",
-   "apt_name": "신촌숲아이파크",
-   "ai_score": 55.2,
-   "axes": {
-    "undervalued": 33.1,
-    "liquidity": 37.7,
-    "transit": 82.3,
-    "momentum": 39.7,
-    "school": 73.8,
-    "product": 89.4
-   },
-   "highlights": [
-    "2019년 준공(7년차)의 상품성",
-    "교통·직주근접 — 광흥창역 도보 6분, 여의도 2.9km"
-   ],
-   "low_confidence": false,
-   "build_year": 2019,
-   "area_exclusive": 59.8,
-   "dong": "신수동",
-   "lat": 37.5462035,
-   "lng": 126.9359375
-  },
-  {
-   "ai_rank": 118,
    "district": "구로구",
    "apt_name": "대림2",
    "ai_score": 55.2,
@@ -2849,6 +2825,30 @@
    "dong": "신도림동",
    "lat": 37.50941,
    "lng": 126.88285
+  },
+  {
+   "ai_rank": 118,
+   "district": "마포구",
+   "apt_name": "신촌숲아이파크",
+   "ai_score": 55.2,
+   "axes": {
+    "undervalued": 33.1,
+    "liquidity": 37.7,
+    "transit": 82.3,
+    "momentum": 39.7,
+    "school": 73.8,
+    "product": 89.4
+   },
+   "highlights": [
+    "2019년 준공(7년차)의 상품성",
+    "교통·직주근접 — 광흥창역 도보 6분, 여의도 2.9km"
+   ],
+   "low_confidence": false,
+   "build_year": 2019,
+   "area_exclusive": 59.8,
+   "dong": "신수동",
+   "lat": 37.5462035,
+   "lng": 126.9359375
   },
   {
    "ai_rank": 119,
@@ -2924,27 +2924,27 @@
   },
   {
    "ai_rank": 122,
-   "district": "관악구",
-   "apt_name": "신림푸르지오",
-   "ai_score": 54.9,
+   "district": "노원구",
+   "apt_name": "현대",
+   "ai_score": 55.0,
    "axes": {
-    "undervalued": 79.1,
-    "liquidity": 37.1,
-    "transit": 51.2,
-    "momentum": 50.1,
-    "school": 42.1,
-    "product": 59.0
+    "undervalued": 41.2,
+    "liquidity": 61.3,
+    "transit": 28.2,
+    "momentum": 77.1,
+    "school": 93.9,
+    "product": 41.0
    },
    "highlights": [
-    "저평가 매력 — 전세가율 60%, 관악구 내 평단가 하위 71%",
-    "2005년 준공(21년차)의 상품성"
+    "학군·생활 — 초품아, 학원 831곳",
+    "최근 가격이 연 +30.8% 추세로 상승 흐름"
    ],
    "low_confidence": false,
-   "build_year": 2005,
+   "build_year": 2000,
    "area_exclusive": 60.0,
-   "dong": "신림동",
-   "lat": 37.4813558,
-   "lng": 126.9112483
+   "dong": "월계동",
+   "lat": 37.656272,
+   "lng": 127.073419
   },
   {
    "ai_rank": 123,
@@ -2972,27 +2972,27 @@
   },
   {
    "ai_rank": 124,
-   "district": "노원구",
-   "apt_name": "현대",
+   "district": "관악구",
+   "apt_name": "신림푸르지오",
    "ai_score": 54.9,
    "axes": {
-    "undervalued": 41.2,
-    "liquidity": 61.2,
-    "transit": 28.2,
-    "momentum": 77.1,
-    "school": 93.9,
-    "product": 41.0
+    "undervalued": 79.1,
+    "liquidity": 37.1,
+    "transit": 51.2,
+    "momentum": 50.1,
+    "school": 42.1,
+    "product": 59.0
    },
    "highlights": [
-    "학군·생활 — 초품아, 학원 831곳",
-    "최근 가격이 연 +30.8% 추세로 상승 흐름"
+    "저평가 매력 — 전세가율 60%, 관악구 내 평단가 하위 71%",
+    "2005년 준공(21년차)의 상품성"
    ],
    "low_confidence": false,
-   "build_year": 2000,
+   "build_year": 2005,
    "area_exclusive": 60.0,
-   "dong": "월계동",
-   "lat": 37.656272,
-   "lng": 127.073419
+   "dong": "신림동",
+   "lat": 37.4813558,
+   "lng": 126.9112483
   },
   {
    "ai_rank": 125,
@@ -3068,6 +3068,30 @@
   },
   {
    "ai_rank": 128,
+   "district": "은평구",
+   "apt_name": "백련산힐스테이트3차",
+   "ai_score": 54.6,
+   "axes": {
+    "undervalued": 86.0,
+    "liquidity": 47.2,
+    "transit": 39.7,
+    "momentum": 11.9,
+    "school": 72.7,
+    "product": 71.4
+   },
+   "highlights": [
+    "저평가 매력 — 전세가율 60%, 은평구 내 평단가 하위 92%",
+    "학군·생활 — 초품아, 학원 250곳"
+   ],
+   "low_confidence": false,
+   "build_year": 2011,
+   "area_exclusive": 59.6,
+   "dong": "응암동",
+   "lat": 37.5887135,
+   "lng": 126.9226762
+  },
+  {
+   "ai_rank": 129,
    "district": "성북구",
    "apt_name": "래미안월곡",
    "ai_score": 54.6,
@@ -3091,7 +3115,7 @@
    "lng": 127.03764
   },
   {
-   "ai_rank": 129,
+   "ai_rank": 130,
    "district": "구로구",
    "apt_name": "대우",
    "ai_score": 54.6,
@@ -3115,31 +3139,31 @@
    "lng": 126.8588409
   },
   {
-   "ai_rank": 130,
-   "district": "은평구",
-   "apt_name": "백련산힐스테이트3차",
+   "ai_rank": 131,
+   "district": "관악구",
+   "apt_name": "LIG대학마을(건영아파트3차)",
    "ai_score": 54.6,
    "axes": {
-    "undervalued": 86.0,
-    "liquidity": 47.2,
-    "transit": 39.7,
-    "momentum": 11.6,
-    "school": 72.7,
-    "product": 71.4
+    "undervalued": 92.9,
+    "liquidity": 57.8,
+    "transit": 72.2,
+    "momentum": 10.1,
+    "school": 46.3,
+    "product": 21.9
    },
    "highlights": [
-    "저평가 매력 — 전세가율 60%, 은평구 내 평단가 하위 92%",
-    "학군·생활 — 초품아, 학원 250곳"
+    "저평가 매력 — 전세가율 64%, 관악구 내 평단가 하위 93%",
+    "교통·직주근접 — 신림역 도보 5분, 여의도 3.9km"
    ],
    "low_confidence": false,
-   "build_year": 2011,
-   "area_exclusive": 59.6,
-   "dong": "응암동",
-   "lat": 37.5887135,
-   "lng": 126.9226762
+   "build_year": 1996,
+   "area_exclusive": 58.9,
+   "dong": "신림동",
+   "lat": 37.486897,
+   "lng": 126.928177
   },
   {
-   "ai_rank": 131,
+   "ai_rank": 132,
    "district": "영등포구",
    "apt_name": "아크로타워스퀘어",
    "ai_score": 54.6,
@@ -3163,37 +3187,13 @@
    "lng": 126.9065622
   },
   {
-   "ai_rank": 132,
-   "district": "관악구",
-   "apt_name": "LIG대학마을(건영아파트3차)",
-   "ai_score": 54.6,
-   "axes": {
-    "undervalued": 92.9,
-    "liquidity": 57.8,
-    "transit": 72.2,
-    "momentum": 9.8,
-    "school": 46.3,
-    "product": 21.9
-   },
-   "highlights": [
-    "저평가 매력 — 전세가율 64%, 관악구 내 평단가 하위 93%",
-    "교통·직주근접 — 신림역 도보 5분, 여의도 3.9km"
-   ],
-   "low_confidence": false,
-   "build_year": 1996,
-   "area_exclusive": 58.9,
-   "dong": "신림동",
-   "lat": 37.486897,
-   "lng": 126.928177
-  },
-  {
    "ai_rank": 133,
    "district": "은평구",
    "apt_name": "e편한세상 수색 에코포레",
    "ai_score": 54.5,
    "axes": {
     "undervalued": 91.3,
-    "liquidity": 56.8,
+    "liquidity": 56.9,
     "transit": 42.1,
     "momentum": 18.9,
     "school": 50.8,
@@ -3212,30 +3212,6 @@
   },
   {
    "ai_rank": 134,
-   "district": "성북구",
-   "apt_name": "래미안아트리치",
-   "ai_score": 54.4,
-   "axes": {
-    "undervalued": 38.8,
-    "liquidity": 72.7,
-    "transit": 39.8,
-    "momentum": 67.3,
-    "school": 25.4,
-    "product": 89.4
-   },
-   "highlights": [
-    "2019년 준공(7년차)의 상품성",
-    "거래가 활발해 환금성 우수 (누적 140건)"
-   ],
-   "low_confidence": false,
-   "build_year": 2019,
-   "area_exclusive": 60.0,
-   "dong": "석관동",
-   "lat": 37.6078902,
-   "lng": 127.0614852
-  },
-  {
-   "ai_rank": 135,
    "district": "영등포구",
    "apt_name": "힐스테이트클래시안",
    "ai_score": 54.4,
@@ -3257,6 +3233,30 @@
    "dong": "신길동",
    "lat": 37.5039343,
    "lng": 126.9121234
+  },
+  {
+   "ai_rank": 135,
+   "district": "성북구",
+   "apt_name": "래미안아트리치",
+   "ai_score": 54.4,
+   "axes": {
+    "undervalued": 38.8,
+    "liquidity": 72.8,
+    "transit": 39.8,
+    "momentum": 67.3,
+    "school": 25.4,
+    "product": 89.4
+   },
+   "highlights": [
+    "2019년 준공(7년차)의 상품성",
+    "거래가 활발해 환금성 우수 (누적 140건)"
+   ],
+   "low_confidence": false,
+   "build_year": 2019,
+   "area_exclusive": 60.0,
+   "dong": "석관동",
+   "lat": 37.6078902,
+   "lng": 127.0614852
   },
   {
    "ai_rank": 136,
@@ -3284,27 +3284,27 @@
   },
   {
    "ai_rank": 137,
-   "district": "양천구",
-   "apt_name": "래미안목동아델리체(101동~118동)",
+   "district": "중구",
+   "apt_name": "삼성",
    "ai_score": 54.2,
    "axes": {
-    "undervalued": 48.0,
-    "liquidity": 25.3,
-    "transit": 51.1,
-    "momentum": 50.1,
-    "school": 77.8,
-    "product": 97.4
+    "undervalued": 44.8,
+    "liquidity": 49.5,
+    "transit": 79.6,
+    "momentum": 92.0,
+    "school": 4.9,
+    "product": 34.1
    },
    "highlights": [
-    "2021년 준공(5년차)의 상품성",
-    "학군·생활 — 초품아, 학원 356곳"
+    "최근 가격이 연 +37.2% 추세로 상승 흐름",
+    "교통·직주근접 — 회현역 도보 8분, 도심(광화문·시청) 1.1km"
    ],
    "low_confidence": false,
-   "build_year": 2021,
-   "area_exclusive": 59.8,
-   "dong": "신정동",
-   "lat": 37.5162407,
-   "lng": 126.8521196
+   "build_year": 1999,
+   "area_exclusive": 60.0,
+   "dong": "신당동",
+   "lat": 37.5603098,
+   "lng": 126.9727125
   },
   {
    "ai_rank": 138,
@@ -3332,6 +3332,30 @@
   },
   {
    "ai_rank": 139,
+   "district": "양천구",
+   "apt_name": "래미안목동아델리체(101동~118동)",
+   "ai_score": 54.2,
+   "axes": {
+    "undervalued": 48.0,
+    "liquidity": 25.3,
+    "transit": 51.1,
+    "momentum": 50.1,
+    "school": 77.8,
+    "product": 97.4
+   },
+   "highlights": [
+    "2021년 준공(5년차)의 상품성",
+    "학군·생활 — 초품아, 학원 356곳"
+   ],
+   "low_confidence": false,
+   "build_year": 2021,
+   "area_exclusive": 59.8,
+   "dong": "신정동",
+   "lat": 37.5162407,
+   "lng": 126.8521196
+  },
+  {
+   "ai_rank": 140,
    "district": "동작구",
    "apt_name": "힐스테이트 상도 프레스티지",
    "ai_score": 54.1,
@@ -3353,30 +3377,6 @@
    "dong": "상도동",
    "lat": 37.4988159,
    "lng": 126.9441045
-  },
-  {
-   "ai_rank": 140,
-   "district": "중구",
-   "apt_name": "삼성",
-   "ai_score": 54.1,
-   "axes": {
-    "undervalued": 44.8,
-    "liquidity": 49.4,
-    "transit": 79.6,
-    "momentum": 92.0,
-    "school": 4.9,
-    "product": 34.1
-   },
-   "highlights": [
-    "최근 가격이 연 +37.2% 추세로 상승 흐름",
-    "교통·직주근접 — 회현역 도보 8분, 도심(광화문·시청) 1.1km"
-   ],
-   "low_confidence": false,
-   "build_year": 1999,
-   "area_exclusive": 60.0,
-   "dong": "신당동",
-   "lat": 37.5603098,
-   "lng": 126.9727125
   },
   {
    "ai_rank": 141,
@@ -3409,7 +3409,7 @@
    "ai_score": 54.0,
    "axes": {
     "undervalued": 90.3,
-    "liquidity": 57.9,
+    "liquidity": 58.0,
     "transit": 59.4,
     "momentum": 19.3,
     "school": 17.5,
@@ -3428,12 +3428,36 @@
   },
   {
    "ai_rank": 143,
+   "district": "강동구",
+   "apt_name": "래미안강동팰리스",
+   "ai_score": 53.9,
+   "axes": {
+    "undervalued": 52.2,
+    "liquidity": 60.8,
+    "transit": 54.4,
+    "momentum": 38.1,
+    "school": 40.0,
+    "product": 83.2
+   },
+   "highlights": [
+    "2017년 준공(9년차)의 상품성",
+    "거래가 활발해 환금성 우수 (누적 115건)"
+   ],
+   "low_confidence": false,
+   "build_year": 2017,
+   "area_exclusive": 60.0,
+   "dong": "천호동",
+   "lat": 37.5373565,
+   "lng": 127.1320174
+  },
+  {
+   "ai_rank": 144,
    "district": "은평구",
    "apt_name": "북한산현대힐스테이트3차아파트",
    "ai_score": 53.8,
    "axes": {
     "undervalued": 72.7,
-    "liquidity": 71.4,
+    "liquidity": 71.5,
     "transit": 61.5,
     "momentum": 18.9,
     "school": 15.3,
@@ -3451,7 +3475,7 @@
    "lng": 126.9339579
   },
   {
-   "ai_rank": 144,
+   "ai_rank": 145,
    "district": "영등포구",
    "apt_name": "경남아너스빌",
    "ai_score": 53.8,
@@ -3475,55 +3499,7 @@
    "lng": 126.8962148
   },
   {
-   "ai_rank": 145,
-   "district": "강동구",
-   "apt_name": "래미안강동팰리스",
-   "ai_score": 53.8,
-   "axes": {
-    "undervalued": 52.2,
-    "liquidity": 60.8,
-    "transit": 54.4,
-    "momentum": 38.1,
-    "school": 40.0,
-    "product": 83.2
-   },
-   "highlights": [
-    "2017년 준공(9년차)의 상품성",
-    "거래가 활발해 환금성 우수 (누적 115건)"
-   ],
-   "low_confidence": false,
-   "build_year": 2017,
-   "area_exclusive": 60.0,
-   "dong": "천호동",
-   "lat": 37.5373565,
-   "lng": 127.1320174
-  },
-  {
    "ai_rank": 146,
-   "district": "성동구",
-   "apt_name": "서울숲리버뷰자이",
-   "ai_score": 53.7,
-   "axes": {
-    "undervalued": 15.6,
-    "liquidity": 39.7,
-    "transit": 62.6,
-    "momentum": 72.4,
-    "school": 77.3,
-    "product": 85.7
-   },
-   "highlights": [
-    "2018년 준공(8년차)의 상품성",
-    "학군·생활 — 초품아, 학원 295곳"
-   ],
-   "low_confidence": false,
-   "build_year": 2018,
-   "area_exclusive": 60.0,
-   "dong": "행당동",
-   "lat": 37.55783,
-   "lng": 127.03571
-  },
-  {
-   "ai_rank": 147,
    "district": "마포구",
    "apt_name": "마포프레스티지자이",
    "ai_score": 53.7,
@@ -3545,6 +3521,30 @@
    "dong": "염리동",
    "lat": 37.5515289,
    "lng": 126.9466934
+  },
+  {
+   "ai_rank": 147,
+   "district": "성동구",
+   "apt_name": "서울숲리버뷰자이",
+   "ai_score": 53.7,
+   "axes": {
+    "undervalued": 15.6,
+    "liquidity": 39.7,
+    "transit": 62.6,
+    "momentum": 72.4,
+    "school": 77.3,
+    "product": 85.7
+   },
+   "highlights": [
+    "2018년 준공(8년차)의 상품성",
+    "학군·생활 — 초품아, 학원 295곳"
+   ],
+   "low_confidence": false,
+   "build_year": 2018,
+   "area_exclusive": 60.0,
+   "dong": "행당동",
+   "lat": 37.55783,
+   "lng": 127.03571
   },
   {
    "ai_rank": 148,
@@ -3574,10 +3574,10 @@
    "ai_rank": 149,
    "district": "성동구",
    "apt_name": "두산",
-   "ai_score": 53.6,
+   "ai_score": 53.7,
    "axes": {
     "undervalued": 42.0,
-    "liquidity": 51.3,
+    "liquidity": 51.4,
     "transit": 60.8,
     "momentum": 89.7,
     "school": 51.0,
@@ -3601,7 +3601,7 @@
    "ai_score": 53.6,
    "axes": {
     "undervalued": 32.8,
-    "liquidity": 59.4,
+    "liquidity": 59.5,
     "transit": 71.0,
     "momentum": 82.2,
     "school": 36.6,
@@ -3716,6 +3716,30 @@
   },
   {
    "ai_rank": 155,
+   "district": "강서구",
+   "apt_name": "마곡수명산파크5단지",
+   "ai_score": 53.4,
+   "axes": {
+    "undervalued": 59.7,
+    "liquidity": 44.9,
+    "transit": 22.9,
+    "momentum": 63.9,
+    "school": 71.1,
+    "product": 65.5
+   },
+   "highlights": [
+    "학군·생활 — 초등학교 319m, 학원 599곳",
+    "2008년 준공(18년차)의 상품성"
+   ],
+   "low_confidence": false,
+   "build_year": 2008,
+   "area_exclusive": 59.8,
+   "dong": "내발산동",
+   "lat": 37.5520774,
+   "lng": 126.8274584
+  },
+  {
+   "ai_rank": 156,
    "district": "송파구",
    "apt_name": "거여4단지",
    "ai_score": 53.4,
@@ -3737,30 +3761,6 @@
    "dong": "거여동",
    "lat": 37.48921,
    "lng": 127.14667
-  },
-  {
-   "ai_rank": 156,
-   "district": "강서구",
-   "apt_name": "마곡수명산파크5단지",
-   "ai_score": 53.3,
-   "axes": {
-    "undervalued": 59.7,
-    "liquidity": 44.8,
-    "transit": 22.9,
-    "momentum": 63.9,
-    "school": 71.1,
-    "product": 65.5
-   },
-   "highlights": [
-    "학군·생활 — 초등학교 319m, 학원 599곳",
-    "2008년 준공(18년차)의 상품성"
-   ],
-   "low_confidence": false,
-   "build_year": 2008,
-   "area_exclusive": 59.8,
-   "dong": "내발산동",
-   "lat": 37.5520774,
-   "lng": 126.8274584
   },
   {
    "ai_rank": 157,
@@ -3788,6 +3788,30 @@
   },
   {
    "ai_rank": 158,
+   "district": "강동구",
+   "apt_name": "길동우성",
+   "ai_score": 53.2,
+   "axes": {
+    "undervalued": 59.6,
+    "liquidity": 48.3,
+    "transit": 27.2,
+    "momentum": 97.4,
+    "school": 55.8,
+    "product": 18.2
+   },
+   "highlights": [
+    "최근 가격이 연 +42.6% 추세로 상승 흐름",
+    "저평가 매력 — 전세가율 49%, 강동구 내 평단가 하위 89%"
+   ],
+   "low_confidence": false,
+   "build_year": 1994,
+   "area_exclusive": 57.1,
+   "dong": "길동",
+   "lat": 37.53736,
+   "lng": 127.14703
+  },
+  {
+   "ai_rank": 159,
    "district": "성북구",
    "apt_name": "정릉풍림아이원",
    "ai_score": 53.2,
@@ -3811,55 +3835,7 @@
    "lng": 126.99794
   },
   {
-   "ai_rank": 159,
-   "district": "강동구",
-   "apt_name": "길동우성",
-   "ai_score": 53.2,
-   "axes": {
-    "undervalued": 59.6,
-    "liquidity": 48.2,
-    "transit": 27.2,
-    "momentum": 97.4,
-    "school": 55.8,
-    "product": 18.2
-   },
-   "highlights": [
-    "최근 가격이 연 +42.6% 추세로 상승 흐름",
-    "저평가 매력 — 전세가율 49%, 강동구 내 평단가 하위 89%"
-   ],
-   "low_confidence": false,
-   "build_year": 1994,
-   "area_exclusive": 57.1,
-   "dong": "길동",
-   "lat": 37.53736,
-   "lng": 127.14703
-  },
-  {
    "ai_rank": 160,
-   "district": "은평구",
-   "apt_name": "백련산에스케이뷰아이파크",
-   "ai_score": 53.1,
-   "axes": {
-    "undervalued": 64.1,
-    "liquidity": 60.7,
-    "transit": 34.6,
-    "momentum": 29.4,
-    "school": 42.2,
-    "product": 93.9
-   },
-   "highlights": [
-    "2020년 준공(6년차)의 상품성",
-    "저평가 매력 — 전세가율 58%, 은평구 내 평단가 하위 46%"
-   ],
-   "low_confidence": false,
-   "build_year": 2020,
-   "area_exclusive": 59.9,
-   "dong": "응암동",
-   "lat": 37.59418,
-   "lng": 126.92555
-  },
-  {
-   "ai_rank": 161,
    "district": "구로구",
    "apt_name": "현대",
    "ai_score": 53.1,
@@ -3883,13 +3859,37 @@
    "lng": 126.8596675
   },
   {
+   "ai_rank": 161,
+   "district": "은평구",
+   "apt_name": "백련산에스케이뷰아이파크",
+   "ai_score": 53.1,
+   "axes": {
+    "undervalued": 64.1,
+    "liquidity": 60.7,
+    "transit": 34.6,
+    "momentum": 29.4,
+    "school": 42.2,
+    "product": 93.9
+   },
+   "highlights": [
+    "2020년 준공(6년차)의 상품성",
+    "저평가 매력 — 전세가율 58%, 은평구 내 평단가 하위 46%"
+   ],
+   "low_confidence": false,
+   "build_year": 2020,
+   "area_exclusive": 59.9,
+   "dong": "응암동",
+   "lat": 37.59418,
+   "lng": 126.92555
+  },
+  {
    "ai_rank": 162,
    "district": "중랑구",
    "apt_name": "한신아파트상가동유치원동(103~109)",
    "ai_score": 53.0,
    "axes": {
     "undervalued": 63.8,
-    "liquidity": 68.0,
+    "liquidity": 68.1,
     "transit": 50.0,
     "momentum": 66.2,
     "school": 21.5,
@@ -3913,7 +3913,7 @@
    "ai_score": 53.0,
    "axes": {
     "undervalued": 40.4,
-    "liquidity": 65.6,
+    "liquidity": 65.7,
     "transit": 83.9,
     "momentum": 72.9,
     "school": 7.1,
@@ -3937,7 +3937,7 @@
    "ai_score": 52.9,
    "axes": {
     "undervalued": 78.8,
-    "liquidity": 58.2,
+    "liquidity": 58.3,
     "transit": 42.4,
     "momentum": 27.6,
     "school": 65.6,
@@ -4028,54 +4028,6 @@
   },
   {
    "ai_rank": 168,
-   "district": "종로구",
-   "apt_name": "인왕산아이파크",
-   "ai_score": 52.5,
-   "axes": {
-    "undervalued": 58.9,
-    "liquidity": 23.3,
-    "transit": 87.3,
-    "momentum": 50.1,
-    "school": 22.0,
-    "product": 65.5
-   },
-   "highlights": [
-    "교통·직주근접 — 독립문역 도보 4분, 도심(광화문·시청) 1.9km",
-    "2008년 준공(18년차)의 상품성"
-   ],
-   "low_confidence": false,
-   "build_year": 2008,
-   "area_exclusive": 60.0,
-   "dong": "무악동",
-   "lat": 37.5769703,
-   "lng": 126.957666
-  },
-  {
-   "ai_rank": 169,
-   "district": "용산구",
-   "apt_name": "삼성래미안",
-   "ai_score": 52.5,
-   "axes": {
-    "undervalued": 40.0,
-    "liquidity": 66.0,
-    "transit": 71.8,
-    "momentum": 45.9,
-    "school": 43.8,
-    "product": 46.9
-   },
-   "highlights": [
-    "교통·직주근접 — 효창공원앞역 도보 7분, 여의도 3.3km",
-    "거래가 활발해 환금성 우수 (누적 135건)"
-   ],
-   "low_confidence": false,
-   "build_year": 2001,
-   "area_exclusive": 59.9,
-   "dong": "도원동",
-   "lat": 37.53857,
-   "lng": 126.95576
-  },
-  {
-   "ai_rank": 170,
    "district": "성북구",
    "apt_name": "롯데캐슬클라시아",
    "ai_score": 52.5,
@@ -4099,7 +4051,79 @@
    "lng": 127.0260696
   },
   {
+   "ai_rank": 169,
+   "district": "종로구",
+   "apt_name": "인왕산아이파크",
+   "ai_score": 52.5,
+   "axes": {
+    "undervalued": 58.9,
+    "liquidity": 23.3,
+    "transit": 87.3,
+    "momentum": 50.1,
+    "school": 22.0,
+    "product": 65.5
+   },
+   "highlights": [
+    "교통·직주근접 — 독립문역 도보 4분, 도심(광화문·시청) 1.9km",
+    "2008년 준공(18년차)의 상품성"
+   ],
+   "low_confidence": false,
+   "build_year": 2008,
+   "area_exclusive": 60.0,
+   "dong": "무악동",
+   "lat": 37.5769703,
+   "lng": 126.957666
+  },
+  {
+   "ai_rank": 170,
+   "district": "용산구",
+   "apt_name": "삼성래미안",
+   "ai_score": 52.5,
+   "axes": {
+    "undervalued": 40.0,
+    "liquidity": 66.0,
+    "transit": 71.8,
+    "momentum": 45.9,
+    "school": 43.8,
+    "product": 46.9
+   },
+   "highlights": [
+    "교통·직주근접 — 효창공원앞역 도보 7분, 여의도 3.3km",
+    "거래가 활발해 환금성 우수 (누적 135건)"
+   ],
+   "low_confidence": false,
+   "build_year": 2001,
+   "area_exclusive": 59.9,
+   "dong": "도원동",
+   "lat": 37.53857,
+   "lng": 126.95576
+  },
+  {
    "ai_rank": 171,
+   "district": "은평구",
+   "apt_name": "녹번역e편한세상캐슬",
+   "ai_score": 52.4,
+   "axes": {
+    "undervalued": 39.0,
+    "liquidity": 61.8,
+    "transit": 34.6,
+    "momentum": 55.3,
+    "school": 42.2,
+    "product": 97.4
+   },
+   "highlights": [
+    "2021년 준공(5년차)의 상품성",
+    "거래가 활발해 환금성 우수 (누적 187건)"
+   ],
+   "low_confidence": false,
+   "build_year": 2021,
+   "area_exclusive": 60.0,
+   "dong": "응암동",
+   "lat": 37.59418,
+   "lng": 126.92555
+  },
+  {
+   "ai_rank": 172,
    "district": "강동구",
    "apt_name": "중앙하이츠",
    "ai_score": 52.3,
@@ -4123,55 +4147,7 @@
    "lng": 127.1590523
   },
   {
-   "ai_rank": 172,
-   "district": "은평구",
-   "apt_name": "녹번역e편한세상캐슬",
-   "ai_score": 52.3,
-   "axes": {
-    "undervalued": 39.0,
-    "liquidity": 61.7,
-    "transit": 34.6,
-    "momentum": 55.3,
-    "school": 42.2,
-    "product": 97.4
-   },
-   "highlights": [
-    "2021년 준공(5년차)의 상품성",
-    "거래가 활발해 환금성 우수 (누적 187건)"
-   ],
-   "low_confidence": false,
-   "build_year": 2021,
-   "area_exclusive": 60.0,
-   "dong": "응암동",
-   "lat": 37.59418,
-   "lng": 126.92555
-  },
-  {
    "ai_rank": 173,
-   "district": "동대문구",
-   "apt_name": "래미안위브",
-   "ai_score": 52.2,
-   "axes": {
-    "undervalued": 27.5,
-    "liquidity": 51.7,
-    "transit": 41.2,
-    "momentum": 71.6,
-    "school": 65.1,
-    "product": 77.1
-   },
-   "highlights": [
-    "2014년 준공(12년차)의 상품성",
-    "최근 가격이 연 +28.4% 추세로 상승 흐름"
-   ],
-   "low_confidence": false,
-   "build_year": 2014,
-   "area_exclusive": 60.0,
-   "dong": "답십리동",
-   "lat": 37.5720374,
-   "lng": 127.053952
-  },
-  {
-   "ai_rank": 174,
    "district": "관악구",
    "apt_name": "신림현대",
    "ai_score": 52.2,
@@ -4195,10 +4171,34 @@
    "lng": 126.928177
   },
   {
+   "ai_rank": 174,
+   "district": "동대문구",
+   "apt_name": "래미안위브",
+   "ai_score": 52.2,
+   "axes": {
+    "undervalued": 27.5,
+    "liquidity": 51.7,
+    "transit": 41.2,
+    "momentum": 71.6,
+    "school": 65.1,
+    "product": 77.1
+   },
+   "highlights": [
+    "2014년 준공(12년차)의 상품성",
+    "최근 가격이 연 +28.4% 추세로 상승 흐름"
+   ],
+   "low_confidence": false,
+   "build_year": 2014,
+   "area_exclusive": 60.0,
+   "dong": "답십리동",
+   "lat": 37.5720374,
+   "lng": 127.053952
+  },
+  {
    "ai_rank": 175,
    "district": "영등포구",
    "apt_name": "신길센트럴자이아파트",
-   "ai_score": 52.1,
+   "ai_score": 52.2,
    "axes": {
     "undervalued": 27.5,
     "liquidity": 65.4,
@@ -4297,7 +4297,7 @@
    "ai_score": 51.8,
    "axes": {
     "undervalued": 24.7,
-    "liquidity": 62.7,
+    "liquidity": 62.8,
     "transit": 65.5,
     "momentum": 76.0,
     "school": 43.9,
@@ -4340,30 +4340,6 @@
   },
   {
    "ai_rank": 181,
-   "district": "동대문구",
-   "apt_name": "래미안크레시티",
-   "ai_score": 51.5,
-   "axes": {
-    "undervalued": 21.8,
-    "liquidity": 71.7,
-    "transit": 29.7,
-    "momentum": 59.5,
-    "school": 75.5,
-    "product": 77.1
-   },
-   "highlights": [
-    "2014년 준공(12년차)의 상품성",
-    "학군·생활 — 초품아, 학원 263곳"
-   ],
-   "low_confidence": false,
-   "build_year": 2014,
-   "area_exclusive": 60.0,
-   "dong": "전농동",
-   "lat": 37.5806,
-   "lng": 127.05543
-  },
-  {
-   "ai_rank": 182,
    "district": "강동구",
    "apt_name": "선사현대아파트",
    "ai_score": 51.5,
@@ -4387,31 +4363,31 @@
    "lng": 127.1258631
   },
   {
-   "ai_rank": 183,
+   "ai_rank": 182,
    "district": "동대문구",
-   "apt_name": "힐스테이트청계",
-   "ai_score": 51.4,
+   "apt_name": "래미안크레시티",
+   "ai_score": 51.5,
    "axes": {
-    "undervalued": 24.3,
-    "liquidity": 39.7,
-    "transit": 54.7,
-    "momentum": 58.5,
-    "school": 73.5,
-    "product": 85.7
+    "undervalued": 21.8,
+    "liquidity": 71.7,
+    "transit": 29.7,
+    "momentum": 59.5,
+    "school": 75.5,
+    "product": 77.1
    },
    "highlights": [
-    "2018년 준공(8년차)의 상품성",
-    "학군·생활 — 초품아, 학원 281곳"
+    "2014년 준공(12년차)의 상품성",
+    "학군·생활 — 초품아, 학원 263곳"
    ],
    "low_confidence": false,
-   "build_year": 2018,
-   "area_exclusive": 59.9,
-   "dong": "답십리동",
-   "lat": 37.57002,
-   "lng": 127.05467
+   "build_year": 2014,
+   "area_exclusive": 60.0,
+   "dong": "전농동",
+   "lat": 37.5806,
+   "lng": 127.05543
   },
   {
-   "ai_rank": 184,
+   "ai_rank": 183,
    "district": "서대문구",
    "apt_name": "남가좌동현대",
    "ai_score": 51.4,
@@ -4433,6 +4409,30 @@
    "dong": "남가좌동",
    "lat": 37.57744,
    "lng": 126.9179
+  },
+  {
+   "ai_rank": 184,
+   "district": "동대문구",
+   "apt_name": "힐스테이트청계",
+   "ai_score": 51.4,
+   "axes": {
+    "undervalued": 24.3,
+    "liquidity": 39.8,
+    "transit": 54.7,
+    "momentum": 58.5,
+    "school": 73.5,
+    "product": 85.7
+   },
+   "highlights": [
+    "2018년 준공(8년차)의 상품성",
+    "학군·생활 — 초품아, 학원 281곳"
+   ],
+   "low_confidence": false,
+   "build_year": 2018,
+   "area_exclusive": 59.9,
+   "dong": "답십리동",
+   "lat": 37.57002,
+   "lng": 127.05467
   },
   {
    "ai_rank": 185,
@@ -4460,36 +4460,12 @@
   },
   {
    "ai_rank": 186,
-   "district": "마포구",
-   "apt_name": "성산시영(유원)",
-   "ai_score": 51.3,
-   "axes": {
-    "undervalued": 31.4,
-    "liquidity": 71.6,
-    "transit": 64.8,
-    "momentum": 74.2,
-    "school": 55.3,
-    "product": 1.9
-   },
-   "highlights": [
-    "최근 가격이 연 +29.6% 추세로 상승 흐름",
-    "거래가 활발해 환금성 우수 (누적 223건)"
-   ],
-   "low_confidence": false,
-   "build_year": 1986,
-   "area_exclusive": 59.4,
-   "dong": "성산동",
-   "lat": 37.56775,
-   "lng": 126.90263
-  },
-  {
-   "ai_rank": 187,
    "district": "성북구",
    "apt_name": "래미안세레니티",
    "ai_score": 51.3,
    "axes": {
     "undervalued": 55.8,
-    "liquidity": 46.2,
+    "liquidity": 46.3,
     "transit": 42.4,
     "momentum": 38.9,
     "school": 65.6,
@@ -4507,7 +4483,7 @@
    "lng": 127.03333
   },
   {
-   "ai_rank": 188,
+   "ai_rank": 187,
    "district": "서초구",
    "apt_name": "서초힐스",
    "ai_score": 51.3,
@@ -4531,13 +4507,37 @@
    "lng": 127.0188666
   },
   {
+   "ai_rank": 188,
+   "district": "마포구",
+   "apt_name": "성산시영(유원)",
+   "ai_score": 51.3,
+   "axes": {
+    "undervalued": 31.4,
+    "liquidity": 71.6,
+    "transit": 64.8,
+    "momentum": 74.2,
+    "school": 55.3,
+    "product": 1.9
+   },
+   "highlights": [
+    "최근 가격이 연 +29.6% 추세로 상승 흐름",
+    "거래가 활발해 환금성 우수 (누적 223건)"
+   ],
+   "low_confidence": false,
+   "build_year": 1986,
+   "area_exclusive": 59.4,
+   "dong": "성산동",
+   "lat": 37.56775,
+   "lng": 126.90263
+  },
+  {
    "ai_rank": 189,
    "district": "구로구",
    "apt_name": "삼환",
    "ai_score": 51.2,
    "axes": {
     "undervalued": 81.1,
-    "liquidity": 49.0,
+    "liquidity": 49.1,
     "transit": 51.9,
     "momentum": 32.0,
     "school": 53.9,
@@ -4604,30 +4604,6 @@
   },
   {
    "ai_rank": 192,
-   "district": "마포구",
-   "apt_name": "대흥동태영아파트",
-   "ai_score": 51.1,
-   "axes": {
-    "undervalued": 34.3,
-    "liquidity": 76.9,
-    "transit": 79.7,
-    "momentum": 17.7,
-    "school": 70.6,
-    "product": 34.1
-   },
-   "highlights": [
-    "교통·직주근접 — 대흥역 도보 5분, 여의도 3.6km",
-    "거래가 활발해 환금성 우수 (누적 160건)"
-   ],
-   "low_confidence": false,
-   "build_year": 1999,
-   "area_exclusive": 59.4,
-   "dong": "대흥동",
-   "lat": 37.5510043,
-   "lng": 126.9419496
-  },
-  {
-   "ai_rank": 193,
    "district": "용산구",
    "apt_name": "한남더힐",
    "ai_score": 51.1,
@@ -4651,55 +4627,31 @@
    "lng": 127.0074
   },
   {
+   "ai_rank": 193,
+   "district": "마포구",
+   "apt_name": "대흥동태영아파트",
+   "ai_score": 51.1,
+   "axes": {
+    "undervalued": 34.3,
+    "liquidity": 76.9,
+    "transit": 79.7,
+    "momentum": 17.7,
+    "school": 70.6,
+    "product": 34.1
+   },
+   "highlights": [
+    "교통·직주근접 — 대흥역 도보 5분, 여의도 3.6km",
+    "거래가 활발해 환금성 우수 (누적 160건)"
+   ],
+   "low_confidence": false,
+   "build_year": 1999,
+   "area_exclusive": 59.4,
+   "dong": "대흥동",
+   "lat": 37.5510043,
+   "lng": 126.9419496
+  },
+  {
    "ai_rank": 194,
-   "district": "은평구",
-   "apt_name": "래미안베라힐즈",
-   "ai_score": 51.1,
-   "axes": {
-    "undervalued": 46.0,
-    "liquidity": 28.1,
-    "transit": 64.5,
-    "momentum": 41.8,
-    "school": 51.7,
-    "product": 89.4
-   },
-   "highlights": [
-    "2019년 준공(7년차)의 상품성",
-    "교통·직주근접 — 녹번역 도보 5분, 도심(광화문·시청) 5.3km"
-   ],
-   "low_confidence": false,
-   "build_year": 2019,
-   "area_exclusive": 60.0,
-   "dong": "녹번동",
-   "lat": 37.60395,
-   "lng": 126.93437
-  },
-  {
-   "ai_rank": 195,
-   "district": "강동구",
-   "apt_name": "고덕센트럴푸르지오",
-   "ai_score": 51.1,
-   "axes": {
-    "undervalued": 46.0,
-    "liquidity": 63.3,
-    "transit": 32.6,
-    "momentum": 45.1,
-    "school": 36.8,
-    "product": 93.9
-   },
-   "highlights": [
-    "2020년 준공(6년차)의 상품성",
-    "거래가 활발해 환금성 우수 (누적 109건)"
-   ],
-   "low_confidence": false,
-   "build_year": 2020,
-   "area_exclusive": 59.1,
-   "dong": "고덕동",
-   "lat": 37.5577227,
-   "lng": 127.1701391
-  },
-  {
-   "ai_rank": 196,
    "district": "영등포구",
    "apt_name": "보라매에스케이뷰",
    "ai_score": 51.1,
@@ -4723,28 +4675,76 @@
    "lng": 126.9119108
   },
   {
-   "ai_rank": 197,
-   "district": "성동구",
-   "apt_name": "텐즈힐(1단지)",
-   "ai_score": 51.0,
+   "ai_rank": 195,
+   "district": "은평구",
+   "apt_name": "래미안베라힐즈",
+   "ai_score": 51.1,
    "axes": {
-    "undervalued": 33.8,
-    "liquidity": 26.9,
-    "transit": 73.6,
-    "momentum": 43.0,
-    "school": 71.0,
-    "product": 79.4
+    "undervalued": 46.0,
+    "liquidity": 28.1,
+    "transit": 64.5,
+    "momentum": 41.8,
+    "school": 51.7,
+    "product": 89.4
    },
    "highlights": [
-    "2015년 준공(11년차)의 상품성",
-    "교통·직주근접 — 상왕십리역 도보 6분, 도심(광화문·시청) 4.5km"
+    "2019년 준공(7년차)의 상품성",
+    "교통·직주근접 — 녹번역 도보 5분, 도심(광화문·시청) 5.3km"
    ],
    "low_confidence": false,
-   "build_year": 2015,
-   "area_exclusive": 59.9,
-   "dong": "하왕십리동",
-   "lat": 37.56131,
-   "lng": 127.02715
+   "build_year": 2019,
+   "area_exclusive": 60.0,
+   "dong": "녹번동",
+   "lat": 37.60395,
+   "lng": 126.93437
+  },
+  {
+   "ai_rank": 196,
+   "district": "강동구",
+   "apt_name": "고덕센트럴푸르지오",
+   "ai_score": 51.1,
+   "axes": {
+    "undervalued": 46.0,
+    "liquidity": 63.3,
+    "transit": 32.6,
+    "momentum": 45.1,
+    "school": 36.8,
+    "product": 93.9
+   },
+   "highlights": [
+    "2020년 준공(6년차)의 상품성",
+    "거래가 활발해 환금성 우수 (누적 109건)"
+   ],
+   "low_confidence": false,
+   "build_year": 2020,
+   "area_exclusive": 59.1,
+   "dong": "고덕동",
+   "lat": 37.5577227,
+   "lng": 127.1701391
+  },
+  {
+   "ai_rank": 197,
+   "district": "은평구",
+   "apt_name": "DMC롯데캐슬더퍼스트",
+   "ai_score": 51.0,
+   "axes": {
+    "undervalued": 52.3,
+    "liquidity": 48.2,
+    "transit": 42.1,
+    "momentum": 29.9,
+    "school": 50.8,
+    "product": 97.4
+   },
+   "highlights": [
+    "2021년 준공(5년차)의 상품성",
+    "저평가 매력 — 전세가율 56%, 은평구 내 평단가 하위 31%"
+   ],
+   "low_confidence": false,
+   "build_year": 2021,
+   "area_exclusive": 60.0,
+   "dong": "수색동",
+   "lat": 37.5851873,
+   "lng": 126.8948584
   },
   {
    "ai_rank": 198,
@@ -4772,27 +4772,27 @@
   },
   {
    "ai_rank": 199,
-   "district": "은평구",
-   "apt_name": "DMC롯데캐슬더퍼스트",
+   "district": "성동구",
+   "apt_name": "텐즈힐(1단지)",
    "ai_score": 51.0,
    "axes": {
-    "undervalued": 52.3,
-    "liquidity": 48.3,
-    "transit": 42.1,
-    "momentum": 29.9,
-    "school": 50.8,
-    "product": 97.4
+    "undervalued": 33.8,
+    "liquidity": 26.9,
+    "transit": 73.6,
+    "momentum": 43.0,
+    "school": 71.0,
+    "product": 79.4
    },
    "highlights": [
-    "2021년 준공(5년차)의 상품성",
-    "저평가 매력 — 전세가율 56%, 은평구 내 평단가 하위 31%"
+    "2015년 준공(11년차)의 상품성",
+    "교통·직주근접 — 상왕십리역 도보 6분, 도심(광화문·시청) 4.5km"
    ],
    "low_confidence": false,
-   "build_year": 2021,
-   "area_exclusive": 60.0,
-   "dong": "수색동",
-   "lat": 37.5851873,
-   "lng": 126.8948584
+   "build_year": 2015,
+   "area_exclusive": 59.9,
+   "dong": "하왕십리동",
+   "lat": 37.56131,
+   "lng": 127.02715
   },
   {
    "ai_rank": 200,
@@ -4916,27 +4916,27 @@
   },
   {
    "ai_rank": 205,
-   "district": "송파구",
-   "apt_name": "가락금호아파트",
+   "district": "강북구",
+   "apt_name": "벽산라이브파크",
    "ai_score": 50.3,
    "axes": {
-    "undervalued": 24.1,
-    "liquidity": 70.3,
-    "transit": 48.1,
-    "momentum": 91.0,
-    "school": 40.4,
-    "product": 24.6
+    "undervalued": 87.4,
+    "liquidity": 44.7,
+    "transit": 59.4,
+    "momentum": 15.5,
+    "school": 17.5,
+    "product": 56.3
    },
    "highlights": [
-    "최근 가격이 연 +36.6% 추세로 상승 흐름",
-    "거래가 활발해 환금성 우수 (누적 143건)"
+    "저평가 매력 — 전세가율 60%, 강북구 내 평단가 하위 100%",
+    "교통·직주근접 — 미아역 도보 4분, 도심(광화문·시청) 7.8km"
    ],
    "low_confidence": false,
-   "build_year": 1997,
-   "area_exclusive": 59.9,
-   "dong": "가락동",
-   "lat": 37.4962886,
-   "lng": 127.116441
+   "build_year": 2004,
+   "area_exclusive": 60.0,
+   "dong": "미아동",
+   "lat": 37.628995,
+   "lng": 127.0257543
   },
   {
    "ai_rank": 206,
@@ -4964,27 +4964,27 @@
   },
   {
    "ai_rank": 207,
-   "district": "강북구",
-   "apt_name": "벽산라이브파크",
+   "district": "송파구",
+   "apt_name": "가락금호아파트",
    "ai_score": 50.3,
    "axes": {
-    "undervalued": 87.4,
-    "liquidity": 44.7,
-    "transit": 59.4,
-    "momentum": 15.5,
-    "school": 17.5,
-    "product": 56.3
+    "undervalued": 24.1,
+    "liquidity": 70.3,
+    "transit": 48.1,
+    "momentum": 91.0,
+    "school": 40.4,
+    "product": 24.6
    },
    "highlights": [
-    "저평가 매력 — 전세가율 60%, 강북구 내 평단가 하위 100%",
-    "교통·직주근접 — 미아역 도보 4분, 도심(광화문·시청) 7.8km"
+    "최근 가격이 연 +36.6% 추세로 상승 흐름",
+    "거래가 활발해 환금성 우수 (누적 143건)"
    ],
    "low_confidence": false,
-   "build_year": 2004,
-   "area_exclusive": 60.0,
-   "dong": "미아동",
-   "lat": 37.628995,
-   "lng": 127.0257543
+   "build_year": 1997,
+   "area_exclusive": 59.9,
+   "dong": "가락동",
+   "lat": 37.4962886,
+   "lng": 127.116441
   },
   {
    "ai_rank": 208,
@@ -5012,30 +5012,6 @@
   },
   {
    "ai_rank": 209,
-   "district": "은평구",
-   "apt_name": "백련산힐스테이트1차",
-   "ai_score": 50.2,
-   "axes": {
-    "undervalued": 85.5,
-    "liquidity": 33.1,
-    "transit": 34.6,
-    "momentum": 27.1,
-    "school": 42.2,
-    "product": 71.4
-   },
-   "highlights": [
-    "저평가 매력 — 전세가율 61%, 은평구 내 평단가 하위 85%",
-    "2011년 준공(15년차)의 상품성"
-   ],
-   "low_confidence": false,
-   "build_year": 2011,
-   "area_exclusive": 59.6,
-   "dong": "응암동",
-   "lat": 37.59418,
-   "lng": 126.92555
-  },
-  {
-   "ai_rank": 210,
    "district": "강서구",
    "apt_name": "우장산힐스테이트",
    "ai_score": 50.2,
@@ -5059,13 +5035,37 @@
    "lng": 126.8375119
   },
   {
+   "ai_rank": 210,
+   "district": "은평구",
+   "apt_name": "백련산힐스테이트1차",
+   "ai_score": 50.2,
+   "axes": {
+    "undervalued": 85.5,
+    "liquidity": 33.1,
+    "transit": 34.6,
+    "momentum": 27.1,
+    "school": 42.2,
+    "product": 71.4
+   },
+   "highlights": [
+    "저평가 매력 — 전세가율 61%, 은평구 내 평단가 하위 85%",
+    "2011년 준공(15년차)의 상품성"
+   ],
+   "low_confidence": false,
+   "build_year": 2011,
+   "area_exclusive": 59.6,
+   "dong": "응암동",
+   "lat": 37.59418,
+   "lng": 126.92555
+  },
+  {
    "ai_rank": 211,
    "district": "동작구",
    "apt_name": "우성",
    "ai_score": 50.1,
    "axes": {
     "undervalued": 39.6,
-    "liquidity": 60.5,
+    "liquidity": 60.6,
     "transit": 67.8,
     "momentum": 33.8,
     "school": 78.9,
@@ -5137,7 +5137,7 @@
    "ai_score": 49.8,
    "axes": {
     "undervalued": 58.1,
-    "liquidity": 32.6,
+    "liquidity": 32.7,
     "transit": 51.6,
     "momentum": 50.1,
     "school": 26.4,
@@ -5161,7 +5161,7 @@
    "ai_score": 49.6,
    "axes": {
     "undervalued": 73.9,
-    "liquidity": 70.1,
+    "liquidity": 70.2,
     "transit": 32.7,
     "momentum": 30.2,
     "school": 24.1,
@@ -5184,7 +5184,7 @@
    "apt_name": "정릉e-편한세상",
    "ai_score": 49.5,
    "axes": {
-    "undervalued": 92.8,
+    "undervalued": 92.7,
     "liquidity": 60.4,
     "transit": 32.1,
     "momentum": 21.1,
@@ -5252,30 +5252,6 @@
   },
   {
    "ai_rank": 219,
-   "district": "양천구",
-   "apt_name": "목동센트럴아이파크위브3단지",
-   "ai_score": 49.0,
-   "axes": {
-    "undervalued": 56.6,
-    "liquidity": 43.3,
-    "transit": 23.2,
-    "momentum": 54.9,
-    "school": 27.8,
-    "product": 93.9
-   },
-   "highlights": [
-    "2020년 준공(6년차)의 상품성",
-    "저평가 매력 — 전세가율 53%, 양천구 내 평단가 하위 60%"
-   ],
-   "low_confidence": false,
-   "build_year": 2020,
-   "area_exclusive": 59.9,
-   "dong": "신월동",
-   "lat": 37.52782,
-   "lng": 126.83692
-  },
-  {
-   "ai_rank": 220,
    "district": "노원구",
    "apt_name": "미성",
    "ai_score": 49.0,
@@ -5299,7 +5275,7 @@
    "lng": 127.0678883
   },
   {
-   "ai_rank": 221,
+   "ai_rank": 220,
    "district": "서대문구",
    "apt_name": "신촌푸르지오",
    "ai_score": 49.0,
@@ -5323,31 +5299,31 @@
    "lng": 126.9552494
   },
   {
-   "ai_rank": 222,
-   "district": "성북구",
-   "apt_name": "래미안포레카운티",
-   "ai_score": 48.8,
+   "ai_rank": 221,
+   "district": "양천구",
+   "apt_name": "목동센트럴아이파크위브3단지",
+   "ai_score": 49.0,
    "axes": {
-    "undervalued": 31.5,
-    "liquidity": 39.6,
-    "transit": 22.7,
-    "momentum": 78.9,
-    "school": 42.6,
-    "product": 97.4
+    "undervalued": 56.6,
+    "liquidity": 43.3,
+    "transit": 23.2,
+    "momentum": 54.9,
+    "school": 27.8,
+    "product": 93.9
    },
    "highlights": [
-    "2021년 준공(5년차)의 상품성",
-    "최근 가격이 연 +31.6% 추세로 상승 흐름"
+    "2020년 준공(6년차)의 상품성",
+    "저평가 매력 — 전세가율 53%, 양천구 내 평단가 하위 60%"
    ],
    "low_confidence": false,
-   "build_year": 2021,
+   "build_year": 2020,
    "area_exclusive": 59.9,
-   "dong": "장위동",
-   "lat": 37.6162,
-   "lng": 127.05086
+   "dong": "신월동",
+   "lat": 37.52782,
+   "lng": 126.83692
   },
   {
-   "ai_rank": 223,
+   "ai_rank": 222,
    "district": "서대문구",
    "apt_name": "힐스테이트신촌",
    "ai_score": 48.8,
@@ -5371,7 +5347,7 @@
    "lng": 126.9510502
   },
   {
-   "ai_rank": 224,
+   "ai_rank": 223,
    "district": "서대문구",
    "apt_name": "DMC파크뷰자이2단지",
    "ai_score": 48.8,
@@ -5395,7 +5371,7 @@
    "lng": 126.9179
   },
   {
-   "ai_rank": 225,
+   "ai_rank": 224,
    "district": "마포구",
    "apt_name": "마포래미안푸르지오3단지",
    "ai_score": 48.8,
@@ -5417,6 +5393,30 @@
    "dong": "아현동",
    "lat": 37.5505624,
    "lng": 126.9525116
+  },
+  {
+   "ai_rank": 225,
+   "district": "성북구",
+   "apt_name": "래미안포레카운티",
+   "ai_score": 48.8,
+   "axes": {
+    "undervalued": 31.5,
+    "liquidity": 39.6,
+    "transit": 22.7,
+    "momentum": 78.9,
+    "school": 42.6,
+    "product": 97.4
+   },
+   "highlights": [
+    "2021년 준공(5년차)의 상품성",
+    "최근 가격이 연 +31.6% 추세로 상승 흐름"
+   ],
+   "low_confidence": false,
+   "build_year": 2021,
+   "area_exclusive": 59.9,
+   "dong": "장위동",
+   "lat": 37.6162,
+   "lng": 127.05086
   },
   {
    "ai_rank": 226,
@@ -5473,7 +5473,7 @@
    "ai_score": 48.3,
    "axes": {
     "undervalued": 36.1,
-    "liquidity": 16.1,
+    "liquidity": 16.2,
     "transit": 72.1,
     "momentum": 50.1,
     "school": 47.2,
@@ -5517,30 +5517,6 @@
   {
    "ai_rank": 230,
    "district": "성동구",
-   "apt_name": "센트라스",
-   "ai_score": 48.2,
-   "axes": {
-    "undervalued": 28.0,
-    "liquidity": 52.9,
-    "transit": 73.6,
-    "momentum": 7.7,
-    "school": 71.0,
-    "product": 81.2
-   },
-   "highlights": [
-    "2016년 준공(10년차)의 상품성",
-    "교통·직주근접 — 상왕십리역 도보 6분, 도심(광화문·시청) 4.5km"
-   ],
-   "low_confidence": false,
-   "build_year": 2016,
-   "area_exclusive": 59.9,
-   "dong": "하왕십리동",
-   "lat": 37.56131,
-   "lng": 127.02715
-  },
-  {
-   "ai_rank": 231,
-   "district": "성동구",
    "apt_name": "서울숲 한신 더 휴",
    "ai_score": 48.2,
    "axes": {
@@ -5563,28 +5539,52 @@
    "lng": 127.03571
   },
   {
-   "ai_rank": 232,
-   "district": "강북구",
-   "apt_name": "삼각산아이원",
-   "ai_score": 48.1,
+   "ai_rank": 231,
+   "district": "성동구",
+   "apt_name": "센트라스",
+   "ai_score": 48.2,
    "axes": {
-    "undervalued": 76.4,
-    "liquidity": 36.0,
-    "transit": 59.4,
-    "momentum": 28.4,
-    "school": 17.5,
-    "product": 53.0
+    "undervalued": 28.0,
+    "liquidity": 52.9,
+    "transit": 73.6,
+    "momentum": 7.7,
+    "school": 71.0,
+    "product": 81.2
    },
    "highlights": [
-    "저평가 매력 — 전세가율 59%, 강북구 내 평단가 하위 75%",
-    "교통·직주근접 — 미아역 도보 4분, 도심(광화문·시청) 7.8km"
+    "2016년 준공(10년차)의 상품성",
+    "교통·직주근접 — 상왕십리역 도보 6분, 도심(광화문·시청) 4.5km"
    ],
    "low_confidence": false,
-   "build_year": 2003,
-   "area_exclusive": 59.8,
-   "dong": "미아동",
-   "lat": 37.628995,
-   "lng": 127.0257543
+   "build_year": 2016,
+   "area_exclusive": 59.9,
+   "dong": "하왕십리동",
+   "lat": 37.56131,
+   "lng": 127.02715
+  },
+  {
+   "ai_rank": 232,
+   "district": "구로구",
+   "apt_name": "구일우성",
+   "ai_score": 48.1,
+   "axes": {
+    "undervalued": 94.5,
+    "liquidity": 51.7,
+    "transit": 34.8,
+    "momentum": 30.9,
+    "school": 14.6,
+    "product": 28.7
+   },
+   "highlights": [
+    "저평가 매력 — 전세가율 65%, 구로구 내 평단가 하위 95%",
+    "거래가 활발해 환금성 우수 (누적 168건)"
+   ],
+   "low_confidence": false,
+   "build_year": 1998,
+   "area_exclusive": 59.4,
+   "dong": "구로동",
+   "lat": 37.489632,
+   "lng": 126.876259
   },
   {
    "ai_rank": 233,
@@ -5593,7 +5593,7 @@
    "ai_score": 48.1,
    "axes": {
     "undervalued": 41.4,
-    "liquidity": 39.9,
+    "liquidity": 40.0,
     "transit": 43.0,
     "momentum": 61.1,
     "school": 16.2,
@@ -5612,27 +5612,27 @@
   },
   {
    "ai_rank": 234,
-   "district": "구로구",
-   "apt_name": "구일우성",
+   "district": "강북구",
+   "apt_name": "삼각산아이원",
    "ai_score": 48.1,
    "axes": {
-    "undervalued": 94.7,
-    "liquidity": 51.7,
-    "transit": 34.8,
-    "momentum": 30.9,
-    "school": 14.6,
-    "product": 28.7
+    "undervalued": 76.4,
+    "liquidity": 36.1,
+    "transit": 59.4,
+    "momentum": 28.4,
+    "school": 17.5,
+    "product": 53.0
    },
    "highlights": [
-    "저평가 매력 — 전세가율 65%, 구로구 내 평단가 하위 95%",
-    "거래가 활발해 환금성 우수 (누적 168건)"
+    "저평가 매력 — 전세가율 59%, 강북구 내 평단가 하위 75%",
+    "교통·직주근접 — 미아역 도보 4분, 도심(광화문·시청) 7.8km"
    ],
    "low_confidence": false,
-   "build_year": 1998,
-   "area_exclusive": 59.4,
-   "dong": "구로동",
-   "lat": 37.489632,
-   "lng": 126.876259
+   "build_year": 2003,
+   "area_exclusive": 59.8,
+   "dong": "미아동",
+   "lat": 37.628995,
+   "lng": 127.0257543
   },
   {
    "ai_rank": 235,
@@ -5660,30 +5660,6 @@
   },
   {
    "ai_rank": 236,
-   "district": "서대문구",
-   "apt_name": "e편한세상신촌1단지",
-   "ai_score": 47.9,
-   "axes": {
-    "undervalued": 18.4,
-    "liquidity": 57.9,
-    "transit": 63.8,
-    "momentum": 23.7,
-    "school": 66.6,
-    "product": 85.7
-   },
-   "highlights": [
-    "2018년 준공(8년차)의 상품성",
-    "학군·생활 — 초품아, 학원 198곳"
-   ],
-   "low_confidence": false,
-   "build_year": 2018,
-   "area_exclusive": 59.8,
-   "dong": "북아현동",
-   "lat": 37.56348,
-   "lng": 126.95426
-  },
-  {
-   "ai_rank": 237,
    "district": "강동구",
    "apt_name": "래미안솔베뉴",
    "ai_score": 47.9,
@@ -5707,37 +5683,37 @@
    "lng": 127.144187
   },
   {
-   "ai_rank": 238,
-   "district": "마포구",
-   "apt_name": "마포그랑자이",
-   "ai_score": 47.8,
+   "ai_rank": 237,
+   "district": "서대문구",
+   "apt_name": "e편한세상신촌1단지",
+   "ai_score": 47.9,
    "axes": {
-    "undervalued": 22.0,
-    "liquidity": 51.4,
-    "transit": 79.7,
-    "momentum": 0.8,
-    "school": 70.6,
-    "product": 93.9
+    "undervalued": 18.4,
+    "liquidity": 57.9,
+    "transit": 63.8,
+    "momentum": 23.7,
+    "school": 66.6,
+    "product": 85.7
    },
    "highlights": [
-    "2020년 준공(6년차)의 상품성",
-    "교통·직주근접 — 대흥역 도보 5분, 여의도 3.6km"
+    "2018년 준공(8년차)의 상품성",
+    "학군·생활 — 초품아, 학원 198곳"
    ],
    "low_confidence": false,
-   "build_year": 2020,
-   "area_exclusive": 60.0,
-   "dong": "대흥동",
-   "lat": 37.5510043,
-   "lng": 126.9419496
+   "build_year": 2018,
+   "area_exclusive": 59.8,
+   "dong": "북아현동",
+   "lat": 37.56348,
+   "lng": 126.95426
   },
   {
-   "ai_rank": 239,
+   "ai_rank": 238,
    "district": "동대문구",
    "apt_name": "대림e-편한세상",
    "ai_score": 47.8,
    "axes": {
     "undervalued": 47.7,
-    "liquidity": 67.9,
+    "liquidity": 68.0,
     "transit": 40.2,
     "momentum": 44.8,
     "school": 28.6,
@@ -5755,7 +5731,7 @@
    "lng": 127.06124
   },
   {
-   "ai_rank": 240,
+   "ai_rank": 239,
    "district": "노원구",
    "apt_name": "태강아파트(아이파크)",
    "ai_score": 47.8,
@@ -5777,6 +5753,30 @@
    "dong": "공릉동",
    "lat": 37.6218908,
    "lng": 127.0724119
+  },
+  {
+   "ai_rank": 240,
+   "district": "마포구",
+   "apt_name": "마포그랑자이",
+   "ai_score": 47.8,
+   "axes": {
+    "undervalued": 22.0,
+    "liquidity": 51.4,
+    "transit": 79.7,
+    "momentum": 0.8,
+    "school": 70.6,
+    "product": 93.9
+   },
+   "highlights": [
+    "2020년 준공(6년차)의 상품성",
+    "교통·직주근접 — 대흥역 도보 5분, 여의도 3.6km"
+   ],
+   "low_confidence": false,
+   "build_year": 2020,
+   "area_exclusive": 60.0,
+   "dong": "대흥동",
+   "lat": 37.5510043,
+   "lng": 126.9419496
   },
   {
    "ai_rank": 241,
@@ -5804,30 +5804,6 @@
   },
   {
    "ai_rank": 242,
-   "district": "동작구",
-   "apt_name": "아크로리버하임",
-   "ai_score": 47.7,
-   "axes": {
-    "undervalued": 14.1,
-    "liquidity": 53.2,
-    "transit": 73.9,
-    "momentum": 57.5,
-    "school": 10.6,
-    "product": 89.4
-   },
-   "highlights": [
-    "2019년 준공(7년차)의 상품성",
-    "교통·직주근접 — 흑석역 도보 6분, 여의도 3.4km"
-   ],
-   "low_confidence": false,
-   "build_year": 2019,
-   "area_exclusive": 59.9,
-   "dong": "흑석동",
-   "lat": 37.5105646,
-   "lng": 126.9597036
-  },
-  {
-   "ai_rank": 243,
    "district": "노원구",
    "apt_name": "한진한화그랑빌",
    "ai_score": 47.7,
@@ -5851,31 +5827,31 @@
    "lng": 127.0524345
   },
   {
-   "ai_rank": 244,
-   "district": "강남구",
-   "apt_name": "역삼래미안",
-   "ai_score": 47.6,
+   "ai_rank": 243,
+   "district": "동작구",
+   "apt_name": "아크로리버하임",
+   "ai_score": 47.7,
    "axes": {
-    "undervalued": 22.9,
-    "liquidity": 71.6,
-    "transit": 94.2,
-    "momentum": 1.8,
-    "school": 47.9,
-    "product": 59.0
+    "undervalued": 14.1,
+    "liquidity": 53.2,
+    "transit": 73.9,
+    "momentum": 57.5,
+    "school": 10.6,
+    "product": 89.4
    },
    "highlights": [
-    "교통·직주근접 — 역삼역 도보 3분, 강남권(테헤란로) 1.0km",
-    "거래가 활발해 환금성 우수 (누적 111건)"
+    "2019년 준공(7년차)의 상품성",
+    "교통·직주근접 — 흑석역 도보 6분, 여의도 3.4km"
    ],
    "low_confidence": false,
-   "build_year": 2005,
-   "area_exclusive": 59.4,
-   "dong": "역삼동",
-   "lat": 37.49988,
-   "lng": 127.03856
+   "build_year": 2019,
+   "area_exclusive": 59.9,
+   "dong": "흑석동",
+   "lat": 37.5105646,
+   "lng": 126.9597036
   },
   {
-   "ai_rank": 245,
+   "ai_rank": 244,
    "district": "중구",
    "apt_name": "서울역센트럴자이",
    "ai_score": 47.6,
@@ -5899,13 +5875,37 @@
    "lng": 126.9639221
   },
   {
+   "ai_rank": 245,
+   "district": "강남구",
+   "apt_name": "역삼래미안",
+   "ai_score": 47.6,
+   "axes": {
+    "undervalued": 22.9,
+    "liquidity": 71.6,
+    "transit": 94.2,
+    "momentum": 1.8,
+    "school": 47.9,
+    "product": 59.0
+   },
+   "highlights": [
+    "교통·직주근접 — 역삼역 도보 3분, 강남권(테헤란로) 1.0km",
+    "거래가 활발해 환금성 우수 (누적 111건)"
+   ],
+   "low_confidence": false,
+   "build_year": 2005,
+   "area_exclusive": 59.4,
+   "dong": "역삼동",
+   "lat": 37.49988,
+   "lng": 127.03856
+  },
+  {
    "ai_rank": 246,
    "district": "송파구",
    "apt_name": "우성",
    "ai_score": 47.5,
    "axes": {
     "undervalued": 35.0,
-    "liquidity": 52.2,
+    "liquidity": 52.3,
     "transit": 56.7,
     "momentum": 85.6,
     "school": 40.1,
@@ -5924,6 +5924,30 @@
   },
   {
    "ai_rank": 247,
+   "district": "서대문구",
+   "apt_name": "홍제센트럴IPARK",
+   "ai_score": 47.5,
+   "axes": {
+    "undervalued": 49.7,
+    "liquidity": 24.7,
+    "transit": 77.6,
+    "momentum": 10.6,
+    "school": 41.2,
+    "product": 93.9
+   },
+   "highlights": [
+    "2020년 준공(6년차)의 상품성",
+    "교통·직주근접 — 홍제역 도보 5분, 도심(광화문·시청) 3.3km"
+   ],
+   "low_confidence": false,
+   "build_year": 2020,
+   "area_exclusive": 60.0,
+   "dong": "홍제동",
+   "lat": 37.5871,
+   "lng": 126.94676
+  },
+  {
+   "ai_rank": 248,
    "district": "동작구",
    "apt_name": "신동아4",
    "ai_score": 47.4,
@@ -5945,30 +5969,6 @@
    "dong": "사당동",
    "lat": 37.4856963,
    "lng": 126.9723525
-  },
-  {
-   "ai_rank": 248,
-   "district": "서대문구",
-   "apt_name": "홍제센트럴IPARK",
-   "ai_score": 47.4,
-   "axes": {
-    "undervalued": 49.7,
-    "liquidity": 24.7,
-    "transit": 77.6,
-    "momentum": 10.3,
-    "school": 41.2,
-    "product": 93.9
-   },
-   "highlights": [
-    "2020년 준공(6년차)의 상품성",
-    "교통·직주근접 — 홍제역 도보 5분, 도심(광화문·시청) 3.3km"
-   ],
-   "low_confidence": false,
-   "build_year": 2020,
-   "area_exclusive": 60.0,
-   "dong": "홍제동",
-   "lat": 37.5871,
-   "lng": 126.94676
   },
   {
    "ai_rank": 249,
@@ -6049,7 +6049,7 @@
    "ai_score": 47.0,
    "axes": {
     "undervalued": 38.4,
-    "liquidity": 53.7,
+    "liquidity": 53.8,
     "transit": 44.5,
     "momentum": 65.7,
     "school": 35.7,
@@ -6141,30 +6141,6 @@
   {
    "ai_rank": 256,
    "district": "성동구",
-   "apt_name": "이편한세상금호파크힐스",
-   "ai_score": 46.6,
-   "axes": {
-    "undervalued": 20.3,
-    "liquidity": 61.1,
-    "transit": 73.5,
-    "momentum": 3.4,
-    "school": 58.8,
-    "product": 89.4
-   },
-   "highlights": [
-    "2019년 준공(7년차)의 상품성",
-    "교통·직주근접 — 신금호역 도보 6분, 도심(광화문·시청) 4.6km"
-   ],
-   "low_confidence": false,
-   "build_year": 2019,
-   "area_exclusive": 60.0,
-   "dong": "금호동1가",
-   "lat": 37.55286,
-   "lng": 127.02393
-  },
-  {
-   "ai_rank": 257,
-   "district": "성동구",
    "apt_name": "극동",
    "ai_score": 46.6,
    "axes": {
@@ -6185,6 +6161,30 @@
    "dong": "옥수동",
    "lat": 37.54176,
    "lng": 127.01648
+  },
+  {
+   "ai_rank": 257,
+   "district": "성동구",
+   "apt_name": "이편한세상금호파크힐스",
+   "ai_score": 46.6,
+   "axes": {
+    "undervalued": 20.3,
+    "liquidity": 61.2,
+    "transit": 73.5,
+    "momentum": 3.4,
+    "school": 58.8,
+    "product": 89.4
+   },
+   "highlights": [
+    "2019년 준공(7년차)의 상품성",
+    "교통·직주근접 — 신금호역 도보 6분, 도심(광화문·시청) 4.6km"
+   ],
+   "low_confidence": false,
+   "build_year": 2019,
+   "area_exclusive": 60.0,
+   "dong": "금호동1가",
+   "lat": 37.55286,
+   "lng": 127.02393
   },
   {
    "ai_rank": 258,
@@ -6219,7 +6219,7 @@
     "undervalued": 77.7,
     "liquidity": 37.7,
     "transit": 44.5,
-    "momentum": 11.9,
+    "momentum": 12.1,
     "school": 35.7,
     "product": 61.1
    },
@@ -6260,30 +6260,6 @@
   },
   {
    "ai_rank": 261,
-   "district": "동대문구",
-   "apt_name": "래미안 허브리츠",
-   "ai_score": 46.0,
-   "axes": {
-    "undervalued": 35.6,
-    "liquidity": 42.5,
-    "transit": 65.2,
-    "momentum": 40.7,
-    "school": 25.8,
-    "product": 71.4
-   },
-   "highlights": [
-    "2011년 준공(15년차)의 상품성",
-    "교통·직주근접 — 용두역 도보 6분, 도심(광화문·시청) 5.1km"
-   ],
-   "low_confidence": false,
-   "build_year": 2011,
-   "area_exclusive": 60.0,
-   "dong": "용두동",
-   "lat": 37.57616,
-   "lng": 127.03476
-  },
-  {
-   "ai_rank": 262,
    "district": "서대문구",
    "apt_name": "홍은동벽산",
    "ai_score": 46.0,
@@ -6305,6 +6281,30 @@
    "dong": "홍은동",
    "lat": 37.59296,
    "lng": 126.93733
+  },
+  {
+   "ai_rank": 262,
+   "district": "동대문구",
+   "apt_name": "래미안 허브리츠",
+   "ai_score": 46.0,
+   "axes": {
+    "undervalued": 35.6,
+    "liquidity": 42.5,
+    "transit": 65.2,
+    "momentum": 40.7,
+    "school": 25.8,
+    "product": 71.4
+   },
+   "highlights": [
+    "2011년 준공(15년차)의 상품성",
+    "교통·직주근접 — 용두역 도보 6분, 도심(광화문·시청) 5.1km"
+   ],
+   "low_confidence": false,
+   "build_year": 2011,
+   "area_exclusive": 60.0,
+   "dong": "용두동",
+   "lat": 37.57616,
+   "lng": 127.03476
   },
   {
    "ai_rank": 263,
@@ -6334,10 +6334,10 @@
    "ai_rank": 264,
    "district": "금천구",
    "apt_name": "금천롯데캐슬골드파크3차",
-   "ai_score": 45.8,
+   "ai_score": 45.9,
    "axes": {
     "undervalued": 58.7,
-    "liquidity": 57.2,
+    "liquidity": 57.3,
     "transit": 32.7,
     "momentum": 18.3,
     "school": 24.1,
@@ -6384,7 +6384,7 @@
    "apt_name": "비선아파트",
    "ai_score": 45.5,
    "axes": {
-    "undervalued": 89.6,
+    "undervalued": 89.5,
     "liquidity": 20.9,
     "transit": 22.8,
     "momentum": 50.1,
@@ -6428,6 +6428,30 @@
   },
   {
    "ai_rank": 268,
+   "district": "성동구",
+   "apt_name": "옥수파크힐스101동~116동",
+   "ai_score": 45.4,
+   "axes": {
+    "undervalued": 8.5,
+    "liquidity": 63.7,
+    "transit": 76.6,
+    "momentum": 12.6,
+    "school": 58.1,
+    "product": 81.2
+   },
+   "highlights": [
+    "2016년 준공(10년차)의 상품성",
+    "교통·직주근접 — 옥수역 도보 3분, 도심(광화문·시청) 4.7km"
+   ],
+   "low_confidence": false,
+   "build_year": 2016,
+   "area_exclusive": 59.9,
+   "dong": "옥수동",
+   "lat": 37.54176,
+   "lng": 127.01648
+  },
+  {
+   "ai_rank": 269,
    "district": "서초구",
    "apt_name": "래미안퍼스티지",
    "ai_score": 45.3,
@@ -6449,30 +6473,6 @@
    "dong": "반포동",
    "lat": 37.5043898,
    "lng": 127.0008014
-  },
-  {
-   "ai_rank": 269,
-   "district": "성동구",
-   "apt_name": "옥수파크힐스101동~116동",
-   "ai_score": 45.3,
-   "axes": {
-    "undervalued": 8.5,
-    "liquidity": 63.6,
-    "transit": 76.6,
-    "momentum": 12.4,
-    "school": 58.1,
-    "product": 81.2
-   },
-   "highlights": [
-    "2016년 준공(10년차)의 상품성",
-    "교통·직주근접 — 옥수역 도보 3분, 도심(광화문·시청) 4.7km"
-   ],
-   "low_confidence": false,
-   "build_year": 2016,
-   "area_exclusive": 59.9,
-   "dong": "옥수동",
-   "lat": 37.54176,
-   "lng": 127.01648
   },
   {
    "ai_rank": 270,
@@ -6577,7 +6577,7 @@
    "ai_score": 44.8,
    "axes": {
     "undervalued": 89.6,
-    "liquidity": 59.7,
+    "liquidity": 59.8,
     "transit": 15.8,
     "momentum": 6.2,
     "school": 22.7,
@@ -6644,6 +6644,30 @@
   },
   {
    "ai_rank": 277,
+   "district": "강서구",
+   "apt_name": "가양6단지",
+   "ai_score": 44.4,
+   "axes": {
+    "undervalued": 27.6,
+    "liquidity": 41.9,
+    "transit": 33.6,
+    "momentum": 86.6,
+    "school": 64.9,
+    "product": 14.3
+   },
+   "highlights": [
+    "최근 가격이 연 +34.7% 추세로 상승 흐름",
+    "학군·생활 — 초품아, 학원 183곳"
+   ],
+   "low_confidence": false,
+   "build_year": 1992,
+   "area_exclusive": 58.7,
+   "dong": "가양동",
+   "lat": 37.5663502,
+   "lng": 126.8525524
+  },
+  {
+   "ai_rank": 278,
    "district": "노원구",
    "apt_name": "상계2차중앙하이츠",
    "ai_score": 44.4,
@@ -6667,55 +6691,7 @@
    "lng": 127.07242
   },
   {
-   "ai_rank": 278,
-   "district": "강서구",
-   "apt_name": "가양6단지",
-   "ai_score": 44.4,
-   "axes": {
-    "undervalued": 27.6,
-    "liquidity": 41.8,
-    "transit": 33.6,
-    "momentum": 86.6,
-    "school": 64.9,
-    "product": 14.3
-   },
-   "highlights": [
-    "최근 가격이 연 +34.7% 추세로 상승 흐름",
-    "학군·생활 — 초품아, 학원 183곳"
-   ],
-   "low_confidence": false,
-   "build_year": 1992,
-   "area_exclusive": 58.7,
-   "dong": "가양동",
-   "lat": 37.5663502,
-   "lng": 126.8525524
-  },
-  {
    "ai_rank": 279,
-   "district": "중랑구",
-   "apt_name": "신내11대명",
-   "ai_score": 44.3,
-   "axes": {
-    "undervalued": 93.0,
-    "liquidity": 42.3,
-    "transit": 28.0,
-    "momentum": 7.2,
-    "school": 52.6,
-    "product": 21.9
-   },
-   "highlights": [
-    "저평가 매력 — 전세가율 62%, 중랑구 내 평단가 하위 100%",
-    "학군·생활 — 초품아, 학원 174곳"
-   ],
-   "low_confidence": false,
-   "build_year": 1996,
-   "area_exclusive": 59.8,
-   "dong": "신내동",
-   "lat": 37.61182,
-   "lng": 127.09298
-  },
-  {
-   "ai_rank": 280,
    "district": "강서구",
    "apt_name": "가양강나루현대",
    "ai_score": 44.3,
@@ -6739,28 +6715,52 @@
    "lng": 126.8498488
   },
   {
-   "ai_rank": 281,
-   "district": "성동구",
-   "apt_name": "옥수삼성",
-   "ai_score": 44.2,
+   "ai_rank": 280,
+   "district": "중랑구",
+   "apt_name": "신내11대명",
+   "ai_score": 44.3,
    "axes": {
-    "undervalued": 18.5,
-    "liquidity": 61.7,
-    "transit": 76.6,
-    "momentum": 26.3,
-    "school": 58.1,
-    "product": 34.1
+    "undervalued": 93.0,
+    "liquidity": 42.3,
+    "transit": 28.0,
+    "momentum": 7.2,
+    "school": 52.6,
+    "product": 21.9
    },
    "highlights": [
-    "교통·직주근접 — 옥수역 도보 3분, 도심(광화문·시청) 4.7km",
-    "거래가 활발해 환금성 우수 (누적 127건)"
+    "저평가 매력 — 전세가율 62%, 중랑구 내 평단가 하위 100%",
+    "학군·생활 — 초품아, 학원 174곳"
    ],
    "low_confidence": false,
-   "build_year": 1999,
-   "area_exclusive": 59.7,
-   "dong": "옥수동",
-   "lat": 37.54176,
-   "lng": 127.01648
+   "build_year": 1996,
+   "area_exclusive": 59.8,
+   "dong": "신내동",
+   "lat": 37.61182,
+   "lng": 127.09298
+  },
+  {
+   "ai_rank": 281,
+   "district": "성북구",
+   "apt_name": "꿈의숲아이파크",
+   "ai_score": 44.2,
+   "axes": {
+    "undervalued": 28.4,
+    "liquidity": 40.2,
+    "transit": 16.5,
+    "momentum": 61.6,
+    "school": 42.1,
+    "product": 99.2
+   },
+   "highlights": [
+    "2022년 준공(4년차)의 상품성",
+    "최근 가격이 연 +24.2% 추세로 상승 흐름"
+   ],
+   "low_confidence": false,
+   "build_year": 2022,
+   "area_exclusive": 59.1,
+   "dong": "장위동",
+   "lat": 37.6185404,
+   "lng": 127.0488475
   },
   {
    "ai_rank": 282,
@@ -6788,27 +6788,27 @@
   },
   {
    "ai_rank": 283,
-   "district": "성북구",
-   "apt_name": "꿈의숲아이파크",
+   "district": "성동구",
+   "apt_name": "옥수삼성",
    "ai_score": 44.2,
    "axes": {
-    "undervalued": 28.4,
-    "liquidity": 40.1,
-    "transit": 16.5,
-    "momentum": 61.6,
-    "school": 42.1,
-    "product": 99.2
+    "undervalued": 18.5,
+    "liquidity": 61.7,
+    "transit": 76.6,
+    "momentum": 26.3,
+    "school": 58.1,
+    "product": 34.1
    },
    "highlights": [
-    "2022년 준공(4년차)의 상품성",
-    "최근 가격이 연 +24.2% 추세로 상승 흐름"
+    "교통·직주근접 — 옥수역 도보 3분, 도심(광화문·시청) 4.7km",
+    "거래가 활발해 환금성 우수 (누적 127건)"
    ],
    "low_confidence": false,
-   "build_year": 2022,
-   "area_exclusive": 59.1,
-   "dong": "장위동",
-   "lat": 37.6185404,
-   "lng": 127.0488475
+   "build_year": 1999,
+   "area_exclusive": 59.7,
+   "dong": "옥수동",
+   "lat": 37.54176,
+   "lng": 127.01648
   },
   {
    "ai_rank": 284,
@@ -6817,7 +6817,7 @@
    "ai_score": 44.0,
    "axes": {
     "undervalued": 35.6,
-    "liquidity": 34.6,
+    "liquidity": 34.7,
     "transit": 39.2,
     "momentum": 97.7,
     "school": 38.7,
@@ -6884,30 +6884,6 @@
   },
   {
    "ai_rank": 287,
-   "district": "서초구",
-   "apt_name": "호반써밋서초파크",
-   "ai_score": 43.7,
-   "axes": {
-    "undervalued": 42.1,
-    "liquidity": 26.1,
-    "transit": 37.4,
-    "momentum": 68.3,
-    "school": 14.0,
-    "product": 75.1
-   },
-   "highlights": [
-    "2013년 준공(13년차)의 상품성",
-    "최근 가격이 연 +27.1% 추세로 상승 흐름"
-   ],
-   "low_confidence": false,
-   "build_year": 2013,
-   "area_exclusive": 59.9,
-   "dong": "우면동",
-   "lat": 37.4583875,
-   "lng": 127.0237919
-  },
-  {
-   "ai_rank": 288,
    "district": "강서구",
    "apt_name": "마곡13단지힐스테이트마스터",
    "ai_score": 43.7,
@@ -6931,7 +6907,7 @@
    "lng": 126.818695
   },
   {
-   "ai_rank": 289,
+   "ai_rank": 288,
    "district": "동작구",
    "apt_name": "흑석한강푸르지오",
    "ai_score": 43.7,
@@ -6953,6 +6929,30 @@
    "dong": "흑석동",
    "lat": 37.5031128,
    "lng": 126.9647141
+  },
+  {
+   "ai_rank": 289,
+   "district": "서초구",
+   "apt_name": "호반써밋서초파크",
+   "ai_score": 43.7,
+   "axes": {
+    "undervalued": 42.1,
+    "liquidity": 26.1,
+    "transit": 37.4,
+    "momentum": 68.3,
+    "school": 14.0,
+    "product": 75.1
+   },
+   "highlights": [
+    "2013년 준공(13년차)의 상품성",
+    "최근 가격이 연 +27.1% 추세로 상승 흐름"
+   ],
+   "low_confidence": false,
+   "build_year": 2013,
+   "area_exclusive": 59.9,
+   "dong": "우면동",
+   "lat": 37.4583875,
+   "lng": 127.0237919
   },
   {
    "ai_rank": 290,
@@ -7006,7 +7006,7 @@
    "ai_rank": 292,
    "district": "금천구",
    "apt_name": "독산주공14단지",
-   "ai_score": 43.4,
+   "ai_score": 43.5,
    "axes": {
     "undervalued": 75.2,
     "liquidity": 33.2,
@@ -7028,6 +7028,30 @@
   },
   {
    "ai_rank": 293,
+   "district": "강동구",
+   "apt_name": "고덕롯데캐슬베네루체",
+   "ai_score": 43.4,
+   "axes": {
+    "undervalued": 37.1,
+    "liquidity": 63.3,
+    "transit": 12.0,
+    "momentum": 43.7,
+    "school": 26.5,
+    "product": 89.4
+   },
+   "highlights": [
+    "2019년 준공(7년차)의 상품성",
+    "거래가 활발해 환금성 우수 (누적 123건)"
+   ],
+   "low_confidence": false,
+   "build_year": 2019,
+   "area_exclusive": 60.0,
+   "dong": "상일동",
+   "lat": 37.5488906,
+   "lng": 127.1677617
+  },
+  {
+   "ai_rank": 294,
    "district": "강남구",
    "apt_name": "강남자곡아이파크",
    "ai_score": 43.4,
@@ -7049,30 +7073,6 @@
    "dong": "자곡동",
    "lat": 37.4725141,
    "lng": 127.0987522
-  },
-  {
-   "ai_rank": 294,
-   "district": "강동구",
-   "apt_name": "고덕롯데캐슬베네루체",
-   "ai_score": 43.3,
-   "axes": {
-    "undervalued": 37.1,
-    "liquidity": 63.3,
-    "transit": 12.0,
-    "momentum": 43.7,
-    "school": 26.5,
-    "product": 89.4
-   },
-   "highlights": [
-    "2019년 준공(7년차)의 상품성",
-    "거래가 활발해 환금성 우수 (누적 123건)"
-   ],
-   "low_confidence": false,
-   "build_year": 2019,
-   "area_exclusive": 60.0,
-   "dong": "상일동",
-   "lat": 37.5488906,
-   "lng": 127.1677617
   },
   {
    "ai_rank": 295,
@@ -7196,30 +7196,6 @@
   },
   {
    "ai_rank": 300,
-   "district": "중랑구",
-   "apt_name": "신내",
-   "ai_score": 42.7,
-   "axes": {
-    "undervalued": 80.9,
-    "liquidity": 45.0,
-    "transit": 46.7,
-    "momentum": 15.2,
-    "school": 19.3,
-    "product": 21.9
-   },
-   "highlights": [
-    "저평가 매력 — 전세가율 61%, 중랑구 내 평단가 하위 71%",
-    "교통·직주근접 — 신내역 도보 1분, 도심(광화문·시청) 12.2km"
-   ],
-   "low_confidence": false,
-   "build_year": 1996,
-   "area_exclusive": 59.8,
-   "dong": "묵동",
-   "lat": 37.6125508,
-   "lng": 127.1040904
-  },
-  {
-   "ai_rank": 301,
    "district": "노원구",
    "apt_name": "상계주공13(고층)",
    "ai_score": 42.7,
@@ -7241,6 +7217,30 @@
    "dong": "상계동",
    "lat": 37.66727,
    "lng": 127.07242
+  },
+  {
+   "ai_rank": 301,
+   "district": "중랑구",
+   "apt_name": "신내",
+   "ai_score": 42.7,
+   "axes": {
+    "undervalued": 80.9,
+    "liquidity": 45.0,
+    "transit": 46.7,
+    "momentum": 15.2,
+    "school": 19.3,
+    "product": 21.9
+   },
+   "highlights": [
+    "저평가 매력 — 전세가율 61%, 중랑구 내 평단가 하위 71%",
+    "교통·직주근접 — 신내역 도보 1분, 도심(광화문·시청) 12.2km"
+   ],
+   "low_confidence": false,
+   "build_year": 1996,
+   "area_exclusive": 59.8,
+   "dong": "묵동",
+   "lat": 37.6125508,
+   "lng": 127.1040904
   },
   {
    "ai_rank": 302,
@@ -7268,54 +7268,6 @@
   },
   {
    "ai_rank": 303,
-   "district": "광진구",
-   "apt_name": "현대프라임",
-   "ai_score": 42.6,
-   "axes": {
-    "undervalued": 34.0,
-    "liquidity": 80.7,
-    "transit": 29.4,
-    "momentum": 36.6,
-    "school": 49.9,
-    "product": 24.6
-   },
-   "highlights": [
-    "거래가 활발해 환금성 우수 (누적 216건)",
-    "학군·생활 — 초등학교 482m, 학원 384곳"
-   ],
-   "low_confidence": false,
-   "build_year": 1997,
-   "area_exclusive": 59.8,
-   "dong": "구의동",
-   "lat": 37.5444896,
-   "lng": 127.0874678
-  },
-  {
-   "ai_rank": 304,
-   "district": "강동구",
-   "apt_name": "고덕그라시움",
-   "ai_score": 42.6,
-   "axes": {
-    "undervalued": 10.0,
-    "liquidity": 67.0,
-    "transit": 30.1,
-    "momentum": 26.5,
-    "school": 66.9,
-    "product": 89.4
-   },
-   "highlights": [
-    "2019년 준공(7년차)의 상품성",
-    "거래가 활발해 환금성 우수 (누적 372건)"
-   ],
-   "low_confidence": false,
-   "build_year": 2019,
-   "area_exclusive": 59.8,
-   "dong": "고덕동",
-   "lat": 37.5560426,
-   "lng": 127.1607169
-  },
-  {
-   "ai_rank": 305,
    "district": "강동구",
    "apt_name": "삼익파크맨션",
    "ai_score": 42.6,
@@ -7339,13 +7291,61 @@
    "lng": 127.1456493
   },
   {
+   "ai_rank": 304,
+   "district": "광진구",
+   "apt_name": "현대프라임",
+   "ai_score": 42.6,
+   "axes": {
+    "undervalued": 34.0,
+    "liquidity": 80.7,
+    "transit": 29.4,
+    "momentum": 36.6,
+    "school": 49.9,
+    "product": 24.6
+   },
+   "highlights": [
+    "거래가 활발해 환금성 우수 (누적 216건)",
+    "학군·생활 — 초등학교 482m, 학원 384곳"
+   ],
+   "low_confidence": false,
+   "build_year": 1997,
+   "area_exclusive": 59.8,
+   "dong": "구의동",
+   "lat": 37.5444896,
+   "lng": 127.0874678
+  },
+  {
+   "ai_rank": 305,
+   "district": "강동구",
+   "apt_name": "고덕그라시움",
+   "ai_score": 42.6,
+   "axes": {
+    "undervalued": 10.0,
+    "liquidity": 67.0,
+    "transit": 30.1,
+    "momentum": 26.5,
+    "school": 66.9,
+    "product": 89.4
+   },
+   "highlights": [
+    "2019년 준공(7년차)의 상품성",
+    "거래가 활발해 환금성 우수 (누적 372건)"
+   ],
+   "low_confidence": false,
+   "build_year": 2019,
+   "area_exclusive": 59.8,
+   "dong": "고덕동",
+   "lat": 37.5560426,
+   "lng": 127.1607169
+  },
+  {
    "ai_rank": 306,
    "district": "송파구",
    "apt_name": "트리지움",
    "ai_score": 42.6,
    "axes": {
     "undervalued": 11.3,
-    "liquidity": 58.0,
+    "liquidity": 58.1,
     "transit": 65.2,
     "momentum": 0.5,
     "school": 90.7,
@@ -7364,36 +7364,12 @@
   },
   {
    "ai_rank": 307,
-   "district": "노원구",
-   "apt_name": "포레나노원",
-   "ai_score": 42.5,
-   "axes": {
-    "undervalued": 56.0,
-    "liquidity": 34.8,
-    "transit": 20.6,
-    "momentum": 20.4,
-    "school": 41.9,
-    "product": 93.9
-   },
-   "highlights": [
-    "2020년 준공(6년차)의 상품성",
-    "저평가 매력 — 전세가율 60%, 노원구 내 평단가 하위 13%"
-   ],
-   "low_confidence": false,
-   "build_year": 2020,
-   "area_exclusive": 60.0,
-   "dong": "상계동",
-   "lat": 37.66727,
-   "lng": 127.07242
-  },
-  {
-   "ai_rank": 308,
    "district": "도봉구",
    "apt_name": "쌍용",
    "ai_score": 42.5,
    "axes": {
     "undervalued": 43.7,
-    "liquidity": 55.3,
+    "liquidity": 55.4,
     "transit": 26.4,
     "momentum": 55.7,
     "school": 43.2,
@@ -7411,7 +7387,7 @@
    "lng": 127.04326
   },
   {
-   "ai_rank": 309,
+   "ai_rank": 308,
    "district": "강동구",
    "apt_name": "롯데캐슬퍼스트",
    "ai_score": 42.5,
@@ -7435,31 +7411,31 @@
    "lng": 127.1308542
   },
   {
-   "ai_rank": 310,
-   "district": "금천구",
-   "apt_name": "두산",
-   "ai_score": 42.3,
+   "ai_rank": 309,
+   "district": "노원구",
+   "apt_name": "포레나노원",
+   "ai_score": 42.5,
    "axes": {
-    "undervalued": 73.7,
-    "liquidity": 60.5,
-    "transit": 33.2,
-    "momentum": 23.5,
-    "school": 7.4,
-    "product": 28.7
+    "undervalued": 56.0,
+    "liquidity": 34.9,
+    "transit": 20.6,
+    "momentum": 20.4,
+    "school": 41.9,
+    "product": 93.9
    },
    "highlights": [
-    "저평가 매력 — 전세가율 65%, 금천구 내 평단가 하위 44%",
-    "거래가 활발해 환금성 우수 (누적 164건)"
+    "2020년 준공(6년차)의 상품성",
+    "저평가 매력 — 전세가율 60%, 노원구 내 평단가 하위 13%"
    ],
    "low_confidence": false,
-   "build_year": 1998,
-   "area_exclusive": 59.8,
-   "dong": "가산동",
-   "lat": 37.4736912,
-   "lng": 126.892249
+   "build_year": 2020,
+   "area_exclusive": 60.0,
+   "dong": "상계동",
+   "lat": 37.66727,
+   "lng": 127.07242
   },
   {
-   "ai_rank": 311,
+   "ai_rank": 310,
    "district": "도봉구",
    "apt_name": "창동주공1단지",
    "ai_score": 42.3,
@@ -7483,13 +7459,37 @@
    "lng": 127.04096
   },
   {
+   "ai_rank": 311,
+   "district": "금천구",
+   "apt_name": "두산",
+   "ai_score": 42.3,
+   "axes": {
+    "undervalued": 73.7,
+    "liquidity": 60.5,
+    "transit": 33.2,
+    "momentum": 23.5,
+    "school": 7.4,
+    "product": 28.7
+   },
+   "highlights": [
+    "저평가 매력 — 전세가율 65%, 금천구 내 평단가 하위 44%",
+    "거래가 활발해 환금성 우수 (누적 164건)"
+   ],
+   "low_confidence": false,
+   "build_year": 1998,
+   "area_exclusive": 59.8,
+   "dong": "가산동",
+   "lat": 37.4736912,
+   "lng": 126.892249
+  },
+  {
    "ai_rank": 312,
    "district": "중랑구",
    "apt_name": "동성1",
    "ai_score": 42.1,
    "axes": {
     "undervalued": 87.8,
-    "liquidity": 52.9,
+    "liquidity": 53.0,
     "transit": 27.0,
     "momentum": 13.1,
     "school": 26.4,
@@ -7556,30 +7556,6 @@
   },
   {
    "ai_rank": 315,
-   "district": "양천구",
-   "apt_name": "목동신시가지12",
-   "ai_score": 41.3,
-   "axes": {
-    "undervalued": 7.2,
-    "liquidity": 35.1,
-    "transit": 51.1,
-    "momentum": 82.0,
-    "school": 77.8,
-    "product": 7.0
-   },
-   "highlights": [
-    "최근 가격이 연 +33.0% 추세로 상승 흐름",
-    "학군·생활 — 초품아, 학원 356곳"
-   ],
-   "low_confidence": false,
-   "build_year": 1988,
-   "area_exclusive": 56.8,
-   "dong": "신정동",
-   "lat": 37.5162407,
-   "lng": 126.8521196
-  },
-  {
-   "ai_rank": 316,
    "district": "강동구",
    "apt_name": "고덕아르테온",
    "ai_score": 41.3,
@@ -7601,6 +7577,30 @@
    "dong": "상일동",
    "lat": 37.5553411,
    "lng": 127.1686571
+  },
+  {
+   "ai_rank": 316,
+   "district": "양천구",
+   "apt_name": "목동신시가지12",
+   "ai_score": 41.3,
+   "axes": {
+    "undervalued": 7.2,
+    "liquidity": 35.1,
+    "transit": 51.1,
+    "momentum": 82.0,
+    "school": 77.8,
+    "product": 7.0
+   },
+   "highlights": [
+    "최근 가격이 연 +33.0% 추세로 상승 흐름",
+    "학군·생활 — 초품아, 학원 356곳"
+   ],
+   "low_confidence": false,
+   "build_year": 1988,
+   "area_exclusive": 56.8,
+   "dong": "신정동",
+   "lat": 37.5162407,
+   "lng": 126.8521196
   },
   {
    "ai_rank": 317,
@@ -7652,36 +7652,12 @@
   },
   {
    "ai_rank": 319,
-   "district": "강남구",
-   "apt_name": "개포래미안포레스트",
-   "ai_score": 40.7,
-   "axes": {
-    "undervalued": 18.3,
-    "liquidity": 54.4,
-    "transit": 51.9,
-    "momentum": 1.5,
-    "school": 53.9,
-    "product": 93.9
-   },
-   "highlights": [
-    "2020년 준공(6년차)의 상품성",
-    "거래가 활발해 환금성 우수 (누적 140건)"
-   ],
-   "low_confidence": false,
-   "build_year": 2020,
-   "area_exclusive": 59.9,
-   "dong": "개포동",
-   "lat": 37.4797883,
-   "lng": 127.0548388
-  },
-  {
-   "ai_rank": 320,
    "district": "노원구",
    "apt_name": "태릉해링턴플레이스",
    "ai_score": 40.7,
    "axes": {
     "undervalued": 52.5,
-    "liquidity": 51.5,
+    "liquidity": 51.6,
     "transit": 8.4,
     "momentum": 28.6,
     "school": 9.1,
@@ -7699,7 +7675,7 @@
    "lng": 127.08818
   },
   {
-   "ai_rank": 321,
+   "ai_rank": 320,
    "district": "송파구",
    "apt_name": "리센츠",
    "ai_score": 40.7,
@@ -7723,37 +7699,37 @@
    "lng": 127.0862914
   },
   {
-   "ai_rank": 322,
-   "district": "노원구",
-   "apt_name": "삼호3",
-   "ai_score": 40.5,
+   "ai_rank": 321,
+   "district": "강남구",
+   "apt_name": "개포래미안포레스트",
+   "ai_score": 40.7,
    "axes": {
-    "undervalued": 2.0,
-    "liquidity": 84.2,
-    "transit": 57.6,
-    "momentum": 74.5,
-    "school": 13.5,
-    "product": 1.9
+    "undervalued": 18.3,
+    "liquidity": 54.4,
+    "transit": 51.9,
+    "momentum": 1.5,
+    "school": 53.9,
+    "product": 93.9
    },
    "highlights": [
-    "거래가 활발해 환금성 우수 (누적 248건)",
-    "최근 가격이 연 +29.7% 추세로 상승 흐름"
+    "2020년 준공(6년차)의 상품성",
+    "거래가 활발해 환금성 우수 (누적 140건)"
    ],
    "low_confidence": false,
-   "build_year": 1986,
-   "area_exclusive": 59.2,
-   "dong": "월계동",
-   "lat": 37.6159637,
-   "lng": 127.0666033
+   "build_year": 2020,
+   "area_exclusive": 59.9,
+   "dong": "개포동",
+   "lat": 37.4797883,
+   "lng": 127.0548388
   },
   {
-   "ai_rank": 323,
+   "ai_rank": 322,
    "district": "송파구",
    "apt_name": "레이크팰리스",
-   "ai_score": 40.5,
+   "ai_score": 40.6,
    "axes": {
     "undervalued": 15.4,
-    "liquidity": 63.0,
+    "liquidity": 63.1,
     "transit": 36.7,
     "momentum": 4.1,
     "school": 96.9,
@@ -7771,13 +7747,37 @@
    "lng": 127.0947018
   },
   {
+   "ai_rank": 323,
+   "district": "노원구",
+   "apt_name": "삼호3",
+   "ai_score": 40.5,
+   "axes": {
+    "undervalued": 2.0,
+    "liquidity": 84.3,
+    "transit": 57.6,
+    "momentum": 74.5,
+    "school": 13.5,
+    "product": 1.9
+   },
+   "highlights": [
+    "거래가 활발해 환금성 우수 (누적 248건)",
+    "최근 가격이 연 +29.7% 추세로 상승 흐름"
+   ],
+   "low_confidence": false,
+   "build_year": 1986,
+   "area_exclusive": 59.2,
+   "dong": "월계동",
+   "lat": 37.6159637,
+   "lng": 127.0666033
+  },
+  {
    "ai_rank": 324,
    "district": "노원구",
    "apt_name": "풍림아파트A",
    "ai_score": 40.1,
    "axes": {
     "undervalued": 55.2,
-    "liquidity": 66.3,
+    "liquidity": 66.4,
     "transit": 8.4,
     "momentum": 41.2,
     "school": 9.1,
@@ -7801,7 +7801,7 @@
    "ai_score": 40.1,
    "axes": {
     "undervalued": 93.9,
-    "liquidity": 28.1,
+    "liquidity": 28.2,
     "transit": 32.1,
     "momentum": 8.0,
     "school": 3.5,
@@ -7820,36 +7820,12 @@
   },
   {
    "ai_rank": 326,
-   "district": "송파구",
-   "apt_name": "헬리오시티",
-   "ai_score": 40.0,
-   "axes": {
-    "undervalued": 18.9,
-    "liquidity": 51.4,
-    "transit": 44.7,
-    "momentum": 3.9,
-    "school": 66.8,
-    "product": 85.7
-   },
-   "highlights": [
-    "2018년 준공(8년차)의 상품성",
-    "학군·생활 — 초품아, 학원 314곳"
-   ],
-   "low_confidence": false,
-   "build_year": 2018,
-   "area_exclusive": 60.0,
-   "dong": "가락동",
-   "lat": 37.4974449,
-   "lng": 127.1070187
-  },
-  {
-   "ai_rank": 327,
    "district": "노원구",
    "apt_name": "학여울청구",
    "ai_score": 40.0,
    "axes": {
     "undervalued": 73.3,
-    "liquidity": 51.5,
+    "liquidity": 51.6,
     "transit": 8.9,
     "momentum": 25.3,
     "school": 31.0,
@@ -7865,6 +7841,30 @@
    "dong": "하계동",
    "lat": 37.63793,
    "lng": 127.07251
+  },
+  {
+   "ai_rank": 327,
+   "district": "송파구",
+   "apt_name": "헬리오시티",
+   "ai_score": 40.0,
+   "axes": {
+    "undervalued": 18.9,
+    "liquidity": 51.5,
+    "transit": 44.7,
+    "momentum": 3.9,
+    "school": 66.8,
+    "product": 85.7
+   },
+   "highlights": [
+    "2018년 준공(8년차)의 상품성",
+    "학군·생활 — 초품아, 학원 314곳"
+   ],
+   "low_confidence": false,
+   "build_year": 2018,
+   "area_exclusive": 60.0,
+   "dong": "가락동",
+   "lat": 37.4974449,
+   "lng": 127.1070187
   },
   {
    "ai_rank": 328,
@@ -8019,7 +8019,7 @@
     "undervalued": 77.2,
     "liquidity": 56.4,
     "transit": 20.6,
-    "momentum": 10.6,
+    "momentum": 10.8,
     "school": 41.9,
     "product": 7.0
    },
@@ -8060,30 +8060,6 @@
   },
   {
    "ai_rank": 336,
-   "district": "중랑구",
-   "apt_name": "면목한신",
-   "ai_score": 39.1,
-   "axes": {
-    "undervalued": 59.6,
-    "liquidity": 25.3,
-    "transit": 52.8,
-    "momentum": 50.1,
-    "school": 17.6,
-    "product": 3.5
-   },
-   "highlights": [
-    "저평가 매력 — 전세가율 54%, 중랑구 내 평단가 하위 57%",
-    "교통·직주근접 — 사가정역 도보 4분, 도심(광화문·시청) 10.1km"
-   ],
-   "low_confidence": false,
-   "build_year": 1987,
-   "area_exclusive": 58.5,
-   "dong": "면목동",
-   "lat": 37.5817944,
-   "lng": 127.0910424
-  },
-  {
-   "ai_rank": 337,
    "district": "동작구",
    "apt_name": "사당우성2",
    "ai_score": 39.1,
@@ -8105,6 +8081,30 @@
    "dong": "사당동",
    "lat": 37.4856963,
    "lng": 126.9723525
+  },
+  {
+   "ai_rank": 337,
+   "district": "중랑구",
+   "apt_name": "면목한신",
+   "ai_score": 39.1,
+   "axes": {
+    "undervalued": 59.6,
+    "liquidity": 25.3,
+    "transit": 52.8,
+    "momentum": 50.1,
+    "school": 17.6,
+    "product": 3.5
+   },
+   "highlights": [
+    "저평가 매력 — 전세가율 54%, 중랑구 내 평단가 하위 57%",
+    "교통·직주근접 — 사가정역 도보 4분, 도심(광화문·시청) 10.1km"
+   ],
+   "low_confidence": false,
+   "build_year": 1987,
+   "area_exclusive": 58.5,
+   "dong": "면목동",
+   "lat": 37.5817944,
+   "lng": 127.0910424
   },
   {
    "ai_rank": 338,
@@ -8132,6 +8132,30 @@
   },
   {
    "ai_rank": 339,
+   "district": "노원구",
+   "apt_name": "은빛1단지",
+   "ai_score": 39.0,
+   "axes": {
+    "undervalued": 93.0,
+    "liquidity": 47.4,
+    "transit": 1.2,
+    "momentum": 10.3,
+    "school": 28.1,
+    "product": 28.7
+   },
+   "highlights": [
+    "저평가 매력 — 전세가율 67%, 노원구 내 평단가 하위 89%",
+    "거래가 활발해 환금성 우수 (누적 133건)"
+   ],
+   "low_confidence": false,
+   "build_year": 1998,
+   "area_exclusive": 60.0,
+   "dong": "상계동",
+   "lat": 37.68121,
+   "lng": 127.055168
+  },
+  {
+   "ai_rank": 340,
    "district": "송파구",
    "apt_name": "올림픽선수기자촌1단지",
    "ai_score": 39.0,
@@ -8155,7 +8179,31 @@
    "lng": 127.1195472
   },
   {
-   "ai_rank": 340,
+   "ai_rank": 341,
+   "district": "도봉구",
+   "apt_name": "삼익세라믹",
+   "ai_score": 38.9,
+   "axes": {
+    "undervalued": 88.7,
+    "liquidity": 47.4,
+    "transit": 9.3,
+    "momentum": 7.0,
+    "school": 50.9,
+    "product": 7.0
+   },
+   "highlights": [
+    "저평가 매력 — 전세가율 63%, 도봉구 내 평단가 하위 83%",
+    "학군·생활 — 초등학교 419m, 학원 341곳"
+   ],
+   "low_confidence": false,
+   "build_year": 1988,
+   "area_exclusive": 58.8,
+   "dong": "쌍문동",
+   "lat": 37.6606639,
+   "lng": 127.0386138
+  },
+  {
+   "ai_rank": 342,
    "district": "구로구",
    "apt_name": "한신",
    "ai_score": 38.9,
@@ -8177,54 +8225,6 @@
    "dong": "구로동",
    "lat": 37.4824398,
    "lng": 126.8942065
-  },
-  {
-   "ai_rank": 341,
-   "district": "도봉구",
-   "apt_name": "삼익세라믹",
-   "ai_score": 38.9,
-   "axes": {
-    "undervalued": 88.7,
-    "liquidity": 47.3,
-    "transit": 9.3,
-    "momentum": 7.0,
-    "school": 50.9,
-    "product": 7.0
-   },
-   "highlights": [
-    "저평가 매력 — 전세가율 63%, 도봉구 내 평단가 하위 83%",
-    "학군·생활 — 초등학교 419m, 학원 341곳"
-   ],
-   "low_confidence": false,
-   "build_year": 1988,
-   "area_exclusive": 58.8,
-   "dong": "쌍문동",
-   "lat": 37.6606639,
-   "lng": 127.0386138
-  },
-  {
-   "ai_rank": 342,
-   "district": "노원구",
-   "apt_name": "은빛1단지",
-   "ai_score": 38.9,
-   "axes": {
-    "undervalued": 93.0,
-    "liquidity": 47.4,
-    "transit": 1.2,
-    "momentum": 10.1,
-    "school": 28.1,
-    "product": 28.7
-   },
-   "highlights": [
-    "저평가 매력 — 전세가율 67%, 노원구 내 평단가 하위 89%",
-    "거래가 활발해 환금성 우수 (누적 133건)"
-   ],
-   "low_confidence": false,
-   "build_year": 1998,
-   "area_exclusive": 60.0,
-   "dong": "상계동",
-   "lat": 37.68121,
-   "lng": 127.055168
   },
   {
    "ai_rank": 343,
@@ -8305,7 +8305,7 @@
    "ai_score": 38.1,
    "axes": {
     "undervalued": 18.7,
-    "liquidity": 44.3,
+    "liquidity": 44.4,
     "transit": 77.9,
     "momentum": 23.2,
     "school": 51.7,
@@ -8324,6 +8324,30 @@
   },
   {
    "ai_rank": 347,
+   "district": "도봉구",
+   "apt_name": "창동주공18단지",
+   "ai_score": 38.0,
+   "axes": {
+    "undervalued": 30.3,
+    "liquidity": 20.3,
+    "transit": 45.5,
+    "momentum": 58.8,
+    "school": 68.6,
+    "product": 7.0
+   },
+   "highlights": [
+    "학군·생활 — 초품아, 학원 230곳",
+    "최근 가격이 연 +23.4% 추세로 상승 흐름"
+   ],
+   "low_confidence": false,
+   "build_year": 1988,
+   "area_exclusive": 59.4,
+   "dong": "창동",
+   "lat": 37.64703,
+   "lng": 127.053
+  },
+  {
+   "ai_rank": 348,
    "district": "강동구",
    "apt_name": "고덕센트럴IPARK",
    "ai_score": 38.0,
@@ -8345,30 +8369,6 @@
    "dong": "상일동",
    "lat": 37.55073,
    "lng": 127.1704
-  },
-  {
-   "ai_rank": 348,
-   "district": "도봉구",
-   "apt_name": "창동주공18단지",
-   "ai_score": 38.0,
-   "axes": {
-    "undervalued": 30.3,
-    "liquidity": 20.2,
-    "transit": 45.5,
-    "momentum": 58.8,
-    "school": 68.6,
-    "product": 7.0
-   },
-   "highlights": [
-    "학군·생활 — 초품아, 학원 230곳",
-    "최근 가격이 연 +23.4% 추세로 상승 흐름"
-   ],
-   "low_confidence": false,
-   "build_year": 1988,
-   "area_exclusive": 59.4,
-   "dong": "창동",
-   "lat": 37.64703,
-   "lng": 127.053
   },
   {
    "ai_rank": 349,
@@ -8403,7 +8403,7 @@
     "undervalued": 76.4,
     "liquidity": 25.7,
     "transit": 26.9,
-    "momentum": 12.1,
+    "momentum": 12.4,
     "school": 1.7,
     "product": 68.9
    },
@@ -8444,30 +8444,6 @@
   },
   {
    "ai_rank": 352,
-   "district": "노원구",
-   "apt_name": "극동",
-   "ai_score": 37.4,
-   "axes": {
-    "undervalued": 68.2,
-    "liquidity": 55.7,
-    "transit": 8.0,
-    "momentum": 37.6,
-    "school": 22.9,
-    "product": 7.0
-   },
-   "highlights": [
-    "저평가 매력 — 전세가율 56%, 노원구 내 평단가 하위 71%",
-    "거래가 활발해 환금성 우수 (누적 69건)"
-   ],
-   "low_confidence": false,
-   "build_year": 1988,
-   "area_exclusive": 55.7,
-   "dong": "하계동",
-   "lat": 37.6382503,
-   "lng": 127.0738302
-  },
-  {
-   "ai_rank": 353,
    "district": "도봉구",
    "apt_name": "대우",
    "ai_score": 37.4,
@@ -8491,7 +8467,55 @@
    "lng": 127.0465305
   },
   {
+   "ai_rank": 353,
+   "district": "노원구",
+   "apt_name": "극동",
+   "ai_score": 37.4,
+   "axes": {
+    "undervalued": 68.2,
+    "liquidity": 55.8,
+    "transit": 8.0,
+    "momentum": 37.6,
+    "school": 22.9,
+    "product": 7.0
+   },
+   "highlights": [
+    "저평가 매력 — 전세가율 56%, 노원구 내 평단가 하위 71%",
+    "거래가 활발해 환금성 우수 (누적 69건)"
+   ],
+   "low_confidence": false,
+   "build_year": 1988,
+   "area_exclusive": 55.7,
+   "dong": "하계동",
+   "lat": 37.6382503,
+   "lng": 127.0738302
+  },
+  {
    "ai_rank": 354,
+   "district": "중랑구",
+   "apt_name": "신내6대주",
+   "ai_score": 36.8,
+   "axes": {
+    "undervalued": 59.9,
+    "liquidity": 39.2,
+    "transit": 28.0,
+    "momentum": 11.6,
+    "school": 52.6,
+    "product": 21.9
+   },
+   "highlights": [
+    "저평가 매력 — 전세가율 57%, 중랑구 내 평단가 하위 43%",
+    "학군·생활 — 초품아, 학원 174곳"
+   ],
+   "low_confidence": false,
+   "build_year": 1996,
+   "area_exclusive": 59.8,
+   "dong": "신내동",
+   "lat": 37.61182,
+   "lng": 127.09298
+  },
+  {
+   "ai_rank": 355,
    "district": "송파구",
    "apt_name": "래미안파크팰리스",
    "ai_score": 36.8,
@@ -8515,30 +8539,6 @@
    "lng": 127.11744
   },
   {
-   "ai_rank": 355,
-   "district": "중랑구",
-   "apt_name": "신내6대주",
-   "ai_score": 36.7,
-   "axes": {
-    "undervalued": 59.9,
-    "liquidity": 39.1,
-    "transit": 28.0,
-    "momentum": 11.3,
-    "school": 52.6,
-    "product": 21.9
-   },
-   "highlights": [
-    "저평가 매력 — 전세가율 57%, 중랑구 내 평단가 하위 43%",
-    "학군·생활 — 초품아, 학원 174곳"
-   ],
-   "low_confidence": false,
-   "build_year": 1996,
-   "area_exclusive": 59.8,
-   "dong": "신내동",
-   "lat": 37.61182,
-   "lng": 127.09298
-  },
-  {
    "ai_rank": 356,
    "district": "성동구",
    "apt_name": "서울숲푸르지오",
@@ -8547,7 +8547,7 @@
     "undervalued": 14.5,
     "liquidity": 44.8,
     "transit": 52.0,
-    "momentum": 11.1,
+    "momentum": 11.3,
     "school": 57.9,
     "product": 63.0
    },
@@ -8614,12 +8614,12 @@
    "ai_rank": 359,
    "district": "노원구",
    "apt_name": "성원(사슴4)",
-   "ai_score": 36.2,
+   "ai_score": 36.3,
    "axes": {
     "undervalued": 65.4,
     "liquidity": 26.5,
     "transit": 33.6,
-    "momentum": 10.8,
+    "momentum": 11.1,
     "school": 50.6,
     "product": 20.0
    },
@@ -8781,30 +8781,6 @@
   {
    "ai_rank": 366,
    "district": "노원구",
-   "apt_name": "상계주공12(고층)",
-   "ai_score": 34.6,
-   "axes": {
-    "undervalued": 54.7,
-    "liquidity": 20.1,
-    "transit": 20.6,
-    "momentum": 50.1,
-    "school": 41.9,
-    "product": 7.0
-   },
-   "highlights": [
-    "저평가 매력 — 전세가율 50%, 노원구 내 평단가 하위 74%",
-    "최근 가격이 연 +21.6% 추세로 상승 흐름"
-   ],
-   "low_confidence": false,
-   "build_year": 1988,
-   "area_exclusive": 61.5,
-   "dong": "상계동",
-   "lat": 37.66727,
-   "lng": 127.07242
-  },
-  {
-   "ai_rank": 367,
-   "district": "노원구",
    "apt_name": "상계주공6(고층)",
    "ai_score": 34.6,
    "axes": {
@@ -8822,6 +8798,30 @@
    "low_confidence": false,
    "build_year": 1988,
    "area_exclusive": 58.0,
+   "dong": "상계동",
+   "lat": 37.66727,
+   "lng": 127.07242
+  },
+  {
+   "ai_rank": 367,
+   "district": "노원구",
+   "apt_name": "상계주공12(고층)",
+   "ai_score": 34.6,
+   "axes": {
+    "undervalued": 54.7,
+    "liquidity": 20.1,
+    "transit": 20.6,
+    "momentum": 50.1,
+    "school": 41.9,
+    "product": 7.0
+   },
+   "highlights": [
+    "저평가 매력 — 전세가율 50%, 노원구 내 평단가 하위 74%",
+    "최근 가격이 연 +21.6% 추세로 상승 흐름"
+   ],
+   "low_confidence": false,
+   "build_year": 1988,
+   "area_exclusive": 61.5,
    "dong": "상계동",
    "lat": 37.66727,
    "lng": 127.07242
@@ -8901,35 +8901,11 @@
   {
    "ai_rank": 371,
    "district": "노원구",
-   "apt_name": "상계주공3(고층)",
+   "apt_name": "상계주공1(고층)",
    "ai_score": 33.6,
    "axes": {
-    "undervalued": 19.0,
-    "liquidity": 50.7,
-    "transit": 20.6,
-    "momentum": 63.4,
-    "school": 41.9,
-    "product": 3.5
-   },
-   "highlights": [
-    "최근 가격이 연 +24.8% 추세로 상승 흐름",
-    "거래가 활발해 환금성 우수 (누적 100건)"
-   ],
-   "low_confidence": false,
-   "build_year": 1987,
-   "area_exclusive": 58.0,
-   "dong": "상계동",
-   "lat": 37.66727,
-   "lng": 127.07242
-  },
-  {
-   "ai_rank": 372,
-   "district": "노원구",
-   "apt_name": "상계주공1(고층)",
-   "ai_score": 33.5,
-   "axes": {
     "undervalued": 46.3,
-    "liquidity": 46.0,
+    "liquidity": 46.1,
     "transit": 20.6,
     "momentum": 29.1,
     "school": 41.9,
@@ -8941,6 +8917,30 @@
    ],
    "low_confidence": false,
    "build_year": 1988,
+   "area_exclusive": 58.0,
+   "dong": "상계동",
+   "lat": 37.66727,
+   "lng": 127.07242
+  },
+  {
+   "ai_rank": 372,
+   "district": "노원구",
+   "apt_name": "상계주공3(고층)",
+   "ai_score": 33.6,
+   "axes": {
+    "undervalued": 19.0,
+    "liquidity": 50.8,
+    "transit": 20.6,
+    "momentum": 63.4,
+    "school": 41.9,
+    "product": 3.5
+   },
+   "highlights": [
+    "최근 가격이 연 +24.8% 추세로 상승 흐름",
+    "거래가 활발해 환금성 우수 (누적 100건)"
+   ],
+   "low_confidence": false,
+   "build_year": 1987,
    "area_exclusive": 58.0,
    "dong": "상계동",
    "lat": 37.66727,
@@ -8977,7 +8977,7 @@
    "ai_score": 32.5,
    "axes": {
     "undervalued": 49.7,
-    "liquidity": 25.8,
+    "liquidity": 25.9,
     "transit": 20.6,
     "momentum": 38.7,
     "school": 41.9,
@@ -8996,6 +8996,30 @@
   },
   {
    "ai_rank": 375,
+   "district": "노원구",
+   "apt_name": "중계무지개",
+   "ai_score": 32.3,
+   "axes": {
+    "undervalued": 42.0,
+    "liquidity": 35.3,
+    "transit": 6.1,
+    "momentum": 35.6,
+    "school": 61.4,
+    "product": 13.3
+   },
+   "highlights": [
+    "학군·생활 — 초등학교 429m, 학원 717곳",
+    "저평가 매력 — 전세가율 49%, 노원구 내 평단가 하위 45%"
+   ],
+   "low_confidence": false,
+   "build_year": 1991,
+   "area_exclusive": 59.3,
+   "dong": "중계동",
+   "lat": 37.64802,
+   "lng": 127.07678
+  },
+  {
+   "ai_rank": 376,
    "district": "성북구",
    "apt_name": "정릉우성아파트 101~105동",
    "ai_score": 32.2,
@@ -9017,30 +9041,6 @@
    "dong": "정릉동",
    "lat": 37.61654,
    "lng": 126.99794
-  },
-  {
-   "ai_rank": 376,
-   "district": "노원구",
-   "apt_name": "중계무지개",
-   "ai_score": 32.2,
-   "axes": {
-    "undervalued": 42.0,
-    "liquidity": 35.3,
-    "transit": 6.1,
-    "momentum": 35.6,
-    "school": 61.4,
-    "product": 13.3
-   },
-   "highlights": [
-    "학군·생활 — 초등학교 429m, 학원 717곳",
-    "저평가 매력 — 전세가율 49%, 노원구 내 평단가 하위 45%"
-   ],
-   "low_confidence": false,
-   "build_year": 1991,
-   "area_exclusive": 59.3,
-   "dong": "중계동",
-   "lat": 37.64802,
-   "lng": 127.07678
   },
   {
    "ai_rank": 377,
@@ -9068,30 +9068,6 @@
   },
   {
    "ai_rank": 378,
-   "district": "강동구",
-   "apt_name": "고덕 아이파크",
-   "ai_score": 31.8,
-   "axes": {
-    "undervalued": 22.1,
-    "liquidity": 46.1,
-    "transit": 5.2,
-    "momentum": 50.1,
-    "school": 2.7,
-    "product": 71.4
-   },
-   "highlights": [
-    "2011년 준공(15년차)의 상품성",
-    "최근 가격이 연 +21.6% 추세로 상승 흐름"
-   ],
-   "low_confidence": false,
-   "build_year": 2011,
-   "area_exclusive": 60.0,
-   "dong": "고덕동",
-   "lat": 37.56528,
-   "lng": 127.15761
-  },
-  {
-   "ai_rank": 379,
    "district": "도봉구",
    "apt_name": "서원",
    "ai_score": 31.8,
@@ -9113,6 +9089,30 @@
    "dong": "도봉동",
    "lat": 37.6716214,
    "lng": 127.0465568
+  },
+  {
+   "ai_rank": 379,
+   "district": "강동구",
+   "apt_name": "고덕 아이파크",
+   "ai_score": 31.8,
+   "axes": {
+    "undervalued": 22.1,
+    "liquidity": 46.1,
+    "transit": 5.2,
+    "momentum": 50.1,
+    "school": 2.7,
+    "product": 71.4
+   },
+   "highlights": [
+    "2011년 준공(15년차)의 상품성",
+    "최근 가격이 연 +21.6% 추세로 상승 흐름"
+   ],
+   "low_confidence": false,
+   "build_year": 2011,
+   "area_exclusive": 60.0,
+   "dong": "고덕동",
+   "lat": 37.56528,
+   "lng": 127.15761
   },
   {
    "ai_rank": 380,
@@ -9241,7 +9241,7 @@
    "ai_score": 27.2,
    "axes": {
     "undervalued": 4.8,
-    "liquidity": 41.5,
+    "liquidity": 41.6,
     "transit": 13.6,
     "momentum": 17.0,
     "school": 32.5,

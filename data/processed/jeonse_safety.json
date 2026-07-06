@@ -407,7 +407,7 @@
   },
   "관악구|관악산휴먼시아2단지": {
    "high_cnt": 0,
-   "total_cnt": 56,
+   "total_cnt": 47,
    "high_share": 0.0,
    "last_high_ym": null,
    "flag": false
@@ -1520,7 +1520,7 @@
   },
   "서대문구|남가좌동현대": {
    "high_cnt": 0,
-   "total_cnt": 57,
+   "total_cnt": 58,
    "high_share": 0.0,
    "last_high_ym": null,
    "flag": false
@@ -2003,7 +2003,7 @@
   },
   "성북구|래미안포레카운티": {
    "high_cnt": 0,
-   "total_cnt": 29,
+   "total_cnt": 30,
    "high_share": 0.0,
    "last_high_ym": null,
    "flag": false
