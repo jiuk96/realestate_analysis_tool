@@ -46,6 +46,7 @@ _PAGES = {
     "scoring":         "scoring.html",          # 점수 근거
     "districts":       "districts.html",        # 구별 소개
     "budget":          "budget.html",           # 예산 플래너
+    "subscription":    "subscription.html",     # 청약 자격 진단
     "ai":              "ai.html",               # AI 추천
 }
 
@@ -112,6 +113,15 @@ def api_jeonse_safety():
     """전세 안전성 참고 지표 (src/jeonse_safety.py 산출, 점수 미반영). 없으면 빈 dict."""
     try:
         return jsonify(_load("jeonse_safety.json"))
+    except FileNotFoundError:
+        return jsonify({})
+
+
+@app.route("/api/subscriptions")
+def api_subscriptions():
+    """서울 분양 공고 (collect_subscriptions.py 산출, 청약홈 API). 없으면 빈 dict."""
+    try:
+        return jsonify(_load("subscriptions.json"))
     except FileNotFoundError:
         return jsonify({})
 

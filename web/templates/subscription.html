@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% set active_page = 'subscription' %}
+{% block title %}청약 자격 진단 · 서울 부동산 분석 툴{% endblock %}
+{% block content %}
+<section class="section section-alt" id="secSubscription">
+  <div class="section-inner">
+    <div class="section-label">STEP 7 · 청약</div>
+    <h2 class="section-title">청약 자격 진단 — 우리는 어디에 해당될까?</h2>
+    <p class="section-desc">
+      청약은 <strong>순위(1·2순위) · 가점 · 특별공급 유형</strong>에 따라 완전히 다른 게임입니다.
+      아래에 조건을 입력하면 <strong>지금 우리가 어떤 자격에 해당되는지</strong> 실시간으로 판정하고,
+      각 판정의 근거는 <strong>＋ 버튼</strong>으로 펼쳐 확인할 수 있습니다.
+    </p>
+
+    <div class="sub-grid">
+      <!-- ── 입력 칼럼 ─────────────────────────────── -->
+      <div class="sub-inputs">
+        <div class="budget-card">
+          <div class="budget-card-title">👤 기본 정보</div>
+          <div class="budget-field-row">
+            <div class="budget-field"><label>내 나이 (만)</label><div class="bf-input"><input type="number" id="subAge" value="30" min="19" max="80"><span>세</span></div></div>
+            <div class="budget-field"><label>혼인 상태</label>
+              <select id="subMarital" class="explorer-sort" style="width:100%">
+                <option value="pre">예비신혼 (1년 내 혼인신고 예정)</option>
+                <option value="married">기혼 (혼인신고 완료)</option>
+                <option value="single">미혼</option>
+              </select></div>
+          </div>
+          <div class="budget-field-row">
+            <div class="budget-field" id="subMarriedYearsWrap" style="display:none"><label>혼인신고 후 경과</label><div class="bf-input"><input type="number" id="subMarriedYears" value="0" min="0" max="30" step="0.5"><span>년</span></div></div>
+            <div class="budget-field"><label>청약하려는 지역</label>
+              <select id="subRegion" class="explorer-sort" style="width:100%">
+                <option value="reg">규제지역 (강남·서초·송파·용산)</option>
+                <option value="seoul" selected>서울 그 외 (수도권)</option>
+                <option value="metro">수도권 기타 (경기·인천)</option>
+                <option value="etc">그 외 지방</option>
+              </select></div>
+          </div>
+          <div class="pc-checks">
+            <label class="bc"><input type="checkbox" id="subHouseholder" checked> 내가 세대주입니다</label>
+          </div>
+        </div>
+
+        <div class="budget-card">
+          <div class="budget-card-title">🏠 주택 · 당첨 이력</div>
+          <div class="budget-field"><label>무주택 기간 <button class="legal-link" data-sub-tip="noHouse">?</button></label>
+            <div class="bf-input"><input type="number" id="subNoHouseYears" value="0" min="0" max="30" step="0.5"><span>년</span></div></div>
+          <div class="pc-checks">
+            <label class="bc"><input type="checkbox" id="subEverOwned"> 본인·배우자가 <b>과거에라도</b> 집을 소유한 적 있음</label>
+            <label class="bc"><input type="checkbox" id="subHouseholdOwns"> 세대 구성원(부모 등) 중 주택 소유자 있음</label>
+            <label class="bc"><input type="checkbox" id="subWon5y"> 최근 5년 내 세대 내 청약 당첨 있음</label>
+            <label class="bc"><input type="checkbox" id="subTax5y" checked> 근로·사업소득세 5년 이상 납부</label>
+          </div>
+        </div>
+
+        <div class="budget-card">
+          <div class="budget-card-title">💳 청약통장 (주택청약종합저축)</div>
+          <div class="budget-field-row">
+            <div class="budget-field"><label>가입 기간</label><div class="bf-input"><input type="number" id="subAccountYears" value="5" min="0" max="30" step="0.5"><span>년</span></div></div>
+            <div class="budget-field"><label>납입 인정 횟수</label><div class="bf-input"><input type="number" id="subPayments" value="60" min="0" max="360"><span>회</span></div></div>
+          </div>
+          <div class="budget-field"><label>예치금 (통장 잔액)</label><div class="bf-input"><input type="number" id="subDeposit" value="500" min="0" step="50"><span>만원</span></div></div>
+        </div>
+
+        <div class="budget-card">
+          <div class="budget-card-title">👨‍👩‍👧 가족 · 소득</div>
+          <div class="budget-field-row">
+            <div class="budget-field"><label>부양가족 수 (본인 제외) <button class="legal-link" data-sub-tip="dependents">?</button></label>
+              <div class="bf-input"><input type="number" id="subDependents" value="1" min="0" max="10"><span>명</span></div></div>
+            <div class="budget-field"><label>미성년 자녀 수</label><div class="bf-input"><input type="number" id="subChildren" value="0" min="0" max="10"><span>명</span></div></div>
+          </div>
+          <div class="budget-field-row">
+            <div class="budget-field"><label>가구원 수 (소득기준용)</label>
+              <select id="subFamilySize" class="explorer-sort" style="width:100%">
+                <option value="2" selected>2인 (부부)</option>
+                <option value="3">3인 (부부+자녀1)</option>
+                <option value="4">4인 이상</option>
+              </select></div>
+            <div class="budget-field"><label>부부합산 세전 월소득</label><div class="bf-input"><input type="number" id="subIncome" value="800" min="0" step="50"><span>만원</span></div></div>
+          </div>
+          <div class="pc-checks">
+            <label class="bc"><input type="checkbox" id="subDual" checked> 맞벌이입니다</label>
+            <label class="bc"><input type="checkbox" id="subNewborn"> 2세 이하 자녀 있음 (또는 임신 중)</label>
+            <label class="bc"><input type="checkbox" id="subElderly"> 만 65세 이상 직계존속을 3년 이상 부양 중</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 결과 칼럼 ─────────────────────────────── -->
+      <div class="sub-results">
+        <div class="budget-card budget-card-result" id="subRankCard"></div>
+        <div class="budget-card" id="subScoreCard"></div>
+        <div class="budget-card" id="subSpecialCard"></div>
+        <details class="budget-card budget-fold" id="subRatioFold">
+          <summary>📊 가점제 vs 추첨제 — 내 점수로 어디를 노려야 하나</summary>
+          <div id="subRatioBody"></div>
+        </details>
+      </div>
+    </div>
+
+    <!-- ── 실시간 분양 공고 ─────────────────────────── -->
+    <div class="budget-card" style="margin-top:1.4rem" id="subNoticeCard">
+      <div class="budget-card-title">📢 서울 분양 공고 (청약홈)</div>
+      <div id="subNoticeList"></div>
+    </div>
+
+    <p class="section-desc" style="margin-top:1.2rem;font-size:.8rem;color:var(--text3)">
+      ※ 본 진단은 「주택공급에 관한 규칙」의 일반 기준을 단순화한 참고용입니다. 소득 기준(도시근로자 월평균소득)은
+      매년 갱신되고 공고마다 적용 기준이 다르므로, 실제 청약 전 반드시 <b>해당 공고문</b>과
+      <a href="https://www.applyhome.co.kr" target="_blank" rel="noopener">청약홈</a>에서 확인하세요.
+    </p>
+  </div>
+</section>
+{% endblock %}

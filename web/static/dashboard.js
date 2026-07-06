@@ -3035,12 +3035,256 @@ function drawJeonseTop1() {
   }
 }
 
+/* ── 📋 청약 자격 진단 ─────────────────────────────────────
+   「주택공급에 관한 규칙」의 일반 기준을 단순화한 클라이언트 계산.
+   순위 판정(국민·민영) + 가점 84점 + 특별공급 5종을 입력값으로 실시간 판정.
+   소득 기준(도시근로자 월평균소득)은 매년 갱신 — 아래 표는 근사치이며 공고문이 우선. */
+
+// 도시근로자 가구원수별 월평균소득 100% (만원/월, 세전 — 2024년 기준 근사)
+const SUB_INCOME_BASE = { 2: 650, 3: 720, 4: 820 };
+// 민영주택 청약 예치금 (서울 기준, 만원)
+const SUB_DEPOSIT_TABLE = [
+  { area: '85㎡ 이하', need: 300 }, { area: '102㎡ 이하', need: 600 },
+  { area: '135㎡ 이하', need: 1000 }, { area: '모든 면적', need: 1500 },
+];
+// 지역별 1순위 요건: 통장 가입기간(년) / 납입횟수
+const SUB_FIRST_RANK_REQ = { reg: [2, 24], seoul: [1, 12], metro: [1, 12], etc: [0.5, 6] };
+
+function subReadProfile() {
+  const num = id => parseFloat(document.getElementById(id).value) || 0;
+  const chk = id => document.getElementById(id).checked;
+  const val = id => document.getElementById(id).value;
+  return {
+    age: num('subAge'), marital: val('subMarital'), marriedYears: num('subMarriedYears'),
+    region: val('subRegion'), householder: chk('subHouseholder'),
+    noHouseYears: num('subNoHouseYears'), everOwned: chk('subEverOwned'),
+    householdOwns: chk('subHouseholdOwns'), won5y: chk('subWon5y'), tax5y: chk('subTax5y'),
+    accountYears: num('subAccountYears'), payments: num('subPayments'), deposit: num('subDeposit'),
+    dependents: num('subDependents'), children: num('subChildren'),
+    familySize: parseInt(val('subFamilySize')), income: num('subIncome'),
+    dual: chk('subDual'), newborn: chk('subNewborn'), elderly: chk('subElderly'),
+  };
+}
+
+// 가점제 84점: 무주택기간(32) + 부양가족(35) + 통장 가입기간(17)
+function subGajeom(p) {
+  const noHousePts = p.everOwned && p.noHouseYears <= 0 ? 0
+    : p.noHouseYears < 1 ? 2 : Math.min(32, 2 + 2 * Math.floor(p.noHouseYears));
+  const depPts = 5 + 5 * Math.min(6, p.dependents);
+  const accPts = p.accountYears < 0.5 ? 1 : Math.min(17, 2 + Math.floor(p.accountYears));
+  return { noHousePts, depPts, accPts, total: noHousePts + depPts + accPts };
+}
+
+function subBadge(state) {
+  // ok=해당 유력 / part=조건 일부 미충족 / no=미해당
+  const m = { ok: ['해당 유력', 'var(--green)'], part: ['일부 미충족', 'var(--gold)'], no: ['미해당', 'var(--text3)'] };
+  const [t, c] = m[state];
+  return `<span class="sub-badge" style="--sb:${c}">${state === 'ok' ? '✓ ' : state === 'part' ? '△ ' : '✕ '}${t}</span>`;
+}
+
+// 판정행: 제목 + 배지 + 이유 목록 + ＋접이식 상세
+function subRow(title, state, reasons, detailHtml) {
+  return `
+  <details class="jz-fold sub-item">
+    <summary><span class="sub-item-title">${title}</span>${subBadge(state)}</summary>
+    <div class="sub-item-body">
+      <ul class="sub-reasons">${reasons.map(r => `<li>${r}</li>`).join('')}</ul>
+      ${detailHtml || ''}
+    </div>
+  </details>`;
+}
+
+function subCheck(cond, okMsg, noMsg) { return { ok: cond, msg: cond ? `✓ ${okMsg}` : `✕ ${noMsg}` }; }
+
+function renderSubscription() {
+  const p = subReadProfile();
+  document.getElementById('subMarriedYearsWrap').style.display = p.marital === 'married' ? '' : 'none';
+  localStorage.setItem('subProfile_v1', JSON.stringify(p));
+
+  const isReg = p.region === 'reg';
+  const [reqY, reqN] = SUB_FIRST_RANK_REQ[p.region];
+  const noHouseSelf = !(p.everOwned && p.noHouseYears <= 0);       // 본인·배우자 현재 무주택
+  const noHouseHousehold = noHouseSelf && !p.householdOwns;        // 무주택 세대
+  const married = p.marital !== 'single';
+
+  /* ── ① 순위 판정 ── */
+  const minCheck = subCheck(p.accountYears >= reqY, `통장 가입 ${p.accountYears}년 ≥ ${reqY}년`, `통장 가입 ${p.accountYears}년 < ${reqY}년 (${((reqY - p.accountYears) * 12).toFixed(0)}개월 더 필요)`);
+  const payCheck = subCheck(p.payments >= reqN, `납입 ${p.payments}회 ≥ ${reqN}회`, `납입 ${p.payments}회 < ${reqN}회`);
+  const depositOk = SUB_DEPOSIT_TABLE.filter(d => p.deposit >= d.need);
+  const depCheck = subCheck(depositOk.length > 0, `예치금 ${p.deposit}만원 → ${depositOk[depositOk.length - 1]?.area || ''}까지 청약 가능`, `예치금 ${p.deposit}만원 < 300만원 (85㎡ 이하 최소 기준)`);
+  const regChecks = isReg ? [
+    subCheck(p.householder, '세대주 요건 충족', '규제지역은 세대주만 1순위'),
+    subCheck(!p.won5y, '5년 내 세대 당첨 없음', '규제지역은 5년 내 당첨 세대 1순위 제외'),
+  ] : [];
+  const gukminReg = isReg ? [...regChecks, subCheck(noHouseHousehold, '무주택 세대 요건 충족', '규제지역 국민주택은 무주택 세대만 1순위')] : [];
+
+  const minRank1 = minCheck.ok && depCheck.ok && regChecks.every(c => c.ok);
+  const gukRank1 = minCheck.ok && payCheck.ok && gukminReg.every(c => c.ok);
+
+  document.getElementById('subRankCard').innerHTML = `
+    <div class="budget-card-title">🎯 순위 판정 — ${isReg ? '규제지역' : p.region === 'etc' ? '지방' : '수도권'} 기준</div>
+    <div class="sub-rank-badges">
+      <div class="sub-rank ${gukRank1 ? 'on' : ''}"><span class="sr-k">국민주택 (공공분양)</span><span class="sr-v">${gukRank1 ? '1순위 ✓' : '2순위'}</span></div>
+      <div class="sub-rank ${minRank1 ? 'on' : ''}"><span class="sr-k">민영주택 (민간분양)</span><span class="sr-v">${minRank1 ? '1순위 ✓' : '2순위'}</span></div>
+    </div>
+    ${subRow('국민주택 1순위 요건 자세히', gukRank1 ? 'ok' : 'part',
+      [minCheck.msg, payCheck.msg, ...gukminReg.map(c => c.msg)],
+      `<div class="sub-detail-note">국민주택(LH·SH 공공분양)은 <b>납입 인정 횟수·금액</b>이 핵심입니다.
+       월 납입 인정 상한은 25만원 — 같은 1순위끼리는 <b>저축총액(전용 40㎡ 초과)</b> 순으로 당첨자를 가립니다.
+       서울 인기 단지 당첨선은 통상 저축총액 2,000만원 이상(월 10만원씩 약 17년)으로 형성됩니다.</div>`)}
+    ${subRow('민영주택 1순위 요건 자세히', minRank1 ? 'ok' : 'part',
+      [minCheck.msg, depCheck.msg, ...regChecks.map(c => c.msg),
+       `예치금 기준(서울): ${SUB_DEPOSIT_TABLE.map(d => `${d.area} ${d.need}만`).join(' · ')}`],
+      `<div class="sub-detail-note">민영주택은 납입 횟수 대신 <b>지역별 예치금</b>만 채우면 됩니다 —
+       공고일 전날까지 일시 예치도 인정되므로, 큰 평수를 노린다면 공고 전에 예치금을 미리 채워두세요.
+       1순위 안에서는 <b>가점제 또는 추첨제</b>로 당첨자를 뽑습니다(아래 비율표 참고).</div>`)}
+  `;
+
+  /* ── ② 가점 84점 ── */
+  const g = subGajeom(p);
+  const seg = (label, pts, max, color) => `
+    <div class="sub-gauge-row">
+      <span class="sgk">${label}</span>
+      <div class="sub-gauge"><div style="width:${pts / max * 100}%;background:${color}"></div></div>
+      <span class="sgv">${pts}<small>/${max}</small></span>
+    </div>`;
+  document.getElementById('subScoreCard').innerHTML = `
+    <div class="budget-card-title">📐 청약 가점 — <b style="color:${g.total >= 60 ? 'var(--green)' : g.total >= 40 ? 'var(--gold)' : 'var(--accent)'}">${g.total}점</b> / 84점</div>
+    ${seg('무주택 기간', g.noHousePts, 32, 'var(--green)')}
+    ${seg('부양가족', g.depPts, 35, 'var(--acc2)')}
+    ${seg('통장 가입기간', g.accPts, 17, 'var(--gold)')}
+    ${subRow('배점표 · 내 점수 올리는 법', g.total >= 60 ? 'ok' : g.total >= 40 ? 'part' : 'no',
+      [`무주택: 1년 미만 2점 → 1년마다 +2점 → 15년 이상 32점 <b>(만 30세 또는 혼인신고일부터 기산)</b>`,
+       `부양가족: 기본 5점 + 1명당 5점 (배우자·자녀·3년 이상 동거 직계존속) — 최대 35점`,
+       `통장: 6개월 미만 1점 → 1년마다 +1점 → 15년 이상 17점`],
+      `<div class="sub-detail-note">서울 민영 가점제 당첨선은 인기 단지 <b>60점대 후반</b>, 비인기 <b>40~50점대</b>가 일반적입니다.
+       신혼·젊은 세대는 가점이 구조적으로 낮으므로 <b>추첨제 물량과 특별공급</b>이 현실적인 길입니다.
+       가장 빠른 +점수는 부양가족(자녀 1명 = +5점)이고, 무주택·통장 기간은 시간만이 해결합니다.</div>`)}
+  `;
+
+  /* ── ③ 특별공급 ── */
+  const base100 = SUB_INCOME_BASE[p.familySize] || SUB_INCOME_BASE[4];
+  const incomePct = base100 > 0 ? p.income / base100 * 100 : 0;
+  const pctStr = `${incomePct.toFixed(0)}%`;
+  const accMin = subCheck(p.accountYears >= 0.5 && p.payments >= 6, '통장 6개월·6회 이상', '통장 6개월·6회 미만');
+
+  const items = [];
+  { // 신혼부부
+    const inYears = p.marital === 'pre' || (p.marital === 'married' && p.marriedYears <= 7);
+    const incCap = p.dual ? 160 : 140;
+    const cs = [
+      subCheck(inYears, p.marital === 'pre' ? '예비신혼(1년 내 혼인신고 예정) 인정' : `혼인 ${p.marriedYears}년 ≤ 7년`, p.marital === 'single' ? '미혼은 대상 아님' : '혼인 7년 초과'),
+      subCheck(noHouseHousehold, '무주택 세대', '무주택 세대 아님'),
+      accMin,
+      subCheck(incomePct <= incCap, `소득 ${pctStr} ≤ ${incCap}% (${p.dual ? '맞벌이' : '외벌이'} 기준)`, `소득 ${pctStr} > ${incCap}% — 단, 추첨제 물량은 ${p.dual ? 200 : 160}%까지 허용`),
+    ];
+    items.push(['💑 신혼부부 특별공급', cs,
+      `<div class="sub-detail-note">민영 기준 소득: 우선공급 100%(맞벌이 120%) · 일반공급 140%(160%) · <b>추첨 물량 160%(200%)</b>.
+       같은 신혼 특공 안에서는 ① 자녀 있는 가구 우선 ② 자녀 수 순입니다.
+       <b>예비신혼</b>은 입주 전까지 혼인신고를 증명해야 하며, 혼인신고일 기준 7년이 지나면 대상에서 빠지니
+       특공을 노린다면 혼인신고 시점도 전략입니다. 2세 이하 자녀가 있으면 <b>신생아 우선공급</b>이 먼저 배정됩니다.</div>`]);
+  }
+  { // 생애최초
+    const cs = [
+      subCheck(!p.everOwned, '본인·배우자 생애 무주택', '주택 소유 이력이 있으면 영구 미해당'),
+      subCheck(married || p.children > 0, '혼인 중 또는 자녀 있음 (미혼 1인가구는 추첨 물량만)', '혼인·자녀 요건 미충족 — 추첨 물량만 신청 가능'),
+      subCheck(p.tax5y, '소득세 5년 이상 납부', '소득세 5년 납부 요건 미충족'),
+      accMin,
+      subCheck(incomePct <= 130, `소득 ${pctStr} ≤ 130%`, `소득 ${pctStr} > 130% — 추첨 물량은 160%까지`),
+    ];
+    items.push(['🌱 생애최초 특별공급', cs,
+      `<div class="sub-detail-note">한 번이라도 집을 소유했다면 <b>영구히 대상 제외</b>인 대신, 요건만 맞으면 100% 추첨이라
+       가점이 낮은 젊은 부부에게 가장 승률 높은 통로입니다. 국민주택은 저축액 600만원 이상 요건이 추가됩니다.</div>`]);
+  }
+  { // 신생아
+    const cs = [subCheck(p.newborn, '2세 이하 자녀(임신 포함) 있음', '2세 이하 자녀 없음'), subCheck(noHouseHousehold, '무주택 세대', '무주택 세대 아님')];
+    items.push(['👶 신생아 우선·특별공급', cs,
+      `<div class="sub-detail-note">2024년 신설 — 공공분양(뉴:홈)에 연 3만호 수준 별도 배정, 민영 신혼 특공에서도 우선 배정.
+       출산 가구엔 <b>신생아 특례대출(최저 1%대)</b>도 연계되어 자금 측면에서도 가장 유리합니다.</div>`]);
+  }
+  { // 다자녀
+    const cs = [subCheck(p.children >= 2, `미성년 자녀 ${p.children}명 ≥ 2명`, '미성년 자녀 2명 미만'), subCheck(noHouseHousehold, '무주택 세대', '무주택 세대 아님'), accMin];
+    items.push(['👨‍👩‍👧‍👦 다자녀 특별공급', cs,
+      `<div class="sub-detail-note">2024년부터 <b>3자녀 → 2자녀</b>로 완화. 자녀 수·무주택 기간 등 배점표로 경쟁하며 소득 기준은 120%(맞벌이 200%)입니다.</div>`]);
+  }
+  { // 노부모
+    const cs = [subCheck(p.elderly, '65세 이상 직계존속 3년 이상 부양', '부양 요건 미충족'), subCheck(p.householder, '세대주', '세대주만 가능'), subCheck(noHouseHousehold, '무주택 세대 (부양 존속 포함)', '무주택 세대 아님')];
+    items.push(['👵 노부모 부양 특별공급', cs,
+      `<div class="sub-detail-note">부모님을 3년 이상 같은 세대로 모시는 세대주 대상 — 부양가족 가점(+10점)과도 겹쳐 가점제에서도 강력합니다.</div>`]);
+  }
+
+  document.getElementById('subSpecialCard').innerHTML = `
+    <div class="budget-card-title">⭐ 특별공급 — 일반공급과 경쟁하지 않는 별도 물량</div>
+    <div class="sub-note">특공은 <b>세대당 평생 1회</b>. 소득 ${pctStr} = 부부합산 ${p.income}만원 ÷ 도시근로자 ${p.familySize}인 가구 월평균소득 약 ${base100}만원 (2024 근사, 공고문 우선)</div>
+    ${items.map(([t, cs, note]) => {
+      const okN = cs.filter(c => c.ok).length;
+      const state = okN === cs.length ? 'ok' : okN >= cs.length - 1 ? 'part' : 'no';
+      return subRow(t, state, cs.map(c => c.msg), note);
+    }).join('')}
+  `;
+
+  /* ── ④ 가점제/추첨제 비율 ── */
+  document.getElementById('subRatioBody').innerHTML = `
+    <table class="sub-table">
+      <tr><th>지역</th><th>전용 85㎡ 이하</th><th>전용 85㎡ 초과</th></tr>
+      <tr><td>규제지역 (강남3구·용산)</td><td>가점 40% · 추첨 60%</td><td>가점 80% · 추첨 20%</td></tr>
+      <tr><td>그 외 수도권·서울</td><td>가점 40% · 추첨 60%</td><td>추첨 100%</td></tr>
+    </table>
+    <div class="sub-detail-note">내 가점 <b>${g.total}점</b> 기준:
+      ${g.total >= 60 ? '가점제로도 승부 가능한 점수입니다 — 85㎡ 초과 규제지역(가점 80%)이 오히려 유리할 수 있습니다.'
+        : '가점제 당첨선(서울 60점대)에는 부족합니다 — <b>85㎡ 이하 추첨제 60% 물량 + 특별공급</b>에 집중하는 것이 확률적으로 맞습니다. 추첨제도 무주택자에게 물량의 75%를 우선 배정하므로 무주택 유지가 중요합니다.'}</div>
+  `;
+}
+
+async function initSubscription() {
+  if (!document.getElementById('subRankCard')) return;
+
+  // 저장된 프로필 복원
+  try {
+    const saved = JSON.parse(localStorage.getItem('subProfile_v1') || 'null');
+    if (saved) {
+      const set = (id, v) => { const el = document.getElementById(id); if (el && v != null) el[typeof v === 'boolean' ? 'checked' : 'value'] = v; };
+      set('subAge', saved.age); set('subMarital', saved.marital); set('subMarriedYears', saved.marriedYears);
+      set('subRegion', saved.region); set('subHouseholder', saved.householder);
+      set('subNoHouseYears', saved.noHouseYears); set('subEverOwned', saved.everOwned);
+      set('subHouseholdOwns', saved.householdOwns); set('subWon5y', saved.won5y); set('subTax5y', saved.tax5y);
+      set('subAccountYears', saved.accountYears); set('subPayments', saved.payments); set('subDeposit', saved.deposit);
+      set('subDependents', saved.dependents); set('subChildren', saved.children);
+      set('subFamilySize', saved.familySize); set('subIncome', saved.income);
+      set('subDual', saved.dual); set('subNewborn', saved.newborn); set('subElderly', saved.elderly);
+    }
+  } catch (e) { /* 무시 — 기본값 사용 */ }
+
+  document.querySelectorAll('#secSubscription input, #secSubscription select').forEach(el =>
+    el.addEventListener('input', renderSubscription));
+  renderSubscription();
+
+  // 실시간 공고 (청약홈 API 수집분 — 없으면 안내만)
+  const list = document.getElementById('subNoticeList');
+  try {
+    const d = await (await fetch('/api/subscriptions')).json();
+    const items = d.items || [];
+    if (items.length) {
+      list.innerHTML = `<div class="sub-note">업데이트: ${d.updated || '—'} · 접수 중이거나 예정인 서울 공고</div>` +
+        items.map(n => `
+        <div class="jb-row"><span><b>${n.name}</b> <small style="color:var(--text3)">${n.addr || ''}</small></span>
+          <span>${n.rcept_bgn || ''} ~ ${n.rcept_end || ''} ${n.url ? `<a href="${n.url}" target="_blank" rel="noopener">공고 ↗</a>` : ''}</span></div>`).join('');
+    } else {
+      list.innerHTML = `<div class="sub-note">아직 공고 데이터가 없습니다 — 공공데이터포털에서
+        <b>「한국부동산원_주택청약 분양정보 조회 서비스」</b> API를 활용신청하고
+        GitHub Secret <code>APPLY_HOME_API_KEY</code>에 등록하면, 매 수집 때 서울 분양 공고가 자동으로 여기에 표시됩니다.
+        그 전에도 <a href="https://www.applyhome.co.kr" target="_blank" rel="noopener">청약홈 ↗</a>에서 직접 확인할 수 있습니다.</div>`;
+    }
+  } catch (e) { list.innerHTML = ''; }
+}
+
 /* ── 초기화 ─────────────────────────────────────────────── */
 (async function init() {
   const safe = async (fn) => { try { await fn(); } catch (e) { console.error(fn.name, e); } };
   initNav();
   await safe(renderScoring);
   await safe(initBudgetPlanner);
+  await safe(initSubscription);
   // 각 섹션을 독립 실행 — 한 곳(예: 지도 CDN)이 실패해도 나머지는 정상 렌더
   await safe(renderExplorer);
   await safe(renderMap);

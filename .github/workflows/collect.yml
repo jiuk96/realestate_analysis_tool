@@ -84,6 +84,12 @@ jobs:
         run: |
           python collect_official_price.py || echo "공시가 수집 실패 — HUG 지표는 다음 실행에서 재시도"
 
+      - name: 서울 분양(청약) 공고 수집 (best-effort)
+        env:
+          APPLY_HOME_API_KEY: ${{ secrets.APPLY_HOME_API_KEY }}
+        run: |
+          python collect_subscriptions.py || echo "청약 공고 수집 실패 — 기존 subscriptions.json 유지"
+
       - name: 전세 안전성 지표 산출 (additive)
         run: |
           python src/jeonse_safety.py || echo "안전성 산출 실패 — 기존 jeonse_safety.json 유지"

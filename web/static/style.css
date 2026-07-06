@@ -1155,6 +1155,35 @@ details.budget-fold .legal-hint { font-weight: 500; }
 .fundbar-caption { font-size: .78rem; color: var(--text2); margin: .2rem 0 .6rem; }
 .jb-row { display: flex; justify-content: space-between; padding: .35rem 0; border-bottom: 1px dashed var(--border); font-size: .86rem; }
 .jb-zero { color: var(--green); font-weight: 700; }
+
+/* ── 청약 자격 진단 ─────────────────────────────── */
+.sub-grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: 1.4rem; align-items: start; }
+@media (max-width: 960px) { .sub-grid { grid-template-columns: 1fr; } }
+.sub-inputs, .sub-results { display: flex; flex-direction: column; gap: 1rem; }
+.sub-rank-badges { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin-bottom: .8rem; }
+.sub-rank { background: var(--bg); border: 1.5px solid var(--border); border-radius: 12px; padding: .8rem 1rem; display: flex; flex-direction: column; gap: .2rem; }
+.sub-rank.on { border-color: var(--green); background: rgba(3,165,82,.06); }
+.sr-k { font-size: .78rem; color: var(--text2); }
+.sr-v { font-size: 1.25rem; font-weight: 800; color: var(--text3); }
+.sub-rank.on .sr-v { color: var(--green); }
+.sub-item { background: var(--bg); border-radius: 10px; padding: .6rem .9rem; margin-top: .55rem; }
+.sub-item > summary { display: flex; align-items: center; gap: .5rem; font-size: .88rem; font-weight: 600; color: var(--text); }
+.sub-item-title { flex: 1; }
+.sub-item-body { padding: .6rem .2rem .2rem; }
+.sub-badge { font-size: .7rem; font-weight: 700; color: var(--sb); border: 1px solid var(--sb); border-radius: 999px; padding: .12rem .55rem; white-space: nowrap; }
+.sub-reasons { list-style: none; padding: 0; margin: 0 0 .5rem; display: flex; flex-direction: column; gap: .3rem; }
+.sub-reasons li { font-size: .82rem; color: var(--text2); }
+.sub-detail-note { font-size: .8rem; color: var(--text2); background: var(--bg-soft); border-left: 3px solid var(--acc2); border-radius: 6px; padding: .6rem .8rem; line-height: 1.55; }
+.sub-note { font-size: .78rem; color: var(--text2); margin-bottom: .4rem; }
+.sub-gauge-row { display: grid; grid-template-columns: 92px 1fr 58px; align-items: center; gap: .6rem; margin: .45rem 0; }
+.sgk { font-size: .78rem; color: var(--text2); }
+.sub-gauge { height: 10px; background: var(--bg); border-radius: 999px; overflow: hidden; }
+.sub-gauge > div { height: 100%; border-radius: 999px; transition: width .3s; }
+.sgv { font-size: .92rem; font-weight: 800; text-align: right; font-variant-numeric: tabular-nums; }
+.sgv small { color: var(--text3); font-weight: 500; }
+.sub-table { width: 100%; border-collapse: collapse; font-size: .8rem; margin: .3rem 0 .7rem; }
+.sub-table th, .sub-table td { border: 1px solid var(--border); padding: .45rem .6rem; text-align: center; }
+.sub-table th { background: var(--bg); color: var(--text2); }
 .couple-box-wide { margin-bottom: 1.1rem; }
 .couple-badge { background: rgba(52,211,153,.15); color: #34d399; font-size: .68rem; padding: .15rem .5rem; border-radius: 999px; margin-left: .4rem; font-weight: 600; }
 .commute-preset { color: #4a5563; font-size: .8rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: .4rem .7rem; }
