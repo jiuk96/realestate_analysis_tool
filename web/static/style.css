@@ -1184,6 +1184,37 @@ details.budget-fold .legal-hint { font-weight: 500; }
 .sub-table { width: 100%; border-collapse: collapse; font-size: .8rem; margin: .3rem 0 .7rem; }
 .sub-table th, .sub-table td { border: 1px solid var(--border); padding: .45rem .6rem; text-align: center; }
 .sub-table th { background: var(--bg); color: var(--text2); }
+
+/* 청약 — 입문 개념 카드 */
+.sub-why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.6rem; }
+@media (max-width: 900px) { .sub-why-grid { grid-template-columns: 1fr; } }
+.sub-why-card { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 14px; padding: 1.1rem 1.2rem; box-shadow: var(--shadow-sm); position: relative; overflow: hidden; }
+.sub-why-card::before { content: ''; position: absolute; inset: 0 auto 0 0; width: 4px; background: var(--insta-grad, linear-gradient(180deg, var(--accent), var(--acc2))); }
+.swc-icon { font-size: 1.4rem; margin-bottom: .3rem; }
+.swc-title { font-weight: 800; font-size: .95rem; margin-bottom: .35rem; }
+.swc-body { font-size: .84rem; color: var(--text2); line-height: 1.6; }
+.sub-foot { font-size: .72rem; color: var(--text3); line-height: 1.55; margin-top: .55rem; padding-top: .5rem; border-top: 1px dashed var(--border); }
+.sub-help { font-size: .74rem; color: var(--text3); line-height: 1.55; background: var(--bg); border-radius: 8px; padding: .5rem .7rem; margin-top: .5rem; }
+
+/* 청약 — 절차 스텝 */
+.sub-steps { display: flex; align-items: stretch; gap: .4rem; margin-bottom: 1rem; overflow-x: auto; padding-bottom: .3rem; }
+.sub-step { flex: 1; min-width: 128px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px; padding: .7rem .8rem; display: flex; flex-direction: column; gap: .25rem; box-shadow: var(--shadow-sm); }
+.sub-step b { font-size: .84rem; }
+.sub-step small { font-size: .7rem; color: var(--text3); line-height: 1.45; }
+.ss-n { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font-size: .72rem; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.ss-arrow { align-self: center; color: var(--text3); font-weight: 700; }
+
+/* 청약 — 당첨선 스케일 */
+.sub-cutline-wrap { margin-top: 1rem; }
+.sub-cutline-title { font-size: .8rem; font-weight: 700; color: var(--text2); margin-bottom: 1.3rem; }
+.sub-cutline { display: flex; height: 16px; border-radius: 999px; overflow: visible; position: relative; }
+.scl-zone { height: 100%; }
+.scl-zone:first-child { border-radius: 999px 0 0 999px; }
+.scl-zone:last-child { border-radius: 0 999px 999px 0; }
+.scl-marker { position: absolute; top: -6px; bottom: -6px; width: 3px; background: var(--text); border-radius: 2px; transform: translateX(-50%); }
+.scl-marker span { position: absolute; top: -1.25rem; left: 50%; transform: translateX(-50%); font-size: .7rem; font-weight: 800; white-space: nowrap; background: var(--text); color: var(--bg-soft); border-radius: 6px; padding: .06rem .4rem; }
+.sub-cutline-labels { display: flex; margin-top: .3rem; }
+.sub-cutline-labels span { font-size: .66rem; color: var(--text3); text-align: center; }
 .couple-box-wide { margin-bottom: 1.1rem; }
 .couple-badge { background: rgba(52,211,153,.15); color: #34d399; font-size: .68rem; padding: .15rem .5rem; border-radius: 999px; margin-left: .4rem; font-weight: 600; }
 .commute-preset { color: #4a5563; font-size: .8rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: .4rem .7rem; }

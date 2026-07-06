@@ -3127,6 +3127,7 @@ function renderSubscription() {
       <div class="sub-rank ${gukRank1 ? 'on' : ''}"><span class="sr-k">국민주택 (공공분양)</span><span class="sr-v">${gukRank1 ? '1순위 ✓' : '2순위'}</span></div>
       <div class="sub-rank ${minRank1 ? 'on' : ''}"><span class="sr-k">민영주택 (민간분양)</span><span class="sr-v">${minRank1 ? '1순위 ✓' : '2순위'}</span></div>
     </div>
+    <div class="sub-foot">1순위는 "당첨"이 아니라 <b>입장권</b>입니다 — 서울 인기 단지는 1순위에서 마감되므로, 2순위면 사실상 기회가 오지 않습니다. 국민주택=LH·SH 등 공공분양(시세보다 저렴, 소득요건 있음), 민영주택=래미안·자이 같은 민간 브랜드 분양입니다.</div>
     ${subRow('국민주택 1순위 요건 자세히', gukRank1 ? 'ok' : 'part',
       [minCheck.msg, payCheck.msg, ...gukminReg.map(c => c.msg)],
       `<div class="sub-detail-note">국민주택(LH·SH 공공분양)은 <b>납입 인정 횟수·금액</b>이 핵심입니다.
@@ -3153,6 +3154,22 @@ function renderSubscription() {
     ${seg('무주택 기간', g.noHousePts, 32, 'var(--green)')}
     ${seg('부양가족', g.depPts, 35, 'var(--acc2)')}
     ${seg('통장 가입기간', g.accPts, 17, 'var(--gold)')}
+
+    <div class="sub-cutline-wrap">
+      <div class="sub-cutline-title">서울 당첨선 위에서 내 위치</div>
+      <div class="sub-cutline">
+        <div class="scl-zone" style="width:${40 / 84 * 100}%;background:rgba(148,163,184,.35)"></div>
+        <div class="scl-zone" style="width:${20 / 84 * 100}%;background:rgba(245,158,11,.4)"></div>
+        <div class="scl-zone" style="width:${24 / 84 * 100}%;background:rgba(3,165,82,.45)"></div>
+        <div class="scl-marker" style="left:${Math.min(99, g.total / 84 * 100)}%"><span>나 ${g.total}점</span></div>
+      </div>
+      <div class="sub-cutline-labels">
+        <span style="width:${40 / 84 * 100}%">~40점 · 추첨제 위주</span>
+        <span style="width:${20 / 84 * 100}%">40~60 · 비인기 가점 가능</span>
+        <span style="width:${24 / 84 * 100}%">60+ · 인기단지 가점권</span>
+      </div>
+      <div class="sub-foot">구간은 최근 서울 민영 가점제 당첨선 분포의 통상 범위입니다 — 단지·평형마다 다르므로 방향 감각용으로만 보세요.</div>
+    </div>
     ${subRow('배점표 · 내 점수 올리는 법', g.total >= 60 ? 'ok' : g.total >= 40 ? 'part' : 'no',
       [`무주택: 1년 미만 2점 → 1년마다 +2점 → 15년 이상 32점 <b>(만 30세 또는 혼인신고일부터 기산)</b>`,
        `부양가족: 기본 5점 + 1명당 5점 (배우자·자녀·3년 이상 동거 직계존속) — 최대 35점`,
