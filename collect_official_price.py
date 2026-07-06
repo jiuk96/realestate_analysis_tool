@@ -5,9 +5,10 @@
 수집해 data/static/official_price.json 캐시로 저장한다. 연 1회 고시라
 캐시가 있으면 스킵(연도 바뀌면 재수집).
 
-필요 활용신청 (data.go.kr, 기존 MOLIT_API_KEY 재사용):
-  ① "국토교통부_공동주택 공시가격" (ApartHousingPriceService)
-  ② "행정표준코드관리시스템_법정동코드" (StanReginCd) — PNU 조립용, 자동승인
+필요 키:
+  ① V-World 인증키 (vworld.kr 발급, GitHub Secret OFFICIAL_PRICE_API_KEY) —
+     공동주택가격 속성조회는 V-World NED API(key= 파라미터)로 호출된다.
+  ② 법정동코드(StanReginCd)는 data.go.kr 공통 키(MOLIT_API_KEY) — PNU 조립용
 
 동작: 단지 대표 지번주소(apt_locations.json) → 법정동코드10+지번 → PNU →
 공시가 조회 → 전용 55~63㎡ 세대 공시가 중앙값. 매칭 실패 단지는 결과에서
@@ -41,7 +42,7 @@ BJD_CACHE = ROOT / "data" / "static" / "bjd_codes_seoul.json"
 OUT = ROOT / "data" / "static" / "official_price.json"
 
 REGIN_URL = "https://apis.data.go.kr/1741000/StanReginCd/getStanReginCdList"
-PRICE_URL = "https://apis.data.go.kr/1611000/nsdi/ApartHousingPriceService/attr/getApartHousingPriceAttr"
+PRICE_URL = "https://api.vworld.kr/ned/data/getApartHousingPriceAttr"
 STDR_YEAR = "2025"        # 최신 고시연도 (실패 시 전년도로 1회 폴백)
 AREA_MIN, AREA_MAX = config.TARGET_AREA_MIN, config.TARGET_AREA_MAX
 
@@ -89,11 +90,12 @@ def _pnu(bjd10: str, jibun: str) -> str | None:
 
 
 def _query_price(key: str, pnu: str, year: str) -> list[dict]:
+    # V-World NED 방식: serviceKey가 아니라 key= 파라미터, domain은 발급 시 등록값
     r = requests.get(PRICE_URL, params={
-        "serviceKey": key, "pnu": pnu, "stdrYear": year,
+        "key": key, "pnu": pnu, "stdrYear": year,
         "format": "json", "numOfRows": 400, "pageNo": 1}, timeout=30)
-    if r.status_code == 403:
-        raise PermissionError("403 — '공동주택 공시가격' 활용신청 미반영")
+    if r.status_code in (401, 403):
+        raise PermissionError(f"{r.status_code} — V-World 인증키(OFFICIAL_PRICE_API_KEY) 확인 필요")
     r.raise_for_status()
     js = r.json()
     field = js.get("apartHousingPrices") or js.get("ApartHousingPrices") or {}
@@ -101,11 +103,14 @@ def _query_price(key: str, pnu: str, year: str) -> list[dict]:
 
 
 def main():
-    # NSDI 계열은 승인 방식에 따라 별도 키가 발급되기도 한다 — 전용 키가 있으면
-    # 우선 사용하고, 없으면 기존 data.go.kr 공통 키로 시도한다(코드 수정 불필요).
-    key = os.getenv("OFFICIAL_PRICE_API_KEY") or os.getenv("MOLIT_API_KEY")
+    # 공시가 조회는 V-World 전용 키, 법정동코드는 data.go.kr 공통 키로 분리
+    key = os.getenv("OFFICIAL_PRICE_API_KEY")
+    regin_key = os.getenv("MOLIT_API_KEY")
     if not key:
-        raise EnvironmentError("OFFICIAL_PRICE_API_KEY 또는 MOLIT_API_KEY 필요")
+        log.error("OFFICIAL_PRICE_API_KEY(V-World 인증키) 시크릿이 없어 공시가 수집을 건너뜁니다.")
+        return
+    if not regin_key:
+        raise EnvironmentError("MOLIT_API_KEY 없음 (법정동코드 조회용)")
     if OUT.exists():
         cached = json.loads(OUT.read_text(encoding="utf-8"))
         if cached.get("stdr_year") == STDR_YEAR and cached.get("apartments"):
@@ -116,7 +121,7 @@ def main():
 
     # 진단: 법정동코드 API부터 (자동승인이라 이게 되면 키 자체는 정상)
     try:
-        bjd = _fetch_bjd_codes(key)
+        bjd = _fetch_bjd_codes(regin_key)
     except Exception as e:
         log.error(f"[진단] 법정동코드 API 실패({e}) — 'StanReginCd' 활용신청 확인 필요. 수집 건너뜀.")
         return
