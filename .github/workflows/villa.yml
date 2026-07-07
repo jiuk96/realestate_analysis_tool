@@ -1,0 +1,49 @@
+name: 빌라 실거래 수집
+
+# 첫 수집은 78개월 × 25구 조합이라 시간 예산(45분)에 걸려 여러 번 나눠 받는다 —
+# 체크포인트가 있어 이 워크플로를 다 찰 때까지 반복 실행하면 된다.
+on:
+  workflow_dispatch:        # 수동 실행 (버튼 클릭)
+
+jobs:
+  villa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GIT_TOKEN }}
+
+      - name: Python 설정
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 패키지 설치
+        run: pip install -r requirements.txt
+
+      - name: 빌라(연립다세대) 매매·전월세 수집
+        timeout-minutes: 50
+        env:
+          MOLIT_API_KEY: ${{ secrets.MOLIT_API_KEY }}
+          PYTHONUNBUFFERED: "1"
+        run: python collect_villa.py
+
+      - name: 빌라 동네 분석
+        run: python src/villa_analysis.py || echo "표본 부족 — 수집을 더 채운 뒤 재실행"
+
+      - name: 커밋·푸시
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/villa_trade data/villa_rent data/processed/villa.json 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "변경 없음 — 스킵"
+          else
+            git commit -m "data: 빌라 실거래 수집·분석 $(date +'%Y-%m-%d %H:%M') KST"
+            git push
+            echo "✅ 푸시 완료"
+          fi

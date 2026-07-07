@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% set active_page = 'villa' %}
+{% block title %}빌라 동네 분석 · 서울 부동산 분석 툴{% endblock %}
+{% block content %}
+<section class="section section-alt" id="secVilla">
+  <div class="section-inner">
+    <div class="section-label">매매 · 빌라</div>
+    <h2 class="section-title">빌라(연립·다세대) — 동네 단위 매수 분석</h2>
+    <p class="section-desc">
+      빌라는 한 건물 세대수가 적어 아파트처럼 <b>건물별 점수</b>를 내면 표본 1~3건짜리 허수가 됩니다.
+      대신 <b>법정동(동네) 단위</b>로 묶어 실거래 표본을 확보하고, 빌라 매수에서 실제로 판단 가능한
+      5개 지표(가격 접근성 · 유동성 · 가격 흐름 · 아파트 갭 · 깡통 안전)로 <b>어느 동네의 빌라를 볼지</b>를 골라줍니다.
+    </p>
+
+    <div class="villa-controls">
+      <div class="price-chips" id="villaDistChips"></div>
+      <div class="villa-control-row">
+        <select id="villaSort" class="explorer-sort">
+          <option value="total">종합점수순</option>
+          <option value="ppm2">평단가 낮은순</option>
+          <option value="n_trades_12m">거래 많은순</option>
+          <option value="apt_gap">아파트 대비 할인 큰순</option>
+          <option value="jeonse_ratio">전세가율 낮은순 (깡통 안전)</option>
+          <option value="trend_pct_yr">가격 상승 추세순</option>
+        </select>
+        <div class="bf-input" style="max-width:170px">
+          <input type="number" id="villaMaxEok" placeholder="예산 상한" step="0.5" min="0"><span>억 이하</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-note" id="villaSummary"></div>
+    <div class="villa-grid" id="villaList"></div>
+
+    <div class="sub-foot" id="villaCaveat" style="margin-top:1.2rem"></div>
+  </div>
+</section>
+{% endblock %}

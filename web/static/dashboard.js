@@ -3035,6 +3035,126 @@ function drawJeonseTop1() {
   }
 }
 
+/* ── 🧱 빌라(연립·다세대) 동네 단위 분석 ─────────────────────
+   src/villa_analysis.py 산출 villa.json 렌더. 건물별이 아니라 법정동 단위 —
+   표본이 받쳐주는 지표만 보여주고, 개별 매물 한계는 caveat로 항상 노출한다. */
+const VILLA_AXES = [
+  ['afford', '가격 접근성', 'var(--green)'],
+  ['liquidity', '유동성', 'var(--acc2)'],
+  ['gap', '아파트 갭', 'var(--gold)'],
+  ['trend', '가격 흐름', '#f472b6'],
+  ['safety', '깡통 안전', 'var(--accent)'],
+];
+let _villaData = null;
+let _villaDist = '전체';
+
+function villaCard(d) {
+  const sc = d.total ?? 0;
+  const scColor = sc >= 70 ? 'var(--green)' : sc >= 50 ? 'var(--gold)' : 'var(--text3)';
+  const axes = VILLA_AXES.map(([k, label, color]) => {
+    const v = d['ax_' + k];
+    if (v == null) return `<div class="vl-ax"><span class="vlk">${label}</span><div class="vl-bar"><div style="width:0"></div></div><span class="vlv" style="color:var(--text3)">—</span></div>`;
+    return `<div class="vl-ax"><span class="vlk">${label}</span><div class="vl-bar"><div style="width:${v}%;background:${color}"></div></div><span class="vlv">${v.toFixed(0)}</span></div>`;
+  }).join('');
+
+  const chips = [];
+  chips.push(`<span>🧾 12개월 ${d.n_trades_12m}건${d.liq_chg_pct != null ? ` (전년 ${d.liq_chg_pct > 0 ? '+' : ''}${d.liq_chg_pct.toFixed(0)}%)` : ''}</span>`);
+  if (d.trend_pct_yr != null) chips.push(`<span style="color:${d.trend_pct_yr >= 0 ? 'var(--green)' : 'var(--red)'}">📈 ${d.trend_pct_yr > 0 ? '+' : ''}${d.trend_pct_yr.toFixed(1)}%/년</span>`);
+  if (d.apt_gap != null) chips.push(`<span>🏢 아파트의 ${(d.apt_gap * 100).toFixed(0)}% 가격</span>`);
+  if (d.jeonse_ratio != null) chips.push(`<span style="color:${d.jeonse_danger ? 'var(--red)' : 'inherit'}">🔑 전세가율 ${(d.jeonse_ratio * 100).toFixed(0)}%</span>`);
+  if (d.median_age != null) chips.push(`<span>🏚️ 평균 ${d.median_age.toFixed(0)}년차</span>`);
+
+  const badges = [];
+  if (d.jeonse_danger) badges.push(`<span class="vl-badge vl-danger">⚠️ 깡통 위험권 (전세가율 80%+)</span>`);
+  if (d.new_share != null && d.new_share >= 0.4) badges.push(`<span class="vl-badge vl-warn">🏗️ 신축 거래 ${(d.new_share * 100).toFixed(0)}% — 신축 고평가 주의</span>`);
+
+  const trades = (d.recent_trades || []).map(t =>
+    `<tr><td>${t.ym.slice(0, 4)}.${t.ym.slice(4)}</td><td>${t.name || '—'}</td><td>${t.area}㎡${t.floor != null ? ` · ${t.floor}층` : ''}</td><td>${t.build_year || '—'}년</td><td><b>${t.amount}억</b></td></tr>`).join('');
+
+  return `
+  <div class="vl-card">
+    <div class="vl-head">
+      <span class="vl-rank">${d.rank}</span>
+      <div class="vl-title">
+        <div class="vl-name">${d.district} ${d.dong}</div>
+        <div class="vl-meta">중위 <b>${d.median_amount_eok}억</b> · 전용 ${d.median_area}㎡ · 평당 ${d.py_price}억</div>
+      </div>
+      <span class="vl-score" style="color:${scColor}">${sc.toFixed(0)}<small>점</small></span>
+    </div>
+    <div class="vl-axes">${axes}</div>
+    <div class="vl-chips">${chips.join('')}</div>
+    ${badges.length ? `<div class="vl-badges">${badges.join('')}</div>` : ''}
+    <details class="jz-fold" style="margin-top:.5rem">
+      <summary>최근 실거래 · 지표 근거</summary>
+      <table class="sub-table" style="margin-top:.5rem">
+        <tr><th>계약</th><th>건물</th><th>면적·층</th><th>준공</th><th>가격</th></tr>${trades}
+      </table>
+      <div class="sub-detail-note" style="margin-top:.5rem">
+        <b>가격 접근성</b>은 ㎡당 매매가(낮을수록↑), <b>유동성</b>은 최근 12개월 거래량(많을수록 되팔기 쉬움),
+        <b>아파트 갭</b>은 같은 구 아파트 ㎡당가 대비 빌라 가격(쌀수록 할인·재개발 여지↑),
+        <b>가격 흐름</b>은 36개월 추세, <b>깡통 안전</b>은 빌라 전세가율(80% 이상이면 역전세·전세사기 위험권)입니다.
+        모두 이 동네 실거래만으로 계산한 서울 전체 동네 중 백분위(0~100)입니다.</div>
+    </details>
+  </div>`;
+}
+
+function renderVillaList() {
+  const d = _villaData;
+  const list = document.getElementById('villaList');
+  const sortKey = document.getElementById('villaSort').value;
+  const maxEok = parseFloat(document.getElementById('villaMaxEok').value) || null;
+  const asc = ['ppm2', 'apt_gap', 'jeonse_ratio'].includes(sortKey);
+
+  let rows = d.dongs.filter(x => _villaDist === '전체' || x.district === _villaDist);
+  if (maxEok) rows = rows.filter(x => x.median_amount_eok <= maxEok);
+  rows = [...rows].sort((a, b) => {
+    const av = a[sortKey], bv = b[sortKey];
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    return asc ? av - bv : bv - av;
+  });
+
+  document.getElementById('villaSummary').textContent =
+    `기준 ${d.period_12m.replace('~', ' ~ ')} · 표본 충분 동네 ${d.n_dongs}개 중 ${rows.length}개 표시 · 실거래 ${d.n_trades_used.toLocaleString()}건 사용`;
+  list.innerHTML = rows.map(villaCard).join('') ||
+    `<div class="sub-note">조건에 맞는 동네가 없습니다 — 예산 상한이나 구 필터를 풀어보세요.</div>`;
+}
+
+async function renderVilla() {
+  const list = document.getElementById('villaList');
+  if (!list) return;
+  const d = await (await fetch('/api/villa')).json();
+  if (!d.dongs || !d.dongs.length) {
+    list.innerHTML = `
+    <div class="budget-card" style="grid-column:1/-1">
+      <div class="budget-card-title">아직 빌라 데이터가 없습니다</div>
+      <div class="sub-note" style="line-height:1.7">
+        공공데이터포털(data.go.kr)에서 아래 두 API를 <b>기존 국토부 키 그대로</b> 활용신청하면 됩니다 (자동승인·무료):<br>
+        ① <b>국토교통부_연립다세대 매매 실거래가 자료</b><br>
+        ② <b>국토교통부_연립다세대 전월세 실거래가 자료</b><br>
+        신청 후 GitHub Actions의 <b>「빌라 실거래 수집」</b> 워크플로를 실행하면 수집(78개월치, 1~2회 실행) →
+        동네 분석까지 자동으로 채워집니다.</div>
+    </div>`;
+    return;
+  }
+  _villaData = d;
+  document.getElementById('villaCaveat').textContent = '⚠️ ' + (d.caveat || '');
+
+  // 구 칩
+  const dists = ['전체', ...[...new Set(d.dongs.map(x => x.district))].sort((a, b) => a.localeCompare(b, 'ko'))];
+  const chipBox = document.getElementById('villaDistChips');
+  chipBox.innerHTML = dists.map(x =>
+    `<button class="price-chip ${x === _villaDist ? 'active' : ''}" data-d="${x}">${x}</button>`).join('');
+  chipBox.querySelectorAll('.price-chip').forEach(c => c.addEventListener('click', () => {
+    _villaDist = c.dataset.d;
+    chipBox.querySelectorAll('.price-chip').forEach(x => x.classList.toggle('active', x.dataset.d === _villaDist));
+    renderVillaList();
+  }));
+  document.getElementById('villaSort').addEventListener('input', renderVillaList);
+  document.getElementById('villaMaxEok').addEventListener('input', renderVillaList);
+  renderVillaList();
+}
+
 /* ── 📋 청약 자격 진단 ─────────────────────────────────────
    「주택공급에 관한 규칙」의 일반 기준을 단순화한 클라이언트 계산.
    순위 판정(국민·민영) + 가점 84점 + 특별공급 5종을 입력값으로 실시간 판정.
@@ -3395,6 +3515,7 @@ async function initSubscription() {
   await safe(renderScoring);
   await safe(initBudgetPlanner);
   await safe(initSubscription);
+  await safe(renderVilla);
   // 각 섹션을 독립 실행 — 한 곳(예: 지도 CDN)이 실패해도 나머지는 정상 렌더
   await safe(renderExplorer);
   await safe(renderMap);

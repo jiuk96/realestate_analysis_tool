@@ -84,6 +84,18 @@ jobs:
         run: |
           python collect_official_price.py || echo "공시가 수집 실패 — HUG 지표는 다음 실행에서 재시도"
 
+      - name: 빌라(연립다세대) 매매·전월세 수집 (best-effort)
+        timeout-minutes: 50
+        env:
+          MOLIT_API_KEY: ${{ secrets.MOLIT_API_KEY }}
+          PYTHONUNBUFFERED: "1"
+        run: |
+          python collect_villa.py || echo "빌라 수집 일부 실패 — 다음 실행에서 이어받음"
+
+      - name: 빌라 동네 분석 (best-effort)
+        run: |
+          python src/villa_analysis.py || echo "빌라 분석 실패 — 기존 villa.json 유지"
+
       - name: 서울 분양(청약) 공고 수집 (best-effort)
         env:
           APPLY_HOME_API_KEY: ${{ secrets.APPLY_HOME_API_KEY }}

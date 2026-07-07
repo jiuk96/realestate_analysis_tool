@@ -38,6 +38,7 @@ _PAGES = {
     # 매매 축
     "rankings":        "rankings.html",         # 매매 · 동네별 순위
     "top1":            "top1.html",             # 매매 · 전체 1위
+    "villa":           "villa.html",            # 매매 · 빌라 동네 분석
     # 전세 축
     "jeonse":          "jeonse.html",           # 전세 · 지도 탐색
     "jeonse-rankings": "jeonse_rankings.html",  # 전세 · 구별 순위
@@ -113,6 +114,15 @@ def api_jeonse_safety():
     """전세 안전성 참고 지표 (src/jeonse_safety.py 산출, 점수 미반영). 없으면 빈 dict."""
     try:
         return jsonify(_load("jeonse_safety.json"))
+    except FileNotFoundError:
+        return jsonify({})
+
+
+@app.route("/api/villa")
+def api_villa():
+    """빌라(연립·다세대) 동네 단위 분석 (src/villa_analysis.py 산출). 없으면 빈 dict."""
+    try:
+        return jsonify(_load("villa.json"))
     except FileNotFoundError:
         return jsonify({})
 
