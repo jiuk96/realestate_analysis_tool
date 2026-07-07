@@ -144,26 +144,40 @@ def _dong_locations(keys: list) -> dict:
 
     kakao = os.environ.get("KAKAO_REST_KEY", "").strip()
     missing = [k for k in keys if k not in cache]
-    if kakao and missing:
+    if missing:
+        import time
         import requests
         n_ok = 0
+        session = requests.Session()
         for k in missing:
             gu, dong = k.split("|", 1)
             try:
-                r = requests.get(
-                    "https://dapi.kakao.com/v2/local/search/address.json",
-                    params={"query": f"서울특별시 {gu} {dong}"},
-                    headers={"Authorization": f"KakaoAK {kakao}"}, timeout=10)
-                docs = r.json().get("documents", [])
+                if kakao:
+                    r = session.get(
+                        "https://dapi.kakao.com/v2/local/search/address.json",
+                        params={"query": f"서울특별시 {gu} {dong}"},
+                        headers={"Authorization": f"KakaoAK {kakao}"}, timeout=10)
+                    docs = r.json().get("documents", [])
+                    if docs:
+                        cache[k] = {"lat": round(float(docs[0]["y"]), 6),
+                                    "lng": round(float(docs[0]["x"]), 6), "source": "kakao"}
+                        n_ok += 1
+                        continue
+                # Kakao 키가 없거나 실패 시: Nominatim(OSM) — 아파트 지오코딩과 동일 경로.
+                # 정책상 1 req/s 준수. 법정동명은 대부분 해석된다.
+                r = session.get("https://nominatim.openstreetmap.org/search",
+                                params={"q": f"{dong}, {gu}, 서울", "format": "json",
+                                        "limit": 1, "countrycodes": "kr"},
+                                headers={"User-Agent": "seoul-apt-tool/1.0"}, timeout=15)
+                time.sleep(1.1)
+                docs = r.json() if r.status_code == 200 else []
                 if docs:
-                    cache[k] = {"lat": round(float(docs[0]["y"]), 6),
-                                "lng": round(float(docs[0]["x"]), 6), "source": "kakao"}
+                    cache[k] = {"lat": round(float(docs[0]["lat"]), 6),
+                                "lng": round(float(docs[0]["lon"]), 6), "source": "osm"}
                     n_ok += 1
             except Exception:
                 pass
         print(f"동 좌표 지오코딩: 신규 {n_ok}/{len(missing)}")
-    elif missing:
-        print(f"동 좌표 미확보 {len(missing)}개 — KAKAO_REST_KEY 있는 환경(CI)에서 자동 보충됩니다.")
 
     DONG_LOC_PATH.parent.mkdir(parents=True, exist_ok=True)
     DONG_LOC_PATH.write_text(json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
