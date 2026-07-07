@@ -93,6 +93,8 @@ jobs:
           python collect_villa.py || echo "빌라 수집 일부 실패 — 다음 실행에서 이어받음"
 
       - name: 빌라 동네 분석 (best-effort)
+        env:
+          KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
         run: |
           python src/villa_analysis.py || echo "빌라 분석 실패 — 기존 villa.json 유지"
 

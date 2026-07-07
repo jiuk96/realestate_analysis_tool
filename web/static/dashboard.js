@@ -3047,6 +3047,56 @@ const VILLA_AXES = [
 ];
 let _villaData = null;
 let _villaDist = '전체';
+let _villaMap = null;
+let _villaMarkers = [];
+
+/* 동네 지도: 원 크기=거래량, 색=종합점수, 빨간 테두리=깡통 위험. 필터와 연동 */
+function renderVillaMap(rows) {
+  const el = document.getElementById('villaMap');
+  if (!el || typeof L === 'undefined') return;
+  try {
+    if (!_villaMap) {
+      _villaMap = L.map('villaMap', { center: [37.552, 126.99], zoom: 11 });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors', maxZoom: 18,
+      }).addTo(_villaMap);
+      addWorkMarkers(_villaMap);   // 💼/💗 두 직장 항상 표시
+    }
+    _villaMarkers.forEach(m => _villaMap.removeLayer(m));
+    _villaMarkers = [];
+
+    const pts = [];
+    rows.forEach(d => {
+      if (d.lat == null || d.lng == null) return;
+      const sc = d.total ?? 0;
+      const fill = sc >= 70 ? '#03a552' : sc >= 50 ? '#f59e0b' : '#94a3b8';
+      const r = Math.max(7, Math.min(22, 6 + Math.sqrt(d.n_trades_12m || 0) * 0.55));
+      const m = L.circleMarker([d.lat, d.lng], {
+        radius: r, fillColor: fill, fillOpacity: 0.55, weight: d.jeonse_danger ? 3 : 1.5,
+        color: d.jeonse_danger ? '#e5484d' : '#ffffff',
+      }).addTo(_villaMap);
+      m.bindPopup(`<b>${d.district} ${d.dong}</b> · ${(d.total ?? 0).toFixed(0)}점<br>
+        중위 ${d.median_amount_eok}억 (${d.median_area}㎡) · 12개월 ${d.n_trades_12m}건<br>
+        ${d.jeonse_ratio != null ? `전세가율 ${(d.jeonse_ratio * 100).toFixed(0)}%${d.jeonse_danger ? ' ⚠️' : ''}<br>` : ''}
+        <a href="#" class="vl-popup-link" data-key="${d.district}|${encodeURIComponent(d.dong)}">아래 카드에서 자세히 ↓</a>`);
+      m.on('popupopen', e => {
+        e.popup.getElement()?.querySelector('.vl-popup-link')?.addEventListener('click', ev => {
+          ev.preventDefault();
+          const card = document.querySelector(`.vl-card[data-key="${ev.target.dataset.key}"]`);
+          if (card) {
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            card.classList.add('vl-flash');
+            setTimeout(() => card.classList.remove('vl-flash'), 1600);
+          }
+        });
+      });
+      _villaMarkers.push(m);
+      pts.push([d.lat, d.lng]);
+    });
+    if (pts.length && _villaDist !== '전체') _villaMap.fitBounds(L.latLngBounds(pts).pad(0.2));
+    else if (pts.length) _villaMap.setView([37.552, 126.99], 11);
+  } catch (e) { console.error('villaMap', e); el.style.display = 'none'; }
+}
 
 function villaCard(d) {
   const sc = d.total ?? 0;
@@ -3072,7 +3122,7 @@ function villaCard(d) {
     `<tr><td>${t.ym.slice(0, 4)}.${t.ym.slice(4)}</td><td>${t.name || '—'}</td><td>${t.area}㎡${t.floor != null ? ` · ${t.floor}층` : ''}</td><td>${t.build_year || '—'}년</td><td><b>${t.amount}억</b></td></tr>`).join('');
 
   return `
-  <div class="vl-card">
+  <div class="vl-card" data-key="${d.district}|${encodeURIComponent(d.dong)}">
     <div class="vl-head">
       <span class="vl-rank">${d.rank}</span>
       <div class="vl-title">
@@ -3118,6 +3168,7 @@ function renderVillaList() {
     `기준 ${d.period_12m.replace('~', ' ~ ')} · 표본 충분 동네 ${d.n_dongs}개 중 ${rows.length}개 표시 · 실거래 ${d.n_trades_used.toLocaleString()}건 사용`;
   list.innerHTML = rows.map(villaCard).join('') ||
     `<div class="sub-note">조건에 맞는 동네가 없습니다 — 예산 상한이나 구 필터를 풀어보세요.</div>`;
+  renderVillaMap(rows);
 }
 
 async function renderVilla() {

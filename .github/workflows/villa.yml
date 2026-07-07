@@ -33,13 +33,15 @@ jobs:
         run: python collect_villa.py
 
       - name: 빌라 동네 분석
+        env:
+          KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
         run: python src/villa_analysis.py || echo "표본 부족 — 수집을 더 채운 뒤 재실행"
 
       - name: 커밋·푸시
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/villa_trade data/villa_rent data/processed/villa.json 2>/dev/null || true
+          git add data/villa_trade data/villa_rent data/processed/villa.json data/static/dong_locations.json 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "변경 없음 — 스킵"
           else

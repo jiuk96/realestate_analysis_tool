@@ -118,6 +118,58 @@ def _apt_ppm2_by_district() -> dict:
     return {d: float(np.median(v)) for d, v in vals.items() if v}
 
 
+DONG_LOC_PATH = ROOT / "data" / "static" / "dong_locations.json"
+
+
+def _dong_locations(keys: list) -> dict:
+    """동 중심 좌표: ① 캐시 → ② 분석 아파트 좌표의 동별 평균 → ③ Kakao 주소검색.
+    Kakao는 KAKAO_REST_KEY가 있을 때만(CI) 시도하고 결과는 캐시에 누적한다."""
+    cache = {}
+    if DONG_LOC_PATH.exists():
+        cache = json.loads(DONG_LOC_PATH.read_text(encoding="utf-8"))
+
+    # 아파트 좌표 fallback (동별 평균)
+    apt_path = ROOT / "data" / "static" / "apt_locations.json"
+    if apt_path.exists():
+        acc: dict = {}
+        for k, v in json.loads(apt_path.read_text(encoding="utf-8")).items():
+            if v.get("dong") and v.get("lat"):
+                acc.setdefault(f"{k.split('|')[0]}|{v['dong']}", []).append((v["lat"], v["lng"]))
+        for k, pts in acc.items():
+            cache.setdefault(k, {
+                "lat": round(sum(p[0] for p in pts) / len(pts), 6),
+                "lng": round(sum(p[1] for p in pts) / len(pts), 6),
+                "source": "apt_avg",
+            })
+
+    kakao = os.environ.get("KAKAO_REST_KEY", "").strip()
+    missing = [k for k in keys if k not in cache]
+    if kakao and missing:
+        import requests
+        n_ok = 0
+        for k in missing:
+            gu, dong = k.split("|", 1)
+            try:
+                r = requests.get(
+                    "https://dapi.kakao.com/v2/local/search/address.json",
+                    params={"query": f"서울특별시 {gu} {dong}"},
+                    headers={"Authorization": f"KakaoAK {kakao}"}, timeout=10)
+                docs = r.json().get("documents", [])
+                if docs:
+                    cache[k] = {"lat": round(float(docs[0]["y"]), 6),
+                                "lng": round(float(docs[0]["x"]), 6), "source": "kakao"}
+                    n_ok += 1
+            except Exception:
+                pass
+        print(f"동 좌표 지오코딩: 신규 {n_ok}/{len(missing)}")
+    elif missing:
+        print(f"동 좌표 미확보 {len(missing)}개 — KAKAO_REST_KEY 있는 환경(CI)에서 자동 보충됩니다.")
+
+    DONG_LOC_PATH.parent.mkdir(parents=True, exist_ok=True)
+    DONG_LOC_PATH.write_text(json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
+    return cache
+
+
 def _pct_rank(s: pd.Series, invert: bool = False) -> pd.Series:
     r = s.rank(pct=True) * 100
     return (100 - r) if invert else r
@@ -232,6 +284,11 @@ def main() -> int:
     df["total"] = df.apply(_total, axis=1)
     df = df.sort_values("total", ascending=False).reset_index(drop=True)
     df["rank"] = df.index + 1
+
+    # 지도용 동 중심 좌표
+    locs = _dong_locations([f"{r.district}|{r.dong}" for r in df.itertuples()])
+    df["lat"] = [locs.get(f"{r.district}|{r.dong}", {}).get("lat") for r in df.itertuples()]
+    df["lng"] = [locs.get(f"{r.district}|{r.dong}", {}).get("lng") for r in df.itertuples()]
 
     out = {
         "updated": date.today().isoformat(),

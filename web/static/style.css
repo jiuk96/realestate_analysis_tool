@@ -1231,6 +1231,10 @@ details.budget-fold .legal-hint { font-weight: 500; }
 #subShareUrl { flex: 1; min-width: 180px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: .55rem .7rem; font-size: .78rem; color: var(--text2); }
 
 /* ── 빌라 동네 분석 ─────────────────────────────── */
+.villa-map { height: 440px; border-radius: 14px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: .8rem; z-index: 1; }
+@media (max-width: 720px) { .villa-map { height: 320px; } }
+.vl-flash { outline: 3px solid var(--accent); outline-offset: 2px; transition: outline-color 1.2s; }
+.vl-popup-link { color: var(--acc2); font-weight: 700; }
 .villa-controls { display: flex; flex-direction: column; gap: .7rem; margin-bottom: .9rem; }
 .villa-control-row { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; }
 .villa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1rem; margin-top: .7rem; }
