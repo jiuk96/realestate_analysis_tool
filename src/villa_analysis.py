@@ -155,7 +155,7 @@ def main() -> int:
         gt = g[g["ym"].isin(trend_yms)]
         monthly = gt.groupby("ym")["ppm2"].median()
         trend_pct = None
-        if len(monthly) >= 12:
+        if len(monthly) >= 18:   # 월별 중앙값 18개 미만이면 구성효과 왜곡이 커 추세 미산출
             x = np.arange(len(monthly), dtype=float)
             slope = _theil_sen_slope(x, monthly.values)          # 만원/㎡ per month
             base = float(np.median(monthly.values))
@@ -242,7 +242,9 @@ def main() -> int:
         "jr_danger": JR_DANGER,
         "caveat": "동네(법정동) 단위 통계입니다. 같은 동 안에서도 개별 빌라의 위반건축물·주차·근저당·채광은 "
                   "데이터에 없으므로, 후보 동네 선정까지만 참고하고 개별 매물은 등기부등본·건축물대장 확인이 필수입니다.",
-        "dongs": df.where(pd.notna(df), None).to_dict(orient="records"),
+        # ⚠️ df.where(notna, None)는 float 컬럼에서 None이 도로 NaN으로 강제된다 —
+        # NaN이 JSON에 그대로 실리면 브라우저 JSON.parse가 깨지므로 to_json 경유(NaN→null)로 변환.
+        "dongs": json.loads(df.to_json(orient="records", force_ascii=False)),
     }
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(out, ensure_ascii=False), encoding="utf-8")
