@@ -3290,8 +3290,52 @@ function renderSubscription() {
   `;
 }
 
+/* 기기 간 공유: 프로필을 URL-safe base64로 링크에 담아 전달.
+   상대 기기에서 ?sync=… 로 열면 localStorage에 이관 후 URL을 정리한다. */
+function subEncodeShare(obj) {
+  return btoa(unescape(encodeURIComponent(JSON.stringify(obj))))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function subDecodeShare(s) {
+  const b64 = s.replace(/-/g, '+').replace(/_/g, '/');
+  return JSON.parse(decodeURIComponent(escape(atob(b64))));
+}
+
 async function initSubscription() {
   if (!document.getElementById('subRankCard')) return;
+
+  // 공유 링크로 진입한 경우: 담겨온 두 사람 프로필을 먼저 저장
+  try {
+    const sync = new URLSearchParams(location.search).get('sync');
+    if (sync) {
+      const obj = subDecodeShare(sync);
+      if (obj && (obj.A || obj.B)) {
+        localStorage.setItem('subProfiles_v2', JSON.stringify({ person: obj.person === 'B' ? 'B' : 'A', A: obj.A || null, B: obj.B || null }));
+      }
+      history.replaceState(null, '', location.pathname);   // 주소창에서 개인정보 제거
+    }
+  } catch (e) { /* 잘못된 링크 — 무시하고 기존 저장분 사용 */ }
+
+  // 공유 링크 생성 버튼
+  const shareBtn = document.getElementById('subShareBtn');
+  if (shareBtn) shareBtn.addEventListener('click', async () => {
+    subSave();
+    const url = `${location.origin}/subscription?sync=${subEncodeShare({ person: subPerson, A: subProfiles.A, B: subProfiles.B })}`;
+    const urlEl = document.getElementById('subShareUrl');
+    urlEl.value = url;
+    document.getElementById('subShareCopy').style.display = '';
+    document.getElementById('subShareFoot').style.display = '';
+    try { await navigator.clipboard.writeText(url); shareBtn.textContent = '복사됨 ✓'; }
+    catch (e) { urlEl.select(); shareBtn.textContent = '길게 눌러 복사'; }
+    setTimeout(() => { shareBtn.textContent = '공유 링크 만들기'; }, 2500);
+  });
+  const copyBtn = document.getElementById('subShareCopy');
+  if (copyBtn) copyBtn.addEventListener('click', async () => {
+    const urlEl = document.getElementById('subShareUrl');
+    try { await navigator.clipboard.writeText(urlEl.value); copyBtn.textContent = '✓'; }
+    catch (e) { urlEl.select(); }
+    setTimeout(() => { copyBtn.textContent = '복사'; }, 2000);
+  });
 
   // 폼 기본값 스냅샷 — 아직 입력하지 않은 사람을 열 때 사용
   subDefaultSnap = subSnapshot();

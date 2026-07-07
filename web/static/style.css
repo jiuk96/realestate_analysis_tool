@@ -1224,6 +1224,11 @@ details.budget-fold .legal-hint { font-weight: 500; }
 .slk-link:hover { background: var(--acc2); color: #fff; }
 .slk-inline { color: var(--acc2); font-weight: 700; text-decoration: none; font-size: .78rem; }
 .slk-body { font-size: .78rem; color: var(--text2); line-height: 1.6; }
+
+/* 청약 — 기기 간 공유 */
+.sub-share-row { display: flex; gap: .5rem; align-items: center; margin-top: .6rem; flex-wrap: wrap; }
+.sub-share-row .price-apply { white-space: nowrap; }
+#subShareUrl { flex: 1; min-width: 180px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: .55rem .7rem; font-size: .78rem; color: var(--text2); }
 .couple-box-wide { margin-bottom: 1.1rem; }
 .couple-badge { background: rgba(52,211,153,.15); color: #34d399; font-size: .68rem; padding: .15rem .5rem; border-radius: 999px; margin-left: .4rem; font-weight: 600; }
 .commute-preset { color: #4a5563; font-size: .8rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: .4rem .7rem; }

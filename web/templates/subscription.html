@@ -66,6 +66,23 @@
       특별공급 당첨은 <b>세대 기준 평생 1회</b>이므로, 더 유리한 쪽 명의로 신청하는 게 전략입니다.
     </div>
 
+    <!-- 📲 기기 간 공유: 조건을 링크에 담아 상대 폰으로 -->
+    <details class="budget-card budget-fold" id="subShareFold" style="margin-bottom:1.1rem">
+      <summary>📲 두 기기 간 공유 — 내 폰의 입력값을 상대 폰으로 보내기</summary>
+      <div>
+        <div class="sub-note">저장은 각자 브라우저에만 남습니다. 아래 버튼으로 <b>공유 링크</b>를 만들어 카톡 등으로 보내면,
+          상대 폰에서 여는 순간 두 사람 조건이 그대로 들어와 이어서 쓸 수 있습니다.</div>
+        <div class="sub-share-row">
+          <button class="price-apply" id="subShareBtn">공유 링크 만들기</button>
+          <input type="text" id="subShareUrl" readonly placeholder="버튼을 누르면 링크가 생성됩니다">
+          <button class="commute-preset" id="subShareCopy" style="display:none">복사</button>
+        </div>
+        <div class="sub-foot" id="subShareFoot" style="display:none">
+          ✅ 링크가 생성됐습니다 — 복사해서 보내세요. 링크에는 입력한 조건(소득 등)이 담겨 있으니 두 사람 외에는 공유하지 마세요.
+          이후 수정한 내용은 다시 링크를 만들어 보내면 갱신됩니다.</div>
+      </div>
+    </details>
+
     <div class="sub-grid">
       <!-- ── 입력 칼럼 ─────────────────────────────── -->
       <div class="sub-inputs">
