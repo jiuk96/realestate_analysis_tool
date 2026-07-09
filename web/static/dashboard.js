@@ -1180,6 +1180,13 @@ function initBudgetPlanner() {
       familyLoanOverrideState[prefix] = parseFloat(slider.value) || 0;
       recalcBudget();
     });
+    // 금액 직접 입력 칸(억) — 슬라이더와 양방향 동기화, 상한(슬라이더 max) 초과분은 잘라낸다
+    const num = document.getElementById(prefix + 'FamilyLoanNum');
+    if (num) num.addEventListener('input', () => {
+      const won = Math.max(0, (parseFloat(num.value) || 0) * 1e8);
+      familyLoanOverrideState[prefix] = Math.min(won, parseFloat(slider.max) || 0);
+      recalcBudget();
+    });
   });
 
   // ── 매매/전세 모드 토글 ──
@@ -1422,7 +1429,10 @@ function recalcBudget() {
       ? `그 외 증여 ${won2eok(S.extraGift)} → 세금 <b>${won2man(P.giftDetail.tax)}</b>`
       : `공제 범위 내 → 증여세 <b>0원</b>`;
 
-    if (valEl && slider) valEl.textContent = `${won2eok(S.familyLoan)} / ${won2eok(Math.max(0, Math.round(slider.max)))}`;
+    if (valEl && slider) valEl.textContent = `/ 최대 ${won2eok(Math.max(0, Math.round(slider.max)))}`;
+    // 직접 입력 칸도 현재 반영값으로 동기화 — 단, 사용자가 입력 중일 땐 건드리지 않는다
+    const numEl = document.getElementById(prefix + 'FamilyLoanNum');
+    if (numEl && document.activeElement !== numEl) numEl.value = (S.familyLoan / 1e8).toFixed(2).replace(/\.?0+$/, '') || '0';
     conclusionEl.innerHTML = conclusion;
   };
   renderParentCompact('a', R.A);

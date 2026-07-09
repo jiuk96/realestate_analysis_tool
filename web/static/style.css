@@ -1230,6 +1230,12 @@ details.budget-fold .legal-hint { font-weight: 500; }
 .sub-share-row .price-apply { white-space: nowrap; }
 #subShareUrl { flex: 1; min-width: 180px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: .55rem .7rem; font-size: .78rem; color: var(--text2); }
 
+/* 무이자 차용 금액 직접 입력 칸 */
+.pc-loan-num-wrap { display: inline-flex; align-items: center; gap: .2rem; flex-shrink: 0; }
+.pc-loan-num { width: 62px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: .3rem .4rem; font-size: .82rem; text-align: right; font-variant-numeric: tabular-nums; color: var(--text); }
+.pc-loan-num:focus { border-color: var(--acc2); outline: none; }
+.pc-loan-num-wrap small { color: var(--text3); font-size: .75rem; }
+
 /* ── 단지 실제 이야기 해시태그 ─────────────────── */
 .rv-tags { display: flex; flex-wrap: wrap; gap: .45rem; }
 .rv-tag { display: inline-flex; align-items: center; gap: .3rem; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: .3rem .75rem; font-size: .82rem; font-weight: 700; color: var(--acc2); text-decoration: none; }
