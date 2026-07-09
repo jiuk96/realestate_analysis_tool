@@ -1215,6 +1215,7 @@ function initBudgetPlanner() {
   document.querySelectorAll('#budgetModeToggle .legend-mode-btn').forEach(btn =>
     btn.addEventListener('click', () => applyBudgetMode(btn.dataset.mode)));
   applyBudgetMode(localStorage.getItem('budgetMode_v1') || 'buy', true);
+  initGiftView();
 
   renderLegalAccordion();
   renderReferences();
@@ -1500,6 +1501,98 @@ function recalcBudget() {
   renderFundFlow(R);
   renderRepayDetail(R);
   renderJeonseBudget(R);   // 전세 모드 결과 (항상 계산, 모드에 따라 표시만)
+  lastBudgetR = R;          // 부모님용 설명 화면에서 재사용
+  if (document.getElementById('giftViewOverlay')?.style.display !== 'none') renderGiftView(gvPerson);
+}
+
+/* ── 👨‍👩‍👧 부모님께 보여드리는 증여·차용 쉬운 설명 화면 ──────
+   예산 계산 결과(R)를 그대로 써서, 지원금이 어떻게 나뉘고 세금·월 상환이
+   얼마인지 큰 글씨 도식으로 보여준다. 인쇄(저장)도 지원. */
+let lastBudgetR = null;
+let gvPerson = 'a';
+
+function renderGiftView(p) {
+  const body = document.getElementById('gvBody');
+  if (!body || !lastBudgetR) return;
+  gvPerson = p;
+  const P = lastBudgetR[p === 'a' ? 'A' : 'B'];
+  const years = parseInt(document.getElementById('familyYears')?.value) || 10;
+  const S = P.parentSplit;
+  const who = p === 'a' ? '아들' : '딸';
+
+  if (!S || P.parentTotal <= 0) {
+    body.innerHTML = `<div class="gv-hero">이쪽 부모님 지원 금액이 0원으로 설정되어 있습니다 — 예산 화면에서 금액을 입력하면 여기에 설명이 나타납니다.</div>`;
+    return;
+  }
+  const tax = S.extraGift > 0 ? P.giftDetail.tax : 0;
+
+  const part = (icon, title, amount, note, cls) => `
+    <div class="gv-part ${cls || ''}">
+      <div class="gv-part-head"><span class="gv-part-icon">${icon}</span><span class="gv-part-title">${title}</span></div>
+      <div class="gv-part-amt">${won2eok(amount)}</div>
+      <div class="gv-part-note">${note}</div>
+    </div>`;
+
+  const parts = [];
+  if (S.basicGift > 0) parts.push(part('🎁', '그냥 주시는 돈 ① 기본 공제', S.basicGift,
+    `<b>세금 0원</b> — 부모가 성인 자녀에게 10년 동안 5천만원까지는 세금 없이 줄 수 있습니다.`));
+  if (S.bonusGift > 0) parts.push(part('💒', '그냥 주시는 돈 ② 결혼 공제', S.bonusGift,
+    `<b>세금 0원</b> — 혼인신고 전후 2년 안에 주시면 1억까지 추가로 비과세입니다 (2024년 신설).`));
+  if (S.familyLoan > 0) parts.push(part('🤝', '빌려주시는 돈 (차용증 작성)', S.familyLoan,
+    `<b>세금 0원</b> — 증여가 아니라 빚이라서 세금이 없습니다. 대신 ${who}이(가) 부모님께
+     <b>매달 ${won2man(P.familyMonthly)}씩 ${years}년</b> 동안 실제로 갚습니다 (계좌이체 기록 유지).`));
+  if (S.extraGift > 0) parts.push(part('📋', '그 외 증여 (과세)', S.extraGift,
+    `공제 한도를 넘는 부분이라 증여세 <b>${won2man(P.giftDetail.tax)}</b>이 나옵니다.
+     계산: 과세표준 ${won2eok(P.giftDetail.taxable)} × ${(P.giftDetail.rate * 100).toFixed(0)}% − 누진공제, 자진신고 3% 할인 적용.`, 'gv-taxed'));
+
+  body.innerHTML = `
+    <div class="gv-hero">
+      부모님이 도와주시는 돈 <b class="gv-hero-amt">${won2eok(P.parentTotal)}</b><br>
+      <span class="gv-hero-sub">아래처럼 나누면 증여세가 ${tax > 0 ? `<b>${won2man(tax)}</b>로 최소화됩니다` : '<b>0원</b>입니다'}</span>
+    </div>
+
+    <div class="gv-flow">
+      <div class="gv-src">👪<br>부모님 지원<br><b>${won2eok(P.parentTotal)}</b></div>
+      <div class="gv-arrow">➜</div>
+      <div class="gv-parts">${parts.join('')}</div>
+    </div>
+
+    <div class="gv-summary">
+      <div class="gv-stat"><span class="gv-sk">내야 하는 증여세</span><span class="gv-sv" style="color:${tax > 0 ? 'var(--red)' : 'var(--green)'}">${tax > 0 ? won2man(tax) : '0원'}</span></div>
+      <div class="gv-stat"><span class="gv-sk">매달 부모님께 갚는 돈</span><span class="gv-sv">${won2man(P.familyMonthly)}</span></div>
+      <div class="gv-stat"><span class="gv-sk">갚는 기간</span><span class="gv-sv">${S.familyLoan > 0 ? years + '년' : '—'}</span></div>
+    </div>
+
+    <div class="gv-notes">
+      <div class="gv-note">📝 <b>차용증은 꼭 씁니다</b> — 금액·이자·상환 기간을 적고 공증(또는 내용증명·확정일자)을 받아두면 국세청 소명이 쉽습니다.</div>
+      <div class="gv-note">🏦 <b>상환은 반드시 계좌이체로</b> — 매달 ${won2man(P.familyMonthly)}이 ${who} 통장에서 부모님 통장으로 자동이체되는 기록이 곧 증거입니다.</div>
+      <div class="gv-note">⚖️ <b>무이자가 허용되는 이유</b> — 세법상 적정이자(연 4.6%)와의 차이가 연 1,000만원 미만이면 증여로 보지 않습니다. 빌리는 돈 ${won2eok(S.familyLoan)}은 이 범위 안입니다.</div>
+      <div class="gv-note">👨‍💼 실행 전에 세무사 상담 한 번(10~20만원)을 권장드립니다 — 이 화면은 일반 규정 기준의 계산입니다.</div>
+    </div>`;
+}
+
+function initGiftView() {
+  const overlay = document.getElementById('giftViewOverlay');
+  const openBtn = document.getElementById('giftViewOpen');
+  if (!overlay || !openBtn) return;
+  document.body.appendChild(overlay);   // 인쇄 시 오버레이만 남기기 위해 body 직속으로 이동
+
+  openBtn.addEventListener('click', () => {
+    overlay.style.display = '';
+    document.body.classList.add('gift-open');
+    renderGiftView(gvPerson);
+  });
+  document.getElementById('gvClose').addEventListener('click', () => {
+    overlay.style.display = 'none';
+    document.body.classList.remove('gift-open');
+  });
+  document.getElementById('gvPrint').addEventListener('click', () => window.print());
+  document.querySelectorAll('#gvPersonToggle .legend-mode-btn').forEach(b =>
+    b.addEventListener('click', () => {
+      document.querySelectorAll('#gvPersonToggle .legend-mode-btn').forEach(x =>
+        x.classList.toggle('active', x === b));
+      renderGiftView(b.dataset.p);
+    }));
 }
 
 /* ── 🔑 전세 자금 계획 — 매매와 분리된 비용 체계 ─────────────

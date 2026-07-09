@@ -173,6 +173,27 @@
       <div id="parentDetail" class="parent-detail"></div>
     </details>
 
+    <!-- 부모님께 보여드리는 쉬운 설명 화면 -->
+    <button class="price-apply" id="giftViewOpen" style="margin-top:1rem;width:100%">
+      👨‍👩‍👧 부모님께 보여드리기 — 증여·차용 쉬운 설명 화면 열기
+    </button>
+
+    <div id="giftViewOverlay" class="gift-overlay" style="display:none">
+      <div class="gift-inner">
+        <div class="gift-top">
+          <div class="legend-mode-toggle" id="gvPersonToggle">
+            <button class="legend-mode-btn active" data-p="a">💼 나의 부모님</button>
+            <button class="legend-mode-btn" data-p="b">💗 여자친구의 부모님</button>
+          </div>
+          <div class="gift-top-btns">
+            <button class="commute-preset" id="gvPrint">🖨️ 인쇄·저장</button>
+            <button class="commute-preset" id="gvClose">✕ 닫기</button>
+          </div>
+        </div>
+        <div id="gvBody"></div>
+      </div>
+    </div>
+
     <!-- 자금 구성 차트 + 부대비용 상세 -->
     <div class="budget-detail-grid" data-bmode="buy">
       <div class="budget-card">
