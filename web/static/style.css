@@ -1230,6 +1230,12 @@ details.budget-fold .legal-hint { font-weight: 500; }
 .sub-share-row .price-apply { white-space: nowrap; }
 #subShareUrl { flex: 1; min-width: 180px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: .55rem .7rem; font-size: .78rem; color: var(--text2); }
 
+/* ── 단지 실제 이야기 해시태그 ─────────────────── */
+.rv-tags { display: flex; flex-wrap: wrap; gap: .45rem; }
+.rv-tag { display: inline-flex; align-items: center; gap: .3rem; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: .3rem .75rem; font-size: .82rem; font-weight: 700; color: var(--acc2); text-decoration: none; }
+.rv-tag small { color: var(--text3); font-weight: 600; font-size: .7rem; }
+.rv-tag:hover { border-color: var(--acc2); background: rgba(108,140,245,.07); }
+
 /* ── 빌라 동네 분석 ─────────────────────────────── */
 .villa-map { height: 440px; border-radius: 14px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: .8rem; z-index: 1; }
 @media (max-width: 720px) { .villa-map { height: 320px; } }

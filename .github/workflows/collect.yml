@@ -98,6 +98,13 @@ jobs:
         run: |
           python src/villa_analysis.py || echo "빌라 분석 실패 — 기존 villa.json 유지"
 
+      - name: 단지 실제 이야기 해시태그 수집 (네이버 검색 API, best-effort)
+        env:
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+        run: |
+          python collect_reviews.py || echo "리뷰 태그 수집 실패 — 기존 apt_reviews.json 유지"
+
       - name: 서울 분양(청약) 공고 수집 (best-effort)
         env:
           APPLY_HOME_API_KEY: ${{ secrets.APPLY_HOME_API_KEY }}

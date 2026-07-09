@@ -2194,6 +2194,34 @@ async function ensureJeonseData() {
   return ranking;
 }
 
+/* ── 💬 단지별 실제 이야기 해시태그 (네이버 블로그·카페 언급 빈도) ──
+   collect_reviews.py 산출 apt_reviews.json. 없으면 아무것도 그리지 않는다.
+   태그 클릭 시 해당 키워드의 네이버 검색 결과로 이동해 원문을 볼 수 있다. */
+let _reviewsAll = null;
+async function ensureReviews() {
+  if (_reviewsAll) return _reviewsAll;
+  try { _reviewsAll = (await (await fetch('/api/reviews')).json()).apartments || {}; }
+  catch (e) { _reviewsAll = {}; }
+  return _reviewsAll;
+}
+async function fillReviewTags(elId, district, aptName) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const all = await ensureReviews();
+  const r = all[`${district}|${aptName}`];
+  if (!r || !r.tags || !r.tags.length) { el.innerHTML = ''; return; }
+  const chips = r.tags.map(([tag, cnt]) => {
+    const q = encodeURIComponent(`${district} ${aptName} ${tag}`);
+    return `<a class="rv-tag" href="https://search.naver.com/search.naver?query=${q}" target="_blank" rel="noopener">#${tag}<small>${cnt}</small></a>`;
+  }).join('');
+  el.innerHTML = `
+    <div class="jz-axis-group-t" style="margin-top:1.2rem">💬 이 단지의 실제 이야기</div>
+    <div class="rv-tags">${chips}</div>
+    <div class="sub-foot" style="border-top:none;margin-top:.3rem">
+      네이버 블로그·카페 검색 상위 ${r.n_posts}건에서 언급 빈도로 자동 요약한 태그입니다 (숫자 = 언급 글 수).
+      광고·중개 글이 섞일 수 있으니 참고용으로만 보고, 태그를 누르면 원문 검색으로 이동합니다.</div>`;
+}
+
 async function openJeonseModal(district, aptName) {
   const overlay = document.getElementById('aptModalOverlay');
   const body = document.getElementById('aptModalBody');
@@ -2253,6 +2281,8 @@ async function openJeonseModal(district, aptName) {
     <div class="jz-axis-group-t" style="margin-top:1.2rem">💰 가격 합리성 세부 6지표</div>
     <div class="top1-axes">${axGroup(JEONSE_AXIS_META, m => a[JEONSE_AX_KEY[m.key]])}</div>
 
+    <div id="jzReviewTags"></div>
+
     <div id="jzModalTransit"></div>
 
     <p class="explorer-note" style="margin-top:1rem">
@@ -2261,6 +2291,7 @@ async function openJeonseModal(district, aptName) {
     </p>`;
 
   fillCommuteTransit('jzModalTransit', a);
+  fillReviewTags('jzReviewTags', district, aptName);
   window.JeonseSafety?.renderCard('jzSafety', a);   // 🛡️ 전세 안전성 (additive 모듈, 없으면 무시)
   document.getElementById('jzToBuyView')?.addEventListener('click', (e) => {
     e.preventDefault();
@@ -2297,6 +2328,12 @@ async function openApartmentModal(district, aptName) {
     badgeHtml: `📍 ${apt.district} 내 ${localRank || '—'}위`,
     extraInsight: [`<li>${apt.district} 내 ${sameDistrictRanked.length}개 분석 단지 중 ${localRank}위입니다</li>`],
   });
+
+  // 💬 실제 이야기 해시태그 — 상세 렌더 뒤에 섹션을 덧붙인다 (데이터 없으면 빈 채로 남음)
+  const rvBox = document.createElement('div');
+  rvBox.id = 'aptModalReviewTags';
+  body.appendChild(rvBox);
+  fillReviewTags('aptModalReviewTags', district, aptName);
 }
 
 function closeApartmentModal() {

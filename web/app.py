@@ -118,6 +118,15 @@ def api_jeonse_safety():
         return jsonify({})
 
 
+@app.route("/api/reviews")
+def api_reviews():
+    """단지별 실제 이야기 해시태그 (collect_reviews.py, 네이버 검색 API). 없으면 빈 dict."""
+    try:
+        return jsonify(_load("apt_reviews.json"))
+    except FileNotFoundError:
+        return jsonify({})
+
+
 @app.route("/api/villa")
 def api_villa():
     """빌라(연립·다세대) 동네 단위 분석 (src/villa_analysis.py 산출). 없으면 빈 dict."""

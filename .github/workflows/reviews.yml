@@ -1,0 +1,44 @@
+name: 단지 이야기 해시태그 수집 (단독 실행)
+
+on:
+  workflow_dispatch:        # 수동 실행 (버튼 클릭)
+  schedule:
+    - cron: '0 21 * * 0'   # 매주 일요일 오전 6시 (KST) — 커뮤니티 이야기는 주 1회면 충분
+
+jobs:
+  reviews:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GIT_TOKEN }}
+
+      - name: Python 설정
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 패키지 설치 (requests만)
+        run: pip install requests
+
+      - name: 해시태그 수집 (네이버 블로그·카페 검색)
+        env:
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+        run: python collect_reviews.py
+
+      - name: 커밋·푸시
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/processed/apt_reviews.json
+          if git diff --staged --quiet; then
+            echo "변경 없음 — 스킵"
+          else
+            git commit -m "data: 단지 이야기 해시태그 갱신 $(date +'%Y-%m-%d') KST"
+            git push
+            echo "✅ 푸시 완료"
+          fi
