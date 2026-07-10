@@ -2231,6 +2231,7 @@ function showAptDetail(a) {
       <a class="ep-hogang" href="${hogangnonoUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener">호갱노노 ↗</a>
     </div>
     <div id="epTransit"></div>
+    <div id="epReviewTags"></div>
     <div class="ep-trades">
       <div class="ep-trades-head">
         📋 실거래 내역 <span class="ep-trades-note">국토부 raw data</span>
@@ -2241,6 +2242,7 @@ function showAptDetail(a) {
 
   if (detailPanel) detailPanel.style.display = 'block';
   fillCommuteTransit('epTransit', a);   // 🚇 우리 회사 가는 길 (비동기)
+  fillReviewTags('epReviewTags', a.district, a.apt_name);   // 💬 실제 이야기 해시태그
   document.getElementById('epBack').addEventListener('click', () => {
     if (detailPanel) detailPanel.style.display = 'none';
     else showAptList();
