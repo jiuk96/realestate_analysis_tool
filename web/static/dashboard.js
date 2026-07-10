@@ -828,6 +828,7 @@ function renderApartmentDetail(containerId, radarId, priceChartId, apt, mddInfo,
           ? `<div class="conf-badge conf-high">✓ 데이터 충분 (관측 ${apt.active_months}개월 · 거래 ${apt.total_trades}건)</div>`
           : ''}
       <div class="top1-score-big">${fmtScore(apt.composite_score)}<span class="top1-score-unit">점</span></div>
+      <div id="${containerId}RvTags"></div>
       <div class="ep-links" style="justify-content:center;margin-top:.8rem">
         <a class="ep-map" href="${naverMapUrl(apt.district, apt.apt_name, apt.dong, apt.lat, apt.lng)}" target="_blank" rel="noopener">네이버 지도 ↗</a>
         <a class="ep-naver" href="${naverLandUrl(apt.district, apt.apt_name, apt.dong, apt.lat, apt.lng)}" target="_blank" rel="noopener">네이버 부동산 ↗</a>
@@ -915,6 +916,7 @@ function renderApartmentDetail(containerId, radarId, priceChartId, apt, mddInfo,
 
   // 🚇 우리 회사 가는 길 (비동기 — 지하철역 데이터 로드 후 채움)
   fillCommuteTransit(`${containerId}Transit`, apt);
+  fillReviewTags(`${containerId}RvTags`, apt.district, apt.apt_name, true);   // 💬 점수 바로 아래 해시태그
 }
 
 async function renderTop1() {
@@ -2257,6 +2259,7 @@ function showAptDetail(a) {
       <div class="ep-price"><span class="epv" style="color:${a.mdd >= -15 ? '#34d399' : '#f87171'}">${a.mdd != null ? a.mdd.toFixed(1)+'%' : '—'}</span><span class="epk">MDD</span></div>
       <div class="ep-price"><span class="epv">${fmtScore(a.composite_score)}점</span><span class="epk">종합점수</span></div>
     </div>
+    <div id="epReviewTags"></div>
     <div class="ep-tags">
       ${best.map(([n,v]) => `<span class="aptag aptag-good">${n} ${v.toFixed(0)}점</span>`).join('')}
       ${a.nearest_station ? `<span class="aptag">🚇 ${a.nearest_station} ${a.nearest_station_m}m</span>` : ''}
@@ -2277,7 +2280,6 @@ function showAptDetail(a) {
       <a class="ep-hogang" href="${hogangnonoUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener">호갱노노 ↗</a>
     </div>
     <div id="epTransit"></div>
-    <div id="epReviewTags"></div>
     <div class="ep-trades">
       <div class="ep-trades-head">
         📋 실거래 내역 <span class="ep-trades-note">국토부 raw data</span>
@@ -2288,7 +2290,7 @@ function showAptDetail(a) {
 
   if (detailPanel) detailPanel.style.display = 'block';
   fillCommuteTransit('epTransit', a);   // 🚇 우리 회사 가는 길 (비동기)
-  fillReviewTags('epReviewTags', a.district, a.apt_name);   // 💬 실제 이야기 해시태그
+  fillReviewTags('epReviewTags', a.district, a.apt_name, true);   // 💬 점수 바로 아래 해시태그
   document.getElementById('epBack').addEventListener('click', () => {
     if (detailPanel) detailPanel.style.display = 'none';
     else showAptList();
@@ -2355,7 +2357,7 @@ async function ensureReviews() {
   catch (e) { _reviewsAll = {}; }
   return _reviewsAll;
 }
-async function fillReviewTags(elId, district, aptName) {
+async function fillReviewTags(elId, district, aptName, compact = false) {
   const el = document.getElementById(elId);
   if (!el) return;
   const all = await ensureReviews();
@@ -2365,6 +2367,13 @@ async function fillReviewTags(elId, district, aptName) {
     const q = encodeURIComponent(`${district} ${aptName} ${tag}`);
     return `<a class="rv-tag" href="https://search.naver.com/search.naver?query=${q}" target="_blank" rel="noopener">#${tag}<small>${cnt}</small></a>`;
   }).join('');
+  if (compact) {
+    // 점수 바로 아래 배치용: 제목 없이 태그 칩 + 출처 한 줄
+    el.innerHTML = `
+      <div class="rv-tags rv-tags-center">${chips}</div>
+      <div class="rv-src-note">💬 네이버 블로그·카페 ${r.n_posts}건 언급 기반 · 태그 클릭 = 원문 보기</div>`;
+    return;
+  }
   el.innerHTML = `
     <div class="jz-axis-group-t" style="margin-top:1.2rem">💬 이 단지의 실제 이야기</div>
     <div class="rv-tags">${chips}</div>
@@ -2410,6 +2419,7 @@ async function openJeonseModal(district, aptName) {
       <div class="top1-loc">${a.district} · ${a.build_year || '—'}년 준공 · 전용 ${Math.round(a.area_exclusive || 0)}㎡</div>
       <div class="top1-score-big">${(a.fit_total ?? a.jeonse_total).toFixed(1)}<span class="top1-score-unit">점</span></div>
       <div class="top1-loc" style="margin-top:.2rem">우리 맞춤 적합도 (가격 합리성 ${Math.round(a.jeonse_total)}점 포함)</div>
+      <div id="jzReviewTags"></div>
       <div class="ep-links" style="justify-content:center;margin-top:.8rem">
         <a class="ep-map" href="${naverMapUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener">네이버 지도 ↗</a>
         <a class="ep-naver" href="${naverLandUrl(a.district, a.apt_name, a.dong, a.lat, a.lng)}" target="_blank" rel="noopener">네이버 부동산 ↗</a>
@@ -2432,8 +2442,6 @@ async function openJeonseModal(district, aptName) {
     <div class="jz-axis-group-t" style="margin-top:1.2rem">💰 가격 합리성 세부 6지표</div>
     <div class="top1-axes">${axGroup(JEONSE_AXIS_META, m => a[JEONSE_AX_KEY[m.key]])}</div>
 
-    <div id="jzReviewTags"></div>
-
     <div id="jzModalTransit"></div>
 
     <p class="explorer-note" style="margin-top:1rem">
@@ -2442,7 +2450,7 @@ async function openJeonseModal(district, aptName) {
     </p>`;
 
   fillCommuteTransit('jzModalTransit', a);
-  fillReviewTags('jzReviewTags', district, aptName);
+  fillReviewTags('jzReviewTags', district, aptName, true);
   window.JeonseSafety?.renderCard('jzSafety', a);   // 🛡️ 전세 안전성 (additive 모듈, 없으면 무시)
   document.getElementById('jzToBuyView')?.addEventListener('click', (e) => {
     e.preventDefault();
@@ -2480,11 +2488,6 @@ async function openApartmentModal(district, aptName) {
     extraInsight: [`<li>${apt.district} 내 ${sameDistrictRanked.length}개 분석 단지 중 ${localRank}위입니다</li>`],
   });
 
-  // 💬 실제 이야기 해시태그 — 상세 렌더 뒤에 섹션을 덧붙인다 (데이터 없으면 빈 채로 남음)
-  const rvBox = document.createElement('div');
-  rvBox.id = 'aptModalReviewTags';
-  body.appendChild(rvBox);
-  fillReviewTags('aptModalReviewTags', district, aptName);
 }
 
 function closeApartmentModal() {
