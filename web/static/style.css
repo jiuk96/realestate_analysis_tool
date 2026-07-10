@@ -1230,6 +1230,8 @@ details.budget-fold .legal-hint { font-weight: 500; }
 .sub-share-row .price-apply { white-space: nowrap; }
 #subShareUrl { flex: 1; min-width: 180px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: .55rem .7rem; font-size: .78rem; color: var(--text2); }
 
+.rank-chip-n-zero { opacity: .45; }
+
 /* 구별 순위 — 목록 클릭 시 지도 버블 강조 + 상세 버튼 */
 .apt-bubble-focus { transform: scale(1.22); box-shadow: 0 0 0 3px var(--accent), 0 6px 18px rgba(20,40,70,.25) !important; z-index: 1000; animation: bubblePulse 1.2s ease-in-out 2; }
 @keyframes bubblePulse { 50% { transform: scale(1.32); } }

@@ -523,8 +523,28 @@ async function renderDistrictRankings() {
   selectRankDistrict(districts.includes(want) ? want : districts[0]);
 }
 
+// 가격 필터 적용 시 구 칩의 숫자(단지 수)도 필터 통과 개수로 갱신
+function rankFilterPass(a) {
+  if (rankPriceFilter.min <= 0 && rankPriceFilter.max >= 9999) return true;
+  const eok = a.latest_price != null ? a.latest_price / 10000 : null;
+  return eok != null && eok >= rankPriceFilter.min && eok <= rankPriceFilter.max;
+}
+function updateRankChipCounts() {
+  const isAll = rankPriceFilter.min <= 0 && rankPriceFilter.max >= 9999;
+  document.querySelectorAll('#rankDistrictChips .rank-chip').forEach(btn => {
+    const d = btn.dataset.d;
+    const full = rankByDistrict[d] || [];
+    const n = isAll ? full.length : full.filter(rankFilterPass).length;
+    const el = btn.querySelector('.rank-chip-n');
+    if (!el) return;
+    el.textContent = isAll ? full.length : `${n}/${full.length}`;
+    el.classList.toggle('rank-chip-n-zero', !isAll && n === 0);
+  });
+}
+
 function selectRankDistrict(district) {
   rankSelected = district;
+  updateRankChipCounts();
   const full = rankByDistrict[district] || [];
   const isAll = rankPriceFilter.min <= 0 && rankPriceFilter.max >= 9999;
   const list = isAll ? full : full.filter(a => {
