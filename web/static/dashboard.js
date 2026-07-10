@@ -416,6 +416,22 @@ let _rankingRowMap = [];
 // 뿌리고, 옆 패널에 구 소개 + 단지 목록(강점 근거 포함)을 보여준다. 단지를
 // 클릭하면 전체 1위와 같은 상세 점수 모달(openApartmentModal)이 열린다.
 let rankMap = null, rankMarkers = [], rankByDistrict = {}, rankSelected = null;
+let rankMarkerByKey = {};
+
+// 목록에서 고른 단지를 지도에서 강조: 확대 이동 + 버블 하이라이트(겹침 위로 끌어올림)
+function focusRankMarker(a) {
+  if (!(a.lat && a.lng)) return;
+  rankMap.setView([a.lat, a.lng], 16, { animate: true });
+  Object.values(rankMarkerByKey).forEach(m => {
+    m.setZIndexOffset(0);
+    m.getElement()?.querySelector('.apt-bubble')?.classList.remove('apt-bubble-focus');
+  });
+  const m = rankMarkerByKey[`${a.district}|${a.apt_name}`];
+  if (m) {
+    m.setZIndexOffset(1000);   // 돈암동처럼 버블이 겹치는 곳에서 맨 위로
+    m.getElement()?.querySelector('.apt-bubble')?.classList.add('apt-bubble-focus');
+  }
+}
 let rankPriceFilter = { min: 0, max: 9999 };   // 억 단위 (최근 실거래가 기준)
 
 // 가격 필터 바 초기화 공통 헬퍼 — 칩/직접입력을 상태에 반영하고 onChange 호출
@@ -524,6 +540,7 @@ function selectRankDistrict(district) {
   // 지도 마커 교체
   rankMarkers.forEach(m => rankMap.removeLayer(m));
   rankMarkers = [];
+  rankMarkerByKey = {};
   const coordApts = list.filter(a => a.lat && a.lng);
   coordApts.forEach((a, i) => {
     const icon = L.divIcon({
@@ -538,6 +555,7 @@ function selectRankDistrict(district) {
     m.on('click', () => openApartmentModal(a.district, a.apt_name));
     m.addTo(rankMap);
     rankMarkers.push(m);
+    rankMarkerByKey[`${a.district}|${a.apt_name}`] = m;
   });
   if (coordApts.length) {
     rankMap.fitBounds(L.latLngBounds(coordApts.map(a => [a.lat, a.lng])).pad(0.2));
@@ -570,6 +588,7 @@ function selectRankDistrict(district) {
       <div class="rank-apt-right">
         <div class="rank-apt-price">${eokFmt(a.latest_price)}</div>
         <div class="rank-apt-score" style="${i === 0 ? `color:${color}` : ''}">${fmtScore(a.composite_score)}점</div>
+        <button class="rank-apt-detail" data-i="${i}" title="상세 점수 보기">📊 상세</button>
       </div>
     </div>`;
   }).join('');
@@ -583,14 +602,21 @@ function selectRankDistrict(district) {
       ${strengths ? `<div class="rank-dist-strengths">${strengths}</div>` : ''}
     </div>
     <div class="ep-list-head">단지 목록 <span class="ep-list-cnt">${list.length}</span>
-      <span class="rank-list-hint">클릭 → 상세 점수</span></div>
+      <span class="rank-list-hint">클릭 → 지도에서 위치 · 📊 → 상세 점수</span></div>
     <div class="rank-apt-list">${rows || '<div class="explorer-panel-empty">이 가격대의 단지가 없어요.<br>필터를 넓혀보세요 🙂</div>'}</div>
   `;
 
+  // 행 클릭 → 지도에서 위치 강조 (모달이 지도를 가리지 않도록 상세는 📊 버튼으로 분리)
   document.querySelectorAll('.rank-apt-row').forEach(el => {
     el.addEventListener('click', () => {
-      const a = list[+el.dataset.i];
-      if (a.lat && a.lng) rankMap.setView([a.lat, a.lng], 15, { animate: true });
+      focusRankMarker(list[+el.dataset.i]);
+      document.querySelectorAll('.rank-apt-row').forEach(x => x.classList.toggle('active', x === el));
+    });
+  });
+  document.querySelectorAll('.rank-apt-detail').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const a = list[+btn.dataset.i];
       openApartmentModal(a.district, a.apt_name);
     });
   });

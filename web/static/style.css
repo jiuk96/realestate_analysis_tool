@@ -1230,6 +1230,13 @@ details.budget-fold .legal-hint { font-weight: 500; }
 .sub-share-row .price-apply { white-space: nowrap; }
 #subShareUrl { flex: 1; min-width: 180px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: .55rem .7rem; font-size: .78rem; color: var(--text2); }
 
+/* 구별 순위 — 목록 클릭 시 지도 버블 강조 + 상세 버튼 */
+.apt-bubble-focus { transform: scale(1.22); box-shadow: 0 0 0 3px var(--accent), 0 6px 18px rgba(20,40,70,.25) !important; z-index: 1000; animation: bubblePulse 1.2s ease-in-out 2; }
+@keyframes bubblePulse { 50% { transform: scale(1.32); } }
+.rank-apt-detail { margin-top: .25rem; font-size: .68rem; font-weight: 700; color: var(--acc2); background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: .2rem .5rem; cursor: pointer; white-space: nowrap; }
+.rank-apt-detail:hover { border-color: var(--acc2); }
+.rank-apt-row.active { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 10px; }
+
 /* ── 부모님용 증여·차용 설명 화면 ─────────────── */
 .gift-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 3000; overflow-y: auto; padding: 1.6rem 1rem 3rem; }
 .gift-inner { max-width: 780px; margin: 0 auto; }
