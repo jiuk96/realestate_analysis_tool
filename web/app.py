@@ -48,6 +48,7 @@ _PAGES = {
     "districts":       "districts.html",        # 구별 소개
     "budget":          "budget.html",           # 예산 플래너
     "subscription":    "subscription.html",     # 청약 자격 진단
+    "learn":           "learn.html",            # 쉬운 부동산 상식 (재개발·재건축)
     "ai":              "ai.html",               # AI 추천
 }
 

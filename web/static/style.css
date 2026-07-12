@@ -1239,6 +1239,17 @@ details.budget-fold .legal-hint { font-weight: 500; }
 .rank-apt-detail:hover { border-color: var(--acc2); }
 .rank-apt-row.active { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 10px; }
 
+/* ── 쉬운 부동산 상식 (공부방) ─────────────── */
+.learn-steps { display: flex; flex-direction: column; gap: .6rem; margin-top: .6rem; }
+.learn-step { background: var(--bg); border-radius: 12px; padding: .75rem .95rem; display: grid; grid-template-columns: 26px 1fr; grid-template-rows: auto auto; column-gap: .6rem; align-items: center; }
+.learn-step b { font-size: .95rem; }
+.learn-step small { grid-column: 2; font-size: .8rem; color: var(--text2); line-height: 1.6; }
+.ls-n { grid-row: 1 / span 2; width: 24px; height: 24px; border-radius: 50%; background: var(--acc2); color: #fff; font-size: .74rem; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.learn-formula { text-align: center; font-size: 1.15rem; background: var(--bg); border-radius: 12px; padding: 1rem; margin: .6rem 0 .9rem; }
+.learn-formula b { color: var(--accent); }
+.learn-video { position: relative; padding-top: 56.25%; border-radius: 12px; overflow: hidden; margin-top: .7rem; background: #000; }
+.learn-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; }
+
 /* ── 부모님용 증여·차용 설명 화면 ─────────────── */
 .gift-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 3000; overflow-y: auto; padding: 1.6rem 1rem 3rem; }
 .gift-inner { max-width: 780px; margin: 0 auto; }

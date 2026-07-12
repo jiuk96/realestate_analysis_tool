@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% set active_page = 'learn' %}
+{% block title %}쉬운 부동산 상식 · 서울 부동산 분석 툴{% endblock %}
+{% block content %}
+<section class="section section-alt" id="secLearn">
+  <div class="section-inner">
+    <div class="section-label">공부방</div>
+    <h2 class="section-title">재개발·재건축, 아는 만큼 보인다</h2>
+    <p class="section-desc">
+      뉴스와 유튜브에 나오는 말들을 <b>중학생도 이해할 수 있는 말</b>로 풀었습니다.
+      순서대로 읽으면 재개발·재건축 기사 하나를 스스로 해석할 수 있게 되는 것이 목표입니다.
+      모든 용어는 <b>＋</b>를 눌러 펼쳐볼 수 있어요.
+    </p>
+
+    <!-- ① 재개발 vs 재건축 -->
+    <div class="budget-card">
+      <div class="budget-card-title">① 재개발 vs 재건축 — 딱 한 문장 차이</div>
+      <div class="sub-note" style="font-size:.92rem;line-height:1.8">
+        <b>재건축</b> = 아파트가 낡아서 <b>그 아파트만</b> 부수고 새로 짓는 것.<br>
+        <b>재개발</b> = 동네 전체(빌라·단독주택·좁은 골목·상가까지)가 낡아서 <b>동네를 통째로</b> 갈아엎는 것.
+      </div>
+      <table class="sub-table" style="margin-top:.8rem">
+        <tr><th></th><th>재건축</th><th>재개발</th></tr>
+        <tr><td>대상</td><td>낡은 아파트 단지</td><td>낡은 동네 전체 (주로 빌라촌)</td></tr>
+        <tr><td>내가 사야 하는 것</td><td>그 아파트</td><td>그 구역 안의 빌라·주택·땅</td></tr>
+        <tr><td>기반시설(도로·공원)</td><td>이미 있음</td><td>새로 만듦 (그래서 기부채납 많음)</td></tr>
+        <tr><td>세입자 보호</td><td>거의 없음</td><td>있음 (이주대책·임대주택)</td></tr>
+        <tr><td>대표 예시</td><td>은마, 잠실주공5, 성산시영</td><td>한남뉴타운, 성수전략정비구역</td></tr>
+      </table>
+      <div class="sub-foot">우리 사이트의 <b>빌라 동네 분석</b>에서 '아파트 갭'이 큰 동네가 바로 재개발 기대감을 보는 지표이고,
+        매매 점수의 <b>재건축 잠재력 축</b>은 위 재건축 가능성(연식·용적률)을 점수화한 것입니다.</div>
+    </div>
+
+    <!-- ② 절차 타임라인 -->
+    <div class="budget-card" style="margin-top:1rem">
+      <div class="budget-card-title">② 사업은 이 순서로 갑니다 — 보통 10~15년</div>
+      <div class="learn-steps">
+        <div class="learn-step"><span class="ls-n">1</span><b>정비구역 지정</b>
+          <small>시청이 "이 동네 새로 지어도 됨"이라고 도장 찍는 것. 여기서부터 가격이 들썩이기 시작.</small></div>
+        <div class="learn-step"><span class="ls-n">2</span><b>조합 설립</b>
+          <small>집주인들이 회사를 만드는 단계. 주민 75% 동의가 필요해서 여기서 몇 년씩 걸리기도.</small></div>
+        <div class="learn-step"><span class="ls-n">3</span><b>사업시행인가</b>
+          <small>"몇 동, 몇 세대로 짓겠다"는 설계안을 시청이 승인. 사업이 절반쯤 왔다는 신호.</small></div>
+        <div class="learn-step"><span class="ls-n">4</span><b>감정평가 → 분양신청</b>
+          <small>내 낡은 집의 가치를 감정사가 매기고, 조합원들이 새 아파트 평형을 신청.</small></div>
+        <div class="learn-step"><span class="ls-n">5</span><b>관리처분인가</b>
+          <small>"누가 몇 동 몇 호를 받고 얼마를 더 내는지" 최종 정산표 승인. <b>사실상 확정 단계 — 가장 안전한 매수 타이밍이지만 프리미엄도 가장 비쌈.</b></small></div>
+        <div class="learn-step"><span class="ls-n">6</span><b>이주 · 철거 · 착공</b>
+          <small>모두 이사 나가고(이주비 대출 지원) 부수고 짓기 시작. 남는 물량은 일반분양(청약).</small></div>
+        <div class="learn-step"><span class="ls-n">7</span><b>준공 · 입주</b>
+          <small>착공부터 보통 3년. 새 아파트 등기가 나오면 사업 끝.</small></div>
+      </div>
+      <div class="sub-foot">투자 관점 핵심: <b>단계가 진행될수록 리스크는 줄고 가격은 오릅니다.</b>
+        초기(1~2단계)는 싸지만 10년을 기다릴 수도 있고, 5단계 이후는 비싸지만 새 아파트가 거의 확정입니다.</div>
+    </div>
+
+    <!-- ③ 돈 계산 -->
+    <div class="budget-card" style="margin-top:1rem">
+      <div class="budget-card-title">③ 돈 계산은 이 공식 하나면 됩니다</div>
+      <div class="learn-formula">
+        내가 실제 내는 돈(분담금) = <b>조합원 분양가</b> − <b>권리가액</b>
+      </div>
+      <div class="sub-note" style="line-height:1.8">
+        예를 들어 볼게요. 성북구 빌라를 <b>4억</b>에 샀습니다.<br>
+        · 감정평가에서 내 빌라 가치가 <b>3억</b>으로 매겨짐 (감정평가액)<br>
+        · 조합 사업이 이익이 나서 비례율이 110% → 권리가액 = 3억 × 110% = <b>3.3억</b><br>
+        · 조합원에게 주는 새 34평 분양가가 <b>9억</b><br>
+        → 분담금 = 9억 − 3.3억 = <b>5.7억을 더 내면</b> 새 아파트를 받습니다.<br>
+        총 투입 = 처음 산 4억 + 분담금 5.7억 = <b>9.7억</b>. 입주 시점 시세가 14억이면 4.3억 버는 구조,
+        11억에 그치면 1.3억 버는 데 10년 쓴 셈이 됩니다.
+      </div>
+      <div class="sub-foot">빌라를 4억에 샀는데 감정평가가 3억인 것에 주목 — 매수가와 감정가는 다릅니다.
+        시장에서 붙는 웃돈(프리미엄)이 1억이었던 것이고, 이 웃돈이 적정한지가 재개발 투자의 승부처입니다.</div>
+    </div>
+
+    <!-- ④ 용어사전 -->
+    <div class="budget-card" style="margin-top:1rem">
+      <div class="budget-card-title">④ 용어사전 — 뉴스에 나오는 말 전부 풀어보기</div>
+      <div class="sub-lookup" style="margin-top:.6rem">
+
+        <details class="jz-fold sub-item"><summary><span class="sub-item-title">용적률 · 건폐율</span></summary><div class="sub-item-body">
+          <b>용적률</b> = 땅 크기 대비 건물을 얼마나 "높이(연면적)" 지을 수 있나. 100평 땅에 용적률 300%면 총 300평짜리 건물 가능.
+          <b>낮은 용적률로 지어진 낡은 아파트일수록</b> 새로 지을 때 더 올릴 여유가 커서 재건축 사업성이 좋습니다 (5층 주공아파트가 금싸라기인 이유).<br>
+          <b>건폐율</b> = 땅을 얼마나 "넓게(바닥)" 덮을 수 있나. 건폐율이 낮으면 동간 거리가 넓고 쾌적.</div></details>
+
+        <details class="jz-fold sub-item"><summary><span class="sub-item-title">대지지분</span></summary><div class="sub-item-body">
+          아파트·빌라 한 채를 사면 건물뿐 아니라 <b>단지 전체 땅의 내 몫</b>도 같이 사는 것인데, 그 땅 몫이 대지지분입니다.
+          건물은 낡으면 가치가 0에 수렴하지만 땅은 남으므로, <b>재개발·재건축에서 보상의 근거는 결국 대지지분</b>입니다.
+          같은 가격이면 대지지분 큰 매물이 정비사업에서 유리합니다 (등기부등본·건축물대장에서 확인).</div></details>
+
+        <details class="jz-fold sub-item"><summary><span class="sub-item-title">감정평가액 · 비례율 · 권리가액</span></summary><div class="sub-item-body">
+          <b>감정평가액</b> = 감정평가사가 매긴 내 낡은 집의 공식 가치 (시세보다 보통 낮음).<br>
+          <b>비례율</b> = 조합 사업의 성적표. (새 아파트 전체 가치 − 총 사업비) ÷ 조합원 재산 총액.
+          100%보다 높으면 남는 장사, 낮으면 조합원이 더 부담. "비례율 108% 확정" 같은 뉴스가 이것.<br>
+          <b>권리가액</b> = 감정평가액 × 비례율. 새 아파트 값에서 <b>깎아주는 내 지분의 최종 인정 금액</b>입니다.</div></details>
+
+        <details class="jz-fold sub-item"><summary><span class="sub-item-title">분담금 · 환급금</span></summary><div class="sub-item-body">
+          <b>분담금</b> = 조합원 분양가 − 권리가액. 새 집 받으려고 추가로 내는 돈.
+          내 권리가액이 분양가보다 크면 반대로 돈을 돌려받는데 그게 <b>환급금</b>.
+          분담금은 보통 이주 시점부터 중도금처럼 나눠 냅니다. 위 ③의 공식·예시 참고.</div></details>
+
+        <details class="jz-fold sub-item"><summary><span class="sub-item-title">프리미엄(피, P)</span></summary><div class="sub-item-body">
+          시장에서 그 "새 아파트 받을 권리"에 붙는 웃돈. "피 3억"이면 감정가 등 원가 대비 3억을 더 주고 사는 것.
+          단계가 진행될수록(위 ② 타임라인) 피는 커지는 게 정상이며, <b>총 투입액(매수가+분담금)과 완공 후 예상 시세를 비교</b>해야 피가 싼지 비싼지 판단할 수 있습니다.</div></details>
+
+        <details class="jz-fold sub-item"><summary><span class="sub-item-title">입주권 vs 분양권</span></summary><div class="sub-item-body">
+          <b>입주권</b> = 조합원이라서 갖는 새 아파트 받을 권리 (원래 그 동네 집주인이었거나 그 지위를 승계 매수).<br>
+          <b>분양권</b> = 청약에 당첨돼서 갖는 권리.<br>
+          입주권은 좋은 동·호수 우선 배정, 발코니 확장 등 혜택이 있지만 <b>주택 수에 포함</b>되고 취득세·양도세 규정이 복잡합니다.
+          분양권은 청약통장이 필요한 대신 초기 투입금이 계약금 10%로 적습니다.</div></details>
+
+        <details class="jz-fold sub-item"><summary><span class="sub-item-title">현금청산 · 물딱지 (가장 무서운 두 단어)</span></summary><div class="sub-item-body">
+          <b>현금청산</b> = 새 아파트를 못 받고 감정가만 받고 쫓겨나듯 정리되는 것. 분양신청을 안 했거나, 자격이 안 되면 발생.
+          감정가는 시세보다 낮아서 대부분 손해입니다.<br>
+          <b>물딱지</b> = 새 아파트 받을 자격이 없는 매물. 대표 사례가 <b>권리산정기준일 이후</b>에 지분 쪼개기(다세대 신축 전환)된 빌라 —
+          겉보기엔 멀쩡한 재개발 구역 빌라인데 사면 현금청산 대상입니다.
+          <b>재개발 구역 빌라를 살 땐 구청에 권리산정기준일과 그 매물의 자격을 반드시 확인</b>하세요.</div></details>
+
+        <details class="jz-fold sub-item"><summary><span class="sub-item-title">안전진단 · 재초환(재건축부담금)</span></summary><div class="sub-item-body">
+          <b>안전진단</b> = "이 아파트 정말 낡았나?" 국가 검사. 재건축의 입장 시험이었는데 2024년부터 완화되어
+          30년 넘으면 사실상 통과(진단 없이 착수 가능)로 바뀌는 추세.<br>
+          <b>재초환</b> = 재건축으로 조합원 1인당 이익이 8천만원을 넘으면 초과분의 최대 50%를 세금처럼 걷는 제도.
+          재건축 단지 뉴스에서 "부담금 폭탄"이 이것. 재개발에는 없습니다.</div></details>
+
+        <details class="jz-fold sub-item"><summary><span class="sub-item-title">이주비 · 이사비 · 주거이전비</span></summary><div class="sub-item-body">
+          철거하려면 모두 이사 가야 하니 조합이 지원합니다.
+          <b>이주비</b> = 이사 나가 있는 동안 살 집 보증금용 대출 (보통 권리가액의 40~60%, 무이자 or 저리).
+          <b>이사비</b> = 포장이사 비용 명목의 일시금. <b>주거이전비</b> = 재개발에서 세입자에게 주는 보상.
+          이주비 덕분에 관리처분 이후 단계는 실투자금이 줄어들기도 합니다.</div></details>
+
+        <details class="jz-fold sub-item"><summary><span class="sub-item-title">기부채납 · 임대주택 비율</span></summary><div class="sub-item-body">
+          용적률을 올려 받는 대가로 조합이 도로·공원·임대주택을 시에 <b>무상으로 내놓는 것</b>.
+          "용적률 300% 받는 대신 임대 15%" 같은 거래입니다. 기부채납이 많으면 사업성(비례율)이 나빠지므로
+          조합과 시청이 늘 줄다리기하는 부분.</div></details>
+
+        <details class="jz-fold sub-item"><summary><span class="sub-item-title">신속통합기획 · 모아타운 · 공공재개발</span></summary><div class="sub-item-body">
+          전부 "재개발을 빨리 하게 해주는 서울시·정부 패스트트랙"입니다.<br>
+          <b>신속통합기획(신통기획)</b> = 서울시가 기획 단계부터 개입해 인허가를 2~3년 단축.<br>
+          <b>모아타운</b> = 대규모 재개발이 어려운 소규모 빌라촌 여러 개를 묶어 중층 아파트로 — 우리가 보는 빌라 동네 중 다수가 후보.<br>
+          <b>공공재개발</b> = LH·SH가 시행을 맡아 속도·용적률 혜택, 대신 공공성(임대) 부담.
+          이런 구역으로 지정되면 대개 <b>토지거래허가·권리산정일 지정</b>이 같이 붙어 투자 진입이 제한됩니다.</div></details>
+
+        <details class="jz-fold sub-item"><summary><span class="sub-item-title">토지거래허가구역 · 전매제한 · 실거주의무</span></summary><div class="sub-item-body">
+          <b>토지거래허가구역</b> = 사려면 구청 허가가 필요하고 <b>2년 실거주 목적만 허가</b> — 갭투자(전세 끼고 매수) 불가.<br>
+          <b>전매제한</b> = 분양권·입주권을 일정 기간 못 파는 것.<br>
+          <b>실거주의무</b> = 분양가상한제 아파트 당첨 시 2~5년 직접 살아야 하는 의무.
+          셋 다 "투기 말고 실거주자만 오라"는 장치라, 실거주 목적인 우리에게는 오히려 경쟁을 줄여주는 면도 있습니다.</div></details>
+
+        <details class="jz-fold sub-item"><summary><span class="sub-item-title">1+1 분양 · 상가 조합원</span></summary><div class="sub-item-body">
+          <b>1+1</b> = 대지지분·감정가가 큰 조합원이 새 아파트 두 채(중형+소형)를 받는 것. 단, 소형은 3년 전매제한.<br>
+          <b>상가 조합원</b> = 구역 내 상가 소유자. 원칙은 새 상가를 받지만 조건 충족 시 아파트 분양도 가능 —
+          "상가 쪼개기"가 규제되는 이유입니다.</div></details>
+
+      </div>
+    </div>
+
+    <!-- ⑤ 초보가 빠지는 함정 -->
+    <div class="budget-card" style="margin-top:1rem">
+      <div class="budget-card-title">⑤ 초보가 가장 많이 당하는 4가지</div>
+      <div class="sub-lookup" style="margin-top:.6rem">
+        <div class="slk-item"><div class="slk-head"><b>🕳️ ① 물딱지 매수</b></div><div class="slk-body">
+          권리산정기준일 이후 신축·쪼개기된 빌라를 "재개발 호재"라며 삽니다 → 현금청산.
+          <b>방어법</b>: 구청 정비사업과에 전화해서 "이 지번, 분양자격 있나요?" 한 통이면 끝.</div></div>
+        <div class="slk-item"><div class="slk-head"><b>⏳ ② 시간 과소평가</b></div><div class="slk-body">
+          "조합설립됐으니 금방"이라 생각하지만 조합설립→입주 평균 10년+. 소송 한 번이면 +3년.
+          그 기간의 이자·기회비용까지 넣고 수익률을 계산해야 합니다.</div></div>
+        <div class="slk-item"><div class="slk-head"><b>💸 ③ 분담금 폭탄</b></div><div class="slk-body">
+          공사비가 오르면 비례율이 떨어지고 분담금이 커집니다. 최근 몇 년 공사비 급등으로
+          "분담금 2억 → 4억" 통보가 흔했습니다. 여유자금 없이 빠듯하게 들어가면 버티지 못합니다.</div></div>
+        <div class="slk-item"><div class="slk-head"><b>🧾 ④ 다주택 세금 착각</b></div><div class="slk-body">
+          입주권도 주택 수에 들어갑니다. 실거주 1주택 + 재개발 빌라 1채면 2주택자 —
+          취득세 중과·종부세·양도세가 전부 달라지고, <b>청약 무주택 자격도 사라집니다</b> (우리 청약 전략과 충돌).</div></div>
+      </div>
+    </div>
+
+    <!-- ⑥ 영상으로 복습 -->
+    <div class="budget-card" style="margin-top:1rem">
+      <div class="budget-card-title">🎬 영상으로 복습하기</div>
+      <div class="sub-note">보내주신 영상을 여기 담아뒀어요 — 위 내용을 읽고 보면 용어가 다 들리기 시작할 겁니다.</div>
+      <div class="learn-video">
+        <iframe src="https://www.youtube.com/embed/ColKlGbo9Mk" title="재개발·재건축 영상"
+          frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen loading="lazy"></iframe>
+      </div>
+      <div class="sub-foot">영상이 재생되지 않으면 <a href="https://youtu.be/ColKlGbo9Mk" target="_blank" rel="noopener">유튜브에서 바로 보기 ↗</a>.
+        영상에서 궁금한 대목이 있으면 알려주세요 — 이 페이지에 그 부분 해설을 추가할 수 있습니다.</div>
+    </div>
+
+    <p class="section-desc" style="margin-top:1.2rem;font-size:.8rem;color:var(--text3)">
+      ※ 제도·세율은 자주 바뀝니다(안전진단·재초환·공제 등). 큰 결정 전에는 최신 공고문과 전문가(세무사·구청 정비사업과) 확인을 권장합니다.
+    </p>
+  </div>
+</section>
+{% endblock %}
