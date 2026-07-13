@@ -145,30 +145,36 @@ def try_cleanup_scrape() -> list | None:
     if not zones:
         return None
 
-    # ── 사업개요(정보공개 카페) 구조 정찰: 카페 3곳을 열어 '용적률' 주변과 메뉴를 로그 ──
+    # ── 사업개요 정찰 v3: 카페의 모든 하위 메뉴를 순회해 '용적률'이 있는 페이지를 찾는다 ──
     probed = 0
     for z in zones:
-        if probed >= 3:
+        if probed >= 2:
             break
         cafe = z.get("cafe")
         if not cafe:
             continue
-        for path in (f"/cafe/mainIndx.do?cafeUrl={cafe}",
-                     f"/cafe/bsnsSummary.do?cafeUrl={cafe}"):
-            url = "https://cleanup.seoul.go.kr" + path
-            try:
-                r = sess.get(url, timeout=20)
-                txt = re.sub(r"\s+", " ", _TAG.sub(" ", r.text))
-                i = txt.find("용적률")
-                print(f"[B 카페정찰] {z['cols'][3][:20]} → {path} HTTP {r.status_code} len={len(r.text)}")
-                if i >= 0:
-                    print(f"  '용적률' 주변: {txt[max(0, i-150):i+250]}")
-                else:
-                    menus = re.findall(r'href="(/cafe/[^"]{0,60})"', r.text)[:12]
-                    print(f"  용적률 없음 · 메뉴 후보: {menus}")
-            except Exception as e:
-                print(f"[B 카페정찰] {url[:80]} 실패: {e}")
         probed += 1
+        base = "https://cleanup.seoul.go.kr"
+        try:
+            r = sess.get(f"{base}/cafe/mainIndx.do?cafeUrl={cafe}", timeout=20)
+            menus = list(dict.fromkeys(
+                m.replace("&amp;", "&") for m in re.findall(r'href="(/cafe/[^"]+)"', r.text)))
+            print(f"[B 정찰v3] {z['cols'][3][:24]} cafe={cafe} 메뉴 {len(menus)}개:")
+            for m in menus[:25]:
+                print("   ", m[:110])
+            for m in menus[:10]:
+                try:
+                    rr = sess.get(base + m, timeout=20)
+                    txt = re.sub(r"\s+", " ", _TAG.sub(" ", rr.text))
+                    i = txt.find("용적률")
+                    mark = "★용적률 발견" if i >= 0 else ""
+                    print(f"  [{rr.status_code}] {m[:80]} len={len(rr.text)} {mark}")
+                    if i >= 0:
+                        print(f"    주변: {txt[max(0, i-200):i+350]}")
+                except Exception as e:
+                    print(f"  {m[:70]} 실패: {e}")
+        except Exception as e:
+            print(f"[B 정찰v3] {cafe} 실패: {e}")
 
     return [_norm_cleanup_row(z) for z in zones]
 
