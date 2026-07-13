@@ -126,8 +126,10 @@ def try_cleanup_scrape() -> list | None:
             tds = [re.sub(r"\s+", " ", t) for t in tds if t is not None]
             if len(tds) < 4:
                 continue
-            # 정비몽땅 목록 통상 구성: 번호, 자치구, 사업장명(구역), 사업유형, 진행단계, (위치…)
-            rec = {"cols": tds, "src": "cleanup"}
+            # 상세(사업개요) 페이지로 가는 링크/onclick도 함께 수집 — 용적률·세대수 확장용
+            links = re.findall(r"""(?:href|onclick)=["']([^"']+)["']""", tr)
+            links = [l for l in links if l and l not in ("#", "#none", "javascript:;")]
+            rec = {"cols": tds, "links": links[:4], "src": "cleanup"}
             zones.append(rec)
             got += 1
         print(f"[B] {page}페이지: 행 {got}개 (누적 {len(zones)})")
@@ -137,6 +139,36 @@ def try_cleanup_scrape() -> list | None:
         time.sleep(0.4)
     if not zones:
         return None
+
+    # ── 상세(사업개요) 페이지 구조 진단: 첫 3개의 링크를 열어 '용적률' 주변 텍스트를 로그 ──
+    # (파서를 정확히 짜기 위한 1회성 정찰 — 구조 확인 후 전수 수집 파서를 붙인다)
+    probed = 0
+    for z in zones:
+        if probed >= 3:
+            break
+        for l in z.get("links", []):
+            url = None
+            if l.startswith("http"):
+                url = l
+            elif l.startswith("/"):
+                url = "https://cleanup.seoul.go.kr" + l
+            elif ".do" in l:
+                m = re.search(r"['\"]?(/[\w/]+\.do[^'\"]*)", l)
+                if m:
+                    url = "https://cleanup.seoul.go.kr" + m.group(1)
+            if not url:
+                continue
+            try:
+                r = sess.get(url, timeout=20)
+                txt = re.sub(r"\s+", " ", _TAG.sub(" ", r.text))
+                i = txt.find("용적률")
+                print(f"[B 상세정찰] {z['cols'][3][:20]} → {url[:90]} HTTP {r.status_code}")
+                print(f"  '용적률' 주변: {txt[max(0, i-120):i+200] if i >= 0 else '(용적률 텍스트 없음) ' + txt[:200]}")
+                probed += 1
+            except Exception as e:
+                print(f"[B 상세정찰] {url[:90]} 실패: {e}")
+            break
+
     return [_norm_cleanup_row(z) for z in zones]
 
 
@@ -149,7 +181,7 @@ def _norm_cleanup_row(z: dict) -> dict:
     # [번호, 자치구, 사업구분, 사업장명, 위치(동 지번), 진행단계, 공개건수, %, %, 링크]
     if len(c) >= 6 and c[0].isdigit() and c[1].endswith("구"):
         return {"name": c[3], "gu": c[1], "type": c[2], "stage": c[5],
-                "addr": c[4], "src": "cleanup", "raw": c}
+                "addr": c[4], "src": "cleanup", "raw": c, "links": z.get("links", [])}
     # 구조가 바뀌었을 때의 휴리스틱 폴백
     gu = next((t for t in c if re.fullmatch(r"\S{1,5}구", t)), "")
     typ = next((t for t in c if any(k in t for k in ("재개발", "재건축", "도시환경", "주거환경", "가로주택", "모아", "리모델링"))), "")
