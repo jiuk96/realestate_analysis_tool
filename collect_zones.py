@@ -145,11 +145,15 @@ _GU = re.compile(r"(\S+구)$|^(\S+구)\b")
 
 def _norm_cleanup_row(z: dict) -> dict:
     c = z["cols"]
-    # 컬럼 순서를 모른 채 견고하게: 구 이름/유형 키워드/단계 키워드를 탐색
+    # 정비몽땅 사업장검색 목록은 고정 10컬럼(2026-07 실측):
+    # [번호, 자치구, 사업구분, 사업장명, 위치(동 지번), 진행단계, 공개건수, %, %, 링크]
+    if len(c) >= 6 and c[0].isdigit() and c[1].endswith("구"):
+        return {"name": c[3], "gu": c[1], "type": c[2], "stage": c[5],
+                "addr": c[4], "src": "cleanup", "raw": c}
+    # 구조가 바뀌었을 때의 휴리스틱 폴백
     gu = next((t for t in c if re.fullmatch(r"\S{1,5}구", t)), "")
     typ = next((t for t in c if any(k in t for k in ("재개발", "재건축", "도시환경", "주거환경", "가로주택", "모아", "리모델링"))), "")
-    stage = next((t for t in c if any(k in t for k in ("구역지정", "추진위", "조합", "시행인가", "사업시행", "관리처분", "착공", "이주", "준공", "기본계획", "안전진단", "완료", "해제"))), "")
-    # 이름: 가장 긴 텍스트 중 위 셋이 아닌 것
+    stage = next((t for t in c if any(k in t for k in ("구역지정", "추진위원회", "조합설립인가", "시행인가", "관리처분", "착공", "준공", "기본계획", "안전진단", "해산", "수립"))), "")
     rest = [t for t in c if t not in (gu, typ, stage) and not t.isdigit()]
     name = max(rest, key=len) if rest else ""
     return {"name": name, "gu": gu, "type": typ, "stage": stage, "addr": "", "src": "cleanup", "raw": c}

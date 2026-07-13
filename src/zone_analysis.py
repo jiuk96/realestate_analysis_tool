@@ -39,7 +39,7 @@ WEIGHTS = {"place": 0.40, "biz": 0.35, "align": 0.25}
 
 # 진행단계 → ② 절차 타임라인 위치 (learn 페이지 단계와 동일한 언어)
 STAGE_STEPS = [
-    ("구역지정", ("기본계획", "정비구역", "구역지정", "안전진단", "예정")),
+    ("구역지정", ("기본계획", "정비구역", "구역지정", "안전진단", "예정", "수립", "후보지", "지정")),
     ("추진위", ("추진위",)),
     ("조합설립", ("조합설립", "조합 설립")),
     ("사업시행", ("사업시행", "시행인가", "시공", "건축심의")),
@@ -125,9 +125,13 @@ def main() -> int:
     gu_ppm2 = {g: float(np.median(v)) for g, v in gu_ppm2.items() if v}
 
     rows = []
+    DONE = ("준공", "해산", "청산", "완료", "해제", "일시중단")
     for z in zones:
         gu, name = z.get("gu") or "", z.get("name") or ""
         if not name:
+            continue
+        # 이미 끝났거나 멈춘 사업장은 매수 후보가 아니므로 제외
+        if any(k in (z.get("stage") or "") for k in DONE):
             continue
         dong = guess_dong(name, z.get("addr", ""))
         dv = dongs.get((gu, dong)) if dong else None
