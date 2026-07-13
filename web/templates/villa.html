@@ -14,7 +14,10 @@
     </p>
 
     <!-- 🗺️ 동네 지도: 원 크기 = 거래량, 색 = 종합점수, 빨간 테두리 = 깡통 위험 -->
-    <div id="villaMap" class="villa-map"></div>
+    <div class="villa-map-wrap">
+      <div id="villaMap" class="villa-map"></div>
+      <div id="zoneDetail" class="map-panel-detail zone-detail" style="display:none"></div>
+    </div>
     <div class="sub-note" id="villaMapLegend" style="margin:-0.3rem 0 1rem">
       ● 원 크기 = 최근 12개월 거래량 · 색 = 종합점수(<span style="color:var(--green)">진초록 70+</span> /
       <span style="color:#f59e0b">앰버 50+</span> / 회색 그 외) · <span style="color:var(--red)">빨간 테두리 = 깡통 위험권(전세가율 80%+)</span>
@@ -30,6 +33,12 @@
     <!-- 구역별 뷰 -->
     <div id="villaZoneView">
       <div class="villa-controls">
+        <div class="price-chips" id="zoneTierChips">
+          <button class="price-chip" data-n="10">🥇 TOP 10</button>
+          <button class="price-chip active" data-n="20">TOP 20</button>
+          <button class="price-chip" data-n="50">TOP 50</button>
+          <button class="price-chip" data-n="0">전체</button>
+        </div>
         <div class="price-chips" id="zoneDistChips"></div>
         <div class="villa-control-row">
           <select id="zoneSort" class="explorer-sort">
@@ -48,7 +57,7 @@
         </div>
       </div>
       <div class="sub-note" id="zoneSummary"></div>
-      <div class="villa-grid" id="zoneList"></div>
+      <div class="zr-list" id="zoneList"></div>
       <div class="sub-foot" id="zoneCaveat" style="margin-top:1.2rem"></div>
     </div>
 

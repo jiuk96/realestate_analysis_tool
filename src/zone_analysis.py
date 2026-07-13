@@ -105,10 +105,17 @@ def main() -> int:
             "gu": r["district"],
             "dong": dong_of.get((r["district"], r["apt_name"])),
             "transit": r.get("transit_score"), "hub": r.get("hub_score"), "school": r.get("school_score"),
+            "hub_km": r.get("hub_min_km"), "hub_name": r.get("hub_nearest_name"),
         })
     idf = pd.DataFrame(infra_rows)
-    infra_dong = idf.dropna(subset=["dong"]).groupby(["gu", "dong"])[["transit", "hub", "school"]].mean()
-    infra_gu = idf.groupby("gu")[["transit", "hub", "school"]].mean()
+    num_cols = ["transit", "hub", "school", "hub_km"]
+    infra_dong = idf.dropna(subset=["dong"]).groupby(["gu", "dong"])[num_cols].mean()
+    infra_gu = idf.groupby("gu")[num_cols].mean()
+    infra_dong_n = idf.dropna(subset=["dong"]).groupby(["gu", "dong"]).size()
+    hub_name_dong = idf.dropna(subset=["dong", "hub_name"]).groupby(["gu", "dong"])["hub_name"] \
+        .agg(lambda x: x.mode().iloc[0] if len(x.mode()) else None)
+    hub_name_gu = idf.dropna(subset=["hub_name"]).groupby("gu")["hub_name"] \
+        .agg(lambda x: x.mode().iloc[0] if len(x.mode()) else None)
 
     # 구별 아파트 ㎡당가 (완공 후 가치 프록시) — villa.json의 apt_gap 산출과 동일 소스 재사용
     ts = json.loads((P / "timeseries.json").read_text(encoding="utf-8"))
@@ -136,12 +143,18 @@ def main() -> int:
         dong = guess_dong(name, z.get("addr", ""))
         dv = dongs.get((gu, dong)) if dong else None
 
-        # 🅰 자리
+        # 🅰 자리 (+ 상세 근거 필드)
+        dong_hit = bool(dong and (gu, dong) in infra_dong.index)
         try:
-            inf = infra_dong.loc[(gu, dong)] if dong and (gu, dong) in infra_dong.index else infra_gu.loc[gu]
+            inf = infra_dong.loc[(gu, dong)] if dong_hit else infra_gu.loc[gu]
             place_infra = float(np.nanmean([inf["transit"], inf["hub"], inf["school"]]))
+            ev_transit = None if pd.isna(inf["transit"]) else round(float(inf["transit"]), 1)
+            ev_school = None if pd.isna(inf["school"]) else round(float(inf["school"]), 1)
+            ev_hub_km = None if pd.isna(inf["hub_km"]) else round(float(inf["hub_km"]), 1)
         except Exception:
-            place_infra = None
+            place_infra = ev_transit = ev_school = ev_hub_km = None
+        ev_hub_name = (hub_name_dong.get((gu, dong)) if dong_hit else hub_name_gu.get(gu)) or None
+        ev_n_apts = int(infra_dong_n.get((gu, dong), 0)) if dong_hit else 0
         place_value = gu_ppm2.get(gu)
 
         rows.append({
@@ -156,6 +169,16 @@ def main() -> int:
             "villa_amt": dv["median_amount_eok"] if dv else None,
             "n_trades_12m": dv["n_trades_12m"] if dv else None,
             "lat": dv["lat"] if dv else None, "lng": dv["lng"] if dv else None,
+            # 상세 근거 (플로팅 상세 패널용)
+            "addr": z.get("addr") or "",
+            "ev_transit": ev_transit, "ev_school": ev_school,
+            "ev_hub_name": ev_hub_name, "ev_hub_km": ev_hub_km,
+            "ev_n_apts": ev_n_apts, "ev_dong_hit": dong_hit,
+            "ev_gu_apt_py": round(place_value * 3.3058 / 10000, 2) if place_value else None,  # 구 아파트 평당가(억)
+            "ev_trend": dv.get("trend_pct_yr") if dv else None,
+            "ev_jeonse_ratio": dv.get("jeonse_ratio") if dv else None,
+            "ev_jeonse_danger": bool(dv.get("jeonse_danger")) if dv else False,
+            "ev_new_share": dv.get("new_share") if dv else None,
         })
     df = pd.DataFrame(rows)
     if df.empty:

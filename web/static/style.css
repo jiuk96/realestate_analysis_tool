@@ -1250,6 +1250,22 @@ details.budget-fold .legal-hint { font-weight: 500; }
 .learn-video { position: relative; padding-top: 56.25%; border-radius: 12px; overflow: hidden; margin-top: .7rem; background: #000; }
 .learn-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; }
 
+/* 빌라 — 구역 탐색기(티어·컴팩트 목록·플로팅 상세) */
+.villa-map-wrap { position: relative; }
+.zone-detail { position: absolute; top: 12px; right: 12px; bottom: 12px; width: min(400px, calc(100% - 24px)); overflow-y: auto; background: var(--bg-soft); border-radius: 14px; box-shadow: 0 8px 28px rgba(20,40,70,.18); padding: 1rem 1.1rem; z-index: 900; }
+.zone-detail .ep-name { font-size: 1rem; font-weight: 800; }
+.zd-sec { font-size: .8rem; font-weight: 800; color: var(--text2); margin: .9rem 0 .3rem; padding-top: .6rem; border-top: 1px solid var(--border); }
+.zr-list { display: flex; flex-direction: column; gap: .4rem; margin-top: .6rem; }
+.zr-row { display: flex; align-items: center; gap: .7rem; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px; padding: .6rem .8rem; cursor: pointer; transition: box-shadow .15s; }
+.zr-row:hover { box-shadow: var(--shadow-sm); border-color: var(--border-strong, #c6ced8); }
+.zr-rank { width: 26px; height: 26px; border-radius: 50%; color: #fff; font-size: .74rem; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.zr-main { flex: 1; min-width: 0; }
+.zr-name { font-weight: 700; font-size: .9rem; overflow-wrap: anywhere; }
+.zr-sub { font-size: .74rem; color: var(--text2); }
+.zr-score { font-size: 1.05rem; font-weight: 800; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.zr-score small { font-size: .68rem; font-weight: 600; }
+@media (max-width: 720px) { .zone-detail { position: fixed; inset: auto 0 0 0; top: 30%; width: 100%; border-radius: 14px 14px 0 0; } }
+
 /* 빌라 — 정비구역 3박자 뷰 */
 .zn-type { font-size: .64rem; font-weight: 800; border-radius: 999px; padding: .12rem .5rem; color: #fff; vertical-align: middle; margin-left: .3rem; }
 .zn-rd { background: var(--green); }
