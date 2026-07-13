@@ -1250,6 +1250,21 @@ details.budget-fold .legal-hint { font-weight: 500; }
 .learn-video { position: relative; padding-top: 56.25%; border-radius: 12px; overflow: hidden; margin-top: .7rem; background: #000; }
 .learn-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; }
 
+/* 쉬운 상식 — 케이스 스터디 */
+.cs-card { background: var(--bg); border-radius: 14px; padding: 1rem 1.1rem; margin-top: .8rem; border-left: 4px solid var(--acc2); }
+.cs-head { display: flex; align-items: center; gap: .5rem; font-size: .95rem; margin-bottom: .45rem; flex-wrap: wrap; }
+.cs-tag { font-size: .66rem; font-weight: 800; border-radius: 999px; padding: .16rem .55rem; color: #fff; flex-shrink: 0; }
+.cs-tag-re { background: var(--acc2); }
+.cs-tag-rd { background: var(--green); }
+.cs-tag-warn { background: var(--red); }
+.cs-body { font-size: .86rem; color: var(--text2); line-height: 1.7; }
+.cs-concepts { font-size: .72rem; color: var(--acc2); font-weight: 700; margin-top: .5rem; }
+.cs-quiz { margin-top: .5rem; background: var(--bg-soft); border-radius: 10px; padding: .55rem .8rem; }
+.cs-quiz > summary { font-size: .84rem; font-weight: 700; cursor: pointer; list-style: none; }
+.cs-quiz > summary::-webkit-details-marker { display: none; }
+.cs-quiz-body { font-size: .82rem; color: var(--text2); line-height: 1.65; padding-top: .5rem; }
+.cs-talk { margin-top: .55rem; font-size: .8rem; color: var(--text); background: rgba(255,116,38,.07); border-radius: 8px; padding: .5rem .75rem; }
+
 /* 쉬운 상식 — 재건축 도식들 */
 .lg-chart { width: 100%; max-width: 560px; display: block; margin: .8rem auto .3rem; background: var(--bg); border-radius: 12px; padding: .5rem; }
 .lg-ladder { display: flex; flex-direction: column; gap: .4rem; margin: .7rem 0 .3rem; }
