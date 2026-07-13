@@ -3509,6 +3509,7 @@ function showZoneDetail(z) {
 
     <div class="zd-sec">🅲 이해관계 — 평형 구성</div>
     ${row('거래 평형 편차', cv != null ? `±${(cv * 100).toFixed(0)}% → ${cvLabel}` : null)}
+    ${cv == null && z.align_hhi != null ? row('계획 평형 쏠림 (폴백)', `${z.align_hhi <= 0.45 ? '고른 구성' : z.align_hhi <= 0.6 ? '보통' : '한 평형 집중'} — 사업개요의 계획 세대 구성 기준(종전 아님)`) : ''}
     ${z.ev_jeonse_ratio != null ? row('동네 빌라 전세가율', `${(z.ev_jeonse_ratio * 100).toFixed(0)}%${z.ev_jeonse_danger ? ' ⚠️ 깡통 위험권' : ''}`) : ''}
     ${z.ev_new_share != null && z.ev_new_share >= 0.3 ? row('신축 거래 비중', `${(z.ev_new_share * 100).toFixed(0)}% — 쪼개기·고평가 주의`) : ''}
 

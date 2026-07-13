@@ -159,7 +159,17 @@ def main() -> int:
         # 이미 끝났거나 멈춘 사업장은 매수 후보가 아니므로 제외
         if any(k in (z.get("stage") or "") for k in DONE):
             continue
-        dong = guess_dong(name, z.get("addr", ""))
+        # 동 매칭 보강: 주소·구역명에서 나오는 모든 동 후보 중 빌라 데이터에 실제로
+        # 존재하는 동을 우선 채택 (예: '금호동2가 421' → 금호동2가)
+        dong = None
+        cands = _DONG.findall((z.get("addr") or "") + " " + name)
+        for c in cands:
+            c2 = re.sub(r"제?\d+동$", "동", c)
+            if (gu, c2) in dongs:
+                dong = c2
+                break
+        if dong is None:
+            dong = guess_dong(name, z.get("addr", ""))
         dv = dongs.get((gu, dong)) if dong else None
 
         # 🅰 자리 (+ 상세 근거 필드)
@@ -201,7 +211,14 @@ def main() -> int:
         })
         # 사업개요 상세 병합 (용도지역·계획 용적률·건폐율·층수·세대수·대지면적·세입자)
         det = details.get(z.get("cafe") or "", {}) or {}
+        # 이해관계 폴백: 계획 평형 3구간 세대수의 쏠림(HHI, 1/3~1) — 낮을수록 균일
+        bands = det.get("units_bands")
+        align_hhi = None
+        if bands and sum(bands) > 0:
+            tot = sum(bands)
+            align_hhi = sum((b / tot) ** 2 for b in bands)
         rows[-1].update({
+            "align_hhi": None if align_hhi is None else round(align_hhi, 3),
             "use_zone": det.get("use_zone"),
             "far_plan": det.get("far_plan"),
             "far_limit": far_limit_of(det.get("use_zone")),
@@ -225,7 +242,12 @@ def main() -> int:
         _pct(df["biz_gap"], invert=True).to_numpy(),     # 빌라가 아파트 대비 쌀수록 ↑
         _pct(df["far_plan"]).to_numpy(),                 # 계획 용적률 클수록 ↑ (사업개요 확보분)
     ]), axis=0).round(1)
-    df["ax_align"] = _pct(df["align_cv"], invert=True).round(1)
+    # 🅲: 1순위 = 동네 빌라 거래 면적 CV(종전 평형 균일도), 결측 시 = 계획 평형 HHI 폴백
+    cv_pct = _pct(df["align_cv"], invert=True)
+    hhi_pct = _pct(df["align_hhi"], invert=True)
+    df["align_src"] = np.where(df["align_cv"].notna(), "trades",
+                               np.where(df["align_hhi"].notna(), "plan", None))
+    df["ax_align"] = cv_pct.fillna(hhi_pct).round(1)
 
     def total(r):
         num = den = 0.0

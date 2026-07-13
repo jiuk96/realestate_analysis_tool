@@ -184,6 +184,7 @@ def _parse_summary(txt: str) -> dict:
         ints = [int(x.replace(",", "")) for x in _NUM.findall(m.group(1)) if "." not in x]
         if len(ints) >= 3:
             d["units_sale"] = sum(ints[-3:])
+            d["units_bands"] = ints[-3:]   # [60㎡이하, 60~85, 85초과] — 평형 구성 균일도(이해관계 폴백)용
     m = re.search(r"50㎡초과\s+((?:[\d,\.]+\s+){1,6})", txt)
     if m:
         ints = [int(x.replace(",", "")) for x in _NUM.findall(m.group(1)) if "." not in x]
@@ -203,8 +204,12 @@ def collect_cafe_details(zones: list, sess) -> None:
     if DETAILS_PATH.exists():
         cache = json.loads(DETAILS_PATH.read_text(encoding="utf-8"))
     base = "https://cleanup.seoul.go.kr"
-    todo = [c for c in dict.fromkeys(z.get("cafe") for z in zones if z.get("cafe"))
-            if c not in cache]
+    def _stale(c):
+        # 구간별 세대수(units_bands)가 없는 구버전 캐시는 재수집 (이해관계 폴백 지표용)
+        v = cache.get(c)
+        return v is None or (v.get("units_sale") and "units_bands" not in v)
+
+    todo = [c for c in dict.fromkeys(z.get("cafe") for z in zones if z.get("cafe")) if _stale(c)]
     print(f"[상세] 사업개요 수집 대상 {len(todo)}개 (캐시 {len(cache)}개)")
     ok = fail = 0
     start = time.monotonic()
