@@ -3456,6 +3456,33 @@ function zoneStageTl(z, steps) {
 }
 
 /* 플로팅 상세 패널 — 점수의 세부 근거를 전부 보여준다 */
+const CONF_META = {
+  high:   { label: '높음', color: '#03a552', dot: '<span style="color:#03a552">●</span>' },
+  medium: { label: '보통', color: '#f59e0b', dot: '<span style="color:#f59e0b">●</span>' },
+  low:    { label: '낮음', color: '#94a3b8', dot: '<span style="color:#94a3b8">●</span>' },
+};
+
+// 신뢰도 배너: 점수를 뒷받침하는 3박자 근거가 각각 실측/추정/없음 중 무엇인지 밝힌다
+function zoneConfBanner(z) {
+  const cm = CONF_META[z.confidence] || CONF_META.medium;
+  const src = (ok, part, none, cond) => cond === 'ok' ? `<b style="color:var(--green)">${ok}</b>`
+    : cond === 'part' ? `<b style="color:var(--gold)">${part}</b>` : `<span style="color:var(--text3)">${none}</span>`;
+  const place = src('동 실측', '', '구 평균 추정', z.ev_dong_hit ? 'ok' : 'none');
+  const biz = src('용적률 실데이터', '', '용적률 미확보(시세만)', z.far_plan != null ? 'ok' : 'none');
+  const align = src('실거래 기반', '계획 세대 추정', '데이터 없음',
+    z.align_src === 'trades' ? 'ok' : z.align_src === 'plan' ? 'part' : 'none');
+  const headline = z.confidence === 'high' ? '3박자 모두 실데이터로 뒷받침됩니다.'
+    : z.confidence === 'low' ? `근거가 제한적입니다(축 ${z.conf_axes}/3) — 점수를 액면 그대로 믿지 마세요.`
+    : '일부 축은 추정치입니다 — 아래 출처를 확인하세요.';
+  return `
+    <div class="zd-conf" style="border-color:${cm.color}">
+      <div class="zd-conf-head"><span class="conf-dot" style="background:${cm.color}"></span>
+        근거 신뢰도 <b style="color:${cm.color}">${cm.label}</b> · 실데이터 축 ${z.conf_axes}/3</div>
+      <div class="zd-conf-note">${headline}</div>
+      <div class="zd-conf-srcs">🅰 자리 ${place} · 🅱 사업성 ${biz} · 🅲 이해관계 ${align}</div>
+    </div>`;
+}
+
 function showZoneDetail(z) {
   const el = document.getElementById('zoneDetail');
   if (!el || !_zoneData) return;
@@ -3483,6 +3510,7 @@ function showZoneDetail(z) {
       <div class="ep-loc">${z.gu}${z.addr ? ' ' + z.addr : ''} · 3박자 ${z.total != null ? z.total.toFixed(0) : '—'}점 (전체 ${z.rank}위)</div>
     </div>
     <div class="zn-tl" style="margin:.5rem 0 .7rem">${zoneStageTl(z, steps)}</div>
+    ${zoneConfBanner(z)}
     <div class="vl-axes">${axes}</div>
 
     <div class="zd-sec">🅰 자리 — 왜 이 점수인가</div>
@@ -3547,6 +3575,7 @@ function renderZoneMarkers(rows) {
 }
 
 let _zoneTier = parseInt(localStorage.getItem('zoneTier_v1') || '20');
+let _zoneHiConf = localStorage.getItem('zoneHiConf_v1') === '1';
 
 function renderZoneList() {
   const d = _zoneData;
@@ -3556,6 +3585,7 @@ function renderZoneList() {
   const typ = document.getElementById('zoneTypeSel').value;
   let rows = d.zones.filter(z => _zoneDist === '전체' || z.gu === _zoneDist);
   if (typ !== '전체') rows = rows.filter(z => (z.type || '').includes(typ));
+  if (_zoneHiConf) rows = rows.filter(z => z.confidence === 'high');   // 신뢰도 높음만
   rows = [...rows].sort((a, b) => {
     if (sortKey === 'stage_idx') return (a.stage_idx ?? 99) - (b.stage_idx ?? 99);
     if (sortKey === 'stage_desc') return (b.stage_idx ?? -1) - (a.stage_idx ?? -1);
@@ -3569,17 +3599,20 @@ function renderZoneList() {
   document.getElementById('zoneSummary').innerHTML =
     `정비구역 ${rows.length}곳 중 <b>${shown.length}곳</b> 표시 · ` +
     `<span style="color:#ff7426">● TOP 10</span> <span style="color:#03a552">● 11~20</span> ` +
-    `<span style="color:#6c8cf5">● 21~50</span> · 지도 원이나 행을 누르면 상세 근거`;
+    `<span style="color:#6c8cf5">● 21~50</span> · 신뢰도 ${CONF_META.high.dot}높음 ${CONF_META.medium.dot}보통 ${CONF_META.low.dot}낮음 · 행을 누르면 상세`;
 
-  listEl.innerHTML = shown.map((z, i) => `
+  listEl.innerHTML = shown.map((z, i) => {
+    const cm = CONF_META[z.confidence] || CONF_META.medium;
+    return `
     <div class="zr-row" data-i="${i}">
       <span class="zr-rank" style="background:${zoneTierColor(i)}">${i + 1}</span>
       <div class="zr-main">
         <div class="zr-name">${z.name}</div>
-        <div class="zr-sub">${z.gu} · ${z.type || '정비사업'} · ${z.stage || '단계 미상'}${z.villa_amt != null ? ` · 중위 ${z.villa_amt}억` : ''}</div>
+        <div class="zr-sub"><span class="conf-dot" style="background:${cm.color}" title="근거 신뢰도: ${cm.label}"></span>${z.gu} · ${z.type || '정비사업'} · ${z.stage || '단계 미상'}${z.villa_amt != null ? ` · 중위 ${z.villa_amt}억` : ''}</div>
       </div>
       <span class="zr-score" style="color:${zoneTierColor(i)}">${z.total != null ? z.total.toFixed(0) : '—'}<small>점</small></span>
-    </div>`).join('') || `<div class="sub-note">조건에 맞는 구역이 없습니다.</div>`;
+    </div>`;
+  }).join('') || `<div class="sub-note">조건에 맞는 구역이 없습니다 — 신뢰도 필터를 풀어보세요.</div>`;
   listEl.querySelectorAll('.zr-row').forEach(r =>
     r.addEventListener('click', () => showZoneDetail(shown[+r.dataset.i])));
 
@@ -3625,6 +3658,16 @@ async function renderVillaZones() {
       renderZoneList();
     });
   });
+  // 신뢰도 높음만 보기 토글
+  const hc = document.getElementById('zoneHiConf');
+  if (hc) {
+    hc.checked = _zoneHiConf;
+    hc.addEventListener('change', () => {
+      _zoneHiConf = hc.checked;
+      localStorage.setItem('zoneHiConf_v1', _zoneHiConf ? '1' : '0');
+      renderZoneList();
+    });
+  }
   renderZoneList();
   return true;
 }

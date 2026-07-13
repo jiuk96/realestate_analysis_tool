@@ -259,7 +259,28 @@ def main() -> int:
         return round(num / den, 1) if den else None
 
     df["total"] = df.apply(total, axis=1)
-    df = df.sort_values("total", ascending=False, na_position="last").reset_index(drop=True)
+
+    # ── 신뢰도 등급: 점수가 몇 개의 '실데이터' 축으로 뒷받침되는지 ──
+    # 3박자 각각의 근거가 실측/추정/없음 중 무엇인지 종합해 high·medium·low로 나눈다.
+    def conf_axes(r):
+        return int(sum(pd.notna(r[a]) for a in ("ax_place", "ax_biz", "ax_align")))
+
+    def confidence(r):
+        n = conf_axes(r)
+        strong = (int(bool(r["ev_dong_hit"]))                       # 자리: 동 실측
+                  + int(pd.notna(r["far_plan"]))                    # 사업성: 계획 용적률 실데이터
+                  + int(r["align_src"] == "trades")                # 이해관계: 실거래 기반
+                  + int(pd.notna(r["n_trades_12m"]) and r["n_trades_12m"] >= 15))  # 표본 충분
+        if n >= 3 and strong >= 3:
+            return "high"
+        if n <= 1 or strong == 0:
+            return "low"
+        return "medium"
+
+    df["conf_axes"] = df.apply(conf_axes, axis=1)
+    df["confidence"] = df.apply(confidence, axis=1)
+
+    df = df.sort_values(["total"], ascending=False, na_position="last").reset_index(drop=True)
     df["rank"] = df.index + 1
 
     out = {

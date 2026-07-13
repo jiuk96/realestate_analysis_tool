@@ -1266,6 +1266,14 @@ details.budget-fold .legal-hint { font-weight: 500; }
 .zr-score small { font-size: .68rem; font-weight: 600; }
 @media (max-width: 720px) { .zone-detail { position: fixed; inset: auto 0 0 0; top: 30%; width: 100%; border-radius: 14px 14px 0 0; } }
 
+/* 신뢰도 표시 */
+.conf-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: .35rem; vertical-align: middle; }
+.zone-conf-toggle { display: inline-flex; align-items: center; gap: .35rem; font-size: .82rem; color: var(--text2); cursor: pointer; white-space: nowrap; }
+.zd-conf { border: 1px solid; border-left-width: 4px; border-radius: 10px; padding: .6rem .75rem; margin-bottom: .7rem; background: var(--bg); }
+.zd-conf-head { font-size: .85rem; font-weight: 700; display: flex; align-items: center; }
+.zd-conf-note { font-size: .8rem; color: var(--text2); margin: .25rem 0; line-height: 1.5; }
+.zd-conf-srcs { font-size: .78rem; color: var(--text2); }
+
 /* 빌라 — 정비구역 3박자 뷰 */
 .zn-type { font-size: .64rem; font-weight: 800; border-radius: 999px; padding: .12rem .5rem; color: #fff; vertical-align: middle; margin-left: .3rem; }
 .zn-rd { background: var(--green); }
