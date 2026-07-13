@@ -1262,6 +1262,7 @@ function initBudgetPlanner() {
   });
   document.querySelectorAll('#budgetModeToggle .legend-mode-btn').forEach(btn =>
     btn.addEventListener('click', () => applyBudgetMode(btn.dataset.mode)));
+  restoreBudgetInputs();   // 마지막으로 저장된 입력값을 기본값으로 복원
   applyBudgetMode(localStorage.getItem('budgetMode_v1') || 'buy', true);
   initGiftView();
 
@@ -1549,8 +1550,44 @@ function recalcBudget() {
   renderFundFlow(R);
   renderRepayDetail(R);
   renderJeonseBudget(R);   // 전세 모드 결과 (항상 계산, 모드에 따라 표시만)
+  saveBudgetInputs();       // 입력값을 저장 — 다음 방문 때 기본값이 됨
   lastBudgetR = R;          // 부모님용 설명 화면에서 재사용
   if (document.getElementById('giftViewOverlay')?.style.display !== 'none') renderGiftView(gvPerson);
+}
+
+/* ── 예산 입력값 영속화: 한 번 넣은 숫자가 다음 방문의 기본값이 된다 ──
+   #secBudget 안의 모든 number/select/checkbox를 id 기준으로 저장하고,
+   슬라이더는 값이 recalc에서 재계산되므로 상태 변수 3종을 따로 저장한다. */
+const BUDGET_STORE_KEY = 'budgetInputs_v1';
+
+function _budgetFormEls() {
+  return document.querySelectorAll('#secBudget input:not([type="range"]), #secBudget select');
+}
+function saveBudgetInputs() {
+  const els = {};
+  _budgetFormEls().forEach(el => {
+    if (!el.id || el.readOnly) return;
+    els[el.id] = el.type === 'checkbox' ? el.checked : el.value;
+  });
+  localStorage.setItem(BUDGET_STORE_KEY, JSON.stringify({
+    els,
+    loan: loanOverrideState,
+    familyLoan: familyLoanOverrideState,
+    jTarget: jTargetState,
+  }));
+}
+function restoreBudgetInputs() {
+  let saved;
+  try { saved = JSON.parse(localStorage.getItem(BUDGET_STORE_KEY) || 'null'); } catch (e) { return; }
+  if (!saved) return;
+  _budgetFormEls().forEach(el => {
+    if (!el.id || !(el.id in (saved.els || {}))) return;
+    if (el.type === 'checkbox') el.checked = !!saved.els[el.id];
+    else el.value = saved.els[el.id];
+  });
+  if (saved.loan) Object.assign(loanOverrideState, saved.loan);
+  if (saved.familyLoan) Object.assign(familyLoanOverrideState, saved.familyLoan);
+  if (saved.jTarget != null) jTargetState = saved.jTarget;
 }
 
 /* ── 👨‍👩‍👧 부모님께 보여드리는 증여·차용 쉬운 설명 화면 ──────
