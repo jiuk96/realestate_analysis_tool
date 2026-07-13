@@ -3497,9 +3497,15 @@ function showZoneDetail(z) {
     ${row('아파트 갭', z.biz_gap != null ? `주변 아파트의 ${(z.biz_gap * 100).toFixed(0)}% 가격` : null)}
     ${row('중위 빌라가 · 거래량', z.villa_amt != null ? `${z.villa_amt}억 · 12개월 ${z.n_trades_12m}건` : null)}
     ${row('가격 흐름', z.ev_trend != null ? `${z.ev_trend > 0 ? '+' : ''}${z.ev_trend.toFixed(1)}%/년` : null)}
-    <div class="jb-row"><span>용적률 한도 / 현재 용적률</span><span><b>구역별 공식 미공개</b></span></div>
-    <div class="sub-foot" style="border-top:none;margin-top:.2rem">서울 조례 한도 참고: 2종 일반주거 250% · 3종 300% · 준주거 400%.
-      이 구역의 용도지역·계획 용적률은 <a href="https://cleanup.seoul.go.kr/cleanup/bsnssttus/lscrMainIndx.do" target="_blank" rel="noopener">정비몽땅 사업개요 ↗</a>에서 확인하세요.</div>
+    ${z.use_zone ? row('용도지역 (땅의 족보)', `${z.use_zone}${z.far_limit ? ` · 조례 기본한도 ${z.far_limit}%` : ''}`) : ''}
+    ${z.far_plan != null ? row('계획 용적률', `<b style="color:var(--accent)">${z.far_plan}%</b>${z.far_limit ? ` (기본한도 ${z.far_limit}% 대비 ${z.far_plan > z.far_limit ? '+' : ''}${(z.far_plan - z.far_limit).toFixed(0)}%p — 정비사업 완화 적용)` : ''}`) : ''}
+    ${z.bcr != null || z.floors != null ? row('건폐율 · 층수', `${z.bcr != null ? '건폐율 ' + z.bcr + '%' : ''}${z.floors != null ? ' · 최고 지상 ' + z.floors + '층' : ''}`) : ''}
+    ${z.units_sale != null ? row('계획 세대수', `분양 ${z.units_sale.toLocaleString()}세대${z.units_rental != null ? ' + 임대 ' + z.units_rental.toLocaleString() + '세대' : ''}`) : ''}
+    ${z.land_area_z != null ? row('대지면적', `${Math.round(z.land_area_z).toLocaleString()}㎡ (약 ${Math.round(z.land_area_z / 3.3058).toLocaleString()}평)`) : ''}
+    ${z.owners != null || z.tenants != null ? row('토지등소유자 · 세입자', `${z.owners != null ? '소유자 ' + z.owners.toLocaleString() + '명' : ''}${z.tenants != null ? ' · 세입자 ' + z.tenants.toLocaleString() + '명' : ''}`) : ''}
+    ${z.far_plan == null ? `<div class="jb-row"><span>용적률 (사업개요)</span><span><b>아직 미확보</b></span></div>
+    <div class="sub-foot" style="border-top:none;margin-top:.2rem">이 구역의 사업개요가 정비몽땅에 아직 없거나 수집 전입니다 — 서울 조례 한도 참고: 2종 일반주거 200% · 3종 250% · 준주거 400%.
+      <a href="https://cleanup.seoul.go.kr/cleanup/bsnssttus/lscrMainIndx.do" target="_blank" rel="noopener">정비몽땅 ↗</a></div>` : ''}
 
     <div class="zd-sec">🅲 이해관계 — 평형 구성</div>
     ${row('거래 평형 편차', cv != null ? `±${(cv * 100).toFixed(0)}% → ${cvLabel}` : null)}

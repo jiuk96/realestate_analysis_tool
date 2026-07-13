@@ -145,38 +145,94 @@ def try_cleanup_scrape() -> list | None:
     if not zones:
         return None
 
-    # ── 사업개요 정찰 v3: 카페의 모든 하위 메뉴를 순회해 '용적률'이 있는 페이지를 찾는다 ──
-    probed = 0
-    for z in zones:
-        if probed >= 2:
+    # 사업개요(용적률·용도지역·세대수) 상세 수집 — 카페가 있는 사업장 전수, 캐시 누적
+    collect_cafe_details(zones, sess)
+    return [_norm_cleanup_row(z) for z in zones]
+
+
+# ── 사업개요 상세: /cafe/mastr-cleanup-bsnsSumry(div=sumry)에 용도지역·건폐율·
+#    용적률·층수·분양/임대 세대수·대지면적·세입자수가 표로 실려 있다 (2026-07 실측).
+DETAILS_PATH = ROOT / "data" / "processed" / "zone_details.json"
+_NUM = re.compile(r"[\d,]+(?:\.\d+)?")
+
+
+def _parse_summary(txt: str) -> dict:
+    d = {}
+    m = re.search(r"용도지역\s+(제?\S+?(?:지역|구역))", txt)
+    if m:
+        d["use_zone"] = m.group(1)
+    # '공동주택 <대지> <건축> <연면적> <건폐율> <용적률> [최고높이] <층수>' 블록
+    m = re.search(r"건폐율\(%\)\s*용적률\(%\).{0,40}?층수\s+\S*?\s*((?:[\d,\.]+\s+){3,7})(?:지상|지하|층)", txt)
+    if m:
+        nums = [float(x.replace(",", "")) for x in _NUM.findall(m.group(1))]
+        big = [n for n in nums if n > 1500]          # 면적류
+        small = [n for n in nums if n <= 1500]
+        if big:
+            d["land_area"] = big[0]
+        bcr = next((n for n in small if 1 <= n <= 90), None)
+        far = next((n for n in small if 50 <= n <= 1500 and n != bcr), None)
+        if bcr is not None:
+            d["bcr"] = bcr
+        if far is not None:
+            d["far_plan"] = far
+    m = re.search(r"층수[^가-힣]{0,20}지상\s*[:：]?\s*(\d+)", txt) or re.search(r"지상\s*[:：]\s*(\d+)", txt)
+    if m:
+        d["floors"] = int(m.group(1))
+    # 분양 세대수: '85㎡초과' 뒤 숫자들 중 정수 3개(면적대별) 합
+    m = re.search(r"85㎡초과\s+((?:[\d,\.]+\s+){2,8})", txt)
+    if m:
+        ints = [int(x.replace(",", "")) for x in _NUM.findall(m.group(1)) if "." not in x]
+        if len(ints) >= 3:
+            d["units_sale"] = sum(ints[-3:])
+    m = re.search(r"50㎡초과\s+((?:[\d,\.]+\s+){1,6})", txt)
+    if m:
+        ints = [int(x.replace(",", "")) for x in _NUM.findall(m.group(1)) if "." not in x]
+        if ints:
+            d["units_rental"] = ints[-1]
+    m = re.search(r"세입자\s*수\s*([\d,]+)", txt)
+    if m:
+        d["tenants"] = int(m.group(1).replace(",", ""))
+    m = re.search(r"토지등\s?소유자\s*수?\s*(?:\(.*?\))?\s*([\d,]+)", txt)
+    if m:
+        d["owners"] = int(m.group(1).replace(",", ""))
+    return d
+
+
+def collect_cafe_details(zones: list, sess) -> None:
+    cache = {}
+    if DETAILS_PATH.exists():
+        cache = json.loads(DETAILS_PATH.read_text(encoding="utf-8"))
+    base = "https://cleanup.seoul.go.kr"
+    todo = [c for c in dict.fromkeys(z.get("cafe") for z in zones if z.get("cafe"))
+            if c not in cache]
+    print(f"[상세] 사업개요 수집 대상 {len(todo)}개 (캐시 {len(cache)}개)")
+    ok = fail = 0
+    start = time.monotonic()
+    for cafe in todo:
+        if time.monotonic() - start > 15 * 60:     # 상세 수집 시간 예산 15분
+            print(f"[상세] 시간 예산 소진 — 남은 {len(todo) - ok - fail}개는 다음 실행에서")
             break
-        cafe = z.get("cafe")
-        if not cafe:
-            continue
-        probed += 1
-        base = "https://cleanup.seoul.go.kr"
         try:
             r = sess.get(f"{base}/cafe/mainIndx.do?cafeUrl={cafe}", timeout=20)
-            menus = list(dict.fromkeys(
-                m.replace("&amp;", "&") for m in re.findall(r'href="(/cafe/[^"]+)"', r.text)))
-            print(f"[B 정찰v3] {z['cols'][3][:24]} cafe={cafe} 메뉴 {len(menus)}개:")
-            for m in menus[:25]:
-                print("   ", m[:110])
-            for m in menus[:10]:
-                try:
-                    rr = sess.get(base + m, timeout=20)
-                    txt = re.sub(r"\s+", " ", _TAG.sub(" ", rr.text))
-                    i = txt.find("용적률")
-                    mark = "★용적률 발견" if i >= 0 else ""
-                    print(f"  [{rr.status_code}] {m[:80]} len={len(rr.text)} {mark}")
-                    if i >= 0:
-                        print(f"    주변: {txt[max(0, i-200):i+350]}")
-                except Exception as e:
-                    print(f"  {m[:70]} 실패: {e}")
-        except Exception as e:
-            print(f"[B 정찰v3] {cafe} 실패: {e}")
-
-    return [_norm_cleanup_row(z) for z in zones]
+            m = re.search(r"cafeId=([0-9A-Za-z]+)", r.text)
+            if not m:
+                cache[cafe] = {}
+                fail += 1
+                continue
+            cafe_id = m.group(1)
+            rr = sess.get(f"{base}/cafe/mastr-cleanup-bsnsSumry/execute.do",
+                          params={"cafeId": cafe_id, "stepSeCode": "102", "div": "sumry"}, timeout=20)
+            txt = re.sub(r"\s+", " ", _TAG.sub(" ", rr.text))
+            d = _parse_summary(txt)
+            cache[cafe] = d
+            ok += 1 if d else 0
+            fail += 0 if d else 1
+        except Exception:
+            fail += 1
+        time.sleep(0.15)
+    DETAILS_PATH.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
+    n_far = sum(1 for v in cache.values() if v.get("far_plan"))
+    print(f"[상세] 완료: 신규 성공 {ok} · 실패 {fail} · 캐시 총 {len(cache)} (용적률 확보 {n_far}건)")
 
 
 _GU = re.compile(r"(\S+구)$|^(\S+구)\b")

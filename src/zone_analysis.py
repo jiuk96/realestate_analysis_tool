@@ -91,6 +91,24 @@ def main() -> int:
         print("구역 목록이 비어 있음.")
         return 0
 
+    # 사업개요 상세 (collect_zones가 카페별로 캐시)
+    details = {}
+    dpath = P / "zone_details.json"
+    if dpath.exists():
+        details = json.loads(dpath.read_text(encoding="utf-8"))
+
+    # 용도지역 → 서울 조례 기본 용적률 한도 (표시용 참고치)
+    FAR_LIMIT = {"제1종전용": 100, "제2종전용": 120, "제1종일반": 150,
+                 "제2종일반": 200, "제3종일반": 250, "준주거": 400, "준공업": 400}
+
+    def far_limit_of(use_zone):
+        if not use_zone:
+            return None
+        for k, v in FAR_LIMIT.items():
+            if k in use_zone.replace(" ", ""):
+                return v
+        return None
+
     villa = json.loads((P / "villa.json").read_text(encoding="utf-8"))
     dongs = {(d["district"], d["dong"]): d for d in villa.get("dongs", [])}
 
@@ -180,6 +198,17 @@ def main() -> int:
             "ev_jeonse_danger": bool(dv.get("jeonse_danger")) if dv else False,
             "ev_new_share": dv.get("new_share") if dv else None,
         })
+        # 사업개요 상세 병합 (용도지역·계획 용적률·건폐율·층수·세대수·대지면적·세입자)
+        det = details.get(z.get("cafe") or "", {}) or {}
+        rows[-1].update({
+            "use_zone": det.get("use_zone"),
+            "far_plan": det.get("far_plan"),
+            "far_limit": far_limit_of(det.get("use_zone")),
+            "bcr": det.get("bcr"), "floors": det.get("floors"),
+            "units_sale": det.get("units_sale"), "units_rental": det.get("units_rental"),
+            "land_area_z": det.get("land_area"), "tenants": det.get("tenants"),
+            "owners": det.get("owners"),
+        })
     df = pd.DataFrame(rows)
     if df.empty:
         print("매칭 가능한 구역 없음.")
@@ -193,6 +222,7 @@ def main() -> int:
     df["ax_biz"] = np.nanmean(np.vstack([
         _pct(df["biz_area"]).to_numpy(),                 # 종전 평형 클수록 ↑
         _pct(df["biz_gap"], invert=True).to_numpy(),     # 빌라가 아파트 대비 쌀수록 ↑
+        _pct(df["far_plan"]).to_numpy(),                 # 계획 용적률 클수록 ↑ (사업개요 확보분)
     ]), axis=0).round(1)
     df["ax_align"] = _pct(df["align_cv"], invert=True).round(1)
 

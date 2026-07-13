@@ -47,7 +47,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/villa_trade data/villa_rent data/processed/villa.json data/processed/zones_raw.json data/processed/villa_zones.json data/static/dong_locations.json 2>/dev/null || true
+          git add data/villa_trade data/villa_rent data/processed/villa.json data/processed/zones_raw.json data/processed/villa_zones.json data/processed/zone_details.json data/static/dong_locations.json 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "변경 없음 — 스킵"
           else
