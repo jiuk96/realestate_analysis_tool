@@ -92,11 +92,17 @@ jobs:
         run: |
           python collect_villa.py || echo "빌라 수집 일부 실패 — 다음 실행에서 이어받음"
 
+      - name: 정비구역 목록 수집 (정비몽땅/열린데이터광장, best-effort)
+        env:
+          SEOUL_API_KEY: ${{ secrets.SEOUL_API_KEY }}
+        run: |
+          python collect_zones.py || echo "정비구역 수집 실패 — 기존 zones_raw.json 유지"
+
       - name: 빌라 동네 분석 (best-effort)
         env:
           KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
         run: |
-          python src/villa_analysis.py || echo "빌라 분석 실패 — 기존 villa.json 유지"
+          python src/villa_analysis.py && python src/zone_analysis.py || echo "빌라 분석 실패 — 기존 villa.json 유지"
 
       - name: 단지 실제 이야기 해시태그 수집 (네이버 검색 API, best-effort)
         env:

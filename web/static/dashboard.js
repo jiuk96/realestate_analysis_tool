@@ -3399,6 +3399,136 @@ function renderVillaList() {
   renderVillaMap(rows);
 }
 
+/* ── 🧱 정비구역 3박자 뷰 ──────────────────────────────
+   '쉬운 상식'의 3박자(자리·사업성·이해관계)를 그대로 축으로 쓰는 구역 채점.
+   villa_zones.json(src/zone_analysis.py) 렌더. 동뷰와 지도를 공유한다. */
+const ZONE_AXES = [
+  ['ax_place', '🅰 좋은 자리', 'var(--green)', '주변 아파트의 교통·업무지구·학군 + 구 아파트 시세(완공 후 가치)'],
+  ['ax_biz', '🅱 사업성', 'var(--gold)', '종전 평형(클수록 ↑) + 아파트 갭(빌라가 쌀수록 ↑) — 용적률은 데이터 확보 시 추가'],
+  ['ax_align', '🅲 맞는 이해관계', 'var(--acc2)', '거래 면적의 균일함(평형 구성이 비슷할수록 ↑)'],
+];
+let _zoneData = null;
+let _zoneDist = '전체';
+let _villaView = 'zone';
+
+function zoneCard(z, steps) {
+  const sc = z.total;
+  const scColor = sc == null ? 'var(--text3)' : sc >= 70 ? 'var(--green)' : sc >= 50 ? 'var(--gold)' : 'var(--text3)';
+  const axes = ZONE_AXES.map(([k, label, color, desc]) => {
+    const v = z[k];
+    return `<div class="vl-ax" title="${desc}"><span class="vlk" style="width:96px">${label}</span>
+      <div class="vl-bar"><div style="width:${v ?? 0}%;background:${color}"></div></div>
+      <span class="vlv">${v != null ? v.toFixed(0) : '—'}</span></div>`;
+  }).join('');
+  const tl = steps.map((s, i) => {
+    const on = z.stage_idx >= 0 && i <= z.stage_idx;
+    const cur = i === z.stage_idx;
+    return `<span class="zn-step ${on ? 'on' : ''} ${cur ? 'cur' : ''}" title="${s}">${cur ? s : ''}</span>`;
+  }).join('<span class="zn-step-line"></span>');
+  const evid = [];
+  if (z.villa_amt != null) evid.push(`중위 빌라가 ${z.villa_amt}억`);
+  if (z.biz_area != null) evid.push(`종전 평형 ${z.biz_area}㎡`);
+  if (z.biz_gap != null) evid.push(`아파트의 ${(z.biz_gap * 100).toFixed(0)}% 가격`);
+  if (z.n_trades_12m != null) evid.push(`12개월 ${z.n_trades_12m}건`);
+  const q = encodeURIComponent(`${z.gu} ${z.name}`);
+  return `
+  <div class="vl-card" data-zkey="${z.gu}|${encodeURIComponent(z.name)}">
+    <div class="vl-head">
+      <span class="vl-rank">${z.rank}</span>
+      <div class="vl-title">
+        <div class="vl-name">${z.name} <span class="zn-type ${z.type.includes('재건축') ? 'zn-re' : 'zn-rd'}">${z.type || '정비사업'}</span></div>
+        <div class="vl-meta">${z.gu}${z.dong ? ' ' + z.dong : ''} · ${z.stage || '단계 미상'}</div>
+      </div>
+      <span class="vl-score" style="color:${scColor}">${sc != null ? sc.toFixed(0) : '—'}<small>점</small></span>
+    </div>
+    <div class="zn-tl">${tl}</div>
+    <div class="vl-axes">${axes}</div>
+    ${evid.length ? `<div class="vl-chips">${evid.map(e => `<span>${e}</span>`).join('')}</div>` : ''}
+    <details class="jz-fold" style="margin-top:.5rem">
+      <summary>근거 · 확인 링크</summary>
+      <div class="sub-detail-note" style="margin-top:.5rem">
+        🅰 자리는 주변 분석 아파트의 교통·업무지구·학군 점수와 구 아파트 시세(일반분양이 비싸게 팔릴 동네인가)로,
+        🅱 사업성은 종전 평형(②-5 초소형 함정)과 아파트 갭으로, 🅲는 거래 면적의 균일함(1인 1표 갈등 가능성)으로 근사했습니다.
+        구역 경계·용적률·권리산정일은 반드시 공식 확인:
+        <a href="https://cleanup.seoul.go.kr/cleanup/bsnssttus/lscrMainIndx.do" target="_blank" rel="noopener">정비몽땅 ↗</a> ·
+        <a href="https://search.naver.com/search.naver?query=${q}" target="_blank" rel="noopener">뉴스 검색 ↗</a>
+      </div>
+    </details>
+  </div>`;
+}
+
+function renderZoneList() {
+  const d = _zoneData;
+  const listEl = document.getElementById('zoneList');
+  if (!d || !listEl) return;
+  const sortKey = document.getElementById('zoneSort').value;
+  const typ = document.getElementById('zoneTypeSel').value;
+  let rows = d.zones.filter(z => _zoneDist === '전체' || z.gu === _zoneDist);
+  if (typ !== '전체') rows = rows.filter(z => (z.type || '').includes(typ));
+  rows = [...rows].sort((a, b) => {
+    if (sortKey === 'stage_idx') return (a.stage_idx ?? 99) - (b.stage_idx ?? 99);
+    if (sortKey === 'stage_desc') return (b.stage_idx ?? -1) - (a.stage_idx ?? -1);
+    const av = a[sortKey], bv = b[sortKey];
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    return bv - av;
+  });
+  document.getElementById('zoneSummary').textContent =
+    `정비구역 ${d.n_zones}곳 중 ${rows.length}곳 표시 · 가중치: 자리 40 · 사업성 35 · 이해관계 25`;
+  listEl.innerHTML = rows.map(z => zoneCard(z, d.stage_steps || [])).join('') ||
+    `<div class="sub-note">조건에 맞는 구역이 없습니다.</div>`;
+  // 지도: 구역 마커 (동 좌표 근사)
+  renderVillaMap(rows.filter(z => z.lat != null).map(z => ({
+    lat: z.lat, lng: z.lng, total: z.total, n_trades_12m: z.n_trades_12m || 20,
+    jeonse_danger: false, district: z.gu, dong: z.name,
+    median_amount_eok: z.villa_amt ?? '—', median_area: z.biz_area ?? '—', jeonse_ratio: null,
+  })));
+}
+
+async function renderVillaZones() {
+  const listEl = document.getElementById('zoneList');
+  if (!listEl) return false;
+  const d = await (await fetch('/api/villa_zones')).json();
+  if (!d.zones || !d.zones.length) {
+    listEl.innerHTML = `
+    <div class="budget-card" style="grid-column:1/-1">
+      <div class="budget-card-title">정비구역 데이터 수집 대기 중</div>
+      <div class="sub-note" style="line-height:1.7">
+        서울시 정비사업 공개 목록(정비몽땅)에서 구역 목록을 자동 수집하도록 준비되어 있습니다 —
+        GitHub Actions의 <b>「빌라 실거래 수집」</b> 워크플로가 다음 실행 때 채웁니다.
+        더 풍부한 필드(면적·계획 용적률)를 원하면 <b>서울 열린데이터광장(data.seoul.go.kr) 인증키</b>를
+        Secret <code>SEOUL_API_KEY</code>로 등록해 주세요 (선택).</div>
+    </div>`;
+    return false;
+  }
+  _zoneData = d;
+  document.getElementById('zoneCaveat').textContent = '⚠️ ' + (d.caveat || '');
+  const dists = ['전체', ...[...new Set(d.zones.map(z => z.gu).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ko'))];
+  const box = document.getElementById('zoneDistChips');
+  box.innerHTML = dists.map(x => `<button class="price-chip ${x === _zoneDist ? 'active' : ''}" data-d="${x}">${x}</button>`).join('');
+  box.querySelectorAll('.price-chip').forEach(c => c.addEventListener('click', () => {
+    _zoneDist = c.dataset.d;
+    box.querySelectorAll('.price-chip').forEach(x => x.classList.toggle('active', x.dataset.d === _zoneDist));
+    renderZoneList();
+  }));
+  document.getElementById('zoneSort').addEventListener('input', renderZoneList);
+  document.getElementById('zoneTypeSel').addEventListener('input', renderZoneList);
+  renderZoneList();
+  return true;
+}
+
+function applyVillaView(view) {
+  _villaView = view === 'dong' ? 'dong' : 'zone';
+  localStorage.setItem('villaView_v1', _villaView);
+  document.querySelectorAll('#villaViewToggle .legend-mode-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.view === _villaView));
+  document.getElementById('villaZoneView').style.display = _villaView === 'zone' ? '' : 'none';
+  document.getElementById('villaDongView').style.display = _villaView === 'dong' ? '' : 'none';
+  const legend = document.getElementById('villaMapLegend');
+  if (legend) legend.style.display = _villaView === 'dong' ? '' : 'none';
+  if (_villaView === 'dong') renderVillaList(); else renderZoneList();
+}
+
 async function renderVilla() {
   const list = document.getElementById('villaList');
   if (!list) return;
@@ -3431,7 +3561,13 @@ async function renderVilla() {
   }));
   document.getElementById('villaSort').addEventListener('input', renderVillaList);
   document.getElementById('villaMaxEok').addEventListener('input', renderVillaList);
-  renderVillaList();
+
+  // 구역(3박자) 뷰 + 전환 토글 — 구역 데이터 없으면 동뷰로 자동 전환
+  const hasZones = await renderVillaZones();
+  document.querySelectorAll('#villaViewToggle .legend-mode-btn').forEach(b =>
+    b.addEventListener('click', () => applyVillaView(b.dataset.view)));
+  const savedView = localStorage.getItem('villaView_v1');
+  applyVillaView(hasZones ? (savedView || 'zone') : 'dong');
 }
 
 /* ── 📋 청약 자격 진단 ─────────────────────────────────────

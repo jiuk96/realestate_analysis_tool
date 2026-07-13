@@ -216,6 +216,8 @@ def main() -> int:
         ppm2 = float(g12["ppm2"].median())
         med_amt = float(g12["amount"].median())
         med_area = float(g12["area_exclusive"].median())
+        # 평형 구성 유사성(이해관계 프록시): 면적 변동계수 — 낮을수록 이해관계가 비슷
+        area_cv = float(g12["area_exclusive"].std() / g12["area_exclusive"].mean()) if len(g12) >= 8 else None
 
         # 36개월 월별 중앙값 추세 (연 %)
         gt = g[g["ym"].isin(trend_yms)]
@@ -260,6 +262,7 @@ def main() -> int:
         rows.append({
             "district": dist, "dong": str(dong),
             "ppm2": round(ppm2, 1), "py_price": round(ppm2 * 3.3058 / 10000, 2),  # 억/평
+            "area_cv": None if area_cv is None else round(area_cv, 3),
             "median_amount_eok": round(med_amt / 10000, 2), "median_area": round(med_area, 1),
             "n_trades_12m": n12, "liq_chg_pct": None if liq_chg is None else round(liq_chg, 1),
             "trend_pct_yr": None if trend_pct is None else round(trend_pct, 2),

@@ -32,16 +32,22 @@ jobs:
           PYTHONUNBUFFERED: "1"
         run: python collect_villa.py
 
+      - name: 정비구역 목록 수집 (정비몽땅/열린데이터광장, best-effort)
+        env:
+          SEOUL_API_KEY: ${{ secrets.SEOUL_API_KEY }}
+        run: |
+          python collect_zones.py || echo "정비구역 수집 실패 — 기존 zones_raw.json 유지"
+
       - name: 빌라 동네 분석
         env:
           KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
-        run: python src/villa_analysis.py || echo "표본 부족 — 수집을 더 채운 뒤 재실행"
+        run: python src/villa_analysis.py && python src/zone_analysis.py || echo "표본 부족 — 수집을 더 채운 뒤 재실행"
 
       - name: 커밋·푸시
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/villa_trade data/villa_rent data/processed/villa.json data/static/dong_locations.json 2>/dev/null || true
+          git add data/villa_trade data/villa_rent data/processed/villa.json data/processed/zones_raw.json data/processed/villa_zones.json data/static/dong_locations.json 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "변경 없음 — 스킵"
           else

@@ -137,6 +137,15 @@ def api_villa():
         return jsonify({})
 
 
+@app.route("/api/villa_zones")
+def api_villa_zones():
+    """정비구역(3박자) 분석 (src/zone_analysis.py). 없으면 빈 dict."""
+    try:
+        return jsonify(_load("villa_zones.json"))
+    except FileNotFoundError:
+        return jsonify({})
+
+
 @app.route("/api/subscriptions")
 def api_subscriptions():
     """서울 분양 공고 (collect_subscriptions.py 산출, 청약홈 API). 없으면 빈 dict."""

@@ -7,9 +7,10 @@
     <div class="section-label">매매 · 빌라</div>
     <h2 class="section-title">빌라(연립·다세대) — 동네 단위 매수 분석</h2>
     <p class="section-desc">
-      빌라는 한 건물 세대수가 적어 아파트처럼 <b>건물별 점수</b>를 내면 표본 1~3건짜리 허수가 됩니다.
-      대신 <b>법정동(동네) 단위</b>로 묶어 실거래 표본을 확보하고, 빌라 매수에서 실제로 판단 가능한
-      5개 지표(가격 접근성 · 유동성 · 가격 흐름 · 아파트 갭 · 깡통 안전)로 <b>어느 동네의 빌라를 볼지</b>를 골라줍니다.
+      빌라·주택 투자는 결국 <b>정비구역(재개발·재건축) 게임</b>입니다. 그래서 '쉬운 상식' 탭의
+      <b>3박자 — 좋은 자리 · 사업성 · 맞는 이해관계</b> — 를 점수의 근간으로,
+      서울의 실제 정비구역(예: 공덕8구역)을 구역 단위로 채점합니다.
+      보조로 법정동 단위 시세 분석(평단가·거래량·깡통 위험)도 함께 제공합니다.
     </p>
 
     <!-- 🗺️ 동네 지도: 원 크기 = 거래량, 색 = 종합점수, 빨간 테두리 = 깡통 위험 -->
@@ -19,6 +20,40 @@
       <span style="color:#f59e0b">앰버 50+</span> / 회색 그 외) · <span style="color:var(--red)">빨간 테두리 = 깡통 위험권(전세가율 80%+)</span>
       · 클릭하면 아래 카드로 이동
     </div>
+
+    <!-- 🧱 구역별(3박자) / 🏘️ 동네별(시세) 보기 전환 -->
+    <div class="legend-mode-toggle" id="villaViewToggle" style="margin-bottom:1rem">
+      <button class="legend-mode-btn active" data-view="zone">🧱 정비구역별 (3박자)</button>
+      <button class="legend-mode-btn" data-view="dong">🏘️ 동네별 (시세·위험)</button>
+    </div>
+
+    <!-- 구역별 뷰 -->
+    <div id="villaZoneView">
+      <div class="villa-controls">
+        <div class="price-chips" id="zoneDistChips"></div>
+        <div class="villa-control-row">
+          <select id="zoneSort" class="explorer-sort">
+            <option value="total">3박자 종합순</option>
+            <option value="ax_place">🅰 자리 좋은순</option>
+            <option value="ax_biz">🅱 사업성 좋은순</option>
+            <option value="ax_align">🅲 이해관계 맞는순</option>
+            <option value="stage_idx">단계 빠른순 (초기)</option>
+            <option value="stage_desc">단계 깊은순 (안전)</option>
+          </select>
+          <select id="zoneTypeSel" class="explorer-sort">
+            <option value="전체">전체 유형</option>
+            <option value="재개발">재개발</option>
+            <option value="재건축">재건축</option>
+          </select>
+        </div>
+      </div>
+      <div class="sub-note" id="zoneSummary"></div>
+      <div class="villa-grid" id="zoneList"></div>
+      <div class="sub-foot" id="zoneCaveat" style="margin-top:1.2rem"></div>
+    </div>
+
+    <div id="villaDongView" style="display:none">
+
 
     <div class="villa-controls">
       <div class="price-chips" id="villaDistChips"></div>
@@ -41,6 +76,7 @@
     <div class="villa-grid" id="villaList"></div>
 
     <div class="sub-foot" id="villaCaveat" style="margin-top:1.2rem"></div>
+    </div><!-- /villaDongView -->
   </div>
 </section>
 {% endblock %}

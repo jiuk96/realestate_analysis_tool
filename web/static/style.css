@@ -1250,6 +1250,16 @@ details.budget-fold .legal-hint { font-weight: 500; }
 .learn-video { position: relative; padding-top: 56.25%; border-radius: 12px; overflow: hidden; margin-top: .7rem; background: #000; }
 .learn-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; }
 
+/* 빌라 — 정비구역 3박자 뷰 */
+.zn-type { font-size: .64rem; font-weight: 800; border-radius: 999px; padding: .12rem .5rem; color: #fff; vertical-align: middle; margin-left: .3rem; }
+.zn-rd { background: var(--green); }
+.zn-re { background: var(--acc2); }
+.zn-tl { display: flex; align-items: center; margin: .15rem 0 .6rem; }
+.zn-step { width: 10px; height: 10px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--border-strong, #c6ced8); flex-shrink: 0; font-size: .62rem; color: var(--accent); font-weight: 800; display: flex; align-items: center; white-space: nowrap; }
+.zn-step.on { background: var(--accent); border-color: var(--accent); }
+.zn-step.cur { width: auto; height: auto; border: none; background: none; padding: 0 .15rem; }
+.zn-step-line { flex: 1; height: 2px; background: var(--border); }
+
 /* 쉬운 상식 — 뉴스 발췌·케이스 팩트/타임라인 */
 .term-news { font-size: .8rem; color: var(--text); background: var(--bg-soft); border-left: 3px solid var(--gold); border-radius: 6px; padding: .5rem .7rem; margin-bottom: .55rem; font-style: normal; line-height: 1.6; }
 .cs-facts { display: flex; flex-wrap: wrap; gap: .35rem; margin: .1rem 0 .55rem; }
