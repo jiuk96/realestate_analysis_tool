@@ -1254,11 +1254,19 @@ details.budget-fold .legal-hint { font-weight: 500; }
 .zn-type { font-size: .64rem; font-weight: 800; border-radius: 999px; padding: .12rem .5rem; color: #fff; vertical-align: middle; margin-left: .3rem; }
 .zn-rd { background: var(--green); }
 .zn-re { background: var(--acc2); }
-.zn-tl { display: flex; align-items: center; margin: .15rem 0 .6rem; }
-.zn-step { width: 10px; height: 10px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--border-strong, #c6ced8); flex-shrink: 0; font-size: .62rem; color: var(--accent); font-weight: 800; display: flex; align-items: center; white-space: nowrap; }
+.zn-tl { display: flex; align-items: center; margin: .15rem 0 .6rem; min-height: 22px; }
+.zn-step { width: 10px; height: 10px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--border-strong, #c6ced8); flex-shrink: 0; }
 .zn-step.on { background: var(--accent); border-color: var(--accent); }
-.zn-step.cur { width: auto; height: auto; border: none; background: none; padding: 0 .15rem; }
-.zn-step-line { flex: 1; height: 2px; background: var(--border); }
+.zn-step.cur { width: auto; height: auto; border: none; background: var(--accent); color: #fff; border-radius: 999px; padding: .12rem .5rem; font-size: .64rem; font-weight: 800; white-space: nowrap; line-height: 1.2; }
+.zn-step-line { flex: 1; height: 2px; background: var(--border); min-width: 4px; }
+/* 3박자 게이지: 라벨 칸을 넓혀 겹침 방지 */
+.zn-ax { grid-template-columns: 112px 1fr 32px !important; }
+.zn-ax .vlk { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* 긴 구역명·주소 줄바꿈 (글자 겹침/삐져나감 방지) */
+.vl-name, .vl-meta { overflow-wrap: anywhere; word-break: keep-all; }
+.vl-clickable { cursor: pointer; transition: box-shadow .15s, transform .15s; }
+.vl-clickable:hover { box-shadow: 0 4px 14px rgba(20,40,70,.12); transform: translateY(-1px); }
+@media (max-width: 480px) { .zn-ax { grid-template-columns: 96px 1fr 30px !important; } .zn-ax .vlk { font-size: .68rem; } }
 
 /* 쉬운 상식 — 뉴스 발췌·케이스 팩트/타임라인 */
 .term-news { font-size: .8rem; color: var(--text); background: var(--bg-soft); border-left: 3px solid var(--gold); border-radius: 6px; padding: .5rem .7rem; margin-bottom: .55rem; font-style: normal; line-height: 1.6; }

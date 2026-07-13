@@ -3277,6 +3277,25 @@ let _villaData = null;
 let _villaDist = '전체';
 let _villaMap = null;
 let _villaMarkers = [];
+let _villaMarkerByKey = {};
+
+// 카드 클릭 → 지도에서 해당 위치로 이동 + 팝업 (링크·접이식 클릭은 제외)
+function focusVillaOnMap(el) {
+  const lat = parseFloat(el.dataset.lat), lng = parseFloat(el.dataset.lng);
+  if (!_villaMap || isNaN(lat)) return;
+  document.getElementById('villaMap')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  try {
+    _villaMap.setView([lat, lng], 15, { animate: true });
+    _villaMarkerByKey[el.dataset.zkey || el.dataset.key]?.openPopup();
+  } catch (e) { /* 지도 스텁/미로드 환경 무시 */ }
+}
+function wireVillaCardClicks(containerId) {
+  document.querySelectorAll(`#${containerId} .vl-card`).forEach(card =>
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('a, details, summary, button, input')) return;
+      focusVillaOnMap(card);
+    }));
+}
 
 /* 동네 지도: 원 크기=거래량, 색=종합점수, 빨간 테두리=깡통 위험. 필터와 연동 */
 function renderVillaMap(rows) {
@@ -3292,6 +3311,7 @@ function renderVillaMap(rows) {
     }
     _villaMarkers.forEach(m => _villaMap.removeLayer(m));
     _villaMarkers = [];
+    _villaMarkerByKey = {};
 
     const pts = [];
     rows.forEach(d => {
@@ -3319,6 +3339,7 @@ function renderVillaMap(rows) {
         });
       });
       _villaMarkers.push(m);
+      _villaMarkerByKey[`${d.district}|${encodeURIComponent(d.dong)}`] = m;
       pts.push([d.lat, d.lng]);
     });
     if (pts.length && _villaDist !== '전체') _villaMap.fitBounds(L.latLngBounds(pts).pad(0.2));
@@ -3350,7 +3371,8 @@ function villaCard(d) {
     `<tr><td>${t.ym.slice(0, 4)}.${t.ym.slice(4)}</td><td>${t.name || '—'}</td><td>${t.area}㎡${t.floor != null ? ` · ${t.floor}층` : ''}</td><td>${t.build_year || '—'}년</td><td><b>${t.amount}억</b></td></tr>`).join('');
 
   return `
-  <div class="vl-card" data-key="${d.district}|${encodeURIComponent(d.dong)}">
+  <div class="vl-card vl-clickable" data-key="${d.district}|${encodeURIComponent(d.dong)}"
+       ${d.lat != null ? `data-lat="${d.lat}" data-lng="${d.lng}"` : ''} title="카드를 누르면 지도에서 위치를 보여줍니다">
     <div class="vl-head">
       <span class="vl-rank">${d.rank}</span>
       <div class="vl-title">
@@ -3396,6 +3418,7 @@ function renderVillaList() {
     `기준 ${d.period_12m.replace('~', ' ~ ')} · 표본 충분 동네 ${d.n_dongs}개 중 ${rows.length}개 표시 · 실거래 ${d.n_trades_used.toLocaleString()}건 사용`;
   list.innerHTML = rows.map(villaCard).join('') ||
     `<div class="sub-note">조건에 맞는 동네가 없습니다 — 예산 상한이나 구 필터를 풀어보세요.</div>`;
+  wireVillaCardClicks('villaList');
   renderVillaMap(rows);
 }
 
@@ -3416,7 +3439,7 @@ function zoneCard(z, steps) {
   const scColor = sc == null ? 'var(--text3)' : sc >= 70 ? 'var(--green)' : sc >= 50 ? 'var(--gold)' : 'var(--text3)';
   const axes = ZONE_AXES.map(([k, label, color, desc]) => {
     const v = z[k];
-    return `<div class="vl-ax" title="${desc}"><span class="vlk" style="width:96px">${label}</span>
+    return `<div class="vl-ax zn-ax" title="${desc}"><span class="vlk">${label}</span>
       <div class="vl-bar"><div style="width:${v ?? 0}%;background:${color}"></div></div>
       <span class="vlv">${v != null ? v.toFixed(0) : '—'}</span></div>`;
   }).join('');
@@ -3432,7 +3455,8 @@ function zoneCard(z, steps) {
   if (z.n_trades_12m != null) evid.push(`12개월 ${z.n_trades_12m}건`);
   const q = encodeURIComponent(`${z.gu} ${z.name}`);
   return `
-  <div class="vl-card" data-zkey="${z.gu}|${encodeURIComponent(z.name)}">
+  <div class="vl-card vl-clickable" data-zkey="${z.gu}|${encodeURIComponent(z.name)}"
+       ${z.lat != null ? `data-lat="${z.lat}" data-lng="${z.lng}"` : ''} title="카드를 누르면 지도에서 위치를 보여줍니다">
     <div class="vl-head">
       <span class="vl-rank">${z.rank}</span>
       <div class="vl-title">
@@ -3477,6 +3501,7 @@ function renderZoneList() {
     `정비구역 ${d.n_zones}곳 중 ${rows.length}곳 표시 · 가중치: 자리 40 · 사업성 35 · 이해관계 25`;
   listEl.innerHTML = rows.map(z => zoneCard(z, d.stage_steps || [])).join('') ||
     `<div class="sub-note">조건에 맞는 구역이 없습니다.</div>`;
+  wireVillaCardClicks('zoneList');
   // 지도: 구역 마커 (동 좌표 근사)
   renderVillaMap(rows.filter(z => z.lat != null).map(z => ({
     lat: z.lat, lng: z.lng, total: z.total, n_trades_12m: z.n_trades_12m || 20,
