@@ -70,6 +70,25 @@ def _clean(s: str) -> str:
     return html.unescape(_TAG.sub("", s or "")).strip()
 
 
+# 같은 사건을 다룬 유사 기사 묶기용 — 제목 핵심 단어 집합
+_STOP = {"대통령", "서울", "부동산", "오세훈", "이재명", "정부", "기자", "종합", "속보",
+         "단독", "한다", "있다", "관련", "밝혀", "예정"}
+
+
+def _title_tokens(t: str) -> set:
+    t = re.sub(r"\[[^\]]*\]|\([^)]*\)", "", t)
+    return {w for w in re.findall(r"[가-힣]{2,}|[A-Za-z]{2,}|\d+", t.lower()) if w not in _STOP}
+
+
+def _is_dup(cand: set, kept_tokens: list) -> bool:
+    """이미 채택한 기사와 핵심 단어가 크게 겹치면(겹침계수≥0.4, 공통 3개↑) 중복으로 본다."""
+    for ks in kept_tokens:
+        common = len(cand & ks)
+        if common >= 3 and common / max(1, min(len(cand), len(ks))) >= 0.4:
+            return True
+    return False
+
+
 def _theme_of(text: str):
     for label, emoji, pat, expl in THEMES:
         if pat and re.search(pat, text):
@@ -125,9 +144,16 @@ def main() -> int:
         except Exception as e:
             print(f"  '{q}' 실패: {e}")
 
-    # 최신순 정렬 후 상한
+    # 최신순 정렬 후, 같은 사건을 다룬 유사 기사는 하나만 남기고 상한 적용
     items.sort(key=lambda x: x["date"], reverse=True)
-    items = items[:60]
+    deduped, kept_tokens = [], []
+    for it in items:
+        tk = _title_tokens(it["title"])
+        if _is_dup(tk, kept_tokens):
+            continue
+        deduped.append(it)
+        kept_tokens.append(tk)
+    items = deduped[:60]
 
     # 테마별 개수 (뉴스 페이지 필터용)
     themes = {}
