@@ -49,6 +49,7 @@ _PAGES = {
     "budget":          "budget.html",           # 예산 플래너
     "subscription":    "subscription.html",     # 청약 자격 진단
     "learn":           "learn.html",            # 쉬운 부동산 상식 (재개발·재건축)
+    "news":            "news.html",             # 부동산 뉴스 쉽게
     "ai":              "ai.html",               # AI 추천
 }
 
@@ -133,6 +134,15 @@ def api_villa():
     """빌라(연립·다세대) 동네 단위 분석 (src/villa_analysis.py 산출). 없으면 빈 dict."""
     try:
         return jsonify(_load("villa.json"))
+    except FileNotFoundError:
+        return jsonify({})
+
+
+@app.route("/api/news")
+def api_news():
+    """부동산 뉴스 + 쉬운 해설 (collect_news.py, 네이버 뉴스 API). 없으면 빈 dict."""
+    try:
+        return jsonify(_load("news.json"))
     except FileNotFoundError:
         return jsonify({})
 

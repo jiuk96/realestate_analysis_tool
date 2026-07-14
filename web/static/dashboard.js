@@ -4078,6 +4078,61 @@ async function initSubscription() {
   } catch (e) { list.innerHTML = ''; }
 }
 
+/* ── 📰 부동산 뉴스 쉽게 읽기 ──────────────────────────────
+   collect_news.py 산출 news.json. 기사(네이버) + 테마 해설(본 서비스). */
+let _newsData = null;
+let _newsTheme = '전체';
+
+function newsCard(n) {
+  const link = n.link || '#';
+  return `
+  <div class="news-card">
+    <div class="news-head"><span class="news-emoji">${n.emoji || '🏠'}</span>
+      <span class="news-theme">${n.theme || '부동산'}</span>
+      <span class="news-date">${n.date || ''}</span></div>
+    <a class="news-title" href="${link}" target="_blank" rel="noopener">${n.title} ↗</a>
+    ${n.summary ? `<div class="news-summary">${n.summary}</div>` : ''}
+    ${n.explainer ? `<div class="news-explain"><b>💡 쉽게 말하면</b> — ${n.explainer}</div>` : ''}
+  </div>`;
+}
+
+function renderNewsList() {
+  const d = _newsData, list = document.getElementById('newsList');
+  if (!d || !list) return;
+  const rows = _newsTheme === '전체' ? d.items : d.items.filter(n => n.theme === _newsTheme);
+  document.getElementById('newsSummary').innerHTML =
+    `업데이트 ${d.updated || '—'} · ${rows.length}건 · 제목·요약은 네이버 뉴스, ` +
+    `<b style="color:var(--acc2)">💡 해설은 본 서비스</b>가 붙였습니다`;
+  list.innerHTML = rows.map(newsCard).join('') || `<div class="sub-note">해당 주제 뉴스가 없습니다.</div>`;
+}
+
+async function renderNews() {
+  const list = document.getElementById('newsList');
+  if (!list) return;
+  const d = await (await fetch('/api/news')).json();
+  if (!d.items || !d.items.length) {
+    list.innerHTML = `
+    <div class="budget-card">
+      <div class="budget-card-title">뉴스 데이터 준비 중</div>
+      <div class="sub-note" style="line-height:1.7">네이버 뉴스 검색으로 부동산 기사를 매일 모으도록 준비돼 있습니다 —
+        <code>NAVER_CLIENT_ID/SECRET</code>(리뷰 태그와 동일 키)가 설정돼 있으면
+        다음 수집 때 자동으로 채워집니다.</div>
+    </div>`;
+    return;
+  }
+  _newsData = d;
+  const themes = ['전체', ...Object.keys(d.themes || {})];
+  const box = document.getElementById('newsThemeChips');
+  box.innerHTML = themes.map(t =>
+    `<button class="price-chip ${t === _newsTheme ? 'active' : ''}" data-t="${t}">${t}${t !== '전체' && d.themes[t] ? ` <small>${d.themes[t]}</small>` : ''}</button>`).join('');
+  box.querySelectorAll('.price-chip').forEach(c => c.addEventListener('click', () => {
+    _newsTheme = c.dataset.t;
+    box.querySelectorAll('.price-chip').forEach(x => x.classList.toggle('active', x.dataset.t === _newsTheme));
+    renderNewsList();
+  }));
+  renderNewsList();
+}
+
 /* ── 초기화 ─────────────────────────────────────────────── */
 (async function init() {
   const safe = async (fn) => { try { await fn(); } catch (e) { console.error(fn.name, e); } };
@@ -4086,6 +4141,7 @@ async function initSubscription() {
   await safe(initBudgetPlanner);
   await safe(initSubscription);
   await safe(renderVilla);
+  await safe(renderNews);
   // 각 섹션을 독립 실행 — 한 곳(예: 지도 CDN)이 실패해도 나머지는 정상 렌더
   await safe(renderExplorer);
   await safe(renderMap);

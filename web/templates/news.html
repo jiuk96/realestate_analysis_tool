@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% set active_page = 'news' %}
+{% block title %}부동산 뉴스 쉽게 · 서울 부동산 분석 툴{% endblock %}
+{% block content %}
+<section class="section section-alt" id="secNews">
+  <div class="section-inner">
+    <div class="section-label">뉴스</div>
+    <h2 class="section-title">부동산 뉴스, 쉽게 읽기</h2>
+    <p class="section-desc">
+      최근 부동산 뉴스를 모아, 각 기사가 <b>왜 중요하고 나에게 무슨 뜻인지</b>를 주제별 해설과 함께 보여줍니다.
+      제목·요약은 <b>네이버 뉴스</b>에서 가져오고, 파란 해설 박스는 <b>본 서비스가 쉬운 말로 붙인 설명</b>입니다.
+    </p>
+
+    <div class="price-chips" id="newsThemeChips"></div>
+    <div class="sub-note" id="newsSummary" style="margin:.6rem 0"></div>
+    <div id="newsList" class="news-list"></div>
+
+    <p class="section-desc" style="margin-top:1.2rem;font-size:.8rem;color:var(--text3)">
+      ※ 기사 제목·요약과 링크의 저작권은 각 언론사에 있으며, 클릭 시 원문으로 이동합니다.
+      해설은 일반적 이해를 돕기 위한 것으로 특정 종목·매물 추천이 아닙니다.
+    </p>
+  </div>
+</section>
+{% endblock %}

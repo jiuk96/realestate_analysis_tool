@@ -117,6 +117,13 @@ jobs:
         run: |
           python collect_subscriptions.py || echo "청약 공고 수집 실패 — 기존 subscriptions.json 유지"
 
+      - name: 부동산 뉴스 수집 (best-effort)
+        env:
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+        run: |
+          python collect_news.py || echo "뉴스 수집 실패 — 기존 news.json 유지"
+
       - name: 전세 안전성 지표 산출 (additive)
         run: |
           python src/jeonse_safety.py || echo "안전성 산출 실패 — 기존 jeonse_safety.json 유지"

@@ -1266,6 +1266,19 @@ details.budget-fold .legal-hint { font-weight: 500; }
 .zr-score small { font-size: .68rem; font-weight: 600; }
 @media (max-width: 720px) { .zone-detail { position: fixed; inset: auto 0 0 0; top: 30%; width: 100%; border-radius: 14px 14px 0 0; } }
 
+/* 부동산 뉴스 */
+.news-list { display: flex; flex-direction: column; gap: .9rem; margin-top: .3rem; }
+.news-card { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 14px; padding: 1rem 1.15rem; box-shadow: var(--shadow-sm); }
+.news-head { display: flex; align-items: center; gap: .5rem; margin-bottom: .35rem; font-size: .76rem; }
+.news-emoji { font-size: 1.1rem; }
+.news-theme { font-weight: 800; color: var(--accent); }
+.news-date { color: var(--text3); margin-left: auto; font-variant-numeric: tabular-nums; }
+.news-title { display: block; font-size: 1rem; font-weight: 700; color: var(--text); text-decoration: none; line-height: 1.5; }
+.news-title:hover { color: var(--acc2); }
+.news-summary { font-size: .84rem; color: var(--text2); line-height: 1.6; margin-top: .3rem; }
+.news-explain { font-size: .84rem; color: var(--text2); line-height: 1.65; margin-top: .6rem; background: var(--bg); border-left: 3px solid var(--acc2); border-radius: 8px; padding: .6rem .8rem; }
+.news-explain b { color: var(--acc2); }
+
 /* 신뢰도 표시 */
 .conf-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: .35rem; vertical-align: middle; }
 .zone-conf-toggle { display: inline-flex; align-items: center; gap: .35rem; font-size: .82rem; color: var(--text2); cursor: pointer; white-space: nowrap; }

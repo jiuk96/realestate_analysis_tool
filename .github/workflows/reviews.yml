@@ -30,11 +30,17 @@ jobs:
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
         run: python collect_reviews.py
 
+      - name: 부동산 뉴스 수집
+        env:
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+        run: python collect_news.py || echo "뉴스 수집 실패 — 기존 news.json 유지"
+
       - name: 커밋·푸시
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/processed/apt_reviews.json
+          git add data/processed/apt_reviews.json data/processed/news.json
           if git diff --staged --quiet; then
             echo "변경 없음 — 스킵"
           else
