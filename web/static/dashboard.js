@@ -4092,7 +4092,7 @@ function newsCard(n) {
       <span class="news-date">${n.date || ''}</span></div>
     <a class="news-title" href="${link}" target="_blank" rel="noopener">${n.title} ↗</a>
     ${n.summary ? `<div class="news-summary">${n.summary}</div>` : ''}
-    ${n.explainer ? `<div class="news-explain"><b>💡 쉽게 말하면</b> — ${n.explainer}</div>` : ''}
+    ${(n.context || n.explainer) ? `<div class="news-context">🔑 ${n.context || n.explainer}</div>` : ''}
   </div>`;
 }
 

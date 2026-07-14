@@ -1275,9 +1275,8 @@ details.budget-fold .legal-hint { font-weight: 500; }
 .news-date { color: var(--text3); margin-left: auto; font-variant-numeric: tabular-nums; }
 .news-title { display: block; font-size: 1rem; font-weight: 700; color: var(--text); text-decoration: none; line-height: 1.5; }
 .news-title:hover { color: var(--acc2); }
-.news-summary { font-size: .84rem; color: var(--text2); line-height: 1.6; margin-top: .3rem; }
-.news-explain { font-size: .84rem; color: var(--text2); line-height: 1.65; margin-top: .6rem; background: var(--bg); border-left: 3px solid var(--acc2); border-radius: 8px; padding: .6rem .8rem; }
-.news-explain b { color: var(--acc2); }
+.news-summary { font-size: .92rem; color: var(--text); line-height: 1.65; margin-top: .4rem; }
+.news-context { font-size: .76rem; color: var(--text3); line-height: 1.55; margin-top: .5rem; }
 
 /* 신뢰도 표시 */
 .conf-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: .35rem; vertical-align: middle; }
