@@ -34,6 +34,8 @@ import pandas as pd
 ROOT = Path(__file__).parent.parent
 P = ROOT / "data" / "processed"
 OUT = Path(os.environ.get("ZONE_OUT", P / "villa_zones.json"))
+sys.path.insert(0, str(ROOT / "src"))
+from villa_analysis import _dong_locations   # 동 좌표 캐시+지오코딩 재사용
 
 WEIGHTS = {"place": 0.40, "biz": 0.35, "align": 0.25}
 
@@ -227,6 +229,20 @@ def main() -> int:
             "land_area_z": det.get("land_area"), "tenants": det.get("tenants"),
             "owners": det.get("owners"),
         })
+    # 지도용 좌표 보강: 빌라 시세 매칭이 안 돼 좌표가 없는 구역도 '구|동' 좌표로 채운다
+    # (캐시에 있으면 즉시, 없으면 지오코딩 후 캐시에 누적 — 빌라 동네와 동일 소스).
+    need = [f"{r['gu']}|{r['dong']}" for r in rows if r.get("lat") is None and r.get("dong")]
+    if need:
+        zlocs = _dong_locations(sorted(set(need)))
+        filled = 0
+        for r in rows:
+            if r.get("lat") is None and r.get("dong"):
+                loc = zlocs.get(f"{r['gu']}|{r['dong']}")
+                if loc and loc.get("lat") is not None:
+                    r["lat"], r["lng"] = loc["lat"], loc["lng"]
+                    filled += 1
+        print(f"[좌표] 시세 미매칭 구역 좌표 보강: {filled}/{len(need)}건")
+
     df = pd.DataFrame(rows)
     if df.empty:
         print("매칭 가능한 구역 없음.")
