@@ -404,10 +404,11 @@ export function calcMonthlyPayment(principal, annualRate, years, type = 'annuity
  * @param {number} years        만기 (년)
  * @returns {number} 대출 가능액 (원)
  */
-export function maxLoanByDSR(annualIncome, annualRate, years) {
+export function maxLoanByDSR(annualIncome, annualRate, years, otherMonthly = 0) {
   if (!annualIncome || annualIncome <= 0) return 0;
   const r = annualRate / 12, n = years * 12;
-  const monthlyCap = annualIncome * DSR_LIMIT / 12;
+  // DSR 40% 한도에서 기존 대출(신용대출 등) 월 원리금을 먼저 뺀 나머지가 주담대 여력
+  const monthlyCap = Math.max(0, annualIncome * DSR_LIMIT / 12 - (otherMonthly || 0));
   return r === 0 ? monthlyCap * n : monthlyCap * (1 - Math.pow(1 + r, -n)) / r;
 }
 
@@ -570,7 +571,7 @@ export function analyzeFinance(input) {
 export function personDsrLoan(p) {
   const stressRate = (p.rate || 0.041) + REGULATION.STRESS_DSR_ADDON;
   return Math.min(
-    maxLoanByDSR(p.income || 0, stressRate, p.years || 40),
+    maxLoanByDSR(p.income || 0, stressRate, p.years || 40, p.otherMonthly || 0),
     (p.product && p.product.maxLoan) || Infinity
   );
 }
@@ -581,9 +582,10 @@ function analyzePerson(p, common) {
   const fam = calcFamilyLoan(p.family || 0, p.familyYears || 10);
   const equity = (p.cash || 0) + gift.netReceived;   // 현금 + 세후증여
   const stressRate = (p.rate || 0.041) + REGULATION.STRESS_DSR_ADDON;
-  // 대출 한도(DSR)는 세전 연소득 기준으로 산정
+  // 대출 한도(DSR)는 세전 연소득 기준으로 산정 — 기타대출 월 원리금은 한도에서 차감
+  const otherMonthly = p.otherMonthly || 0;
   const dsrLoan = Math.min(
-    maxLoanByDSR(p.income || 0, stressRate, p.years || 40),
+    maxLoanByDSR(p.income || 0, stressRate, p.years || 40, otherMonthly),
     (p.product && p.product.maxLoan) || Infinity
   );
   return {
@@ -591,7 +593,7 @@ function analyzePerson(p, common) {
     giftDetail: gift,   // 증여공제 내역(기본/혼인·출산 공제, 과세표준, 세율 등) 표시용
     parentSplit: p.parentSplit,   // 부모지원 총액 분해 내역(기본공제/혼인공제/무이자차용/그외증여)
     family: p.family || 0, familyMonthly: fam.monthly, familyOverLimit: fam.overLimit,
-    equity, dsrLoan, income: p.income || 0,
+    equity, dsrLoan, income: p.income || 0, otherMonthly,
     // 실제 상환 여력은 사용자가 입력한 세후 실수령 월급 기준
     netMonthly: p.netMonthly || 0,
     product: p.product, rate: p.rate, years: p.years,
@@ -653,6 +655,10 @@ export function analyzeCouple(inA, inB, common) {
 
   const person = (P, ln, mth) => {
     const bankMonthly = mth - P.familyMonthly;   // 은행 상환분
+    // DSR = (주담대 원리금 + 기타대출 원리금) × 12 ÷ 세전 연소득. 규제선 40%.
+    const housingMonthlyDsr = calcMonthlyPayment(ln, P.rate, P.years, 'annuity').first;  // 원리금균등 기준
+    const dsrMonthly = housingMonthlyDsr + (P.otherMonthly || 0);
+    const dsrRatio = P.income > 0 ? (dsrMonthly * 12) / P.income : 0;
     return {
       cash: P.cash, netGift: P.netGift, giftGross: P.giftGross, giftTax: P.giftTax,
       giftDetail: P.giftDetail,   // 증여공제 분해 내역 (기본/혼인·출산 공제, 과세표준, 세율)
@@ -665,6 +671,8 @@ export function analyzeCouple(inA, inB, common) {
       burdenPct: P.netMonthly > 0 ? (mth / P.netMonthly) : 0,
       contrib: P.equity + P.family + ln,     // 각자 총 기여 가용자금
       dsrLoan: P.dsrLoan, familyOverLimit: P.familyOverLimit,
+      // DSR 계산기 표시용 (주담대·기타대출 원리금 분해)
+      dsrRatio, dsrHousingMonthly: housingMonthlyDsr, dsrOtherMonthly: P.otherMonthly || 0,
       rate: P.rate, years: P.years,          // 대출 시뮬레이터용 (금리·만기)
     };
   };

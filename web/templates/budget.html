@@ -54,11 +54,16 @@
             <div class="budget-field"><label>금리 (%) <button class="legal-link" data-legal="rate">?</button></label><div class="bf-input"><input type="number" id="aRate" step="0.05" min="0"></div></div>
             <div class="budget-field"><label>만기 (년)</label><div class="bf-input"><input type="number" id="aYears" step="5" min="5" max="50"></div></div>
           </div>
+          <div class="budget-field">
+            <label>기타 대출 월 상환액 <small style="color:var(--text3)">신용대출·카드론·자동차 등</small></label>
+            <div class="bf-input"><input type="number" id="aOtherDebt" value="0" step="10" min="0"><span>만원/월</span></div>
+          </div>
           <div class="budget-field ls-field">
             <label>실제 사용할 대출액 <span class="ls-max" id="aLoanMax"></span></label>
             <input type="range" class="ls-slider" id="aLoanOverride" min="0" max="0" step="1000000" value="0">
             <div class="ls-out" id="aLoanOut"></div>
           </div>
+          <div id="aDsrGauge" class="dsr-gauge"></div>
         </div>
 
         <div id="aSummary" class="person-summary" data-bmode="buy"></div>
@@ -100,11 +105,16 @@
             <div class="budget-field"><label>금리 (%) <button class="legal-link" data-legal="rate">?</button></label><div class="bf-input"><input type="number" id="bRate" step="0.05" min="0"></div></div>
             <div class="budget-field"><label>만기 (년)</label><div class="bf-input"><input type="number" id="bYears" step="5" min="5" max="50"></div></div>
           </div>
+          <div class="budget-field">
+            <label>기타 대출 월 상환액 <small style="color:var(--text3)">신용대출·카드론·자동차 등</small></label>
+            <div class="bf-input"><input type="number" id="bOtherDebt" value="0" step="10" min="0"><span>만원/월</span></div>
+          </div>
           <div class="budget-field ls-field">
             <label>실제 사용할 대출액 <span class="ls-max" id="bLoanMax"></span></label>
             <input type="range" class="ls-slider" id="bLoanOverride" min="0" max="0" step="1000000" value="0">
             <div class="ls-out" id="bLoanOut"></div>
           </div>
+          <div id="bDsrGauge" class="dsr-gauge"></div>
         </div>
 
         <div id="bSummary" class="person-summary" data-bmode="buy"></div>

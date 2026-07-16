@@ -1201,8 +1201,8 @@ function initBudgetPlanner() {
   initProductSelect('b');
 
   // 모든 입력에 반응형 바인딩 (입력 즉시 재계산)
-  ['aCash','aParent','aIncome','aNetMonthly','aRate','aYears','aBasicOn','aMarriageOn',
-   'bCash','bParent','bIncome','bNetMonthly','bRate','bYears','bBasicOn','bMarriageOn',
+  ['aCash','aParent','aIncome','aNetMonthly','aRate','aYears','aBasicOn','aMarriageOn','aOtherDebt',
+   'bCash','bParent','bIncome','bNetMonthly','bRate','bYears','bBasicOn','bMarriageOn','bOtherDebt',
    'repayType','familyYears','optBirth','optFirstHome','optRegulated'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', recalcBudget);
@@ -1370,6 +1370,7 @@ function personInput(prefix, common) {
     marriage: chkEl(prefix + 'MarriageOn') ? chkEl(prefix + 'MarriageOn').checked : false,
     income: num(prefix + 'Income') * 만,
     netMonthly: num(prefix + 'NetMonthly') * 만,   // 실수령 월급(세후)
+    otherMonthly: num(prefix + 'OtherDebt') * 만,  // 기타대출 월 원리금(DSR 차감)
     product,
     rate: (num(prefix + 'Rate') / 100) || product.rate,
     years: parseInt(document.getElementById(prefix + 'Years').value) || product.years,
@@ -1462,6 +1463,37 @@ function recalcBudget() {
   };
   updateLoanOut('a', R.A);
   updateLoanOut('b', R.B);
+
+  // DSR 게이지 — 네이버 DSR 계산기처럼 (주담대 + 기타대출) 원리금 ÷ 연소득 vs 40% 규제선
+  const renderDsrGauge = (prefix, P) => {
+    const el = document.getElementById(prefix + 'DsrGauge');
+    if (!el) return;
+    if (!P.income || P.income <= 0) { el.innerHTML = ''; return; }
+    const pct = (P.dsrRatio || 0) * 100;
+    const over = pct > 40;
+    const near = !over && pct > 32;
+    const color = over ? 'var(--red)' : near ? 'var(--gold)' : 'var(--green)';
+    const houseW = P.dsrHousingMonthly * 12 / P.income * 100;
+    const otherW = P.dsrOtherMonthly * 12 / P.income * 100;
+    el.innerHTML = `
+      <div class="dsr-head"><span>📊 DSR ${pct.toFixed(0)}%</span>
+        <span class="dsr-verdict" style="color:${color}">${over ? '한도 초과 ⚠️' : '40% 이내 ✓'}</span></div>
+      <div class="dsr-bar">
+        <div class="dsr-fill dsr-house" style="width:${Math.min(100, houseW)}%"></div>
+        <div class="dsr-fill dsr-other" style="width:${Math.min(100 - houseW, otherW)}%"></div>
+        <div class="dsr-limit" style="left:40%"></div>
+      </div>
+      <div class="dsr-legend">
+        <span><i class="dsr-dot dsr-house"></i>주담대 ${won2man(P.dsrHousingMonthly)}/월</span>
+        ${P.dsrOtherMonthly > 0 ? `<span><i class="dsr-dot dsr-other"></i>기타대출 ${won2man(P.dsrOtherMonthly)}/월</span>` : ''}
+        <span class="dsr-limit-lbl">규제선 40%</span>
+      </div>
+      <div class="dsr-note">연소득 ${won2man(P.income)}의 40%(연 ${won2man(P.income * 0.4)})까지 원리금 상환이 허용됩니다.
+        기타대출이 있으면 그만큼 주담대 한도가 줄어듭니다.
+        <a href="https://search.naver.com/search.naver?query=DSR+계산기" target="_blank" rel="noopener">네이버 DSR 계산기로 교차확인 ↗</a></div>`;
+  };
+  renderDsrGauge('a', R.A);
+  renderDsrGauge('b', R.B);
 
   // 자금 카드에는 간략 요약만: 기본/혼인공제는 체크박스 자체가 상태를 보여주므로,
   // 여기서는 무이자차용 슬라이더 값 표시 + 한 줄 결론(세금 유무)만 갱신한다.

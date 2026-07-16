@@ -1399,6 +1399,23 @@ details.budget-fold .legal-hint { font-weight: 500; }
 .pc-loan-num:focus { border-color: var(--acc2); outline: none; }
 .pc-loan-num-wrap small { color: var(--text3); font-size: .75rem; }
 
+/* DSR 게이지 (대출 계산기) */
+.dsr-gauge { margin-top: .7rem; padding: .6rem .7rem; background: var(--bg); border-radius: 10px; }
+.dsr-head { display: flex; justify-content: space-between; font-size: .84rem; font-weight: 800; margin-bottom: .35rem; }
+.dsr-verdict { font-size: .78rem; }
+.dsr-bar { position: relative; height: 14px; background: var(--border); border-radius: 999px; overflow: hidden; display: flex; }
+.dsr-fill { height: 100%; }
+.dsr-fill.dsr-house { background: var(--acc2); }
+.dsr-fill.dsr-other { background: var(--gold); }
+.dsr-limit { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--red); }
+.dsr-legend { display: flex; flex-wrap: wrap; gap: .3rem .8rem; font-size: .72rem; color: var(--text2); margin-top: .35rem; align-items: center; }
+.dsr-dot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: .25rem; vertical-align: middle; }
+.dsr-dot.dsr-house { background: var(--acc2); }
+.dsr-dot.dsr-other { background: var(--gold); }
+.dsr-limit-lbl { color: var(--red); margin-left: auto; }
+.dsr-note { font-size: .72rem; color: var(--text3); line-height: 1.55; margin-top: .4rem; }
+.dsr-note a { color: var(--acc2); }
+
 /* ── 단지 실제 이야기 해시태그 ─────────────────── */
 .rv-tags { display: flex; flex-wrap: wrap; gap: .45rem; }
 .rv-tag { display: inline-flex; align-items: center; gap: .3rem; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: .3rem .75rem; font-size: .82rem; font-weight: 700; color: var(--acc2); text-decoration: none; }
