@@ -124,6 +124,16 @@
     <!-- ⚙️ 공통 조건 (전체 폭, 가로 배치) -->
     <div class="budget-card common-card" data-bmode="buy">
       <div class="budget-card-title">⚙️ 공통 조건</div>
+
+      <div class="budget-field" style="margin-bottom:.6rem">
+        <label>혼인신고 여부 <small style="color:var(--text3)">합산 세대인지, 각자 세대인지</small></label>
+        <div class="legend-mode-toggle" id="marriedToggle" style="margin-top:.3rem">
+          <button class="legend-mode-btn active" data-married="1">💍 혼인신고 완료 (합산 세대)</button>
+          <button class="legend-mode-btn" data-married="0">👫 예비부부·미혼 (각자 세대)</button>
+        </div>
+        <div class="lp-note" id="marriedNote" style="margin-top:.4rem"></div>
+      </div>
+
       <div class="common-grid">
         <div class="common-checks">
           <label class="bc"><input type="checkbox" id="optBirth"> 출산 예정/신생아 특례 대상</label>
@@ -135,12 +145,13 @@
             <option value="annuity">원리금균등 (매달 동일)</option>
             <option value="linear">원금균등 (초기 부담 큼, 총이자 적음)</option>
           </select>
+          <div id="repayCompare" class="repay-compare"></div>
         </div>
         <div class="budget-field"><label>부모 차용 상환기간 (공통)</label>
           <div class="bf-input"><input type="number" id="familyYears" value="10" step="1" min="1" max="30"><span>년</span></div>
         </div>
       </div>
-      <p class="lp-note" style="margin-top:.7rem">혼인·출산공제는 각자 "부모님 지원" 카드에서 체크합니다. 대출 한도는 각자 소득의 DSR 40%(스트레스 +1.5%p)로 계산 후 합산되고, 주택 전체에 LTV·6억 캡이 적용됩니다.</p>
+      <p class="lp-note" style="margin-top:.7rem">대출 한도(DSR 40%)는 <b>혼인 여부와 무관하게 각자 소득 기준</b>으로 계산 후 합산됩니다(합산 소득 대출은 없음). 혼인신고는 세대·증여·청약에서 차이가 납니다.</p>
     </div>
 
     <!-- 결과 (전체 폭) -->

@@ -1262,6 +1262,9 @@ function initBudgetPlanner() {
   });
   document.querySelectorAll('#budgetModeToggle .legend-mode-btn').forEach(btn =>
     btn.addEventListener('click', () => applyBudgetMode(btn.dataset.mode)));
+  document.querySelectorAll('#marriedToggle .legend-mode-btn').forEach(btn =>
+    btn.addEventListener('click', () => applyMarried(btn.dataset.married === '1')));
+  applyMarried(budgetMarried, true);   // 저장된 혼인신고 상태 복원
   restoreBudgetInputs();   // 마지막으로 저장된 입력값을 기본값으로 복원
   applyBudgetMode(localStorage.getItem('budgetMode_v1') || 'buy', true);
   initGiftView();
@@ -1274,6 +1277,7 @@ function initBudgetPlanner() {
 }
 
 let budgetMode = 'buy';
+let budgetMarried = localStorage.getItem('budgetMarried_v1') !== '0';   // 기본: 혼인신고 완료(합산)
 let jTargetState = null;   // 목표 전세금 슬라이더 (null=자동: 최대치의 90% 수준)
 
 function applyBudgetMode(mode, skipRecalc) {
@@ -1284,6 +1288,14 @@ function applyBudgetMode(mode, skipRecalc) {
   document.querySelectorAll('[data-bmode]').forEach(el => {
     el.style.display = el.dataset.bmode === budgetMode ? '' : 'none';
   });
+  if (!skipRecalc) recalcBudget();
+}
+
+function applyMarried(married, skipRecalc) {
+  budgetMarried = !!married;
+  localStorage.setItem('budgetMarried_v1', budgetMarried ? '1' : '0');
+  document.querySelectorAll('#marriedToggle .legend-mode-btn').forEach(b =>
+    b.classList.toggle('active', (b.dataset.married === '1') === budgetMarried));
   if (!skipRecalc) recalcBudget();
 }
 
@@ -1494,6 +1506,35 @@ function recalcBudget() {
   };
   renderDsrGauge('a', R.A);
   renderDsrGauge('b', R.B);
+
+  // 혼인신고 여부 안내 — DSR/대출은 불변, 세대·증여·청약에서만 차이
+  const marriedNote = document.getElementById('marriedNote');
+  if (marriedNote) marriedNote.innerHTML = budgetMarried
+    ? `💍 <b>부부 1세대</b>로 봅니다 — 함께 사는 집은 1주택, 생애최초·취득세 감면은 세대 기준 1회 적용. 부부 사이 자금 이동은 증여세 없이 자유롭습니다(10년 6억 공제).`
+    : `👫 <b>각자 세대</b>로 봅니다 — 공동명의로 함께 살 순 있지만, ⚠️ 한쪽 돈으로 상대 지분을 채우면 <b>커플 간 증여세</b>가 생길 수 있습니다(부부 아님). 생애최초·청약 자격은 각자 세대 기준으로 따로 판단하세요.`;
+
+  // 원리금균등 vs 원금균등 실제 숫자 비교 + 유리 판정
+  const rc = document.getElementById('repayCompare');
+  if (rc) {
+    const loan = R.loan, rate = (R.A.rate || 0.041), yrs = (R.A.years || 40);
+    if (loan > 0) {
+      const an = calcMonthlyPayment(loan, rate, yrs, 'annuity');
+      const li = calcMonthlyPayment(loan, rate, yrs, 'linear');
+      const cur = document.getElementById('repayType').value;
+      const saveInterest = an.totalInterest - li.totalInterest;   // 원금균등이 아끼는 총이자
+      rc.innerHTML = `
+        <table class="rc-table">
+          <tr><th></th><th>원리금균등</th><th>원금균등</th></tr>
+          <tr><td>첫 달 상환</td><td>${won2man(an.first)}</td><td>${won2man(li.first)}</td></tr>
+          <tr><td>총 이자</td><td>${won2eok(an.totalInterest)}</td><td>${won2eok(li.totalInterest)}</td></tr>
+        </table>
+        <div class="rc-verdict">💡 <b>총이자</b>는 원금균등이 <b style="color:var(--green)">${won2eok(saveInterest)}</b> 적지만,
+          <b>초기 월부담</b>은 원리금균등이 <b>${won2man(li.first - an.first)}</b> 가볍습니다.
+          <br>· 월급이 일정하고 <b>매달 같은 금액</b>이 편하면 → <b>원리금균등</b>
+          <br>· 초기 여유가 있고 <b>총이자 절감</b>·조기상환 계획이면 → <b>원금균등</b>
+          <span style="color:var(--text3)">(현재 선택: ${cur === 'linear' ? '원금균등' : '원리금균등'})</span></div>`;
+    } else { rc.innerHTML = ''; }
+  }
 
   // 자금 카드에는 간략 요약만: 기본/혼인공제는 체크박스 자체가 상태를 보여주므로,
   // 여기서는 무이자차용 슬라이더 값 표시 + 한 줄 결론(세금 유무)만 갱신한다.
