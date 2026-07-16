@@ -1558,7 +1558,9 @@ function recalcBudget() {
 /* ── 예산 입력값 영속화: 한 번 넣은 숫자가 다음 방문의 기본값이 된다 ──
    #secBudget 안의 모든 number/select/checkbox를 id 기준으로 저장하고,
    슬라이더는 값이 recalc에서 재계산되므로 상태 변수 3종을 따로 저장한다. */
-const BUDGET_STORE_KEY = 'budgetInputs_v1';
+// v2: 기본값(현금·소득·부모지원 등)을 갱신하며 옛 저장분을 무시하도록 키 버전 상향.
+// 이 이후 사용자가 바꾼 값은 다시 이 키에 저장되어 다음 방문의 기본값이 된다.
+const BUDGET_STORE_KEY = 'budgetInputs_v2';
 
 function _budgetFormEls() {
   return document.querySelectorAll('#secBudget input:not([type="range"]), #secBudget select');
