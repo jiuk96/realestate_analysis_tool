@@ -1516,10 +1516,14 @@ function recalcBudget() {
   // 원리금균등 vs 원금균등 실제 숫자 비교 + 유리 판정
   const rc = document.getElementById('repayCompare');
   if (rc) {
-    const loan = R.loan, rate = (R.A.rate || 0.041), yrs = (R.A.years || 40);
-    if (loan > 0) {
-      const an = calcMonthlyPayment(loan, rate, yrs, 'annuity');
-      const li = calcMonthlyPayment(loan, rate, yrs, 'linear');
+    // 두 사람이 서로 다른 대출상품(금리·만기)을 쓸 수 있으므로 각자 계산해 합산한다.
+    const sumRepay = (kind) => [R.A, R.B].reduce((acc, P) => {
+      const m = calcMonthlyPayment(P.loan || 0, P.rate || 0.041, P.years || 40, kind);
+      return { first: acc.first + m.first, totalInterest: acc.totalInterest + m.totalInterest };
+    }, { first: 0, totalInterest: 0 });
+    if (R.loan > 0) {
+      const an = sumRepay('annuity');
+      const li = sumRepay('linear');
       const cur = document.getElementById('repayType').value;
       const saveInterest = an.totalInterest - li.totalInterest;   // 원금균등이 아끼는 총이자
       rc.innerHTML = `
