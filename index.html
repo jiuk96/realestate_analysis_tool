@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#87CEEB">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="점프하며 하늘 끝까지! 두들 점프 스타일의 무한 점프 게임">
+  <title>점프! 점프!</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="game"></canvas>
+
+    <!-- 시작 화면 -->
+    <div id="start-screen" class="overlay">
+      <h1 class="title">점프!<br>점프!</h1>
+      <p class="subtitle">하늘 끝까지 올라가 보세요</p>
+      <button id="btn-start" class="btn-primary">게임 시작</button>
+      <div class="help">
+        <p>📱 모바일: 화면 좌/우 터치 또는 기기 기울이기</p>
+        <p>⌨️ PC: ← → 방향키, 스페이스바로 발사</p>
+      </div>
+      <p id="best-score-label" class="best"></p>
+    </div>
+
+    <!-- 게임오버 화면 -->
+    <div id="gameover-screen" class="overlay hidden">
+      <h1 class="title small">게임 오버</h1>
+      <p class="score-line">점수 <span id="final-score">0</span></p>
+      <p class="score-line best" id="final-best"></p>
+      <p id="new-record" class="new-record hidden">🎉 신기록!</p>
+      <button id="btn-retry" class="btn-primary">다시 하기</button>
+      <button id="btn-home" class="btn-secondary">처음으로</button>
+    </div>
+
+    <!-- 일시정지 버튼 -->
+    <button id="btn-pause" class="pause-btn hidden" aria-label="일시정지">❚❚</button>
+
+    <!-- 일시정지 화면 -->
+    <div id="pause-screen" class="overlay hidden">
+      <h1 class="title small">일시정지</h1>
+      <button id="btn-resume" class="btn-primary">계속 하기</button>
+      <button id="btn-quit" class="btn-secondary">그만 하기</button>
+    </div>
+  </div>
+
+  <script src="js/game.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>
