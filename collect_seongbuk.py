@@ -52,8 +52,19 @@ API_KEY = os.environ.get("MOLIT_API_KEY", "").strip()
 KAKAO = os.environ.get("KAKAO_REST_KEY", "").strip()
 
 LIST_URL = "https://apis.data.go.kr/1613000/AptListService3/getSigunguAptList3"
-BASE_URL = "https://apis.data.go.kr/1613000/AptBasisInfoServiceV3/getAphusBaseInfoV3"
-DTL_URL = "https://apis.data.go.kr/1613000/AptBasisInfoServiceV3/getAphusDtlInfoV3"
+# 기본/상세 정보는 data.go.kr 서비스 버전이 바뀌곤 해(V3→V4) 후보를 순차 시도한다.
+BASE_URLS = [
+    "https://apis.data.go.kr/1613000/AptBasisInfoServiceV4/getAphusBaseInfoV4",
+    "https://apis.data.go.kr/1613000/AptBasisInfoServiceV3/getAphusBaseInfoV3",
+    "https://apis.data.go.kr/1613000/AptBasisInfoServiceV2/getAphusBaseInfoV2",
+    "https://apis.data.go.kr/1613000/AptBasisInfoService1/getAphusBaseInfo1",
+]
+DTL_URLS = [
+    "https://apis.data.go.kr/1613000/AptBasisInfoServiceV4/getAphusDtlInfoV4",
+    "https://apis.data.go.kr/1613000/AptBasisInfoServiceV3/getAphusDtlInfoV3",
+    "https://apis.data.go.kr/1613000/AptBasisInfoServiceV2/getAphusDtlInfoV2",
+    "https://apis.data.go.kr/1613000/AptBasisInfoService1/getAphusDtlInfo1",
+]
 ELEV_URL = "https://api.open-elevation.com/api/v1/lookup"
 
 
@@ -96,6 +107,26 @@ def _get(url: str, **params) -> list:
     return _xml_items(r.text)
 
 
+_ver_cache = {}   # id(url_list) → 동작 확인된 URL
+
+
+def _get_versioned(urls: list, **params) -> list:
+    """URL 후보를 순차 시도해 처음 성공한 버전을 기억한다 (V4/V3 개편 대응)."""
+    key = id(urls)
+    if key in _ver_cache:
+        return _get(_ver_cache[key], **params)
+    last = None
+    for u in urls:
+        try:
+            out = _get(u, **params)
+            _ver_cache[key] = u
+            print(f"  ↳ 사용 엔드포인트: {u.rsplit('/', 1)[-1]}")
+            return out
+        except Exception as e:
+            last = e
+    raise last or RuntimeError("모든 버전 실패")
+
+
 def fetch_kapt() -> list:
     """성북구 전체 단지 목록 → 단지별 기본+상세 정보. 실패 시 빈 리스트(폴백)."""
     if not API_KEY:
@@ -120,10 +151,10 @@ def fetch_kapt() -> list:
         if not code:
             continue
         try:
-            base = (_get(BASE_URL, kaptCode=code) or [{}])[0]
+            base = (_get_versioned(BASE_URLS, kaptCode=code) or [{}])[0]
             time.sleep(0.15)
             try:
-                dtl = (_get(DTL_URL, kaptCode=code) or [{}])[0]
+                dtl = (_get_versioned(DTL_URLS, kaptCode=code) or [{}])[0]
             except Exception:
                 dtl = {}
             time.sleep(0.15)
