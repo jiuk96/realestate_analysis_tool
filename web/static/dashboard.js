@@ -3804,11 +3804,10 @@ async function renderVilla() {
   applyVillaView(hasZones ? (savedView || 'zone') : 'dong');
 }
 
-/* ── 🏔️ 성북구 심화 — 300세대+ 전수 단지 ──────────────────
-   collect_seongbuk.py 산출(/api/seongbuk). 색=경사도, 크기=세대수.
-   경사 필터·정렬·예산 상한과 카드(장점/단점·로드뷰·네이버) 연동. */
-let _sbData = null, _sbMap = null, _sbMarkers = [], _sbMarkerByKey = {};
-let _sbSlope = 'all';
+/* ── 🏔️ 성북구 심화 — 300세대+ 전수 단지 (지도 탐색 스타일) ──
+   collect_seongbuk.py 산출(/api/seongbuk). 버블 색=경사도, 아래 숫자=최근가.
+   목록/버블 클릭 → 플로팅 상세(경사·주차·복도·시세·장단점·로드뷰). */
+let _sbData = null, _sbMap = null, _sbMarkers = [], _sbSlope = 'all', _sbVisible = [];
 
 function _sbSlopeColor(s) {
   if (s == null) return '#9ca3af';
@@ -3828,133 +3827,148 @@ function _sbFiltered() {
   });
 }
 
-function renderSbMap(rows) {
-  const el = document.getElementById('sbMap');
-  if (!el || typeof L === 'undefined') return;
-  if (!_sbMap) {
-    _sbMap = L.map('sbMap', { center: [37.6015, 127.02], zoom: 13 });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors', maxZoom: 18,
-    }).addTo(_sbMap);
-    addWorkMarkers(_sbMap);
-  }
-  try {
-    _sbMarkers.forEach(m => _sbMap.removeLayer(m));
-    _sbMarkers = []; _sbMarkerByKey = {};
-    rows.forEach(c => {
-      if (c.lat == null) return;
-      const hh = c.households || 300;
-      const mk = L.circleMarker([c.lat, c.lng], {
-        radius: Math.max(7, Math.min(18, Math.sqrt(hh) / 3.2)),
-        color: '#fff', weight: 1.5, fillColor: _sbSlopeColor(c.slope_pct), fillOpacity: 0.85,
-      }).addTo(_sbMap);
-      mk.bindPopup(`<b>${c.name}</b><br>${(c.dong || '')} · ${hh.toLocaleString()}세대` +
-        (c.slope_pct != null ? `<br>경사 ${c.slope_pct}% (${c.slope_label})` : '') +
-        (c.med_12m ? `<br>최근가 ${_sbEok(c.med_12m)}` : ''));
-      mk.on('click', () => {
-        const card = document.querySelector(`#sbList .vl-card[data-key="${CSS.escape(c.name)}"]`);
-        card?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        card?.classList.add('vl-flash'); setTimeout(() => card?.classList.remove('vl-flash'), 1600);
-      });
-      _sbMarkers.push(mk); _sbMarkerByKey[c.name] = mk;
-    });
-  } catch (e) { /* 지도 스텁 환경 무시 */ }
-}
-
-function renderSbList() {
-  const rows = _sbFiltered();
-  const sortBy = document.getElementById('sbSort').value;
+function _sbSort(rows) {
+  const mode = document.getElementById('sbSort').value;
   const key = {
     households: c => -(c.households || 0),
     ppm2:       c => c.ppm2_12m ?? 1e9,
+    priceAsc:   c => c.med_12m ?? 1e12,
     slope:      c => c.slope_pct ?? 1e9,
     build_year: c => -(c.build_year || 0),
     trend:      c => -(c.trend_pct ?? -1e9),
     n12:        c => -(c.n_12m || 0),
-  }[sortBy] || (c => -(c.households || 0));
-  rows.sort((a, b) => key(a) - key(b));
+  }[mode] || (c => -(c.households || 0));
+  return [...rows].sort((a, b) => key(a) - key(b));
+}
 
-  document.getElementById('sbSummary').innerHTML =
-    `${rows.length}개 단지 표시 중 (전체 ${_sbData.complexes.length}개) · 성북구 ㎡가 중위 ${(_sbData.gu_ppm2_median || 0).toLocaleString()}만원`;
+function renderSb() {
+  _sbVisible = _sbSort(_sbFiltered());
+  document.getElementById('sbCount').textContent = `${_sbVisible.length}개 단지`;
 
-  document.getElementById('sbList').innerHTML = rows.map(c => {
-    const hh = c.households ? c.households.toLocaleString() + '세대' : '?세대';
-    const est = c.hh_source === 'estimated' ? `<span class="sb-est" title="거래량 기반 추정 — K-apt 승인 후 정확값으로 대체">추정</span>` : '';
-    const slope = c.slope_pct != null
-      ? `<span class="sb-slope" style="background:${_sbSlopeColor(c.slope_pct)}1a;color:${_sbSlopeColor(c.slope_pct)}">⛰ ${c.slope_label} ${c.slope_pct}%${c.elevation_m != null ? ` · 고도 ${c.elevation_m}m` : ''}</span>`
-      : `<span class="sb-slope" style="color:var(--text3)">⛰ 경사 데이터 수집 대기</span>`;
-    const meta = [
-      c.dong, c.build_year ? `${c.build_year}년 준공` : null,
-      c.dong_cnt ? `${c.dong_cnt}개동` : null,
-      c.parking && c.households ? `주차 ${(c.parking / c.households).toFixed(1)}대/세대` : null,
-      c.hall_type || null, c.heat || null,
-      c.main_area ? `주력 ${Math.round(c.main_area)}㎡` : null,
-    ].filter(Boolean).join(' · ');
-    const price = c.med_12m
-      ? `최근 12개월 중위 <b>${_sbEok(c.med_12m)}</b> · ㎡가 ${Math.round(c.ppm2_12m).toLocaleString()}만` +
-        (c.trend_pct != null ? ` · 1년 <b style="color:${c.trend_pct >= 0 ? 'var(--green)' : 'var(--red)'}">${c.trend_pct >= 0 ? '+' : ''}${c.trend_pct}%</b>` : '') +
-        ` · 거래 ${c.n_12m}건`
-      : `<span style="color:var(--text3)">최근 12개월 실거래 없음</span>`;
-    const roadview = c.lat != null
-      ? `<a class="vl-link" href="https://map.kakao.com/link/roadview/${c.lat},${c.lng}" target="_blank" rel="noopener">📷 로드뷰(실사진)</a>` : '';
-    const naver = `<a class="vl-link" href="https://m.land.naver.com/search/result/${encodeURIComponent('성북구 ' + c.name)}" target="_blank" rel="noopener">🏠 네이버 부동산</a>`;
-    return `
-    <div class="vl-card sb-card" data-key="${c.name}" data-lat="${c.lat ?? ''}" data-lng="${c.lng ?? ''}" data-zkey="${c.name}">
-      <div class="vl-head">
-        <div class="vl-name">${c.name} <span class="sb-hh">${hh}</span>${est}</div>
+  // 버블 마커
+  try {
+    _sbMarkers.forEach(m => _sbMap.removeLayer(m));
+    _sbMarkers = [];
+    _sbVisible.forEach((c, i) => {
+      if (c.lat == null) return;
+      const sub = c.med_12m ? _sbEok(c.med_12m) : `${((c.households || 0) / 1000).toFixed(1)}천세대`;
+      const icon = L.divIcon({
+        className: '',
+        html: `<div class="apt-bubble" style="background:${_sbSlopeColor(c.slope_pct)}">
+                 <span class="apt-bubble-name">${shortName(c.name)}</span>
+                 <span class="apt-bubble-price">${sub}</span>
+               </div>`,
+        iconSize: [72, 40], iconAnchor: [36, 40],
+      });
+      const m = L.marker([c.lat, c.lng], { icon });
+      m.on('click', () => showSbDetail(c));
+      m.addTo(_sbMap);
+      _sbMarkers.push(m);
+    });
+  } catch (e) { /* 지도 스텁 환경 무시 */ }
+
+  // 목록 패널
+  const rows = _sbVisible.map((c, i) => `
+    <div class="ep-list-row" data-idx="${i}">
+      <div class="ep-list-rank">${i + 1}</div>
+      <div class="ep-list-main">
+        <div class="ep-list-name">${c.name}</div>
+        <div class="ep-list-sub">${c.dong || ''} · ${(c.households || 0).toLocaleString()}세대${c.build_year ? ` · ${c.build_year}년` : ''}${c.slope_pct != null ? ` · <span style="color:${_sbSlopeColor(c.slope_pct)}">⛰${c.slope_pct}%</span>` : ''}</div>
       </div>
-      <div class="sb-slope-row">${slope}</div>
-      <div class="vl-meta">${meta}</div>
-      <div class="sb-price">${price}</div>
-      ${c.pros?.length ? `<div class="sb-pc sb-pros"><div class="sb-pc-t">👍 장점</div><ul>${c.pros.map(p => `<li>${p}</li>`).join('')}</ul></div>` : ''}
-      ${c.cons?.length ? `<div class="sb-pc sb-cons"><div class="sb-pc-t">👎 단점</div><ul>${c.cons.map(p => `<li>${p}</li>`).join('')}</ul></div>` : ''}
-      <div class="vl-links">${roadview}${naver}
-        <a class="vl-link" href="https://map.kakao.com/link/map/${encodeURIComponent(c.name)},${c.lat ?? 37.6},${c.lng ?? 127.02}" target="_blank" rel="noopener">🗺 카카오맵</a>
+      <div class="ep-list-right">
+        <div class="ep-list-price">${_sbEok(c.med_12m)}</div>
+        <div class="ep-list-score">${c.ppm2_12m ? Math.round(c.ppm2_12m).toLocaleString() + '만/㎡' : '거래없음'}</div>
       </div>
-    </div>`;
-  }).join('');
-
-  document.querySelectorAll('#sbList .sb-card').forEach(card =>
-    card.addEventListener('click', (e) => {
-      if (e.target.closest('a, button, input')) return;
-      const lat = parseFloat(card.dataset.lat);
-      if (!_sbMap || isNaN(lat)) return;
-      document.getElementById('sbMap')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      try { _sbMap.setView([lat, parseFloat(card.dataset.lng)], 16, { animate: true });
-            _sbMarkerByKey[card.dataset.key]?.openPopup(); } catch (err) {}
+    </div>`).join('');
+  document.getElementById('sbPanel').innerHTML = `
+    <div class="ep-list-head">단지 목록 <span class="ep-list-cnt">${_sbVisible.length}</span></div>
+    <div class="ep-list">${rows || '<div class="explorer-panel-empty">조건에 맞는 단지가 없습니다</div>'}</div>`;
+  document.querySelectorAll('#sbPanel .ep-list-row').forEach(el =>
+    el.addEventListener('click', () => {
+      const c = _sbVisible[+el.dataset.idx];
+      if (c.lat != null) { try { _sbMap.setView([c.lat, c.lng], 15, { animate: true }); } catch (e) {} }
+      showSbDetail(c);
     }));
-  renderSbMap(rows);
+}
+
+function showSbDetail(c) {
+  const panel = document.getElementById('sbDetail');
+  if (!panel) return;
+  const meta = [
+    c.dong, c.build_year ? `${c.build_year}년 준공` : null,
+    c.dong_cnt ? `${c.dong_cnt}개동` : null, c.hall_type || null, c.heat || null,
+    c.main_area ? `주력 ${Math.round(c.main_area)}㎡` : null,
+  ].filter(Boolean).join(' · ');
+  const slope = c.slope_pct != null
+    ? `<span class="sb-slope" style="background:${_sbSlopeColor(c.slope_pct)}1a;color:${_sbSlopeColor(c.slope_pct)}">⛰ ${c.slope_label} ${c.slope_pct}%${c.elevation_m != null ? ` · 고도 ${c.elevation_m}m` : ''}</span>`
+    : `<span class="sb-slope" style="color:var(--text3)">⛰ 경사 데이터 수집 대기</span>`;
+  panel.innerHTML = `
+    <button class="mpd-close" id="sbDetailClose" title="닫기">✕</button>
+    <div class="ep-head">
+      <div class="ep-name">${c.name}${c.hh_source === 'estimated' ? ' <span class="sb-est">추정</span>' : ''}</div>
+      <div class="ep-loc">${meta}</div>
+    </div>
+    <div class="ep-price-grid">
+      <div class="ep-price"><span class="epv">${(c.households || 0).toLocaleString()}</span><span class="epk">세대수</span></div>
+      <div class="ep-price"><span class="epv">${_sbEok(c.med_12m)}</span><span class="epk">최근 중위가</span></div>
+      <div class="ep-price"><span class="epv">${c.parking && c.households ? (c.parking / c.households).toFixed(1) + '대' : '—'}</span><span class="epk">주차/세대</span></div>
+      <div class="ep-price"><span class="epv" style="color:${(c.trend_pct ?? 0) >= 0 ? 'var(--green)' : 'var(--red)'}">${c.trend_pct != null ? (c.trend_pct >= 0 ? '+' : '') + c.trend_pct + '%' : '—'}</span><span class="epk">1년 추세</span></div>
+    </div>
+    <div class="sb-slope-row" style="margin:.3rem 0 .5rem">${slope}</div>
+    <div class="ep-tags">
+      ${c.subway_station ? `<span class="aptag">🚇 ${c.subway_station}${c.subway_walk ? ` 도보 ${c.subway_walk}` : ''}</span>` : ''}
+      ${c.n_12m ? `<span class="aptag">최근 12개월 거래 ${c.n_12m}건</span>` : '<span class="aptag">최근 12개월 실거래 없음</span>'}
+      ${c.ppm2_12m ? `<span class="aptag">㎡가 ${Math.round(c.ppm2_12m).toLocaleString()}만</span>` : ''}
+    </div>
+    ${c.pros?.length ? `<div class="sb-pc sb-pros"><div class="sb-pc-t">👍 장점</div><ul>${c.pros.map(p => `<li>${p}</li>`).join('')}</ul></div>` : ''}
+    ${c.cons?.length ? `<div class="sb-pc sb-cons" style="margin-top:.4rem"><div class="sb-pc-t">👎 단점</div><ul>${c.cons.map(p => `<li>${p}</li>`).join('')}</ul></div>` : ''}
+    <div class="ep-links" style="margin-top:.6rem">
+      ${c.lat != null ? `<a class="ep-map" href="https://map.kakao.com/link/roadview/${c.lat},${c.lng}" target="_blank" rel="noopener">📷 로드뷰 ↗</a>` : ''}
+      <a class="ep-naver" href="https://m.land.naver.com/search/result/${encodeURIComponent('성북구 ' + c.name)}" target="_blank" rel="noopener">네이버 부동산 ↗</a>
+      <a class="ep-hogang" href="https://map.kakao.com/link/map/${encodeURIComponent(c.name)},${c.lat ?? 37.6},${c.lng ?? 127.02}" target="_blank" rel="noopener">카카오맵 ↗</a>
+    </div>`;
+  panel.style.display = 'block';
+  document.getElementById('sbDetailClose').addEventListener('click', () => {
+    panel.style.display = 'none';
+  });
 }
 
 async function renderSeongbuk() {
-  const list = document.getElementById('sbList');
-  if (!list) return;
+  const mapEl = document.getElementById('sbMap');
+  if (!mapEl) return;
   const d = await (await fetch('/api/seongbuk')).json();
   if (!d.complexes || !d.complexes.length) {
-    list.innerHTML = `<div class="budget-card" style="grid-column:1/-1">
-      <div class="budget-card-title">아직 성북구 심화 데이터가 없습니다</div>
-      <div class="sub-note">GitHub Actions의 「성북구 심화 수집」 워크플로를 실행하면 채워집니다.</div></div>`;
+    document.getElementById('sbPanel').innerHTML = `<div class="ep-list-head">아직 데이터가 없습니다 —
+      GitHub Actions 「성북구 심화 수집」 실행 필요</div>`;
     return;
   }
   _sbData = d;
   const note = document.getElementById('sbSourceNote');
   if (note) note.innerHTML = d.kapt_ok
     ? `✅ 세대수·주차·복도유형: <b>K-apt 공동주택관리정보</b> 공식값 · 시세: 국토부 실거래가 · 갱신 ${d.updated}`
-    : `⚠️ 세대수는 현재 <b>거래량 기반 추정치</b>입니다. data.go.kr에서 기존 국토부 키로
-       <b>「공동주택 단지 목록제공」 + 「공동주택 기본 정보제공」</b> 두 서비스를 활용신청(자동승인·무료)하면
-       다음 수집부터 K-apt 공식 세대수·주차·복도유형으로 대체됩니다. · 갱신 ${d.updated}`;
+    : `⚠️ 세대수는 <b>거래량 기반 추정치</b>입니다 (K-apt 연동 대기) · 갱신 ${d.updated}`;
 
-  document.querySelectorAll('#sbSlopeChips .price-chip').forEach(c =>
-    c.addEventListener('click', () => {
-      _sbSlope = c.dataset.s;
+  if (typeof L !== 'undefined' && !_sbMap) {
+    _sbMap = L.map('sbMap', { center: [37.6015, 127.025], zoom: 13 });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors', maxZoom: 18,
+    }).addTo(_sbMap);
+    addWorkMarkers(_sbMap);
+  }
+
+  document.querySelectorAll('#sbSlopeChips .price-chip').forEach(chip =>
+    chip.addEventListener('click', () => {
+      _sbSlope = chip.dataset.s;
       document.querySelectorAll('#sbSlopeChips .price-chip').forEach(x =>
         x.classList.toggle('active', x.dataset.s === _sbSlope));
-      renderSbList();
+      renderSb();
     }));
-  document.getElementById('sbSort').addEventListener('input', renderSbList);
-  document.getElementById('sbMaxEok').addEventListener('input', renderSbList);
-  renderSbList();
+  document.getElementById('sbSort').addEventListener('input', renderSb);
+  document.getElementById('sbMaxEok').addEventListener('change', renderSb);
+  document.getElementById('sbPriceApply')?.addEventListener('click', renderSb);
+  renderSb();
 }
+
 
 /* ── 📋 청약 자격 진단 ─────────────────────────────────────
    「주택공급에 관한 규칙」의 일반 기준을 단순화한 클라이언트 계산.

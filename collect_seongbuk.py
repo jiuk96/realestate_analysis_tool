@@ -173,6 +173,7 @@ def _kapt_web(code: str) -> dict:
         "heat": str(_pick(f, r"code_?heat") or ""),
         "parking": int((fnum(r"kaptd_?pcnt$") or 0) + (fnum(r"kaptd_?pcntu$") or 0)) or None,
         "addr": str(_pick(f, r"doro_?juso", r"kapt_?addr") or ""),
+        "addr_jibun": str(_pick(f, r"kapt_?addr") or ""),   # 법정동 포함 지번주소
         "subway_line": str(_pick(f, r"subway_?line") or ""),
         "subway_station": str(_pick(f, r"subway_?station") or ""),
         "subway_walk": str(_pick(f, r"wtimesub") or ""),
@@ -231,6 +232,7 @@ def fetch_kapt() -> list:
                     "heat": str(_pick(f, r"codeheat") or ""),
                     "parking": int((fnum(r"kaptdpcnt$") or 0) + (fnum(r"kaptdpcntu$") or 0)) or None,
                     "addr": str(_pick(f, r"dorojuso", r"kaptaddr") or ""),
+                    "addr_jibun": str(_pick(f, r"kaptaddr") or ""),
                     "subway_line": str(_pick(f, r"subwayline") or ""),
                     "subway_station": str(_pick(f, r"subwaystation") or ""),
                     "subway_walk": str(_pick(f, r"wtimesub") or ""),
@@ -302,6 +304,57 @@ def trade_stats(df: pd.DataFrame) -> dict:
             "est_households": int(len(g) / 6 * 10),              # 폴백용 추정
         }
     return out
+
+
+# ── 이름 퍼지 매칭 (K-apt ↔ 실거래) ──────────────────────
+def _bigrams(s: str) -> set:
+    return {s[i:i + 2] for i in range(len(s) - 1)} if len(s) > 1 else {s}
+
+
+def _norm2(name: str) -> str:
+    """괄호 내용을 보존하는 느슨한 정규화 (서브스트링 매칭용)."""
+    return re.sub(r"[\s\-·()]|아파트", "", str(name or "")).lower()
+
+
+def _digits(s: str) -> set:
+    return set(re.findall(r"\d+", s))
+
+
+def fuzzy_trade_match(norm_name: str, raw_name: str, addr: str, tstats: dict):
+    """정규화 완전일치 실패 시 실거래 그룹을 찾는다.
+    ① 괄호 보존 서브스트링 (예: '래미안길음1차' ⊂ '길음뉴타운1단지(래미안길음1차)')
+    ② 바이그램 겹침 — 단, 숫자(차수·단지번호) 불일치는 거부하고,
+       법정동을 모르면 문턱을 0.7로 올려 오매칭을 막는다."""
+    m = re.search(r"([가-힣]+동)", addr or "")
+    dong = m.group(1) if m else None
+    n2 = _norm2(raw_name)
+
+    # ① 서브스트링 (양방향, 4자 이상)
+    best_sub, best_len = None, 3
+    for k, v in tstats.items():
+        k2 = _norm2(v["apt_name"])
+        short = min(len(n2), len(k2))
+        if short >= 4 and (n2 in k2 or k2 in n2) and short > best_len:
+            if dong and v.get("dong") and v["dong"] != dong:
+                continue
+            best_sub, best_len = v, short
+    if best_sub:
+        return best_sub
+
+    # ② 바이그램
+    nb, nd = _bigrams(norm_name), _digits(norm_name)
+    best, best_score = None, (0.55 if dong else 0.7)
+    for k, v in tstats.items():
+        if dong and v.get("dong") != dong:
+            continue
+        kd = _digits(k)
+        if nd and kd and not (nd & kd):
+            continue   # 1차 vs 2차, 4단지 vs 9단지 같은 숫자 불일치
+        kb = _bigrams(k)
+        score = len(nb & kb) / max(1, min(len(nb), len(kb)))
+        if score > best_score or (score == best_score and best and v["n_total"] > best["n_total"]):
+            best, best_score = v, score
+    return best
 
 
 # ── 좌표 ─────────────────────────────────────────────────
@@ -456,7 +509,8 @@ def main() -> int:
                 continue
             n = _norm(k["name"])
             r = dict(k)
-            ts = tstats.get(n)
+            ts = tstats.get(n) or fuzzy_trade_match(
+                n, k["name"], k.get("addr_jibun") or k.get("addr", ""), tstats)
             if ts:
                 r.update({f: ts[f] for f in ("dong", "build_year", "n_total", "n_12m",
                                              "med_12m", "ppm2_12m", "trend_pct", "main_area")})

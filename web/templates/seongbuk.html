@@ -5,55 +5,62 @@
 <section class="section section-alt" id="secSeongbuk">
   <div class="section-inner">
     <div class="section-label">매매 · 성북구 심화</div>
-    <h2 class="section-title">성북구 — 300세대 이상 전수 분석</h2>
+    <h2 class="section-title">성북구 — 300세대 이상 전수 탐색</h2>
     <p class="section-desc">
-      서울 전체 랭킹과 별도로, 성북구만 따로 떼어 <b>300세대 이상 모든 단지</b>를 훑습니다.
-      단지마다 <b>경사도(고도 5점 표본)</b> · 세대수·준공·주차 · 최근 12개월 실거래 시세와 함께,
-      데이터에서 뽑은 <b>장점/단점</b>을 정리했습니다. 📷 <b>실제 모습</b>은 각 카드의
-      <b>로드뷰</b> 버튼으로 단지 앞 거리 사진을 바로 볼 수 있습니다.
+      성북구만 따로 떼어 <b>300세대 이상 모든 단지</b>(K-apt 공식 세대수)를 지도에서 탐색합니다.
+      버블 색 = <b>경사도</b>, 목록/버블을 누르면 단지 상세(경사·주차·복도유형·시세·장단점)가 열리고
+      📷 <b>로드뷰</b>로 실제 거리 모습을 바로 볼 수 있습니다.
     </p>
 
     <div class="sub-note" id="sbSourceNote" style="margin-bottom:.8rem"></div>
 
-    <!-- 🗺️ 지도: 색 = 경사도, 크기 = 세대수 -->
-    <div class="villa-map-wrap">
-      <div id="sbMap" class="villa-map"></div>
-    </div>
-    <div class="sub-note" style="margin:-0.3rem 0 1rem">
-      ● 원 크기 = 세대수 · 색 = 경사도(<span style="color:var(--green)">초록 평지</span> /
-      <span style="color:#f59e0b">주황 완만</span> / <span style="color:var(--red)">빨강 언덕↑</span> /
-      회색 = 고도 데이터 대기) · 클릭하면 아래 카드로 이동
-    </div>
-
-    <!-- 필터/정렬 -->
-    <div class="villa-controls">
+    <!-- 필터 바 (지도 탐색과 동일 패턴) -->
+    <div class="explorer-bar">
       <div class="price-chips" id="sbSlopeChips">
         <button class="price-chip active" data-s="all">전체</button>
         <button class="price-chip" data-s="flat">🟢 평지 (&lt;3%)</button>
         <button class="price-chip" data-s="mild">🟡 완만 (3~6%)</button>
         <button class="price-chip" data-s="hill">🔴 언덕 (6%+)</button>
       </div>
+      <div class="price-custom">
+        <input type="number" id="sbMaxEok" placeholder="예산 상한(억)" min="0" step="0.5">
+        <button id="sbPriceApply" class="price-apply">적용</button>
+      </div>
       <select id="sbSort" class="explorer-sort">
         <option value="households">세대수 많은순</option>
         <option value="ppm2">㎡가 낮은순</option>
+        <option value="priceAsc">가격 낮은순</option>
         <option value="slope">경사 낮은순</option>
         <option value="build_year">준공 최신순</option>
         <option value="trend">최근 1년 상승률순</option>
         <option value="n12">최근 거래 많은순</option>
       </select>
-      <div class="bf-input" style="max-width:170px">
-        <input type="number" id="sbMaxEok" placeholder="예산 상한" step="0.5" min="0"><span>억 이하</span>
+      <div class="explorer-count" id="sbCount"></div>
+    </div>
+
+    <div class="explorer-legend-bar">
+      <div class="explorer-legend">
+        <span class="legend-chip"><span class="legend-dot" style="background:#16a34a"></span>평지 &lt;3%</span>
+        <span class="legend-chip"><span class="legend-dot" style="background:#f59e0b"></span>완만 3~6%</span>
+        <span class="legend-chip"><span class="legend-dot" style="background:#ef4444"></span>언덕 6~10%</span>
+        <span class="legend-chip"><span class="legend-dot" style="background:#b91c1c"></span>가파름 10%+</span>
+        <span class="legend-chip"><span class="legend-dot" style="background:#9ca3af"></span>경사 데이터 없음</span>
+        <span class="legend-chip legend-hint">💡 버블 아래 숫자는 최근 실거래 중위가 (거래 없으면 세대수)</span>
       </div>
     </div>
 
-    <div class="sub-note" id="sbSummary"></div>
-    <div class="villa-grid" id="sbList"></div>
-
-    <div class="sub-foot" style="margin-top:1.2rem">
-      경사도는 단지 중심과 동서남북 120m 지점의 고도(Open-Elevation) 차이로 계산한 근사치입니다 —
-      단지 내부 경사와 다를 수 있으니 로드뷰로 확인하세요. 장점/단점은 공개 데이터에서
-      규칙으로 뽑은 요약이며, 현장 확인을 대신하지 않습니다.
+    <!-- 지도 + 목록/상세 플로팅 패널 -->
+    <div class="explorer-layout">
+      <div id="sbMap" class="explorer-map"></div>
+      <div id="sbPanel" class="explorer-panel"></div>
+      <div id="sbDetail" class="map-panel-detail"></div>
     </div>
+
+    <p class="explorer-note">
+      ※ 세대수·주차·복도유형·난방: <b>K-apt 공동주택관리정보시스템</b> 공식값 · 시세: 국토부 실거래
+      (최근 12개월 중위, 전 평형 혼합) · 경사도는 단지 중심과 동서남북 120m 고도(Open-Elevation) 차이 근사치 —
+      로드뷰로 확인하세요. 장점/단점은 공개 데이터 기반 자동 요약으로 현장 확인을 대신하지 않습니다.
+    </p>
   </div>
 </section>
 {% endblock %}
