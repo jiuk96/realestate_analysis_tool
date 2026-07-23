@@ -291,6 +291,11 @@ def trade_stats(df: pd.DataFrame) -> dict:
         # 주력 평형: 최근 3년 최빈 전용면적 구간
         g3 = g[g["ym"] > (y - 3) * 100 + m]
         area_mode = g3["area_exclusive"].round(0).mode()
+        # 최근 12개월 거래가 없어도 표시할 '마지막 시세': 최근 20건 중위가 + 기준 시점
+        tail = g.sort_values("ym").tail(20)
+        med_any = tail["deal_amount"].median() if len(tail) else None
+        ppm2_any = (tail["deal_amount"] / tail["area_exclusive"]).median() if len(tail) else None
+        any_ym = int(tail["ym"].max()) if len(tail) else None
         out[norm] = {
             "apt_name": g["apt_name"].mode().iloc[0],
             "dong": g["umd_name"].mode().iloc[0],
@@ -301,6 +306,9 @@ def trade_stats(df: pd.DataFrame) -> dict:
             "ppm2_12m": round(ppm2, 1) if ppm2 else None,        # 만원/㎡
             "trend_pct": round((med12 / med_prev - 1) * 100, 1) if med12 and med_prev else None,
             "main_area": float(area_mode.iloc[0]) if len(area_mode) else None,
+            "med_any": round(med_any) if med_any else None,      # 마지막 시세 (만원)
+            "ppm2_any": round(ppm2_any, 1) if ppm2_any else None,
+            "any_ym": f"{any_ym // 100}.{any_ym % 100:02d}" if any_ym else None,  # 'YYYY.MM'
             "est_households": int(len(g) / 6 * 10),              # 폴백용 추정
         }
     return out
@@ -513,7 +521,9 @@ def main() -> int:
                 n, k["name"], k.get("addr_jibun") or k.get("addr", ""), tstats)
             if ts:
                 r.update({f: ts[f] for f in ("dong", "build_year", "n_total", "n_12m",
-                                             "med_12m", "ppm2_12m", "trend_pct", "main_area")})
+                                             "med_12m", "ppm2_12m", "trend_pct", "main_area",
+                                             "med_any", "ppm2_any", "any_ym")})
+                r["trade_name"] = ts["apt_name"]   # 리뷰 해시태그·거래내역 조인 키
             if not r.get("build_year") and r.get("use_date"):
                 r["build_year"] = int(r["use_date"][:4])
             xy = known_xy.get(n)
@@ -534,6 +544,7 @@ def main() -> int:
             r = {"name": ts["apt_name"], "households": ts["est_households"],
                  "hh_source": "estimated", **{f: ts[f] for f in
                  ("dong", "jibun", "build_year", "n_total", "n_12m", "med_12m",
+                  "med_any", "ppm2_any", "any_ym",
                   "ppm2_12m", "trend_pct", "main_area")}}
             xy = known_xy.get(n)
             if xy:

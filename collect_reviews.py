@@ -116,6 +116,16 @@ def main() -> int:
         return 0
     comp = json.loads((ROOT / "data" / "processed" / "composite_score.json").read_text(encoding="utf-8"))
     apts = [(r["district"], r["apt_name"]) for r in comp["ranking"]]
+    # 성북구 심화(300세대+ 전수) 단지도 태그 수집 대상에 포함 — K-apt 공식 이름 기준
+    try:
+        sb = json.loads((ROOT / "data" / "processed" / "seongbuk.json").read_text(encoding="utf-8"))
+        seen = {(d, a) for d, a in apts}
+        for c in sb.get("complexes", []):
+            k = ("성북구", c["name"])
+            if k not in seen:
+                apts.append(k)
+    except FileNotFoundError:
+        pass
 
     prev = {}
     if OUT.exists():

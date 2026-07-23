@@ -3814,6 +3814,12 @@ function _sbSlopeColor(s) {
   return s < 3 ? '#16a34a' : s < 6 ? '#f59e0b' : s < 10 ? '#ef4444' : '#b91c1c';
 }
 const _sbEok = m => m == null ? '—' : (m / 10000).toFixed(m >= 100000 ? 0 : 1) + '억';
+// 시세 표시 통일: 최근 12개월 중위가 → 없으면 마지막 20건 중위가(≈ 표시, 기준 시점 병기)
+function _sbPrice(c) {
+  if (c.med_12m) return { v: c.med_12m, ppm2: c.ppm2_12m, stale: false, ym: null };
+  if (c.med_any) return { v: c.med_any, ppm2: c.ppm2_any, stale: true, ym: c.any_ym };
+  return null;
+}
 
 function _sbFiltered() {
   const maxEok = parseFloat(document.getElementById('sbMaxEok')?.value) || 0;
@@ -3851,7 +3857,8 @@ function renderSb() {
     _sbMarkers = [];
     _sbVisible.forEach((c, i) => {
       if (c.lat == null) return;
-      const sub = c.med_12m ? _sbEok(c.med_12m) : `${((c.households || 0) / 1000).toFixed(1)}천세대`;
+      const p = _sbPrice(c);
+      const sub = p ? (p.stale ? '≈' : '') + _sbEok(p.v) : `${(c.households || 0).toLocaleString()}세대`;
       const icon = L.divIcon({
         className: '',
         html: `<div class="apt-bubble" style="background:${_sbSlopeColor(c.slope_pct)}">
@@ -3875,10 +3882,12 @@ function renderSb() {
         <div class="ep-list-name">${c.name}</div>
         <div class="ep-list-sub">${c.dong || ''} · ${(c.households || 0).toLocaleString()}세대${c.build_year ? ` · ${c.build_year}년` : ''}${c.slope_pct != null ? ` · <span style="color:${_sbSlopeColor(c.slope_pct)}">⛰${c.slope_pct}%</span>` : ''}</div>
       </div>
-      <div class="ep-list-right">
-        <div class="ep-list-price">${_sbEok(c.med_12m)}</div>
-        <div class="ep-list-score">${c.ppm2_12m ? Math.round(c.ppm2_12m).toLocaleString() + '만/㎡' : '거래없음'}</div>
-      </div>
+      <div class="ep-list-right">${(() => {
+        const p = _sbPrice(c);
+        if (!p) return `<div class="ep-list-price">—</div><div class="ep-list-score">거래이력 없음</div>`;
+        return `<div class="ep-list-price">${p.stale ? '≈' : ''}${_sbEok(p.v)}</div>
+          <div class="ep-list-score">${p.stale ? `${p.ym} 마지막` : Math.round(p.ppm2).toLocaleString() + '만/㎡'}</div>`;
+      })()}</div>
     </div>`).join('');
   document.getElementById('sbPanel').innerHTML = `
     <div class="ep-list-head">단지 목록 <span class="ep-list-cnt">${_sbVisible.length}</span></div>
@@ -3910,11 +3919,16 @@ function showSbDetail(c) {
     </div>
     <div class="ep-price-grid">
       <div class="ep-price"><span class="epv">${(c.households || 0).toLocaleString()}</span><span class="epk">세대수</span></div>
-      <div class="ep-price"><span class="epv">${_sbEok(c.med_12m)}</span><span class="epk">최근 중위가</span></div>
+      ${(() => {
+        const p = _sbPrice(c);
+        if (!p) return `<div class="ep-price"><span class="epv">—</span><span class="epk">거래이력 없음</span></div>`;
+        return `<div class="ep-price"><span class="epv">${p.stale ? '≈' : ''}${_sbEok(p.v)}</span><span class="epk">${p.stale ? `중위가 (${p.ym} 기준)` : '최근 12개월 중위가'}</span></div>`;
+      })()}
       <div class="ep-price"><span class="epv">${c.parking && c.households ? (c.parking / c.households).toFixed(1) + '대' : '—'}</span><span class="epk">주차/세대</span></div>
       <div class="ep-price"><span class="epv" style="color:${(c.trend_pct ?? 0) >= 0 ? 'var(--green)' : 'var(--red)'}">${c.trend_pct != null ? (c.trend_pct >= 0 ? '+' : '') + c.trend_pct + '%' : '—'}</span><span class="epk">1년 추세</span></div>
     </div>
     <div class="sb-slope-row" style="margin:.3rem 0 .5rem">${slope}</div>
+    <div id="sbReviewTags"></div>
     <div class="ep-tags">
       ${c.subway_station ? `<span class="aptag">🚇 ${c.subway_station}${c.subway_walk ? ` 도보 ${c.subway_walk}` : ''}</span>` : ''}
       ${c.n_12m ? `<span class="aptag">최근 12개월 거래 ${c.n_12m}건</span>` : '<span class="aptag">최근 12개월 실거래 없음</span>'}
@@ -3931,6 +3945,15 @@ function showSbDetail(c) {
   document.getElementById('sbDetailClose').addEventListener('click', () => {
     panel.style.display = 'none';
   });
+  fillSbReviewTags(c);   // 💬 실제 이야기 해시태그 (비동기)
+}
+
+// 리뷰 태그는 K-apt 이름 또는 실거래 이름으로 키가 잡혀 있을 수 있어 둘 다 시도
+async function fillSbReviewTags(c) {
+  const all = await ensureReviews();
+  const key = [c.name, c.trade_name].find(n => n && all[`성북구|${n}`]?.tags?.length);
+  if (key) fillReviewTags('sbReviewTags', '성북구', key, true);
+  else { const el = document.getElementById('sbReviewTags'); if (el) el.innerHTML = ''; }
 }
 
 async function renderSeongbuk() {
