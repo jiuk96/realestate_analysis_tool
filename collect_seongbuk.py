@@ -53,17 +53,15 @@ KAKAO = os.environ.get("KAKAO_REST_KEY", "").strip()
 
 LIST_URL = "https://apis.data.go.kr/1613000/AptListService3/getSigunguAptList3"
 # 기본/상세 정보는 data.go.kr 서비스 버전이 바뀌곤 해(V3→V4) 후보를 순차 시도한다.
-BASE_URLS = [
-    "https://apis.data.go.kr/1613000/AptBasisInfoServiceV4/getAphusBaseInfoV4",
-    "https://apis.data.go.kr/1613000/AptBasisInfoServiceV3/getAphusBaseInfoV3",
-    "https://apis.data.go.kr/1613000/AptBasisInfoServiceV2/getAphusBaseInfoV2",
-    "https://apis.data.go.kr/1613000/AptBasisInfoService1/getAphusBaseInfo1",
+BASE_URLS = [   # 주의: 오퍼레이션명은 'Bass'다 (Base 아님)
+    "https://apis.data.go.kr/1613000/AptBasisInfoServiceV3/getAphusBassInfoV3",
+    "https://apis.data.go.kr/1613000/AptBasisInfoServiceV4/getAphusBassInfoV4",
+    "https://apis.data.go.kr/1611000/AptBasisInfoService/getAphusBassInfo",
 ]
 DTL_URLS = [
-    "https://apis.data.go.kr/1613000/AptBasisInfoServiceV4/getAphusDtlInfoV4",
     "https://apis.data.go.kr/1613000/AptBasisInfoServiceV3/getAphusDtlInfoV3",
-    "https://apis.data.go.kr/1613000/AptBasisInfoServiceV2/getAphusDtlInfoV2",
-    "https://apis.data.go.kr/1613000/AptBasisInfoService1/getAphusDtlInfo1",
+    "https://apis.data.go.kr/1613000/AptBasisInfoServiceV4/getAphusDtlInfoV4",
+    "https://apis.data.go.kr/1611000/AptBasisInfoService/getAphusDtlInfo",
 ]
 ELEV_URL = "https://api.open-elevation.com/api/v1/lookup"
 
