@@ -1460,6 +1460,28 @@ details.budget-fold .legal-hint { font-weight: 500; }
 .vl-badge { font-size: .7rem; font-weight: 700; border-radius: 999px; padding: .18rem .6rem; }
 .vl-danger { background: rgba(229,72,77,.1); color: var(--red); border: 1px solid rgba(229,72,77,.4); }
 .vl-warn { background: rgba(245,158,11,.1); color: #b45309; border: 1px solid rgba(245,158,11,.4); }
+
+/* ── 성북구 심화 (300세대+ 전수) ─────────────────── */
+.sb-card { cursor: pointer; display: flex; flex-direction: column; gap: .45rem; }
+.sb-card:hover { box-shadow: 0 4px 14px rgba(20,40,70,.12); }
+.sb-hh { font-size: .78rem; font-weight: 700; color: var(--acc2); margin-left: .3rem; }
+.sb-est { font-size: .64rem; font-weight: 700; background: rgba(245,158,11,.12); color: #b45309;
+  border: 1px solid rgba(245,158,11,.4); border-radius: 999px; padding: .1rem .45rem; margin-left: .35rem; vertical-align: middle; }
+.sb-slope-row { display: flex; }
+.sb-slope { font-size: .74rem; font-weight: 700; border-radius: 999px; padding: .2rem .65rem; }
+.sb-price { font-size: .82rem; color: var(--text2); font-variant-numeric: tabular-nums; }
+.sb-pc { font-size: .78rem; border-radius: 10px; padding: .5rem .7rem; }
+.sb-pc-t { font-weight: 800; margin-bottom: .25rem; font-size: .74rem; }
+.sb-pc ul { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: .15rem; }
+.sb-pc li { line-height: 1.5; }
+.sb-pros { background: rgba(22,163,74,.07); color: var(--text); }
+.sb-pros .sb-pc-t { color: var(--green); }
+.sb-cons { background: rgba(229,72,77,.06); }
+.sb-cons .sb-pc-t { color: var(--red); }
+.vl-links { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .2rem; }
+.vl-link { font-size: .74rem; font-weight: 700; color: var(--acc2); text-decoration: none;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: .28rem .7rem; }
+.vl-link:hover { border-color: var(--acc2); }
 .couple-box-wide { margin-bottom: 1.1rem; }
 .couple-badge { background: rgba(52,211,153,.15); color: #34d399; font-size: .68rem; padding: .15rem .5rem; border-radius: 999px; margin-left: .4rem; font-weight: 600; }
 .commute-preset { color: #4a5563; font-size: .8rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: .4rem .7rem; }

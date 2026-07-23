@@ -3804,6 +3804,158 @@ async function renderVilla() {
   applyVillaView(hasZones ? (savedView || 'zone') : 'dong');
 }
 
+/* ── 🏔️ 성북구 심화 — 300세대+ 전수 단지 ──────────────────
+   collect_seongbuk.py 산출(/api/seongbuk). 색=경사도, 크기=세대수.
+   경사 필터·정렬·예산 상한과 카드(장점/단점·로드뷰·네이버) 연동. */
+let _sbData = null, _sbMap = null, _sbMarkers = [], _sbMarkerByKey = {};
+let _sbSlope = 'all';
+
+function _sbSlopeColor(s) {
+  if (s == null) return '#9ca3af';
+  return s < 3 ? '#16a34a' : s < 6 ? '#f59e0b' : s < 10 ? '#ef4444' : '#b91c1c';
+}
+const _sbEok = m => m == null ? '—' : (m / 10000).toFixed(m >= 100000 ? 0 : 1) + '억';
+
+function _sbFiltered() {
+  const maxEok = parseFloat(document.getElementById('sbMaxEok')?.value) || 0;
+  return (_sbData.complexes || []).filter(c => {
+    const s = c.slope_pct;
+    if (_sbSlope === 'flat' && !(s != null && s < 3)) return false;
+    if (_sbSlope === 'mild' && !(s != null && s >= 3 && s < 6)) return false;
+    if (_sbSlope === 'hill' && !(s != null && s >= 6)) return false;
+    if (maxEok > 0 && c.med_12m && c.med_12m > maxEok * 10000) return false;
+    return true;
+  });
+}
+
+function renderSbMap(rows) {
+  const el = document.getElementById('sbMap');
+  if (!el || typeof L === 'undefined') return;
+  if (!_sbMap) {
+    _sbMap = L.map('sbMap', { center: [37.6015, 127.02], zoom: 13 });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors', maxZoom: 18,
+    }).addTo(_sbMap);
+    addWorkMarkers(_sbMap);
+  }
+  try {
+    _sbMarkers.forEach(m => _sbMap.removeLayer(m));
+    _sbMarkers = []; _sbMarkerByKey = {};
+    rows.forEach(c => {
+      if (c.lat == null) return;
+      const hh = c.households || 300;
+      const mk = L.circleMarker([c.lat, c.lng], {
+        radius: Math.max(7, Math.min(18, Math.sqrt(hh) / 3.2)),
+        color: '#fff', weight: 1.5, fillColor: _sbSlopeColor(c.slope_pct), fillOpacity: 0.85,
+      }).addTo(_sbMap);
+      mk.bindPopup(`<b>${c.name}</b><br>${(c.dong || '')} · ${hh.toLocaleString()}세대` +
+        (c.slope_pct != null ? `<br>경사 ${c.slope_pct}% (${c.slope_label})` : '') +
+        (c.med_12m ? `<br>최근가 ${_sbEok(c.med_12m)}` : ''));
+      mk.on('click', () => {
+        const card = document.querySelector(`#sbList .vl-card[data-key="${CSS.escape(c.name)}"]`);
+        card?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card?.classList.add('vl-flash'); setTimeout(() => card?.classList.remove('vl-flash'), 1600);
+      });
+      _sbMarkers.push(mk); _sbMarkerByKey[c.name] = mk;
+    });
+  } catch (e) { /* 지도 스텁 환경 무시 */ }
+}
+
+function renderSbList() {
+  const rows = _sbFiltered();
+  const sortBy = document.getElementById('sbSort').value;
+  const key = {
+    households: c => -(c.households || 0),
+    ppm2:       c => c.ppm2_12m ?? 1e9,
+    slope:      c => c.slope_pct ?? 1e9,
+    build_year: c => -(c.build_year || 0),
+    trend:      c => -(c.trend_pct ?? -1e9),
+    n12:        c => -(c.n_12m || 0),
+  }[sortBy] || (c => -(c.households || 0));
+  rows.sort((a, b) => key(a) - key(b));
+
+  document.getElementById('sbSummary').innerHTML =
+    `${rows.length}개 단지 표시 중 (전체 ${_sbData.complexes.length}개) · 성북구 ㎡가 중위 ${(_sbData.gu_ppm2_median || 0).toLocaleString()}만원`;
+
+  document.getElementById('sbList').innerHTML = rows.map(c => {
+    const hh = c.households ? c.households.toLocaleString() + '세대' : '?세대';
+    const est = c.hh_source === 'estimated' ? `<span class="sb-est" title="거래량 기반 추정 — K-apt 승인 후 정확값으로 대체">추정</span>` : '';
+    const slope = c.slope_pct != null
+      ? `<span class="sb-slope" style="background:${_sbSlopeColor(c.slope_pct)}1a;color:${_sbSlopeColor(c.slope_pct)}">⛰ ${c.slope_label} ${c.slope_pct}%${c.elevation_m != null ? ` · 고도 ${c.elevation_m}m` : ''}</span>`
+      : `<span class="sb-slope" style="color:var(--text3)">⛰ 경사 데이터 수집 대기</span>`;
+    const meta = [
+      c.dong, c.build_year ? `${c.build_year}년 준공` : null,
+      c.dong_cnt ? `${c.dong_cnt}개동` : null,
+      c.parking && c.households ? `주차 ${(c.parking / c.households).toFixed(1)}대/세대` : null,
+      c.hall_type || null, c.heat || null,
+      c.main_area ? `주력 ${Math.round(c.main_area)}㎡` : null,
+    ].filter(Boolean).join(' · ');
+    const price = c.med_12m
+      ? `최근 12개월 중위 <b>${_sbEok(c.med_12m)}</b> · ㎡가 ${Math.round(c.ppm2_12m).toLocaleString()}만` +
+        (c.trend_pct != null ? ` · 1년 <b style="color:${c.trend_pct >= 0 ? 'var(--green)' : 'var(--red)'}">${c.trend_pct >= 0 ? '+' : ''}${c.trend_pct}%</b>` : '') +
+        ` · 거래 ${c.n_12m}건`
+      : `<span style="color:var(--text3)">최근 12개월 실거래 없음</span>`;
+    const roadview = c.lat != null
+      ? `<a class="vl-link" href="https://map.kakao.com/link/roadview/${c.lat},${c.lng}" target="_blank" rel="noopener">📷 로드뷰(실사진)</a>` : '';
+    const naver = `<a class="vl-link" href="https://m.land.naver.com/search/result/${encodeURIComponent('성북구 ' + c.name)}" target="_blank" rel="noopener">🏠 네이버 부동산</a>`;
+    return `
+    <div class="vl-card sb-card" data-key="${c.name}" data-lat="${c.lat ?? ''}" data-lng="${c.lng ?? ''}" data-zkey="${c.name}">
+      <div class="vl-head">
+        <div class="vl-name">${c.name} <span class="sb-hh">${hh}</span>${est}</div>
+      </div>
+      <div class="sb-slope-row">${slope}</div>
+      <div class="vl-meta">${meta}</div>
+      <div class="sb-price">${price}</div>
+      ${c.pros?.length ? `<div class="sb-pc sb-pros"><div class="sb-pc-t">👍 장점</div><ul>${c.pros.map(p => `<li>${p}</li>`).join('')}</ul></div>` : ''}
+      ${c.cons?.length ? `<div class="sb-pc sb-cons"><div class="sb-pc-t">👎 단점</div><ul>${c.cons.map(p => `<li>${p}</li>`).join('')}</ul></div>` : ''}
+      <div class="vl-links">${roadview}${naver}
+        <a class="vl-link" href="https://map.kakao.com/link/map/${encodeURIComponent(c.name)},${c.lat ?? 37.6},${c.lng ?? 127.02}" target="_blank" rel="noopener">🗺 카카오맵</a>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.querySelectorAll('#sbList .sb-card').forEach(card =>
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('a, button, input')) return;
+      const lat = parseFloat(card.dataset.lat);
+      if (!_sbMap || isNaN(lat)) return;
+      document.getElementById('sbMap')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      try { _sbMap.setView([lat, parseFloat(card.dataset.lng)], 16, { animate: true });
+            _sbMarkerByKey[card.dataset.key]?.openPopup(); } catch (err) {}
+    }));
+  renderSbMap(rows);
+}
+
+async function renderSeongbuk() {
+  const list = document.getElementById('sbList');
+  if (!list) return;
+  const d = await (await fetch('/api/seongbuk')).json();
+  if (!d.complexes || !d.complexes.length) {
+    list.innerHTML = `<div class="budget-card" style="grid-column:1/-1">
+      <div class="budget-card-title">아직 성북구 심화 데이터가 없습니다</div>
+      <div class="sub-note">GitHub Actions의 「성북구 심화 수집」 워크플로를 실행하면 채워집니다.</div></div>`;
+    return;
+  }
+  _sbData = d;
+  const note = document.getElementById('sbSourceNote');
+  if (note) note.innerHTML = d.kapt_ok
+    ? `✅ 세대수·주차·복도유형: <b>K-apt 공동주택관리정보</b> 공식값 · 시세: 국토부 실거래가 · 갱신 ${d.updated}`
+    : `⚠️ 세대수는 현재 <b>거래량 기반 추정치</b>입니다. data.go.kr에서 기존 국토부 키로
+       <b>「공동주택 단지 목록제공」 + 「공동주택 기본 정보제공」</b> 두 서비스를 활용신청(자동승인·무료)하면
+       다음 수집부터 K-apt 공식 세대수·주차·복도유형으로 대체됩니다. · 갱신 ${d.updated}`;
+
+  document.querySelectorAll('#sbSlopeChips .price-chip').forEach(c =>
+    c.addEventListener('click', () => {
+      _sbSlope = c.dataset.s;
+      document.querySelectorAll('#sbSlopeChips .price-chip').forEach(x =>
+        x.classList.toggle('active', x.dataset.s === _sbSlope));
+      renderSbList();
+    }));
+  document.getElementById('sbSort').addEventListener('input', renderSbList);
+  document.getElementById('sbMaxEok').addEventListener('input', renderSbList);
+  renderSbList();
+}
+
 /* ── 📋 청약 자격 진단 ─────────────────────────────────────
    「주택공급에 관한 규칙」의 일반 기준을 단순화한 클라이언트 계산.
    순위 판정(국민·민영) + 가점 84점 + 특별공급 5종을 입력값으로 실시간 판정.
@@ -4220,6 +4372,7 @@ async function renderNews() {
   await safe(initBudgetPlanner);
   await safe(initSubscription);
   await safe(renderVilla);
+  await safe(renderSeongbuk);
   await safe(renderNews);
   // 각 섹션을 독립 실행 — 한 곳(예: 지도 CDN)이 실패해도 나머지는 정상 렌더
   await safe(renderExplorer);

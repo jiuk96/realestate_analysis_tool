@@ -39,6 +39,7 @@ _PAGES = {
     "rankings":        "rankings.html",         # 매매 · 동네별 순위
     "top1":            "top1.html",             # 매매 · 전체 1위
     "villa":           "villa.html",            # 매매 · 빌라 동네 분석
+    "seongbuk":        "seongbuk.html",         # 매매 · 성북구 심화 (300세대+ 전수)
     # 전세 축
     "jeonse":          "jeonse.html",           # 전세 · 지도 탐색
     "jeonse-rankings": "jeonse_rankings.html",  # 전세 · 구별 순위
@@ -143,6 +144,15 @@ def api_news():
     """부동산 뉴스 + 쉬운 해설 (collect_news.py, 네이버 뉴스 API). 없으면 빈 dict."""
     try:
         return jsonify(_load("news.json"))
+    except FileNotFoundError:
+        return jsonify({})
+
+
+@app.route("/api/seongbuk")
+def api_seongbuk():
+    """성북구 심화 — 300세대+ 전수 단지 (collect_seongbuk.py). 없으면 빈 dict."""
+    try:
+        return jsonify(_load("seongbuk.json"))
     except FileNotFoundError:
         return jsonify({})
 

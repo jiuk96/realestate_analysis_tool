@@ -1,0 +1,49 @@
+name: 성북구 심화 수집
+
+# 성북구 300세대+ 전수: K-apt 세대수·주차 + 카카오 지오코딩 + Open-Elevation 경사도.
+# K-apt 활용신청 전이어도 실거래 기반 추정 모드로 동작한다.
+on:
+  workflow_dispatch:          # 수동 실행
+  schedule:
+    - cron: '43 21 * * 0'     # 매주 월요일 06:43 KST (UTC 일 21:43)
+
+jobs:
+  seongbuk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GIT_TOKEN }}
+
+      - name: Python 설정
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 패키지 설치
+        run: pip install -r requirements.txt
+
+      - name: 성북구 심화 수집 (K-apt + 경사도)
+        env:
+          MOLIT_API_KEY: ${{ secrets.MOLIT_API_KEY }}
+          KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
+          PYTHONUNBUFFERED: "1"
+        run: python collect_seongbuk.py
+
+      - name: 커밋·푸시
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/processed/seongbuk.json
+          if git diff --staged --quiet; then
+            echo "변경 없음 — 스킵"
+          else
+            git commit -m "data: 성북구 심화 갱신 $(date +'%Y-%m-%d') KST"
+            git pull --rebase origin "${GITHUB_REF_NAME}" || true
+            git push
+            echo "✅ 푸시 완료"
+          fi
