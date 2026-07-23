@@ -127,6 +127,61 @@ def _get_versioned(urls: list, **params) -> list:
     raise last or RuntimeError("모든 버전 실패")
 
 
+def _flat(d, out=None):
+    """중첩 dict를 평탄화 (키 소문자)."""
+    out = out if out is not None else {}
+    if isinstance(d, dict):
+        for k, v in d.items():
+            if isinstance(v, (dict, list)):
+                _flat(v, out)
+            else:
+                out[str(k).lower()] = v
+    elif isinstance(d, list):
+        for v in d:
+            _flat(v, out)
+    return out
+
+
+def _pick(flat: dict, *patterns):
+    """평탄화된 응답에서 정규식으로 첫 매칭 값을 찾는다 (스키마 방어)."""
+    for pat in patterns:
+        rx = re.compile(pat)
+        for k, v in flat.items():
+            if rx.search(k) and v not in (None, "", "null"):
+                return v
+    return None
+
+
+def _kapt_web(code: str) -> dict:
+    """k-apt.go.kr 공개 JSON — 인증키 불필요. API 500 장애 시 폴백."""
+    r = requests.get("https://www.k-apt.go.kr/kaptinfo/getKaptInfo.do",
+                     params={"kapt_code": code}, timeout=15,
+                     headers={"User-Agent": "Mozilla/5.0", "Referer": "https://www.k-apt.go.kr/"})
+    r.raise_for_status()
+    f = _flat(r.json())
+    def fnum(*pats):
+        v = _pick(f, *pats)
+        try:
+            return float(re.sub(r"[^\d.]", "", str(v))) if v is not None else None
+        except ValueError:
+            return None
+    hh = fnum(r"kaptda_?cnt$")
+    return {
+        "households": int(hh) if hh else None,
+        "dong_cnt": int(fnum(r"kapt_?dong_?cnt$") or 0) or None,
+        "ho_cnt": int(fnum(r"^ho_?cnt$") or 0) or None,
+        "use_date": str(_pick(f, r"kapt_?usedate") or "")[:6].replace("-", ""),
+        "hall_type": str(_pick(f, r"code_?hall") or ""),
+        "heat": str(_pick(f, r"code_?heat") or ""),
+        "parking": int((fnum(r"kaptd_?pcnt$") or 0) + (fnum(r"kaptd_?pcntu$") or 0)) or None,
+        "addr": str(_pick(f, r"doro_?juso", r"kapt_?addr") or ""),
+        "subway_line": str(_pick(f, r"subway_?line") or ""),
+        "subway_station": str(_pick(f, r"subway_?station") or ""),
+        "subway_walk": str(_pick(f, r"wtimesub") or ""),
+        "bus_walk": str(_pick(f, r"wtimebus") or ""),
+    }
+
+
 def fetch_kapt() -> list:
     """성북구 전체 단지 목록 → 단지별 기본+상세 정보. 실패 시 빈 리스트(폴백)."""
     if not API_KEY:
@@ -145,47 +200,61 @@ def fetch_kapt() -> list:
         print(f"⚠️ K-apt 목록 실패({e}) — data.go.kr에서 'AptListService3' 활용신청 필요할 수 있음")
         return []
 
-    rows = []
+    rows, mode, api_fails = [], "api", 0
     for i, it in enumerate(items):
         code = it.get("kaptCode")
         if not code:
             continue
-        try:
-            base = (_get_versioned(BASE_URLS, kaptCode=code) or [{}])[0]
-            time.sleep(0.15)
+        rec = None
+        if mode == "api":
             try:
-                dtl = (_get_versioned(DTL_URLS, kaptCode=code) or [{}])[0]
-            except Exception:
-                dtl = {}
-            time.sleep(0.15)
-        except Exception as e:
-            print(f"  {it.get('kaptName')} 기본정보 실패: {e}")
-            continue
+                base = (_get_versioned(BASE_URLS, kaptCode=code) or [{}])[0]
+                time.sleep(0.15)
+                try:
+                    dtl = (_get_versioned(DTL_URLS, kaptCode=code) or [{}])[0]
+                except Exception:
+                    dtl = {}
+                time.sleep(0.15)
+                f = _flat({**dtl, **base})
 
-        def num(d, *keys):
-            for k in keys:
-                v = d.get(k)
-                if v and re.match(r"^\d+(\.\d+)?$", str(v)):
-                    return float(v)
-            return None
-
-        hh = num(base, "kaptdaCnt") or num(dtl, "kaptdaCnt")
-        rows.append({
-            "kapt_code": code,
-            "name": base.get("kaptName") or it.get("kaptName"),
-            "addr": base.get("doroJuso") or base.get("kaptAddr") or "",
-            "households": int(hh) if hh else None,
-            "dong_cnt": int(num(base, "kaptDongCnt") or 0) or None,
-            "ho_cnt": int(num(base, "hoCnt") or 0) or None,
-            "use_date": str(base.get("kaptUsedate") or "")[:6],   # YYYYMM
-            "hall_type": str(base.get("codeHallNm") or ""),        # 복도식/계단식/혼합식
-            "heat": str(base.get("codeHeatNm") or ""),             # 개별난방/지역난방...
-            "parking": int((num(dtl, "kaptdPcnt") or 0) + (num(dtl, "kaptdPcntu") or 0)) or None,
-            "subway_line": str(dtl.get("subwayLine") or ""),
-            "subway_station": str(dtl.get("subwayStation") or ""),
-            "subway_walk": str(dtl.get("kaptdWtimesub") or ""),    # '5분이내' 등 문자열
-            "bus_walk": str(dtl.get("kaptdWtimebus") or ""),
-        })
+                def fnum(*pats):
+                    v = _pick(f, *pats)
+                    try:
+                        return float(str(v)) if v is not None else None
+                    except ValueError:
+                        return None
+                hh = fnum(r"kaptdacnt$")
+                rec = {
+                    "households": int(hh) if hh else None,
+                    "dong_cnt": int(fnum(r"kaptdongcnt$") or 0) or None,
+                    "ho_cnt": int(fnum(r"^hocnt$") or 0) or None,
+                    "use_date": str(_pick(f, r"kaptusedate") or "")[:6],
+                    "hall_type": str(_pick(f, r"codehall") or ""),
+                    "heat": str(_pick(f, r"codeheat") or ""),
+                    "parking": int((fnum(r"kaptdpcnt$") or 0) + (fnum(r"kaptdpcntu$") or 0)) or None,
+                    "addr": str(_pick(f, r"dorojuso", r"kaptaddr") or ""),
+                    "subway_line": str(_pick(f, r"subwayline") or ""),
+                    "subway_station": str(_pick(f, r"subwaystation") or ""),
+                    "subway_walk": str(_pick(f, r"wtimesub") or ""),
+                    "bus_walk": str(_pick(f, r"wtimebus") or ""),
+                }
+                rec["hh_api"] = True
+                api_fails = 0
+            except Exception as e:
+                api_fails += 1
+                if api_fails >= 3 and not any(r.get("hh_api") for r in rows):
+                    mode = "web"   # API가 전면 장애 — 이후는 k-apt 웹 JSON으로
+                    print(f"  ⚠️ 기본정보 API 연속 실패({e}) → k-apt.go.kr 웹 JSON으로 전환")
+        if rec is None:
+            try:
+                rec = _kapt_web(code)
+                rec["hh_api"] = False
+                time.sleep(0.4)
+            except Exception as e:
+                print(f"  {it.get('kaptName')} 웹 조회도 실패: {e}")
+                continue
+        rec.update({"kapt_code": code, "name": it.get("kaptName")})
+        rows.append(rec)
         if (i + 1) % 20 == 0:
             print(f"  기본정보 {i+1}/{len(items)}")
     return rows
