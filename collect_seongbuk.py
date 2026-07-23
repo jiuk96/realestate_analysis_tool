@@ -77,11 +77,22 @@ def _xml_items(text: str) -> list:
     return out
 
 
+def _json_items(data: dict) -> list:
+    """K-apt JSON 응답에서 item 리스트 추출 (단건이면 dict로 오기도 한다)."""
+    body = (data.get("response") or {}).get("body") or {}
+    items = body.get("items") or body.get("item") or []
+    if isinstance(items, dict):
+        items = items.get("item", items)
+    if isinstance(items, dict):
+        items = [items]
+    return [i for i in items if isinstance(i, dict)]
+
+
 def _get(url: str, **params) -> list:
     r = requests.get(url, params={"serviceKey": API_KEY, **params}, timeout=20)
     r.raise_for_status()
-    if r.text.lstrip().startswith("{"):          # 일부 게이트웨이는 JSON 에러를 준다
-        raise RuntimeError(r.text[:200])
+    if r.text.lstrip().startswith("{"):          # 이 API는 JSON으로 응답한다
+        return _json_items(r.json())
     return _xml_items(r.text)
 
 
@@ -135,13 +146,14 @@ def fetch_kapt() -> list:
             "households": int(hh) if hh else None,
             "dong_cnt": int(num(base, "kaptDongCnt") or 0) or None,
             "ho_cnt": int(num(base, "hoCnt") or 0) or None,
-            "use_date": (base.get("kaptUsedate") or "")[:6],   # YYYYMM
-            "hall_type": base.get("codeHallNm") or "",          # 복도식/계단식/혼합식
-            "heat": base.get("codeHeatNm") or "",               # 개별난방/지역난방...
+            "use_date": str(base.get("kaptUsedate") or "")[:6],   # YYYYMM
+            "hall_type": str(base.get("codeHallNm") or ""),        # 복도식/계단식/혼합식
+            "heat": str(base.get("codeHeatNm") or ""),             # 개별난방/지역난방...
             "parking": int((num(dtl, "kaptdPcnt") or 0) + (num(dtl, "kaptdPcntu") or 0)) or None,
-            "subway_line": dtl.get("subwayLine") or "", "subway_station": dtl.get("subwayStation") or "",
-            "subway_walk": dtl.get("kaptdWtimesub") or "",      # '5분이내' 등 문자열
-            "bus_walk": dtl.get("kaptdWtimebus") or "",
+            "subway_line": str(dtl.get("subwayLine") or ""),
+            "subway_station": str(dtl.get("subwayStation") or ""),
+            "subway_walk": str(dtl.get("kaptdWtimesub") or ""),    # '5분이내' 등 문자열
+            "bus_walk": str(dtl.get("kaptdWtimebus") or ""),
         })
         if (i + 1) % 20 == 0:
             print(f"  기본정보 {i+1}/{len(items)}")
@@ -196,18 +208,31 @@ def trade_stats(df: pd.DataFrame) -> dict:
 
 # ── 좌표 ─────────────────────────────────────────────────
 def geocode(addr: str, cache: dict) -> dict | None:
-    if not addr or not KAKAO:
+    """카카오 → (키 없으면) Nominatim 순으로 주소 지오코딩."""
+    if not addr:
         return None
     if addr in cache:
         return cache[addr]
-    try:
-        r = requests.get("https://dapi.kakao.com/v2/local/search/address.json",
-                         params={"query": addr},
-                         headers={"Authorization": f"KakaoAK {KAKAO}"}, timeout=10)
-        docs = r.json().get("documents", [])
-        if docs:
-            cache[addr] = {"lat": float(docs[0]["y"]), "lng": float(docs[0]["x"])}
-            time.sleep(0.1)
+    if KAKAO:
+        try:
+            r = requests.get("https://dapi.kakao.com/v2/local/search/address.json",
+                             params={"query": addr},
+                             headers={"Authorization": f"KakaoAK {KAKAO}"}, timeout=10)
+            docs = r.json().get("documents", [])
+            if docs:
+                cache[addr] = {"lat": float(docs[0]["y"]), "lng": float(docs[0]["x"])}
+                time.sleep(0.1)
+                return cache[addr]
+        except Exception:
+            pass
+    try:   # Nominatim 폴백 (CI에서 동작, 1건/초 예의)
+        r = requests.get("https://nominatim.openstreetmap.org/search",
+                         params={"q": addr, "format": "json", "limit": 1, "countrycodes": "kr"},
+                         headers={"User-Agent": "seoul-apt-tool/1.0"}, timeout=15)
+        js = r.json()
+        time.sleep(1.1)
+        if js:
+            cache[addr] = {"lat": float(js[0]["lat"]), "lng": float(js[0]["lon"])}
             return cache[addr]
     except Exception:
         pass
