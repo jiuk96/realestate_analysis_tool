@@ -335,6 +335,8 @@ def fuzzy_trade_match(norm_name: str, raw_name: str, addr: str, tstats: dict):
        법정동을 모르면 문턱을 0.7로 올려 오매칭을 막는다."""
     m = re.search(r"([가-힣]+동)", addr or "")
     dong = m.group(1) if m else None
+    # '안암동5가' → '안암동' 정규화 후 비교 (법정동 숫자+가 접미 대응)
+    base_dong = lambda x: re.sub(r"\d+가$", "", x or "")
     n2 = _norm2(raw_name)
 
     # ① 서브스트링 (양방향, 4자 이상)
@@ -343,7 +345,7 @@ def fuzzy_trade_match(norm_name: str, raw_name: str, addr: str, tstats: dict):
         k2 = _norm2(v["apt_name"])
         short = min(len(n2), len(k2))
         if short >= 4 and (n2 in k2 or k2 in n2) and short > best_len:
-            if dong and v.get("dong") and v["dong"] != dong:
+            if dong and v.get("dong") and base_dong(v["dong"]) != dong:
                 continue
             best_sub, best_len = v, short
     if best_sub:
@@ -353,7 +355,7 @@ def fuzzy_trade_match(norm_name: str, raw_name: str, addr: str, tstats: dict):
     nb, nd = _bigrams(norm_name), _digits(norm_name)
     best, best_score = None, (0.55 if dong else 0.7)
     for k, v in tstats.items():
-        if dong and v.get("dong") != dong:
+        if dong and base_dong(v.get("dong")) != dong:
             continue
         kd = _digits(k)
         if nd and kd and not (nd & kd):
