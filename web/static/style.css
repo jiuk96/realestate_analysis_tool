@@ -1506,6 +1506,8 @@ details.budget-fold .legal-hint { font-weight: 500; }
 .sb-dong-bar > span { display: block; height: 100%; border-radius: 999px; }
 .sb-dong-pct { font-size: .76rem; font-weight: 800; text-align: right; font-variant-numeric: tabular-nums; }
 .sb-dong-sub { grid-column: 2 / -1; font-size: .68rem; color: var(--text3); }
+.sb-station small { font-weight: 500; }
+.sb-list-station { color: var(--acc2); margin-top: .1rem; }
 .couple-box-wide { margin-bottom: 1.1rem; }
 .couple-badge { background: rgba(52,211,153,.15); color: #34d399; font-size: .68rem; padding: .15rem .5rem; border-radius: 999px; margin-left: .4rem; font-weight: 600; }
 .commute-preset { color: #4a5563; font-size: .8rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: .4rem .7rem; }

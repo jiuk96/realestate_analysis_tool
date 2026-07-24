@@ -3886,6 +3886,7 @@ function renderSb() {
           const col = { '저평가': 'var(--green)', '고평가': 'var(--red)', '적정': 'var(--acc2)' }[c.value_label];
           return ` · <span style="color:${col};font-weight:700">${c.value_label} ${c.value_gap_pct > 0 ? '+' : ''}${c.value_gap_pct}%</span>`;
         })()}</div>
+        ${c.station_name ? `<div class="ep-list-sub sb-list-station">🚇 ${c.station_line ? c.station_line + ' ' : ''}${c.station_name} · ${c.station_m}m 도보 ${c.station_walk_min}분</div>` : ''}
       </div>
       <div class="ep-list-right">${(() => {
         const p = _sbPrice(c);
@@ -3954,6 +3955,18 @@ function _sbBestDongBlock(c) {
     </div>`;
 }
 
+// 🚇 최근접 역 태그 — 좌표 기반(노선·역명·거리·도보분). 없으면 K-apt 텍스트 폴백.
+function _sbStationTag(c) {
+  if (c.station_name) {
+    const line = c.station_line ? `${c.station_line} ` : '';
+    const dist = c.station_m != null
+      ? ` <small style="opacity:.75">${c.station_m}m·도보 ${c.station_walk_min}분</small>` : '';
+    return `<span class="aptag sb-station">🚇 ${line}${c.station_name}${dist}</span>`;
+  }
+  if (c.subway_walk) return `<span class="aptag">🚇 지하철 도보 ${c.subway_walk}</span>`;
+  return '';
+}
+
 function showSbDetail(c) {
   const panel = document.getElementById('sbDetail');
   if (!panel) return;
@@ -3986,7 +3999,7 @@ function showSbDetail(c) {
     ${_sbBestDongBlock(c)}
     <div id="sbReviewTags"></div>
     <div class="ep-tags">
-      ${c.subway_station ? `<span class="aptag">🚇 ${c.subway_station}${c.subway_walk ? ` 도보 ${c.subway_walk}` : ''}</span>` : ''}
+      ${_sbStationTag(c)}
       ${c.n_12m ? `<span class="aptag">최근 12개월 거래 ${c.n_12m}건</span>` : '<span class="aptag">최근 12개월 실거래 없음</span>'}
       ${c.ppm2_12m ? `<span class="aptag">㎡가 ${Math.round(c.ppm2_12m).toLocaleString()}만</span>` : ''}
     </div>

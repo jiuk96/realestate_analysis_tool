@@ -525,6 +525,34 @@ def pros_cons(r: dict, gu_ppm2: float | None) -> tuple[list, list]:
     return pros, cons
 
 
+# ── 최근접 지하철역 (좌표 기반) ───────────────────────────
+def add_subway(rows):
+    """단지 좌표에서 가장 가까운 지하철역을 계산한다. K-apt의 '5~10분이내'류
+    부정확·결측 필드 대신, 실제 역 좌표(282개)로 역명·노선·직선거리·도보분을 채운다."""
+    try:
+        stations = json.loads((ROOT / "data" / "static" / "subway_stations.json").read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        print("⚠️ subway_stations.json 없음 — 역 계산 건너뜀")
+        return
+    stations = [s for s in stations if s.get("lat") and s.get("name")]
+    for r in rows:
+        if r.get("lat") is None:
+            continue
+        best, best_km = None, 9e9
+        for s in stations:
+            dkm = _haversine((r["lat"], r["lng"]), (s["lat"], s["lng"]))
+            if dkm < best_km:
+                best, best_km = s, dkm
+        if not best:
+            continue
+        name = best["name"] if str(best["name"]).endswith("역") else f'{best["name"]}역'
+        line = re.sub(r"^0", "", str(best.get("line", "")))   # '04호선' → '4호선'
+        r["station_name"] = name
+        r["station_line"] = line
+        r["station_m"] = round(best_km * 1000)
+        r["station_walk_min"] = max(1, round(best_km * 1000 / 80))   # 도보 ≈ 80m/분
+
+
 # ── 적정가격 (헤도닉 회귀) ────────────────────────────────
 CBD = (37.5716, 126.9769)   # 광화문(도심 업무지구)
 _SUBWAY_MIN = {"5분이내": 4, "5~10분이내": 7.5, "10~15분이내": 12.5,
@@ -544,7 +572,8 @@ def _features(r, med_slope, med_sub):
     slope = r.get("slope_pct")
     slope = slope if slope is not None else med_slope
     cbd = _haversine((r["lat"], r["lng"]), CBD) if r.get("lat") else 6.0
-    sub = _SUBWAY_MIN.get(r.get("subway_walk", ""), med_sub)
+    # 좌표 기반 실제 도보분 우선, 없으면 K-apt 텍스트 파싱, 그것도 없으면 중위값
+    sub = r.get("station_walk_min") or _SUBWAY_MIN.get(r.get("subway_walk", ""), med_sub)
     hh = math.log(max(r.get("households") or 300, 50))
     return [age, slope, cbd, sub, hh]
 
@@ -658,6 +687,7 @@ def main() -> int:
         print(f"추정 기준 300세대+ 단지: {len(rows)}개 (K-apt 승인 후 정확 세대수로 대체)")
 
     add_slopes(rows)
+    add_subway(rows)
 
     gu_ppm2 = pd.Series([r["ppm2_12m"] for r in rows if r.get("ppm2_12m")]).median()
     for r in rows:
