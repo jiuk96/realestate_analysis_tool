@@ -34,6 +34,7 @@ import xml.etree.ElementTree as ET
 from datetime import date
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import requests
 
@@ -275,6 +276,41 @@ def load_trades() -> pd.DataFrame:
     return df
 
 
+def best_dong(g: pd.DataFrame, y: int, m: int) -> list:
+    """단지 내 '가장 좋은 동' — 최근 3년 거래를 동(棟)별로 묶어 층수 보정 ㎡가로 순위.
+    같은 단지라도 조망·향·역과의 거리로 동마다 값이 달라, 층수 효과를 제거한 뒤
+    동별 중위 ㎡가를 비교한다. 거래 3건 이상 동만, 상위 3개 반환."""
+    g3 = g[g["ym"] > (y - 3) * 100 + m].copy()
+    g3["dong"] = g3["aptDong"].astype(str).str.strip()
+    g3["floor_n"] = pd.to_numeric(g3["floor"], errors="coerce")
+    g3["ppm2"] = g3["deal_amount"] / g3["area_exclusive"]
+    g3 = g3[(g3["dong"] != "") & g3["floor_n"].notna() & g3["ppm2"].notna()]
+    if len(g3) < 6 or g3["dong"].nunique() < 2:
+        return []
+    # 층수 효과 제거: ppm2 ~ floor 선형 추세를 빼 '중층 기준' ㎡가로 보정
+    try:
+        slope = np.polyfit(g3["floor_n"], g3["ppm2"], 1)[0]
+    except Exception:
+        slope = 0.0
+    fmed = g3["floor_n"].median()
+    g3["adj"] = g3["ppm2"] - slope * (g3["floor_n"] - fmed)
+    comp_med = g3["adj"].median()
+    rows = []
+    for dong, gd in g3.groupby("dong"):
+        if len(gd) < 3:
+            continue
+        adj = gd["adj"].median()
+        rows.append({
+            "dong": dong,
+            "ppm2": round(adj, 1),                              # 층수보정 ㎡가
+            "premium_pct": round((adj / comp_med - 1) * 100, 1),  # 단지 평균 대비
+            "n": int(len(gd)),
+            "avg_floor": round(gd["floor_n"].mean(), 1),
+        })
+    rows.sort(key=lambda r: -r["ppm2"])
+    return rows[:3]
+
+
 def trade_stats(df: pd.DataFrame) -> dict:
     """정규화 이름 → 시세 요약. (동 구분: 같은 이름은 성북구 안에서 드물어 이름 기준)"""
     last_ym = int(df["ym"].max())
@@ -310,6 +346,7 @@ def trade_stats(df: pd.DataFrame) -> dict:
             "ppm2_any": round(ppm2_any, 1) if ppm2_any else None,
             "any_ym": f"{any_ym // 100}.{any_ym % 100:02d}" if any_ym else None,  # 'YYYY.MM'
             "est_households": int(len(g) / 6 * 10),              # 폴백용 추정
+            "best_dongs": best_dong(g, y, m),                    # 단지 내 상위 동
         }
     return out
 
@@ -488,6 +525,72 @@ def pros_cons(r: dict, gu_ppm2: float | None) -> tuple[list, list]:
     return pros, cons
 
 
+# ── 적정가격 (헤도닉 회귀) ────────────────────────────────
+CBD = (37.5716, 126.9769)   # 광화문(도심 업무지구)
+_SUBWAY_MIN = {"5분이내": 4, "5~10분이내": 7.5, "10~15분이내": 12.5,
+               "15~20분이내": 17.5, "20분초과": 22}
+
+
+def _haversine(a, b):
+    R = 6371.0
+    la1, ln1, la2, ln2 = map(math.radians, [a[0], a[1], b[0], b[1]])
+    h = math.sin((la2 - la1) / 2) ** 2 + math.cos(la1) * math.cos(la2) * math.sin((ln2 - ln1) / 2) ** 2
+    return 2 * R * math.asin(math.sqrt(h))
+
+
+def _features(r, med_slope, med_sub):
+    """적정가 모델 입력: [연식, 경사, 도심거리km, 지하철도보분, log세대수]."""
+    age = date.today().year - r["build_year"] if r.get("build_year") else 25
+    slope = r.get("slope_pct")
+    slope = slope if slope is not None else med_slope
+    cbd = _haversine((r["lat"], r["lng"]), CBD) if r.get("lat") else 6.0
+    sub = _SUBWAY_MIN.get(r.get("subway_walk", ""), med_sub)
+    hh = math.log(max(r.get("households") or 300, 50))
+    return [age, slope, cbd, sub, hh]
+
+
+def fair_value(rows) -> float:
+    """단지 특성으로 '적정 ㎡가'를 회귀 예측하고, 현재가와 비교해 저/고평가를 매긴다.
+    log(㎡가) ~ 연식·경사·도심거리·역세권·세대수 최소자승 적합. 학습표본은 최근
+    12개월 실거래가 있는 단지. 결정계수(R²)를 함께 반환해 신뢰도를 표시한다."""
+    slopes = [r["slope_pct"] for r in rows if r.get("slope_pct") is not None]
+    subs = [_SUBWAY_MIN[r["subway_walk"]] for r in rows if r.get("subway_walk") in _SUBWAY_MIN]
+    med_slope = float(np.median(slopes)) if slopes else 8.0
+    med_sub = float(np.median(subs)) if subs else 12.5
+    med_area = float(np.median([r["main_area"] for r in rows if r.get("main_area")]) or 75)
+
+    train = [r for r in rows if r.get("ppm2_12m") and r.get("build_year")]
+    if len(train) < 12:
+        return 0.0
+    X = np.array([_features(r, med_slope, med_sub) for r in train])
+    yv = np.log(np.array([r["ppm2_12m"] for r in train]))
+    Xn = (X - X.mean(0)) / (X.std(0) + 1e-9)
+    A = np.column_stack([np.ones(len(Xn)), Xn])
+    coef, *_ = np.linalg.lstsq(A, yv, rcond=None)
+    pred = A @ coef
+    ss_res = float(((yv - pred) ** 2).sum())
+    ss_tot = float(((yv - yv.mean()) ** 2).sum())
+    r2 = 1 - ss_res / ss_tot if ss_tot else 0.0
+
+    mean, std = X.mean(0), X.std(0) + 1e-9
+    for r in rows:
+        f = (np.array(_features(r, med_slope, med_sub)) - mean) / std
+        fair_ppm2 = float(np.exp(np.r_[1, f] @ coef))
+        r["fair_ppm2"] = round(fair_ppm2, 1)
+        area = r.get("main_area") or med_area
+        r["fair_price"] = round(fair_ppm2 * area)          # 적정 매매가(주력평형, 만원)
+        r["fair_area"] = round(area)
+        cur = r.get("ppm2_12m") or r.get("ppm2_any")
+        if cur:
+            gap = cur / fair_ppm2 - 1
+            r["value_gap_pct"] = round(gap * 100, 1)
+            r["value_label"] = ("저평가" if gap <= -0.10 else "고평가" if gap >= 0.10 else "적정")
+        else:
+            r["value_gap_pct"] = None
+            r["value_label"] = "거래없음"   # 예측가만 제공
+    return round(r2, 2)
+
+
 # ── 메인 ─────────────────────────────────────────────────
 def main() -> int:
     df = load_trades()
@@ -524,7 +627,7 @@ def main() -> int:
             if ts:
                 r.update({f: ts[f] for f in ("dong", "build_year", "n_total", "n_12m",
                                              "med_12m", "ppm2_12m", "trend_pct", "main_area",
-                                             "med_any", "ppm2_any", "any_ym")})
+                                             "med_any", "ppm2_any", "any_ym", "best_dongs")})
                 r["trade_name"] = ts["apt_name"]   # 리뷰 해시태그·거래내역 조인 키
             if not r.get("build_year") and r.get("use_date"):
                 r["build_year"] = int(r["use_date"][:4])
@@ -546,7 +649,7 @@ def main() -> int:
             r = {"name": ts["apt_name"], "households": ts["est_households"],
                  "hh_source": "estimated", **{f: ts[f] for f in
                  ("dong", "jibun", "build_year", "n_total", "n_12m", "med_12m",
-                  "med_any", "ppm2_any", "any_ym",
+                  "med_any", "ppm2_any", "any_ym", "best_dongs",
                   "ppm2_12m", "trend_pct", "main_area")}}
             xy = known_xy.get(n)
             if xy:
@@ -559,12 +662,15 @@ def main() -> int:
     gu_ppm2 = pd.Series([r["ppm2_12m"] for r in rows if r.get("ppm2_12m")]).median()
     for r in rows:
         r["pros"], r["cons"] = pros_cons(r, gu_ppm2)
+    fair_r2 = fair_value(rows)   # 적정가 모델 (rows에 fair_* 필드 주입)
+    print(f"적정가 모델 R² = {fair_r2}")
     rows.sort(key=lambda r: -(r.get("households") or 0))
 
     OUT.write_text(json.dumps({
         "updated": date.today().isoformat(),
         "kapt_ok": kapt_ok,
         "gu_ppm2_median": round(gu_ppm2, 1) if gu_ppm2 == gu_ppm2 else None,
+        "fair_r2": fair_r2,
         "source": "K-apt 공동주택 기본정보 + 국토부 실거래가 + Open-Elevation 고도"
                   if kapt_ok else "국토부 실거래가(세대수는 거래량 기반 추정) + Open-Elevation 고도",
         "complexes": rows,

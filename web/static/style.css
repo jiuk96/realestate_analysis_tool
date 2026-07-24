@@ -1482,6 +1482,30 @@ details.budget-fold .legal-hint { font-weight: 500; }
 .vl-link { font-size: .74rem; font-weight: 700; color: var(--acc2); text-decoration: none;
   background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: .28rem .7rem; }
 .vl-link:hover { border-color: var(--acc2); }
+
+/* 성북 심화 — 적정가 평가 + 가장 좋은 동 (지도 탐색 상세 카드 안) */
+.sb-fair, .sb-dong { margin: .6rem 0; padding: .6rem .7rem; border: 1px solid var(--border);
+  border-radius: 10px; background: var(--bg); }
+.sb-fair-head { font-weight: 800; font-size: .8rem; margin-bottom: .5rem; display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }
+.sb-fair-head small { font-weight: 500; color: var(--text3); }
+.sb-val-badge { font-size: .72rem; font-weight: 800; border-radius: 999px; padding: .12rem .5rem; }
+.sb-fair-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .3rem; margin-bottom: .5rem; }
+.sb-fair-grid > div { display: flex; flex-direction: column; }
+.sb-fair-k { font-size: .68rem; color: var(--text3); }
+.sb-fair-v { font-size: .92rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.sb-fair-v small { font-size: .66rem; font-weight: 500; color: var(--text3); }
+.sb-fair-bar { position: relative; height: 8px; background: var(--bg-soft); border: 1px solid var(--border);
+  border-radius: 999px; overflow: hidden; }
+.sb-fair-fill { height: 100%; border-radius: 999px; }
+.sb-fair-mid { position: absolute; left: 50%; top: -2px; bottom: -2px; width: 2px; background: var(--text3); z-index: 1; }
+.sb-fair-note { font-size: .7rem; color: var(--text3); line-height: 1.5; margin-top: .35rem; }
+.sb-dong-row { display: grid; grid-template-columns: 20px 42px 1fr 46px; align-items: center; gap: .4rem; margin: .28rem 0; }
+.sb-dong-rank { font-size: .85rem; }
+.sb-dong-name { font-size: .8rem; font-weight: 800; }
+.sb-dong-bar { height: 7px; background: var(--bg-soft); border-radius: 999px; overflow: hidden; }
+.sb-dong-bar > span { display: block; height: 100%; border-radius: 999px; }
+.sb-dong-pct { font-size: .76rem; font-weight: 800; text-align: right; font-variant-numeric: tabular-nums; }
+.sb-dong-sub { grid-column: 2 / -1; font-size: .68rem; color: var(--text3); }
 .couple-box-wide { margin-bottom: 1.1rem; }
 .couple-badge { background: rgba(52,211,153,.15); color: #34d399; font-size: .68rem; padding: .15rem .5rem; border-radius: 999px; margin-left: .4rem; font-weight: 600; }
 .commute-preset { color: #4a5563; font-size: .8rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: .4rem .7rem; }

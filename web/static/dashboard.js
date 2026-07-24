@@ -3839,6 +3839,7 @@ function _sbSort(rows) {
     households: c => -(c.households || 0),
     ppm2:       c => c.ppm2_12m ?? 1e9,
     priceAsc:   c => c.med_12m ?? 1e12,
+    value:      c => c.value_gap_pct ?? 1e9,   // 저평가(음수)일수록 먼저
     slope:      c => c.slope_pct ?? 1e9,
     build_year: c => -(c.build_year || 0),
     trend:      c => -(c.trend_pct ?? -1e9),
@@ -3880,7 +3881,11 @@ function renderSb() {
       <div class="ep-list-rank">${i + 1}</div>
       <div class="ep-list-main">
         <div class="ep-list-name">${c.name}</div>
-        <div class="ep-list-sub">${c.dong || ''} · ${(c.households || 0).toLocaleString()}세대${c.build_year ? ` · ${c.build_year}년` : ''}${c.slope_pct != null ? ` · <span style="color:${_sbSlopeColor(c.slope_pct)}">⛰${c.slope_pct}%</span>` : ''}</div>
+        <div class="ep-list-sub">${c.dong || ''} · ${(c.households || 0).toLocaleString()}세대${c.build_year ? ` · ${c.build_year}년` : ''}${c.slope_pct != null ? ` · <span style="color:${_sbSlopeColor(c.slope_pct)}">⛰${c.slope_pct}%</span>` : ''}${(() => {
+          if (!c.value_label || c.value_label === '거래없음') return '';
+          const col = { '저평가': 'var(--green)', '고평가': 'var(--red)', '적정': 'var(--acc2)' }[c.value_label];
+          return ` · <span style="color:${col};font-weight:700">${c.value_label} ${c.value_gap_pct > 0 ? '+' : ''}${c.value_gap_pct}%</span>`;
+        })()}</div>
       </div>
       <div class="ep-list-right">${(() => {
         const p = _sbPrice(c);
@@ -3898,6 +3903,55 @@ function renderSb() {
       if (c.lat != null) { try { _sbMap.setView([c.lat, c.lng], 15, { animate: true }); } catch (e) {} }
       showSbDetail(c);
     }));
+}
+
+// ⚖️ 적정가 평가 블록 — 헤도닉 모델(연식·경사·도심거리·역세권·세대수)로 예측한
+//    적정 ㎡가·적정 매매가와 현재가를 비교해 저평가/적정/고평가를 표시.
+function _sbFairBlock(c) {
+  if (!c.fair_ppm2) return '';
+  const label = c.value_label;
+  const gap = c.value_gap_pct;
+  const color = { '저평가': 'var(--green)', '고평가': 'var(--red)', '적정': 'var(--acc2)' }[label] || 'var(--text3)';
+  const badge = label && label !== '거래없음'
+    ? `<span class="sb-val-badge" style="background:${color}1a;color:${color}">${label} ${gap > 0 ? '+' : ''}${gap}%</span>`
+    : `<span class="sb-val-badge" style="color:var(--text3)">예측가</span>`;
+  const cur = c.ppm2_12m || c.ppm2_any;
+  const barCur = cur ? Math.min(100, cur / c.fair_ppm2 * 50) : null;   // 적정=50% 지점
+  return `
+    <div class="sb-fair">
+      <div class="sb-fair-head">⚖️ 적정가 평가 ${badge}</div>
+      <div class="sb-fair-grid">
+        <div><span class="sb-fair-k">적정 ㎡가</span><span class="sb-fair-v">${Math.round(c.fair_ppm2).toLocaleString()}만</span></div>
+        <div><span class="sb-fair-k">적정 매매가</span><span class="sb-fair-v">${_sbEok(c.fair_price)} <small>(${c.fair_area}㎡)</small></span></div>
+        <div><span class="sb-fair-k">현재 ㎡가</span><span class="sb-fair-v" style="color:${color}">${cur ? Math.round(cur).toLocaleString() + '만' : '—'}</span></div>
+      </div>
+      ${barCur != null ? `<div class="sb-fair-bar"><div class="sb-fair-mid" title="적정선"></div><div class="sb-fair-fill" style="width:${barCur}%;background:${color}"></div></div>
+      <div class="sb-fair-note">${label === '저평가' ? '특성(입지·연식·규모) 대비 <b>싸게</b> 거래되고 있습니다' : label === '고평가' ? '특성 대비 <b>프리미엄</b>이 붙어 있습니다' : '특성에 <b>부합하는</b> 가격대입니다'} · 막대 중앙선 = 적정선</div>` : `<div class="sb-fair-note">최근 실거래가 없어 <b>예측 적정가</b>만 제시합니다</div>`}
+    </div>`;
+}
+
+// 🏆 단지 내 가장 좋은 동 — 층수 보정 ㎡가로 순위 (같은 값 대비 프리미엄)
+function _sbBestDongBlock(c) {
+  const bd = c.best_dongs;
+  if (!bd || !bd.length) return '';
+  const maxP = Math.max(...bd.map(x => Math.abs(x.premium_pct)), 5);
+  const rows = bd.map((x, i) => {
+    const w = Math.min(100, Math.abs(x.premium_pct) / maxP * 100);
+    const pos = x.premium_pct >= 0;
+    return `<div class="sb-dong-row">
+      <span class="sb-dong-rank">${['🥇', '🥈', '🥉'][i] || ''}</span>
+      <span class="sb-dong-name">${x.dong}동</span>
+      <span class="sb-dong-bar"><span style="width:${w}%;background:${pos ? 'var(--green)' : 'var(--text3)'}"></span></span>
+      <span class="sb-dong-pct" style="color:${pos ? 'var(--green)' : 'var(--text3)'}">${pos ? '+' : ''}${x.premium_pct}%</span>
+      <span class="sb-dong-sub">${Math.round(x.ppm2).toLocaleString()}만/㎡ · ${x.n}건</span>
+    </div>`;
+  }).join('');
+  return `
+    <div class="sb-dong">
+      <div class="sb-fair-head">🏆 단지 내 가장 좋은 동 <small>(층수 보정 ㎡가, 단지 평균 대비)</small></div>
+      ${rows}
+      <div class="sb-fair-note">조망·향·역까지 거리로 같은 단지도 동마다 값이 다릅니다. 층수 효과는 제거했습니다.</div>
+    </div>`;
 }
 
 function showSbDetail(c) {
@@ -3928,6 +3982,8 @@ function showSbDetail(c) {
       <div class="ep-price"><span class="epv" style="color:${(c.trend_pct ?? 0) >= 0 ? 'var(--green)' : 'var(--red)'}">${c.trend_pct != null ? (c.trend_pct >= 0 ? '+' : '') + c.trend_pct + '%' : '—'}</span><span class="epk">1년 추세</span></div>
     </div>
     <div class="sb-slope-row" style="margin:.3rem 0 .5rem">${slope}</div>
+    ${_sbFairBlock(c)}
+    ${_sbBestDongBlock(c)}
     <div id="sbReviewTags"></div>
     <div class="ep-tags">
       ${c.subway_station ? `<span class="aptag">🚇 ${c.subway_station}${c.subway_walk ? ` 도보 ${c.subway_walk}` : ''}</span>` : ''}
@@ -3967,9 +4023,10 @@ async function renderSeongbuk() {
   }
   _sbData = d;
   const note = document.getElementById('sbSourceNote');
-  if (note) note.innerHTML = d.kapt_ok
-    ? `✅ 세대수·주차·복도유형: <b>K-apt 공동주택관리정보</b> 공식값 · 시세: 국토부 실거래가 · 갱신 ${d.updated}`
-    : `⚠️ 세대수는 <b>거래량 기반 추정치</b>입니다 (K-apt 연동 대기) · 갱신 ${d.updated}`;
+  if (note) note.innerHTML = (d.kapt_ok
+    ? `✅ 세대수·주차·복도유형: <b>K-apt 공동주택관리정보</b> 공식값 · 시세: 국토부 실거래가`
+    : `⚠️ 세대수는 <b>거래량 기반 추정치</b>입니다 (K-apt 연동 대기)`)
+    + (d.fair_r2 ? ` · 적정가 모델 설명력 R²=${d.fair_r2}` : '') + ` · 갱신 ${d.updated}`;
 
   if (typeof L !== 'undefined' && !_sbMap) {
     _sbMap = L.map('sbMap', { center: [37.6015, 127.025], zoom: 13 });
