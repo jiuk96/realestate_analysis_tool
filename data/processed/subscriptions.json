@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-24",
+  "updated": "2026-07-25",
   "items": [
     {
       "name": "월계 중흥S-클래스 리비에르",
@@ -36,15 +36,6 @@
       "rcept_end": "2026-07-02",
       "winner_date": "2026-07-08",
       "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000241&pblancNo=2026000241"
-    },
-    {
-      "name": "북서울자이 폴라리스(보류지)",
-      "addr": null,
-      "notice_date": "2026-06-12",
-      "rcept_bgn": "2026-06-22",
-      "rcept_end": "2026-06-24",
-      "winner_date": "2026-06-30",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000235&pblancNo=2026000235"
     }
   ]
 }
