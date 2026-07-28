@@ -3934,7 +3934,11 @@ function _sbFairBlock(c) {
 // 🏆 단지 내 가장 좋은 동 — 층수 보정 ㎡가로 순위 (같은 값 대비 프리미엄)
 function _sbBestDongBlock(c) {
   const bd = c.best_dongs;
-  if (!bd || !bd.length) return '';
+  if (!bd || !bd.length) {
+    return `<div class="sb-dong"><div class="sb-fair-head">🏆 단지 내 가장 좋은 동</div>
+      <div class="sb-fair-note">동(棟)별 판정에는 동마다 거래 3건 이상이 필요한데, 이 단지는
+      최근 3년 거래·동 표기가 부족해 산출하지 못했습니다.</div></div>`;
+  }
   const maxP = Math.max(...bd.map(x => Math.abs(x.premium_pct)), 5);
   const rows = bd.map((x, i) => {
     const w = Math.min(100, Math.abs(x.premium_pct) / maxP * 100);
@@ -3955,15 +3959,14 @@ function _sbBestDongBlock(c) {
     </div>`;
 }
 
-// 🚇 최근접 역 태그 — 좌표 기반(노선·역명·거리·도보분). 없으면 K-apt 텍스트 폴백.
-function _sbStationTag(c) {
+// 🚇 최근접 역 칩 — 좌표 기반(노선·역명·거리·도보분). 상단에 크게 표시.
+function _sbStationChip(c) {
   if (c.station_name) {
     const line = c.station_line ? `${c.station_line} ` : '';
-    const dist = c.station_m != null
-      ? ` <small style="opacity:.75">${c.station_m}m·도보 ${c.station_walk_min}분</small>` : '';
-    return `<span class="aptag sb-station">🚇 ${line}${c.station_name}${dist}</span>`;
+    const dist = c.station_m != null ? ` · ${c.station_m}m 도보 ${c.station_walk_min}분` : '';
+    return `<span class="sb-chip sb-chip-station">🚇 ${line}<b>${c.station_name}</b>${dist}</span>`;
   }
-  if (c.subway_walk) return `<span class="aptag">🚇 지하철 도보 ${c.subway_walk}</span>`;
+  if (c.subway_walk) return `<span class="sb-chip sb-chip-station">🚇 지하철 도보 ${c.subway_walk}</span>`;
   return '';
 }
 
@@ -3984,6 +3987,7 @@ function showSbDetail(c) {
       <div class="ep-name">${c.name}${c.hh_source === 'estimated' ? ' <span class="sb-est">추정</span>' : ''}</div>
       <div class="ep-loc">${meta}</div>
     </div>
+    <div class="sb-top-chips">${_sbStationChip(c)}${slope}</div>
     <div class="ep-price-grid">
       <div class="ep-price"><span class="epv">${(c.households || 0).toLocaleString()}</span><span class="epk">세대수</span></div>
       ${(() => {
@@ -3994,12 +3998,10 @@ function showSbDetail(c) {
       <div class="ep-price"><span class="epv">${c.parking && c.households ? (c.parking / c.households).toFixed(1) + '대' : '—'}</span><span class="epk">주차/세대</span></div>
       <div class="ep-price"><span class="epv" style="color:${(c.trend_pct ?? 0) >= 0 ? 'var(--green)' : 'var(--red)'}">${c.trend_pct != null ? (c.trend_pct >= 0 ? '+' : '') + c.trend_pct + '%' : '—'}</span><span class="epk">1년 추세</span></div>
     </div>
-    <div class="sb-slope-row" style="margin:.3rem 0 .5rem">${slope}</div>
     ${_sbFairBlock(c)}
     ${_sbBestDongBlock(c)}
     <div id="sbReviewTags"></div>
     <div class="ep-tags">
-      ${_sbStationTag(c)}
       ${c.n_12m ? `<span class="aptag">최근 12개월 거래 ${c.n_12m}건</span>` : '<span class="aptag">최근 12개월 실거래 없음</span>'}
       ${c.ppm2_12m ? `<span class="aptag">㎡가 ${Math.round(c.ppm2_12m).toLocaleString()}만</span>` : ''}
     </div>
