@@ -4531,5 +4531,38 @@
     "nearest_station_m": 1315,
     "stations_within_1km": 0,
     "dong": "하계동"
+  },
+  "송파구|현대": {
+    "apt_name": "현대",
+    "district": "송파구",
+    "address": "서울 송파구 송파동 163-14",
+    "dong": "송파동",
+    "lat": 37.5087792,
+    "lng": 127.0866602,
+    "nearest_station": "잠실새내역",
+    "nearest_station_m": 326,
+    "stations_within_1km": 1
+  },
+  "은평구|북한산힐스테이트1차아파트": {
+    "apt_name": "북한산힐스테이트1차아파트",
+    "district": "은평구",
+    "address": "서울 은평구 불광동 635",
+    "dong": "불광동",
+    "lat": 37.6128028,
+    "lng": 126.9368385,
+    "nearest_station": "불광역",
+    "nearest_station_m": 665,
+    "stations_within_1km": 2
+  },
+  "강남구|삼익": {
+    "apt_name": "삼익",
+    "district": "강남구",
+    "address": "서울 강남구 수서동 708",
+    "dong": "수서동",
+    "lat": 37.48445,
+    "lng": 127.09838,
+    "nearest_station": "수서역",
+    "nearest_station_m": 448,
+    "stations_within_1km": 1
   }
 }
