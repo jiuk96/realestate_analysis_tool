@@ -2,6 +2,33 @@
   "updated": "2026-08-07",
   "items": [
     {
+      "name": "더샵 신길센트럴시티(조합원 취소분)",
+      "addr": null,
+      "notice_date": "2026-08-07",
+      "rcept_bgn": "2026-08-18",
+      "rcept_end": "2026-08-21",
+      "winner_date": "2026-08-27",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000374&pblancNo=2026000374"
+    },
+    {
+      "name": "써밋 클라비온",
+      "addr": null,
+      "notice_date": "2026-08-07",
+      "rcept_bgn": "2026-08-18",
+      "rcept_end": "2026-08-21",
+      "winner_date": "2026-08-28",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000364&pblancNo=2026000364"
+    },
+    {
+      "name": "충정로역자이르네",
+      "addr": null,
+      "notice_date": "2026-08-07",
+      "rcept_bgn": "2026-08-18",
+      "rcept_end": "2026-08-21",
+      "winner_date": "2026-08-31",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000358&pblancNo=2026000358"
+    },
+    {
       "name": "월계 중흥S-클래스 리비에르",
       "addr": null,
       "notice_date": "2026-07-16",
