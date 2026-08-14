@@ -1,6 +1,15 @@
 {
-  "updated": "2026-08-13",
+  "updated": "2026-08-14",
   "items": [
+    {
+      "name": "쌍용 더 플래티넘 서대문",
+      "addr": null,
+      "notice_date": "2026-08-14",
+      "rcept_bgn": "2026-08-24",
+      "rcept_end": "2026-08-27",
+      "winner_date": "2026-09-02",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000372&pblancNo=2026000372"
+    },
     {
       "name": "더샵 신길센트럴시티(조합원 취소분)",
       "addr": null,
