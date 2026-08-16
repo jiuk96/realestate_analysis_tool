@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-15",
+  "updated": "2026-08-16",
   "items": [
     {
       "name": "쌍용 더 플래티넘 서대문",
@@ -45,15 +45,6 @@
       "rcept_end": "2026-07-30",
       "winner_date": "2026-08-05",
       "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000355&pblancNo=2026000355"
-    },
-    {
-      "name": "동작 센트럴 동문 디 이스트",
-      "addr": null,
-      "notice_date": "2026-07-02",
-      "rcept_bgn": "2026-07-13",
-      "rcept_end": "2026-07-16",
-      "winner_date": "2026-07-23",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000153&pblancNo=2026000153"
     }
   ]
 }
