@@ -1,6 +1,15 @@
 {
-  "updated": "2026-08-28",
+  "updated": "2026-08-29",
   "items": [
+    {
+      "name": "브라운스톤 월곡 센트럴",
+      "addr": null,
+      "notice_date": "2026-08-28",
+      "rcept_bgn": "2026-09-07",
+      "rcept_end": "2026-09-10",
+      "winner_date": "2026-09-16",
+      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000399&pblancNo=2026000399"
+    },
     {
       "name": "쌍용 더 플래티넘 서대문",
       "addr": null,
