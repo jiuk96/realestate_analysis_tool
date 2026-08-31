@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-29",
+  "updated": "2026-08-31",
   "items": [
     {
       "name": "브라운스톤 월곡 센트럴",
@@ -45,15 +45,6 @@
       "rcept_end": "2026-08-21",
       "winner_date": "2026-08-31",
       "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000358&pblancNo=2026000358"
-    },
-    {
-      "name": "월계 중흥S-클래스 리비에르",
-      "addr": null,
-      "notice_date": "2026-07-16",
-      "rcept_bgn": "2026-07-27",
-      "rcept_end": "2026-07-30",
-      "winner_date": "2026-08-05",
-      "url": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000355&pblancNo=2026000355"
     }
   ]
 }
